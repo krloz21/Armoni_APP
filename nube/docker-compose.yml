@@ -1,0 +1,31 @@
+services:
+  n8n:
+    image: docker.n8n.io/n8nio/n8n:latest
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:5678:5678"      # solo accesible desde el propio servidor (Tailscale lo publica en privado)
+    environment:
+      - TZ=America/Bogota
+      - GENERIC_TIMEZONE=America/Bogota
+      - N8N_HOST=${TS_HOST}
+      - N8N_PROTOCOL=https
+      - WEBHOOK_URL=https://${TS_HOST}/
+      - N8N_EDITOR_BASE_URL=https://${TS_HOST}:8443/
+      - N8N_PROXY_HOPS=1
+      - N8N_ENCRYPTION_KEY=${N8N_ENCRYPTION_KEY}
+    volumes:
+      - n8n_data:/home/node/.n8n
+
+  web:
+    image: nginx:alpine
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8080:80"        # idem: solo desde el servidor
+    volumes:
+      - ./web:/usr/share/nginx/html:ro
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - n8n
+
+volumes:
+  n8n_data:

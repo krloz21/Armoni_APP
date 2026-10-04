@@ -1,0 +1,926 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="¿Qué se acabó?">
+<meta name="theme-color" content="#000000">
+<title>¿Qué se acabó?</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --void:#000000; --panel:rgba(6,8,13,.94); --line:rgba(255,255,255,.11);
+  --ghost:rgba(255,255,255,.55); --dim:rgba(255,255,255,.4); --white:#f5f6f7;
+  --blue:#3f7cf6; --cyan:#7ee8ff; --clay:#f2734f;
+  color-scheme:dark;
+}
+*{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+html, body{ margin:0; background:var(--void); color:var(--white); }
+body{
+  font-family:"Schibsted Grotesk", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size:20px; line-height:1.4; -webkit-font-smoothing:antialiased;
+  padding:env(safe-area-inset-top) 0 calc(28px + env(safe-area-inset-bottom));
+}
+#lineas, #campo{ position:fixed; inset:0; width:100%; height:100%; display:block; pointer-events:none; z-index:0; }
+#campo{ opacity:0; transition:opacity 1.4s ease; }
+.col{ position:relative; z-index:1; max-width:560px; margin:0 auto; }
+header{ padding:26px 20px 6px; }
+h1{
+  margin:0; font-size:2.1rem; font-weight:600; letter-spacing:-.02em;
+  background:linear-gradient(180deg, #fff 35%, #8fa4c4); -webkit-background-clip:text; background-clip:text; color:transparent;
+}
+header p{ margin:8px 0 0; color:var(--ghost); font-size:1.02rem; }
+.cuenta[hidden]{ display:none; }
+.cuenta{ display:inline-block; margin-top:14px; padding:8px 16px; border-radius:999px; background:rgba(242,115,79,.14); color:var(--clay); font-weight:700; font-size:.92rem; }
+
+.grupo{
+  display:flex; align-items:center; gap:8px; width:calc(100% - 40px);
+  margin:26px 20px 4px; padding:9px 0; border:0; background:none; color:var(--dim); font:inherit;
+  font-size:.88rem; font-weight:700; color:#fff; letter-spacing:.08em; text-transform:uppercase; cursor:pointer;
+}
+.grupo .chev{ width:14px; height:14px; flex:none; color:var(--ghost); transition:transform .35s cubic-bezier(.16,1,.3,1); }
+.grupo .chev svg{ width:100%; height:100%; display:block; }
+.grupo[aria-expanded="true"] .chev{ transform:rotate(90deg); }
+.grupo .n{ flex:1; text-align:left; }
+.grupo .c{ font-size:.78rem; font-weight:400; color:var(--dim); letter-spacing:0; text-transform:none; }
+
+.cuerpo{ display:grid; grid-template-rows:0fr; transition:grid-template-rows .4s cubic-bezier(.16,1,.3,1); }
+.cuerpo.on{ grid-template-rows:1fr; }
+.cuerpo > div{ overflow:hidden; min-height:0; }
+.lista{ margin:8px 14px 0; display:grid; gap:11px; }
+
+.item{
+  display:flex; align-items:center; gap:16px; width:100%; padding:21px 18px; border-radius:22px;
+  border:1px solid var(--line); background:rgba(6,8,13,.5); color:var(--white); font:inherit; text-align:left; cursor:pointer;
+  -webkit-backdrop-filter:blur(22px) saturate(1.5); backdrop-filter:blur(22px) saturate(1.5);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.1); transition:transform .1s ease-out, background .25s, border-color .25s;
+}
+.item:active{ transform:scale(.98); }
+.item .e{ font-size:2.3rem; width:50px; text-align:center; flex:none; }
+.item .n{ flex:1; font-weight:600; font-size:1.05rem; }
+.item .s{ font-size:.9rem; padding:8px 14px; border-radius:999px; background:rgba(255,255,255,.07); color:var(--dim); white-space:nowrap; flex:none; }
+.item.acabo{ background:rgba(242,115,79,.1); border-color:rgba(242,115,79,.45); }
+.item.acabo .s{ background:var(--clay); color:#1f0a04; font-weight:700; }
+.item.envio{ opacity:.55; }
+.estado{ margin:30px 20px; color:var(--dim); font-size:1.05rem; }
+
+.aviso{
+  position:fixed; left:50%; bottom:calc(20px + env(safe-area-inset-bottom)); transform:translate(-50%, 140px);
+  background:var(--panel); border:1px solid var(--line); padding:14px 20px; border-radius:17px; font-size:1.02rem;
+  transition:transform .35s cubic-bezier(.22,1,.36,1); width:max-content; max-width:90vw; text-align:center;
+  box-shadow:0 14px 40px -16px rgba(0,0,0,.8); z-index:5;
+}
+.aviso.on{ transform:translate(-50%, 0); }
+.aviso.mal{ border-color:rgba(242,115,79,.55); }
+
+/* con una ventana abierta, el fondo y la lista se desenfocan como con el menú de Armoni */
+#lineas, #campo, .col{ transition:filter .3s ease; }
+body.dlg #lineas, body.dlg #campo, body.dlg .col{ filter:blur(6px); }
+.cfScrim{ position:fixed; inset:0; z-index:20; display:flex; align-items:center; justify-content:center; padding:24px; background:rgba(0,3,10,.55); opacity:0; transition:opacity .3s ease; }
+.cfScrim.on{ opacity:1; }
+.cfCard{
+  width:min(100%, 330px); text-align:center; padding:26px 22px 18px; border-radius:24px;
+  background:linear-gradient(180deg, rgba(14,18,30,.94), rgba(6,8,14,.97)); border:1px solid var(--line);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.14), 0 30px 70px rgba(0,0,0,.55);
+  transform:translateY(14px) scale(.96); transition:transform .38s cubic-bezier(.16,1,.3,1);
+}
+.cfScrim.on .cfCard{ transform:none; }
+.cfCard h3{ margin:0; font-size:1.25rem; font-weight:600; letter-spacing:-.015em; }
+.cfCard p{ margin:10px 0 0; color:var(--ghost); font-size:1rem; }
+.cfRow{ display:flex; gap:10px; margin-top:22px; }
+.cfRow button{ flex:1; padding:15px 8px; border-radius:16px; font:inherit; font-size:1rem; font-weight:600; cursor:pointer; border:1px solid var(--line); background:rgba(255,255,255,.05); color:var(--white); }
+.cfRow .cfSi{ background:linear-gradient(140deg, var(--cyan), var(--blue)); color:#03070f; border:0; }
+.cfRow button:active{ transform:scale(.97); }
+</style>
+</head>
+<body>
+<canvas id="lineas" aria-hidden="true"></canvas>
+<canvas id="campo" aria-hidden="true"></canvas>
+<div class="col">
+<header>
+  <h1>¿Qué se acabó?</h1>
+  <p>Toca lo que haga falta comprar. Le llega directo a la lista del mercado.</p>
+  <span class="cuenta" id="cuenta" hidden></span>
+</header>
+<main id="main"><p class="estado">Cargando…</p></main>
+</div>
+<div class="aviso" id="aviso" role="status"></div>
+<script>
+/* ════════════════════════════════════════════════════════════
+   FONDO DE LÍNEAS (WebGL): las mismas líneas que caen del fondo de Armoni
+   ════════════════════════════════════════════════════════════ */
+const Lineas = (function(){
+  const VS = "attribute vec2 a;void main(){gl_Position=vec4(a,0.,1.);}";
+  const FS = `
+precision highp float;
+uniform vec2  uCanvas;
+uniform vec2  uRes;
+uniform float uScale;
+uniform float uTime;
+uniform float uDim;
+
+float h1(float n){ return fract(sin(n * 12.9898) * 43758.5453); }
+
+vec3 lines(vec2 pc, float t){
+  float GAP = 26.;
+  float i = floor(pc.x / GAP);
+  float cx = i * GAP + GAP * .5;
+  float dx = pc.x - cx;
+  float phase = sin(i / 5.5) * 130.;
+  float spd = 46. * (.75 + .5 * abs(sin(i * .37)));
+  float span = uRes.y + 282.;
+  float y0 = mod(h1(i + .3) * span + t * spd + phase, span) - 130.;
+
+  float len = 22.;
+  float top = y0;
+  float vy = (pc.y - top) / len;
+  if(vy < 0. || vy > 1.) return vec3(0.);
+  float vprof = sin(vy * 3.14159);
+
+  bool accent = h1(i + 9.1) < .05;
+  float shade = h1(i + 4.4) < .5 ? .15 : .07;
+  float coreW = accent ? 1.2 : .85;
+  float core = smoothstep(coreW + .6, coreW - .4, abs(dx));
+  float a = min(1., accent ? .55 : shade) * vprof * uDim;
+
+  vec3 baseCol = accent ? vec3(.27, .51, .98) : vec3(.82, .88, 1.);
+  return baseCol * core * a;
+}
+
+void main(){
+  vec2 pc = vec2(gl_FragCoord.x, uCanvas.y - gl_FragCoord.y) / uScale;
+  gl_FragColor = vec4(lines(pc, uTime), 1.);
+}`;
+
+  function compila(gl, tipo, src){
+    const sh = gl.createShader(tipo);
+    gl.shaderSource(sh, src); gl.compileShader(sh);
+    if(!gl.getShaderParameter(sh, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(sh));
+    return sh;
+  }
+
+  /* opts: reducido (una sola imagen fija) */
+  function iniciar(canvas, opts){
+    opts = opts || {};
+    const gl = canvas.getContext("webgl", { antialias: false, alpha: false, depth: false, stencil: false, powerPreference: "low-power" });
+    if(!gl) return null;
+    let prog;
+    try{
+      prog = gl.createProgram();
+      gl.attachShader(prog, compila(gl, gl.VERTEX_SHADER, VS));
+      gl.attachShader(prog, compila(gl, gl.FRAGMENT_SHADER, FS));
+      gl.linkProgram(prog);
+      if(!gl.getProgramParameter(prog, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(prog));
+    }catch(err){ console.warn("Fondo de líneas sin WebGL:", err.message); return null; }
+    gl.useProgram(prog);
+    const buf = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+    const loc = gl.getAttribLocation(prog, "a");
+    gl.enableVertexAttribArray(loc);
+    gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+    const uCanvas = gl.getUniformLocation(prog, "uCanvas"), uRes = gl.getUniformLocation(prog, "uRes");
+    const uScale = gl.getUniformLocation(prog, "uScale"), uTime = gl.getUniformLocation(prog, "uTime"), uDim = gl.getUniformLocation(prog, "uDim");
+
+    const SCALE = Math.min(1.5, window.devicePixelRatio || 1);
+    let w = 0, h = 0, clock = 0, last = 0, lastDraw = 0, raf = 0, dim = 1, dimObj = 1;
+    function ajusta(){
+      w = window.innerWidth; h = window.innerHeight;
+      canvas.width = Math.max(1, Math.round(w * SCALE)); canvas.height = Math.max(1, Math.round(h * SCALE));
+      canvas.style.width = w + "px"; canvas.style.height = h + "px";
+      gl.viewport(0, 0, canvas.width, canvas.height);
+    }
+    function dibuja(now){
+      clock += last ? Math.min(0.05, (now - last) / 1000) : 0;
+      last = now;
+      gl.uniform2f(uCanvas, canvas.width, canvas.height);
+      gl.uniform2f(uRes, w, h);
+      gl.uniform1f(uScale, SCALE);
+      dim += (dimObj - dim) * 0.08;
+      gl.uniform1f(uTime, clock);
+      gl.uniform1f(uDim, dim);
+      gl.drawArrays(gl.TRIANGLES, 0, 3);
+    }
+    function bucle(now){
+      raf = requestAnimationFrame(bucle);
+      if(now - lastDraw < 33) return;                 // 30 cuadros por segundo
+      lastDraw = now;
+      dibuja(now);
+    }
+    ajusta();
+    window.addEventListener("resize", () => { ajusta(); dibuja(performance.now()); });
+    if(opts.reducido) dibuja(performance.now()); else raf = requestAnimationFrame(bucle);
+    return { atenua(si){ dimObj = si ? 0.42 : 1; if(opts.reducido){ dim = dimObj; dibuja(performance.now()); } }, sigue(){ if(!raf && !opts.reducido){ last = 0; raf = requestAnimationFrame(bucle); } }, pausa(){ if(raf){ cancelAnimationFrame(raf); raf = 0; } } };
+  }
+  return { iniciar };
+})();
+
+/* ════════════════════════════════════════════════════════════
+   CAMPO DE ANILLO (WebGL): un campo de trazos que respira alrededor de
+   un anillo que vaga solo. Sin mouse: solo la animación, muy tenue.
+   ════════════════════════════════════════════════════════════ */
+const Campo = (function(){
+  const FIELD = 500, HALF = FIELD / 2, WORLD = 5, FOV = 40, MAX_POINTS = 65536, TAU = Math.PI * 2;
+  const MAX_COLORS = 5, RING_EDGE = 4 / 100, WANDER_LERP = 0.01, MAX_DPR = 1.5, FRAME_MS = 33;
+  const DENSITY = 300, SPEED = 6 / 50, CAM = 1.6;
+  const RING = { radius: 0.12, width: 0.09, push: 0.5, turb: 1 };
+  const COLORS = ["#7ee8ff", "#3f7cf6", "#0b0b18"];
+
+  const NOISE = `
+vec3 mod289(vec3 x){return x-floor(x*(1.0/289.0))*289.0;}
+vec4 mod289(vec4 x){return x-floor(x*(1.0/289.0))*289.0;}
+vec4 permute(vec4 x){return mod289(((x*34.0)+1.0)*x);}
+vec4 taylorInvSqrt(vec4 r){return 1.79284291400159-0.85373472095314*r;}
+float snoise(vec3 v){
+  const vec2 C=vec2(1.0/6.0,1.0/3.0);
+  const vec4 D=vec4(0.0,0.5,1.0,2.0);
+  vec3 i=floor(v+dot(v,C.yyy));
+  vec3 x0=v-i+dot(i,C.xxx);
+  vec3 g=step(x0.yzx,x0.xyz);
+  vec3 l=1.0-g;
+  vec3 i1=min(g.xyz,l.zxy);
+  vec3 i2=max(g.xyz,l.zxy);
+  vec3 x1=x0-i1+C.xxx;
+  vec3 x2=x0-i2+C.yyy;
+  vec3 x3=x0-D.yyy;
+  i=mod289(i);
+  vec4 p=permute(permute(permute(
+      i.z+vec4(0.0,i1.z,i2.z,1.0))
+    + i.y+vec4(0.0,i1.y,i2.y,1.0))
+    + i.x+vec4(0.0,i1.x,i2.x,1.0));
+  float n_=0.142857142857;
+  vec3 ns=n_*D.wyz-D.xzx;
+  vec4 j=p-49.0*floor(p*ns.z*ns.z);
+  vec4 x_=floor(j*ns.z);
+  vec4 y_=floor(j-7.0*x_);
+  vec4 x=x_*ns.x+ns.yyyy;
+  vec4 y=y_*ns.x+ns.yyyy;
+  vec4 h=1.0-abs(x)-abs(y);
+  vec4 b0=vec4(x.xy,y.xy);
+  vec4 b1=vec4(x.zw,y.zw);
+  vec4 s0=floor(b0)*2.0+1.0;
+  vec4 s1=floor(b1)*2.0+1.0;
+  vec4 sh=-step(h,vec4(0.0));
+  vec4 a0=b0.xzyw+s0.xzyw*sh.xxyy;
+  vec4 a1=b1.xzyw+s1.xzyw*sh.zzww;
+  vec3 p0=vec3(a0.xy,h.x);
+  vec3 p1=vec3(a0.zw,h.y);
+  vec3 p2=vec3(a1.xy,h.z);
+  vec3 p3=vec3(a1.zw,h.w);
+  vec4 norm=taylorInvSqrt(vec4(dot(p0,p0),dot(p1,p1),dot(p2,p2),dot(p3,p3)));
+  p0*=norm.x;p1*=norm.y;p2*=norm.z;p3*=norm.w;
+  vec4 m=max(0.6-vec4(dot(x0,x0),dot(x1,x1),dot(x2,x2),dot(x3,x3)),0.0);
+  m=m*m;
+  return 42.0*dot(m*m,vec4(dot(p0,x0),dot(p1,x1),dot(p2,x2),dot(p3,x3)));
+}
+`;
+
+  const FIELD_TERMS = `
+void fieldTerms(
+    vec2 ref, vec2 ringPos, float time,
+    float ringRadius, float w1, float w2, float turb,
+    out vec2 disp, out float bandT, out float bandHot
+){
+    float dist = distance(ref, ringPos);
+
+    float n0 = snoise(vec3(ref * 0.2 + vec2(18.4924, 72.9744), time * 0.5));
+    float dist1 = distance(ref + (n0 * 0.005), ringPos);
+
+    float t  = smoothstep(ringRadius - (w1 * 2.0), ringRadius, dist)
+             - smoothstep(ringRadius, ringRadius + w1, dist1);
+    float t2 = smoothstep(ringRadius - (w2 * 2.0), ringRadius, dist)
+             - smoothstep(ringRadius, ringRadius + w2, dist1);
+    float t3 = smoothstep(ringRadius + w2, ringRadius, dist);
+
+    t  = pow(max(t, 0.0), 2.0);
+    t2 = pow(max(t2, 0.0), 3.0);
+
+    t += t2 * 3.0;
+    t += t3 * 0.4;
+    t += snoise(vec3(ref * 30.0 + vec2(11.4924, 12.9744), time * 0.5)) * t3 * 0.5;
+
+    float nS = snoise(vec3(ref * 2.0 + vec2(18.4924, 72.9744), time * 0.5));
+    t += pow((nS + 1.5) * 0.5, 2.0) * 0.6;
+
+    float n1 = snoise(vec3(ref * 4.0 + vec2(88.494, 32.4397), time * 0.35));
+    float n2 = snoise(vec3(ref * 4.0 + vec2(50.904, 120.947), time * 0.35));
+    float n3 = snoise(vec3(ref * 20.0 + vec2(18.4924, 72.9744), time * 0.5));
+    float n4 = snoise(vec3(ref * 20.0 + vec2(50.904, 120.947), time * 0.5));
+
+    vec2 d = vec2(n1, n2) * 0.03 + vec2(n3, n4) * 0.005;
+    d.x += sin((ref.x * 20.0) + (time * 4.0)) * 0.02 * clamp(dist, 0.0, 1.0);
+    d.y += cos((ref.y * 20.0) + (time * 3.0)) * 0.02 * clamp(dist, 0.0, 1.0);
+
+    disp = d * turb;
+    bandT = t;
+    bandHot = t2;
+}
+`;
+
+  const SIM_VERT = `
+precision highp float;
+attribute vec2 aPos;
+varying vec2 vUV;
+void main(){
+    vUV = aPos * 0.5 + 0.5;
+    gl_Position = vec4(aPos, 0.0, 1.0);
+}
+`;
+
+  const SIM_FRAG = `
+precision highp float;
+
+uniform sampler2D uState;
+uniform sampler2D uRefs;
+uniform vec2  uRingPos;
+uniform float uRingRadius;
+uniform float uRingWidth;
+uniform float uRingWidth2;
+uniform float uPush;
+uniform float uTurb;
+uniform float uTime;
+
+varying vec2 vUV;
+
+${NOISE}
+${FIELD_TERMS}
+
+void main(){
+    vec4 frame = texture2D(uState, vUV);
+    vec2 ref   = texture2D(uRefs, vUV).xy;
+
+    float scale  = frame.z;
+    float energy = frame.w;
+    float time   = uTime * 0.5;
+
+    vec2 disp; float t; float t2;
+    fieldTerms(ref, uRingPos, time, uRingRadius, uRingWidth, uRingWidth2, uTurb, disp, t, t2);
+
+    vec2 mem = frame.xy * 0.8;
+
+    mem -= (uRingPos - (ref + disp)) * pow(max(t2, 0.0), 0.75) * uPush;
+
+    scale += (t - scale) * 0.2;
+
+    vec2 finalPos = ref + disp + (mem * 0.25);
+
+    energy = energy * 0.5 + scale * 0.25;
+
+    gl_FragColor = vec4(finalPos, scale, energy);
+}
+`;
+
+  const RENDER_VERT = estatico => `
+precision highp float;
+
+attribute vec2 aUV;
+attribute vec2 aRef;
+
+uniform sampler2D uState;
+uniform float uProjF;
+uniform float uAspect;
+uniform float uCamDist;
+uniform float uPointScale;
+${estatico ? `uniform vec2  uRingPos;
+uniform float uRingRadius;
+uniform float uRingWidth;
+uniform float uRingWidth2;
+uniform float uTurb;
+uniform float uTime;` : ``}
+
+varying vec2  vLocalPos;
+varying float vScale;
+varying float vEnergy;
+
+${estatico ? NOISE : ``}
+${estatico ? FIELD_TERMS : ``}
+
+void main(){
+${estatico ? `    vec2 disp; float t; float t2;
+    fieldTerms(aRef, uRingPos, uTime * 0.5, uRingRadius, uRingWidth, uRingWidth2, uTurb, disp, t, t2);
+    vec4 state = vec4(aRef + disp, t, t * 0.5);` : `    vec4 state = texture2D(uState, aUV);`}
+
+    vLocalPos = state.xy;
+    vScale    = state.z;
+    vEnergy   = state.w;
+
+    vec2 world = state.xy * ${WORLD.toFixed(1)};
+
+    gl_Position = vec4(world.x * uProjF / uAspect, world.y * uProjF, 0.0, uCamDist);
+
+    gl_PointSize = max(vScale, 0.0) * 7.0 * uPointScale;
+}
+`;
+
+  const RENDER_FRAG = `
+precision highp float;
+
+varying vec2  vLocalPos;
+varying float vScale;
+varying float vEnergy;
+
+uniform vec3  uColors[${MAX_COLORS}];
+uniform int   uColorCount;
+uniform vec2  uRingPos;
+uniform float uTime;
+
+${NOISE}
+
+float sdRoundBox(in vec2 p, in vec2 b, in float r){
+    vec2 q = abs(p) - b + r;
+    return min(max(q.x, q.y), 0.0) + length(max(q, 0.0)) - r;
+}
+
+vec2 rotate(vec2 v, float a){
+    float s = sin(a);
+    float c = cos(a);
+    return mat2(c, s, -s, c) * v;
+}
+
+void main(){
+    float noiseAngle = snoise(vec3(vLocalPos * 10.0 + vec2(18.4924, 72.9744), uTime * 0.85));
+    float noiseColor = snoise(vec3(vLocalPos * 2.0  + vec2(74.664,  91.556),  uTime * 0.5));
+    noiseColor = (noiseColor + 1.0) * 0.5;
+
+    float angle = atan(vLocalPos.y - uRingPos.y, vLocalPos.x - uRingPos.x);
+
+    vec2 uv = gl_PointCoord.xy - vec2(0.5);
+    uv.y *= -1.0;
+    uv = rotate(uv, -angle + (noiseAngle * 0.5));
+
+    float p = smoothstep(0.0, 0.75, pow(noiseColor, 2.0));
+    vec3 color = uColors[0];
+    for (int i = 0; i < ${MAX_COLORS - 1}; i++) {
+        if (i < uColorCount - 1) {
+            float span = 1.0 / float(uColorCount - 1);
+            float t = clamp((p - float(i) * span) / span, 0.0, 1.0);
+            color = mix(color, uColors[i + 1], t);
+        }
+    }
+
+    float d = sdRoundBox(uv, vec2(0.5, 0.2), 0.25);
+    float mask = smoothstep(0.1, 0.0, d);
+
+    float a = mask * smoothstep(0.1, 0.2, vScale);
+    if (a < 0.01) discard;
+
+    color = clamp(color, 0.0, 1.0);
+    color *= clamp(vEnergy, 0.0, 1.0);
+
+    gl_FragColor = vec4(color, clamp(a, 0.0, 1.0));
+}
+`;
+
+  function compila(gl, tipo, src){
+    const sh = gl.createShader(tipo);
+    gl.shaderSource(sh, src); gl.compileShader(sh);
+    if(!gl.getShaderParameter(sh, gl.COMPILE_STATUS)){
+      const log = gl.getShaderInfoLog(sh); gl.deleteShader(sh);
+      throw new Error(log || "shader compile failed");
+    }
+    return sh;
+  }
+  function programa(gl, vs, fs, nombres){
+    const prog = gl.createProgram();
+    const v = compila(gl, gl.VERTEX_SHADER, vs), f = compila(gl, gl.FRAGMENT_SHADER, fs);
+    gl.attachShader(prog, v); gl.attachShader(prog, f); gl.linkProgram(prog);
+    gl.deleteShader(v); gl.deleteShader(f);
+    if(!gl.getProgramParameter(prog, gl.LINK_STATUS)){
+      const log = gl.getProgramInfoLog(prog); gl.deleteProgram(prog);
+      throw new Error(log || "program link failed");
+    }
+    const u = {};
+    nombres.forEach(n => { u[n] = gl.getUniformLocation(prog, n); });
+    return { prog, u };
+  }
+
+  /* WebGL2 si hay; el formato de las texturas de estado depende de lo que el equipo permita dibujar */
+  function contexto(canvas){
+    const opts = { alpha: true, antialias: false, premultipliedAlpha: false, depth: false, stencil: false, powerPreference: "low-power" };
+    let gl = canvas.getContext("webgl2", opts), fmt = null;
+    if(gl){
+      if(gl.getExtension("EXT_color_buffer_float")) fmt = { internal: gl.RGBA32F, format: gl.RGBA, type: gl.FLOAT };
+      else if(gl.getExtension("EXT_color_buffer_half_float")) fmt = { internal: gl.RGBA16F, format: gl.RGBA, type: gl.HALF_FLOAT };
+    } else {
+      gl = canvas.getContext("webgl", opts) || canvas.getContext("experimental-webgl", opts);
+      if(!gl) return null;
+      if(gl.getExtension("OES_texture_float") && gl.getExtension("WEBGL_color_buffer_float")) fmt = { internal: gl.RGBA, format: gl.RGBA, type: gl.FLOAT };
+    }
+    if(gl.getParameter(gl.MAX_VERTEX_TEXTURE_IMAGE_UNITS) < 2) fmt = null;
+    if(fmt){
+      const prueba = objetivo(gl, fmt, 4);
+      if(!prueba.ok) fmt = null;
+      gl.deleteTexture(prueba.tex); gl.deleteFramebuffer(prueba.fbo);
+    }
+    return { gl, fmt };
+  }
+
+  function textura(gl, fmt, size, pixeles){
+    const tex = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, tex);
+    gl.texImage2D(gl.TEXTURE_2D, 0, fmt.internal, size, size, 0, fmt.format, fmt.type, pixeles || null);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.bindTexture(gl.TEXTURE_2D, null);
+    return tex;
+  }
+  function objetivo(gl, fmt, size){
+    const tex = textura(gl, fmt, size, null);
+    const fbo = gl.createFramebuffer();
+    gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, tex, 0);
+    const ok = gl.checkFramebufferStatus(gl.FRAMEBUFFER) === gl.FRAMEBUFFER_COMPLETE;
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    return { tex, fbo, ok };
+  }
+
+  function mulberry32(a){
+    return function(){
+      a |= 0; a = (a + 0x6d2b79f5) | 0;
+      let t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  const linMap = (x, a, b, c, d) => ((x - a) * (d - c)) / (b - a) + c;
+
+  /* puntos repartidos al azar pero parejos (Poisson disk): nunca se amontonan ni dejan huecos */
+  function poisson(size, minD, maxD, intentos, rand){
+    const cell = minD / Math.SQRT2, gw = Math.ceil(size / cell), gh = Math.ceil(size / cell);
+    const grid = new Int32Array(gw * gh).fill(-1);
+    const px = [], py = [], activos = [], minD2 = minD * minD;
+    const agrega = (x, y) => {
+      const i = px.length; px.push(x); py.push(y);
+      grid[((y / cell) | 0) * gw + ((x / cell) | 0)] = i; activos.push(i);
+    };
+    agrega(rand() * size, rand() * size);
+    while(activos.length > 0 && px.length < MAX_POINTS){
+      const ai = (rand() * activos.length) | 0, idx = activos[ai];
+      let puesto = false;
+      for(let t = 0; t < intentos; t++){
+        const ang = rand() * TAU, r = minD + (maxD - minD) * rand();
+        const nx = px[idx] + Math.cos(ang) * r, ny = py[idx] + Math.sin(ang) * r;
+        if(nx < 0 || ny < 0 || nx >= size || ny >= size) continue;
+        const cx = (nx / cell) | 0, cy = (ny / cell) | 0;
+        let ok = true;
+        for(let j = Math.max(0, cy - 2); j <= Math.min(gh - 1, cy + 2) && ok; j++){
+          for(let i = Math.max(0, cx - 2); i <= Math.min(gw - 1, cx + 2); i++){
+            const q = grid[j * gw + i];
+            if(q < 0) continue;
+            const dx = px[q] - nx, dy = py[q] - ny;
+            if(dx * dx + dy * dy < minD2){ ok = false; break; }
+          }
+        }
+        if(ok){ agrega(nx, ny); puesto = true; break; }
+      }
+      if(!puesto){ activos[ai] = activos[activos.length - 1]; activos.pop(); }
+    }
+    return { px, py, count: px.length };
+  }
+
+  function armaCampo(densidad){
+    const rand = mulberry32(0x9e3779b9);
+    const minD = linMap(densidad, 0, 300, 10, 2), maxD = linMap(densidad, 0, 300, 11, 3);
+    const lado = FIELD * 0.5;   // el anillo y la cámara nunca salen de ±0.5: no hace falta el resto
+    const { px, py, count } = poisson(lado, minD, maxD, 20, rand);
+    let texSize = 8;
+    while(texSize * texSize < count) texSize *= 2;
+    const refs = new Float32Array(texSize * texSize * 4);
+    const aUV = new Float32Array(count * 2), aRef = new Float32Array(count * 2);
+    for(let i = 0; i < count; i++){
+      const x = (px[i] - lado / 2) / HALF, y = (py[i] - lado / 2) / HALF;
+      refs[i * 4] = x; refs[i * 4 + 1] = y;
+      aRef[i * 2] = x; aRef[i * 2 + 1] = y;
+      aUV[i * 2] = ((i % texSize) + 0.5) / texSize;
+      aUV[i * 2 + 1] = (Math.floor(i / texSize) + 0.5) / texSize;
+    }
+    return { count, texSize, refs, aUV, aRef };
+  }
+
+  function ruido1(x, semilla){
+    const i = Math.floor(x), f = x - i;
+    const h = n => { const s = Math.sin((n + semilla) * 127.1) * 43758.5453; return s - Math.floor(s); };
+    const u = f * f * (3 - 2 * f);
+    return h(i) * (1 - u) + h(i + 1) * u;
+  }
+
+  function hexRgb(hex){
+    let s = String(hex).trim().replace("#", "");
+    if(s.length === 3) s = s[0] + s[0] + s[1] + s[1] + s[2] + s[2];
+    const n = parseInt(s.slice(0, 6), 16);
+    return [((n >> 16) & 255) / 255, ((n >> 8) & 255) / 255, (n & 255) / 255];
+  }
+
+  /* opts: opacidad (0–1), reducido (una sola imagen fija), activo() (si devuelve false no dibuja),
+     tinte([r,g,b]) → [r,g,b] (para teñir los colores, p. ej. por temporada) */
+  function iniciar(canvas, opts){
+    opts = opts || {};
+    const opacidad = opts.opacidad == null ? 0.5 : opts.opacidad;
+    const ctx = contexto(canvas);
+    if(!ctx) return null;
+    const { gl, fmt } = ctx;
+    const sim = !!fmt;
+
+    let simProg = null, renderProg = null;
+    try{
+      if(sim) simProg = programa(gl, SIM_VERT, SIM_FRAG, ["uState", "uRefs", "uRingPos", "uRingRadius", "uRingWidth", "uRingWidth2", "uPush", "uTurb", "uTime"]);
+      const nombres = ["uProjF", "uAspect", "uCamDist", "uPointScale", "uColors[0]", "uColorCount", "uRingPos", "uTime"];
+      if(sim) nombres.push("uState"); else nombres.push("uRingRadius", "uRingWidth", "uRingWidth2", "uTurb");
+      renderProg = programa(gl, RENDER_VERT(!sim), RENDER_FRAG, nombres);
+    }catch(err){
+      console.warn("Campo de anillo sin WebGL:", err.message);
+      return null;
+    }
+
+    const colores = new Float32Array(MAX_COLORS * 3);
+    const clamp01 = x => Math.max(0, Math.min(1, x));
+    const muestras = COLORS.slice(0, MAX_COLORS).map(hexRgb).map(c => opts.tinte ? opts.tinte(c).map(clamp01) : c);
+    for(let i = 0; i < MAX_COLORS; i++){
+      const c = muestras[Math.min(i, muestras.length - 1)];
+      colores[i * 3] = c[0]; colores[i * 3 + 1] = c[1]; colores[i * 3 + 2] = c[2];
+    }
+
+    const campo = armaCampo(DENSITY);
+    const count = campo.count, texSize = campo.texSize;
+    const quad = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, quad);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+    const uvBuf = gl.createBuffer(), refBuf = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, uvBuf); gl.bufferData(gl.ARRAY_BUFFER, campo.aUV, gl.STATIC_DRAW);
+    gl.bindBuffer(gl.ARRAY_BUFFER, refBuf); gl.bufferData(gl.ARRAY_BUFFER, campo.aRef, gl.STATIC_DRAW);
+
+    let refsTex = null, rt1 = null, rt2 = null;
+    if(sim){
+      refsTex = textura(gl, { internal: fmt.internal, format: gl.RGBA, type: gl.FLOAT }, texSize, campo.refs);
+      rt1 = objetivo(gl, fmt, texSize); rt2 = objetivo(gl, fmt, texSize);
+      [rt1, rt2].forEach(rt => {
+        gl.bindTexture(gl.TEXTURE_2D, rt.tex);
+        gl.texImage2D(gl.TEXTURE_2D, 0, fmt.internal, texSize, texSize, 0, gl.RGBA, gl.FLOAT, campo.refs);
+      });
+      gl.bindTexture(gl.TEXTURE_2D, null);
+    }
+
+    let dpr = 1, cssW = 1, cssH = 1;
+    const ajusta = () => {
+      dpr = Math.min(window.devicePixelRatio || 1, MAX_DPR);
+      cssW = Math.max(canvas.clientWidth || 1, 1); cssH = Math.max(canvas.clientHeight || 1, 1);
+      const w = Math.max(1, Math.round(cssW * dpr)), h = Math.max(1, Math.round(cssH * dpr));
+      if(canvas.width !== w || canvas.height !== h){ canvas.width = w; canvas.height = h; }
+    };
+    ajusta();
+    if(window.ResizeObserver) new ResizeObserver(ajusta).observe(canvas);
+    else window.addEventListener("resize", ajusta);
+
+    const anillo = { x: 0, y: 0 };
+    let raf = 0, last = 0, lastDraw = 0, simTime = 0, wander = 0, ping = true, visible = false, fuerza = opacidad;
+    const posSim = simProg ? gl.getAttribLocation(simProg.prog, "aPos") : -1;
+    const uvLoc = gl.getAttribLocation(renderProg.prog, "aUV"), refLoc = gl.getAttribLocation(renderProg.prog, "aRef");
+
+    gl.disable(gl.DEPTH_TEST);
+    gl.enable(gl.BLEND);
+    gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+
+    function dibuja(now){
+      const dt = Math.min(last ? (now - last) / 1000 : 1 / 60, 1 / 20);
+      last = now;
+      simTime = (simTime + dt * SPEED) % 3600;
+      wander += dt * SPEED;
+
+      const aspect = Math.max(cssW / Math.max(cssH, 1), 0.0001);
+      const projF = 1 / Math.tan(((FOV * Math.PI) / 180) / 2);
+      /* en pantallas verticales la cámara se aleja para que el anillo quepa, y los trazos se
+         escalan con la separación que tienen en pantalla, así se ven igual de proporcionados */
+      const vertical = aspect < 1;
+      const cam = CAM * (vertical ? Math.min(1 / aspect, 2.4) : 1);
+      const paso = cssH / ((2 * cam) / (projF * WORLD * 0.0095));
+
+      const wx = (ruido1(wander * 0.66, 94.234) - 0.5) * 2;
+      const wy = (ruido1(wander * 0.75, 21.028) - 0.5) * 2;
+      const rk = 1 - Math.pow(1 - WANDER_LERP, dt * 60);
+      anillo.x += (wx * 0.2 - anillo.x) * rk;
+      anillo.y += (wy * 0.1 - anillo.y) * rk;
+
+      const radio = RING.radius + Math.sin(simTime) * 0.03 + Math.cos(simTime * 3) * 0.02;
+
+      if(sim){
+        const src = ping ? rt1 : rt2, dst = ping ? rt2 : rt1;
+        gl.bindFramebuffer(gl.FRAMEBUFFER, dst.fbo);
+        gl.viewport(0, 0, texSize, texSize);
+        gl.disable(gl.BLEND);
+        gl.useProgram(simProg.prog);
+        gl.bindBuffer(gl.ARRAY_BUFFER, quad);
+        gl.enableVertexAttribArray(posSim);
+        gl.vertexAttribPointer(posSim, 2, gl.FLOAT, false, 0, 0);
+        gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, src.tex); gl.uniform1i(simProg.u.uState, 0);
+        gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, refsTex); gl.uniform1i(simProg.u.uRefs, 1);
+        gl.uniform2f(simProg.u.uRingPos, anillo.x, anillo.y);
+        gl.uniform1f(simProg.u.uRingRadius, radio);
+        gl.uniform1f(simProg.u.uRingWidth, RING.width);
+        gl.uniform1f(simProg.u.uRingWidth2, RING_EDGE);
+        gl.uniform1f(simProg.u.uPush, RING.push);
+        gl.uniform1f(simProg.u.uTurb, RING.turb);
+        gl.uniform1f(simProg.u.uTime, simTime);
+        gl.drawArrays(gl.TRIANGLES, 0, 3);
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+        gl.enable(gl.BLEND);
+        ping = !ping;
+      }
+
+      gl.viewport(0, 0, canvas.width, canvas.height);
+      gl.clearColor(0, 0, 0, 0);
+      gl.clear(gl.COLOR_BUFFER_BIT);
+      gl.useProgram(renderProg.prog);
+      if(uvLoc >= 0){ gl.bindBuffer(gl.ARRAY_BUFFER, uvBuf); gl.enableVertexAttribArray(uvLoc); gl.vertexAttribPointer(uvLoc, 2, gl.FLOAT, false, 0, 0); }
+      if(refLoc >= 0){ gl.bindBuffer(gl.ARRAY_BUFFER, refBuf); gl.enableVertexAttribArray(refLoc); gl.vertexAttribPointer(refLoc, 2, gl.FLOAT, false, 0, 0); }
+
+      if(sim){
+        gl.activeTexture(gl.TEXTURE0);
+        gl.bindTexture(gl.TEXTURE_2D, (ping ? rt1 : rt2).tex);
+        gl.uniform1i(renderProg.u.uState, 0);
+      } else {
+        gl.uniform1f(renderProg.u.uRingRadius, radio);
+        gl.uniform1f(renderProg.u.uRingWidth, RING.width);
+        gl.uniform1f(renderProg.u.uRingWidth2, RING_EDGE);
+        gl.uniform1f(renderProg.u.uTurb, RING.turb);
+      }
+      gl.uniform1f(renderProg.u.uProjF, projF);
+      gl.uniform1f(renderProg.u.uAspect, aspect);
+      gl.uniform1f(renderProg.u.uCamDist, cam);
+      gl.uniform1f(renderProg.u.uPointScale, paso * 0.0116 * dpr * (vertical ? 1.5 : 1));
+      gl.uniform3fv(renderProg.u["uColors[0]"], colores);
+      gl.uniform1i(renderProg.u.uColorCount, muestras.length);
+      gl.uniform2f(renderProg.u.uRingPos, anillo.x, anillo.y);
+      gl.uniform1f(renderProg.u.uTime, simTime);
+      gl.drawArrays(gl.POINTS, 0, count);
+
+      if(!visible){ visible = true; canvas.style.opacity = String(fuerza); }   // aparece con un fundido, sin destello
+    }
+
+    function bucle(now){
+      raf = requestAnimationFrame(bucle);
+      if(now - lastDraw < FRAME_MS) return;          // 30 cuadros por segundo: sobra para algo tan lento
+      if(opts.activo && !opts.activo()) return;
+      lastDraw = now;
+      dibuja(now);
+    }
+    function sigue(){ if(raf || opts.reducido) return; last = 0; raf = requestAnimationFrame(bucle); }
+    function pausa(){ if(raf){ cancelAnimationFrame(raf); raf = 0; } }
+
+    if(opts.reducido){ simTime = 20; wander = 20; for(let k = 0; k < 45; k++) dibuja(k * FRAME_MS); }   // una imagen fija, ya asentada
+    else sigue();
+    /* al leer una conversación o ver información el campo se oscurece para camuflarse */
+    function atenua(si){ fuerza = si ? opacidad * 0.35 : opacidad; if(visible) canvas.style.opacity = String(fuerza); }
+    return { sigue, pausa, atenua };
+  }
+
+  return { iniciar };
+})();
+
+const REDUCED = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const fondoLineas = Lineas.iniciar(document.getElementById("lineas"), { reducido: REDUCED });
+/* la lista siempre es información: el fondo se oscurece como en Armoni al leer */
+if(fondoLineas) fondoLineas.atenua(true);
+const arrancaCampo = () => { const f = Campo.iniciar(document.getElementById("campo"), { opacidad: .32, reducido: REDUCED }); if(f) f.atenua(true); };
+if(window.requestIdleCallback) requestIdleCallback(arrancaCampo, { timeout: 3000 }); else setTimeout(arrancaCampo, 1500);
+
+/* ventana de confirmación centrada: devuelve true si dice que sí */
+function confirmar(titulo, texto, si){
+  return new Promise(resolve => {
+    const scrim = document.createElement("div");
+    scrim.className = "cfScrim";
+    scrim.innerHTML = '<div class="cfCard" role="dialog" aria-modal="true"><h3></h3><p></p>' +
+      '<div class="cfRow"><button type="button" class="cfNo">No</button><button type="button" class="cfSi"></button></div></div>';
+    scrim.querySelector("h3").textContent = titulo;
+    if(texto) scrim.querySelector("p").textContent = texto; else scrim.querySelector("p").remove();
+    scrim.querySelector(".cfSi").textContent = si;
+    document.body.appendChild(scrim);
+    document.body.classList.add("dlg");
+    requestAnimationFrame(() => scrim.classList.add("on"));
+    const cierra = v => {
+      scrim.classList.remove("on"); document.body.classList.remove("dlg");
+      setTimeout(() => scrim.remove(), 300);
+      resolve(v);
+    };
+    scrim.querySelector(".cfSi").addEventListener("click", () => cierra(true));
+    scrim.querySelector(".cfNo").addEventListener("click", () => cierra(false));
+    scrim.addEventListener("click", e => { if(e.target === scrim) cierra(false); });
+  });
+}
+const ESTADO_URL = "http://192.168.1.7:5678/webhook/mercado-estado";
+const MARCAR_URL = "http://192.168.1.7:5678/webhook/mercado-marcar";
+const TOKEN = "mercado-7d41c2a9e05b";
+const GRUPOS = ["Despensa", "Lácteos", "Carnes", "Ema", "Aseo"];
+const EMOJIS = [["panqueque","🥞"],["panela","🟫"],["pan","🍞"],["arroz","🍚"],["chocolate","🍫"],["leche","🥛"],["guisamar","🧂"],["sal","🧂"],
+  ["azúcar","🍬"],["azucar","🍬"],["oliva","🫒"],["aceite","🛢️"],["pasta","🍝"],["frijol","🫘"],["lenteja","🫘"],["crispeta","🍿"],["queso","🧀"],
+  ["mantequilla","🧈"],["cereal","🥣"],["carne","🥩"],["cerdo","🍖"],["pollo","🍗"],["ariel","🧺"],["axion","🧽"],["dientes","🪥"],["shampoo","🧴"],
+  ["papel","🧻"],["desodorante","🧴"],["jabón","🧼"],["jabon","🧼"],["talco","🫧"],["tomate","🍅"],["huevo","🥚"],["fruta","🍎"],["verdura","🥬"]];
+const emoji = n => { const s = String(n || "").toLowerCase(); for(const [k, e] of EMOJIS) if(s.includes(k)) return e; return "🛒"; };
+const esc = t => String(t).replace(/[&<>]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
+const main = document.getElementById("main");
+const cuenta = document.getElementById("cuenta");
+const aviso = document.getElementById("aviso");
+let productos = [];
+let tAviso = null;
+
+/* qué grupos están cerrados: se guarda para que al volver a abrir la app quede como lo dejaste */
+let cerrados;
+try{ cerrados = new Set(JSON.parse(localStorage.getItem("mama.cerrados")) || []); }catch{ cerrados = new Set(); }
+function guardarCerrados(){ try{ localStorage.setItem("mama.cerrados", JSON.stringify([...cerrados])); }catch{} }
+
+function avisar(texto, mal){
+  aviso.textContent = texto;
+  aviso.classList.toggle("mal", !!mal);
+  aviso.classList.add("on");
+  clearTimeout(tAviso);
+  tAviso = setTimeout(() => aviso.classList.remove("on"), 2600);
+}
+function contar(){
+  const n = productos.filter(p => p.falta).length;
+  cuenta.hidden = !n;
+  cuenta.textContent = n === 1 ? "1 cosa marcada" : n + " cosas marcadas";
+}
+
+const CHEV = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>';
+
+function pintar(){
+  let html = "";
+  GRUPOS.concat(["Otros"]).forEach(g => {
+    const del = productos.filter(p => (GRUPOS.includes(p.grupo) ? p.grupo : "Otros") === g);
+    if(!del.length) return;
+    const abierto = !cerrados.has(g);
+    html += '<button type="button" class="grupo" data-g="' + esc(g) + '" aria-expanded="' + abierto + '">' +
+      '<span class="chev" aria-hidden="true">' + CHEV + '</span><span class="n">' + g + '</span>' +
+      '<span class="c">' + del.length + '</span></button>' +
+      '<div class="cuerpo' + (abierto ? ' on' : '') + '"><div><div class="lista">' + del.map(p =>
+        '<button type="button" class="item' + (p.falta ? ' acabo' : '') + '" data-id="' + p.id + '">' +
+        '<span class="e" aria-hidden="true">' + emoji(p.nombre) + '</span><span class="n">' + esc(p.nombre) + '</span>' +
+        '<span class="s">' + (p.falta ? "Ya hay que comprar" : "Hay") + '</span></button>'
+      ).join("") + '</div></div></div>';
+  });
+  main.innerHTML = html || '<p class="estado">No hay productos en la lista todavía.</p>';
+  contar();
+}
+
+main.addEventListener("click", async e => {
+  const cab = e.target.closest(".grupo");
+  if(cab){
+    const g = cab.dataset.g;
+    const cuerpo = cab.nextElementSibling;
+    const abrir = cerrados.has(g);
+    if(abrir) cerrados.delete(g); else cerrados.add(g);
+    cab.setAttribute("aria-expanded", String(abrir));
+    cuerpo.classList.toggle("on", abrir);
+    guardarCerrados();
+    return;
+  }
+  const btn = e.target.closest(".item");
+  if(!btn || btn.classList.contains("envio")) return;
+  const p = productos.find(x => x.id === btn.dataset.id);
+  if(!p) return;
+  /* desmarcar puede ser un error: antes de sacarlo de la lista de Armoni, se pregunta */
+  if(p.falta && !(await confirmar("¿Seguro que quieres desmarcar " + p.nombre + "?", "", "Sí"))) return;
+  const nuevo = !p.falta;
+  p.falta = nuevo;                                   // se ve al instante, y si falla se devuelve
+  btn.classList.toggle("acabo", nuevo);
+  btn.querySelector(".s").textContent = nuevo ? "Ya hay que comprar" : "Hay";
+  btn.classList.add("envio");
+  contar();
+  try{
+    const res = await fetch(MARCAR_URL, { method: "POST", body: JSON.stringify({ token: TOKEN, ids: [p.id], falta: nuevo, origen: "Mamá" }) });
+    if(!res.ok) throw Object.assign(new Error(), { http: res.status });
+    avisar(nuevo ? "Listo: " + p.nombre + " ya hay que comprarlo" : "Listo: sí hay " + p.nombre);
+  }catch(err){
+    p.falta = !nuevo;
+    btn.classList.toggle("acabo", !nuevo);
+    btn.querySelector(".s").textContent = !nuevo ? "Ya hay que comprar" : "Hay";
+    contar();
+    avisar(err && err.http ? "Armoni no pudo guardarlo (error " + err.http + ")" : "No se pudo enviar. ¿Estás conectada al WiFi de la casa?", true);
+  }finally{
+    btn.classList.remove("envio");
+  }
+});
+async function cargar(){
+  try{
+    const res = await fetch(ESTADO_URL, { cache: "no-store" });
+    if(!res.ok) throw new Error();
+    const d = await res.json();
+    productos = d.productos || [];
+    try{ localStorage.setItem("mama.productos", JSON.stringify(productos)); }catch{}
+    pintar();
+  }catch{
+    if(!productos.length) main.innerHTML = '<p class="estado">No se pudo cargar. Revisa que estés conectada al WiFi de la casa.</p>';
+  }
+}
+try{ const c = JSON.parse(localStorage.getItem("mama.productos")); if(c && c.length){ productos = c; pintar(); } }catch{}
+cargar();
+document.addEventListener("visibilitychange", () => { if(!document.hidden) cargar(); });
+</script>
+</body>
+</html>
