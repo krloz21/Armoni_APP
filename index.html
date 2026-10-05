@@ -949,6 +949,30 @@ body.mode-gmail footer, body.mode-glim footer{ display:none; }
 
 
 
+
+/* ── mejoras de comida: carrusel con entrada escalonada, ícono abierto con neón, ficha con destello ── */
+.restRail .cat{ animation:catIn .6s cubic-bezier(.16,1,.3,1) backwards; animation-delay:calc(var(--i, 0) * 45ms); }
+@keyframes catIn{ from{ opacity:0; transform:translateY(14px) scale(.9); } to{ opacity:1; transform:none; } }
+.restRail .tile{ position:relative; }
+.restRail .tile::after{ content:""; position:absolute; inset:-1px; border-radius:inherit; padding:1.5px; pointer-events:none; opacity:0; transition:opacity .45s ease;
+  background:conic-gradient(from var(--inAng), #6ff0ff, #3a78ff, #5a3fe0, #3a78ff, #6ff0ff);
+  -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite:xor; mask:linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0); }
+.restRail .cat[aria-pressed="true"] .tile{ border-color:transparent; background:radial-gradient(120% 120% at 30% 20%, rgba(111,240,255,.2), rgba(90,63,224,.12)); box-shadow:inset 0 1px 0 rgba(var(--hi),.2), 0 8px 26px rgba(58,120,255,.4); }
+.restRail .cat[aria-pressed="true"] .tile::after{ opacity:1; animation:inIAflow 3.2s linear infinite; }
+.restRail .cat[aria-pressed="true"] .lbl{ color:var(--strong); font-weight:600; }
+.restRail .tile{ transition:transform .35s cubic-bezier(.34,1.56,.64,1), border-color .3s, box-shadow .4s, background .3s; }
+.restRail .cat:active .tile{ transform:scale(.9); }
+.sheetCard.flash::after{ content:""; position:absolute; inset:-1px; border-radius:inherit; padding:1.5px; pointer-events:none;
+  background:conic-gradient(from var(--inAng), #6ff0ff, #3a78ff, #5a3fe0, #3a78ff, #6ff0ff);
+  -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite:xor; mask:linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  animation:inIAflow 1.4s linear, inNeonRing 1.4s ease-out forwards; }
+.sheetHead .emo{ background:radial-gradient(120% 120% at 30% 20%, rgba(111,240,255,.18), rgba(90,63,224,.08)); border-color:rgba(111,240,255,.28); box-shadow:0 6px 20px rgba(58,120,255,.22); }
+.restCard{ border-radius:16px; background:linear-gradient(180deg, rgba(var(--ink),.045), rgba(var(--ink),.02)); box-shadow:inset 0 1px 0 rgba(var(--hi),.08); }
+.restCard:hover, .restCard:active{ border-color:rgba(111,240,255,.35); }
+.restNum.top{ filter:drop-shadow(0 0 8px rgba(111,240,255,.45)); }
+.restNum.low{ background:none; color:var(--dim); -webkit-text-fill-color:var(--dim); }
+@media (prefers-reduced-motion:reduce){ .restRail .cat{ animation:none; } .restRail .cat[aria-pressed="true"] .tile::after, .sheetCard.flash::after{ animation:none; } }
+
 /* ── ajustes, abajo del menú ── */
 .dFoot{ margin-top:auto; padding:14px 4px 2px; border-top:1px solid var(--line); }
 .dFootLbl{ font-size:.7rem; text-transform:uppercase; letter-spacing:.08em; color:var(--dim); font-weight:600; margin:0 8px 10px; }
@@ -1982,7 +2006,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
 /* ═════════ VERSIÓN ═════════
    Súbela en cada entrega: si el servidor tiene una versión distinta a la que está corriendo,
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
-const APP_VERSION = "2026-10-05.50";
+const APP_VERSION = "2026-10-05.51";
 (function autoActualizar(){
   const patron = new RegExp("const APP_" + "VERSION = \"([^\"]+)\"");
   async function revisar(){
@@ -3750,7 +3774,7 @@ const Restaurantes = (function(){
     { id:"italiana",    label:"Italiana",      emo:"🍝", re:/italian|pasta|lasagna|risotto/ },
     { id:"arabe",       label:"Árabe",         emo:"🥙", re:/arabe|shawarma|libanes|turc|falafel/ },
     { id:"mariscos",    label:"Mar",           emo:"🦐", re:/marisco|pescado|ceviche|peruan|camaron/ },
-    { id:"colombiana",  label:"Colombiana",    emo:"🍲", re:/colombian|tipica|corrientazo|sancocho|bandeja|almuerzo/ },
+    { id:"colombiana",  label:"Almuerzos",      emo:"🍲", re:/colombian|tipica|corrientazo|sancocho|bandeja|almuerzo/ },
     { id:"arepas",      label:"Arepas",        emo:"🫓", re:/arepa/ },
     { id:"saludable",   label:"Saludable",     emo:"🥗", re:/vegetarian|vegan|saludable|ensalada|bowl|poke/ },
     { id:"desayuno",    label:"Desayuno",      emo:"🥞", re:/desayuno|brunch|pancake|waffle/ },
@@ -3815,14 +3839,25 @@ const Restaurantes = (function(){
     cats.push(...orden);
   }
 
+  /* el ícono de la categoría abierta queda encendido en el carrusel y se centra */
+  function marcaRail(id){
+    railEl.querySelectorAll(".cat").forEach(b => {
+      const on = b.dataset.id === id;
+      b.setAttribute("aria-pressed", String(on));
+      if(on) railEl.scrollTo({ left: b.offsetLeft - (railEl.clientWidth - b.offsetWidth) / 2, behavior: REDUCED ? "auto" : "smooth" });
+    });
+  }
+
   function paintRail(){
     railEl.innerHTML = "";
-    cats.forEach(id => {
+    cats.forEach((id, n) => {
       const c = id === "todos" ? { label:"Todos", emo:"🍽️" } : catDe(id);
       const b = document.createElement("button");
       b.type = "button";
       b.className = "cat";
+      b.style.setProperty("--i", Math.min(n, 10));
       b.dataset.id = id;
+      b.setAttribute("aria-pressed", "false");
       b.setAttribute("aria-haspopup", "dialog");
       b.innerHTML = '<span class="tile" aria-hidden="true">' + c.emo + '</span><span class="lbl">' + esc(c.label) + "</span>";
       b.addEventListener("click", () => Sheet.openCategory(id));
@@ -3846,7 +3881,7 @@ const Restaurantes = (function(){
       '<div class="restMain"><div class="restName">' + esc(r.nombre) + (emos ? '<span class="emos">' + emos + "</span>" : "") + "</div>" +
       (stats ? '<div class="restStats">' + stats + "</div>" : "") +
       (r.nota ? '<div class="restNote">' + esc(r.nota) + "</div>" : "") + "</div>" +
-      '<div class="restNum" aria-label="' + nota10(r.score) + ' de 10">' + nota10(r.score) + "<small>/10</small></div>";
+      '<div class="restNum' + (r.score >= 8.5 ? " top" : r.score < 6 ? " low" : "") + '" aria-label="' + nota10(r.score) + ' de 10">' + nota10(r.score) + "<small>/10</small></div>";
     el.addEventListener("click", () => Sheet.openDetail(r));
     return el;
   }
@@ -3872,7 +3907,7 @@ const Restaurantes = (function(){
     function close(){
       if(!scrim) return;
       scrim.classList.remove("on");
-      const s = scrim; scrim = null; card = null; kind = null;
+      const s = scrim; scrim = null; card = null; kind = null; marcaRail(null);
       setTimeout(() => s.remove(), REDUCED ? 0 : 380);
       document.removeEventListener("keydown", onKey);
     }
@@ -3884,6 +3919,7 @@ const Restaurantes = (function(){
       card = scrim.querySelector(".sheetCard");
       root.appendChild(scrim);
       requestAnimationFrame(() => scrim.classList.add("on"));
+      card.classList.add("flash"); setTimeout(() => card && card.classList.remove("flash"), 1500);   // destello neón al abrir
       scrim.addEventListener("click", e => { if(e.target === scrim) close(); });
       scrim.querySelector(".sheetClose").addEventListener("click", close);
       document.addEventListener("keydown", onKey);
@@ -3919,14 +3955,14 @@ const Restaurantes = (function(){
     }
 
     function fillCategory(id){
-      kind = "cat"; swiping = id;
+      kind = "cat"; swiping = id; marcaRail(id);
       const c = id === "todos" ? { label:"Todos", emo:"🍽️" } : catDe(id);
       const lista = items.filter(r => enCat(r, id)).sort((a, b) => b.score - a.score);
       card.setAttribute("aria-label", c.label);
       const body = card.querySelector(".sheetBody");
       body.innerHTML =
         '<div class="sheetHead"><span class="emo" aria-hidden="true">' + c.emo + '</span>' +
-        '<div><div class="nm">' + esc(c.label) + '</div><div class="ct">' + lista.length + (lista.length === 1 ? " lugar" : " lugares") + '</div></div></div>' +
+        '<div><div class="nm">' + esc(c.label) + '</div><div class="ct">' + lista.length + (lista.length === 1 ? " lugar" : " lugares") + (lista.length > 1 ? " · de mejor a peor" : "") + '</div></div></div>' +
         '<div class="sheetList"></div>';
       const listWrap = body.querySelector(".sheetList");
       if(!lista.length){
