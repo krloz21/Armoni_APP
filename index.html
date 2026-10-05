@@ -335,7 +335,7 @@ body:not([class*="mode-"]) #thread.sinChat{ overflow-y:hidden; }
 }
 #servicioBanner .svBanner{ margin-bottom:0; }
 #servicioBanner .svBanner{
-  -webkit-backdrop-filter:blur(18px) saturate(1.5) brightness(1.08); backdrop-filter:blur(18px) saturate(1.5) brightness(1.08);
+  -webkit-backdrop-filter:blur(5px) saturate(1.25); backdrop-filter:blur(5px) saturate(1.25);
   touch-action:none;
   animation-fill-mode:backwards;   /* al terminar la entrada no deja ningún filtro puesto: así el desenfoque del vidrio funciona */
 }
@@ -1803,7 +1803,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
 /* ═════════ VERSIÓN ═════════
    Súbela en cada entrega: si el servidor tiene una versión distinta a la que está corriendo,
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
-const APP_VERSION = "2026-10-05.25";
+const APP_VERSION = "2026-10-05.26";
 (function autoActualizar(){
   const patron = new RegExp("const APP_" + "VERSION = \"([^\"]+)\"");
   async function revisar(){
