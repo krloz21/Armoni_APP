@@ -950,6 +950,9 @@ body.mode-gmail footer, body.mode-glim footer{ display:none; }
 .notifBtn:hover{ border-color:var(--cyan); }
 .notifBtn:disabled{ opacity:.6; cursor:default; }
 .notifBtn.on{ color:var(--dim); background:transparent; }
+.ajVolver{ display:inline-flex; align-items:center; gap:4px; margin:2px 0 6px 2px; padding:8px 15px 8px 9px; border-radius:999px; border:1px solid var(--line); background:rgba(var(--ink),.05); color:var(--ghost); font:inherit; font-size:.85rem; font-weight:600; cursor:pointer; transition:transform .45s cubic-bezier(.32,.72,0,1), background .2s ease; }
+.ajVolver svg{ width:16px; height:16px; }
+.ajVolver:active{ transform:scale(.95); }
 .ajGrupo{ margin:22px 4px 8px; font-size:.72rem; color:var(--dim); letter-spacing:.08em; text-transform:uppercase; }
 .ajCard{ background:var(--panel); border:1px solid var(--line); border-radius:16px; padding:4px 8px; }
 .ajCard .setRow{ padding:12px 8px; }
@@ -1680,6 +1683,7 @@ body.mode-gmail footer, body.mode-glim footer{ display:none; }
         <div id="mkStage"></div>
       </section>
       <section id="ajustesView" aria-label="Ajustes">
+        <button type="button" class="ajVolver" id="ajVolver"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>Volver</button>
         <div class="restIntro"><h2>Ajustes</h2></div>
         <div class="ajGrupo">Apariencia</div>
         <div class="ajCard">
@@ -1818,7 +1822,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
 /* ═════════ VERSIÓN ═════════
    Súbela en cada entrega: si el servidor tiene una versión distinta a la que está corriendo,
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
-const APP_VERSION = "2026-10-05.19";
+const APP_VERSION = "2026-10-05.20";
 (function autoActualizar(){
   const patron = new RegExp("const APP_" + "VERSION = \"([^\"]+)\"");
   async function revisar(){
@@ -4461,6 +4465,8 @@ const Theme = (function(){
 })();
 
 
+document.getElementById("ajVolver").addEventListener("click", () => document.getElementById("navChat").click());
+
 /* onda líquida al tocar (solo se ve en el tema P; en el B no hay estilo para ella) */
 document.addEventListener("pointerdown", e => {
   if(document.documentElement.dataset.theme !== "light" || REDUCED) return;
@@ -5296,13 +5302,14 @@ const Mercar = (function(){
     cola = ps.filter(esMama).concat(ps.filter(p => !esMama(p)));   // lo que marcó la mamá va primero
     idx = 0; decision = []; bloqueado = false; estado = "juego";
     stage.innerHTML =
-      '<div class="mkTop"><button type="button" class="mkSalir" id="mkSalir" aria-label="Salir sin terminar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>' +
+      '<div class="mkTop">' +
       '<div class="mkBar"><i id="mkBarI"></i></div><span class="mkCount" id="mkCount"></span><span class="mkCart" id="mkCart">🛒 <b>0</b></span></div>' +
       '<div class="mkDeck" id="mkDeck"></div>' +
       '<div class="mkBtns"><button type="button" class="mkNo" id="mkNo" aria-label="Falta, hay que comprar">✕</button>' +
       '<button type="button" class="mkUndo" id="mkUndo" aria-label="Deshacer">↶</button>' +
       '<button type="button" class="mkSi" id="mkSi" aria-label="Sí hay">✓</button></div>' +
-      '<p class="mkLeyenda">Desliza a la derecha si <b>hay</b> · a la izquierda si <b>falta</b></p>';
+      '<p class="mkLeyenda">Desliza a la derecha si <b>hay</b> · a la izquierda si <b>falta</b></p>' +
+      '<button type="button" class="mkBtn sec full" id="mkSalir" style="margin-top:14px">Volver</button>';
     document.getElementById("mkNo").addEventListener("click", () => decide("no"));
     document.getElementById("mkSi").addEventListener("click", () => decide("si"));
     document.getElementById("mkUndo").addEventListener("click", deshacer);
