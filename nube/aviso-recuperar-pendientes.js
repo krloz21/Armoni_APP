@@ -1,6 +1,6 @@
-// ¿Toca avisar?  Va entre el reloj y «Pedir pagos pendientes».
-// El reloj ahora revisa cada 15 minutos. Si un horario (8:00, 12:30, 20:30) ya pasó y no se ha enviado hoy,
-// deja continuar el flujo. Así, si el computador estuvo apagado, el aviso sale apenas se prende.
+// ¿Toca avisar?  Va entre los disparadores (horas exactas + «Al arrancar n8n») y «Pedir pagos pendientes».
+// Los avisos salen a su hora exacta (8:00, 12:30, 20:30). Este nodo evita repetirlos y, si el computador estuvo apagado,
+// recupera el que se perdió apenas n8n vuelve a arrancar (o cuando publicas el flujo).
 const sd = $getWorkflowStaticData('global');
 const co = new Date(Date.now() - 5 * 3600 * 1000);            // hora de Colombia
 const hoy = co.toISOString().slice(0, 10);
