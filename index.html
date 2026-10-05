@@ -1985,7 +1985,9 @@ const SERVICIOS_DIA_LIMITE = 7;   // hasta qué día del mes avisa si falta paga
 const PUSH_ENVIAR_URL = N8N + "/webhook/push-enviar";
 const PUSH_SUBSCRIBE_URL = N8N + "/webhook/push-subscribe";   // guarda la suscripción para que n8n pueda avisar
 const VAPID_PUBLIC_KEY = "BKRJjoINCgWY6PkbiGozkt2H5hGTpdPwLr5mepMMMc57GSfY2ERERh-9feitXcHOUxUBQv36nLtiC7sjbDrXp_8";
-const REPOSO_SEGUNDOS  = 45;   // sin tocar nada: la animación se congela
+/* ahorro de batería solo en celular/tableta (táctil); en computador todo queda a plena calidad */
+const ESCRITORIO = matchMedia("(hover: hover) and (pointer: fine)").matches;
+const REPOSO_SEGUNDOS  = ESCRITORIO ? 90 : 45;   // sin tocar nada: la animación se congela
 const REINICIO_MINUTOS = 15;   // sin usarla: la conversación empieza de cero
 
 /* ═════════ TEMPORADA ═════════ */
@@ -2004,7 +2006,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
 /* ═════════ VERSIÓN ═════════
    Súbela en cada entrega: si el servidor tiene una versión distinta a la que está corriendo,
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
-const APP_VERSION = "2026-10-05.57";
+const APP_VERSION = "2026-10-05.58";
 (function autoActualizar(){
   const patron = new RegExp("const APP_" + "VERSION = \"([^\"]+)\"");
   async function revisar(){
@@ -2321,7 +2323,7 @@ void main(){
   const uRect = U("uRect"), uRad = U("uRad"), uDim = U("uDim"), uLight = U("uLight"), uSeason = U("uSeason");
 
   /* líneas de 1px: necesitan resolución real, pero sin pasar de 1.5x */
-  const SCALE = Math.min(1.25, devicePixelRatio || 1);   // 30% menos píxeles que a 1.5x; en un fondo de luz suave no se nota
+  const SCALE = Math.min(ESCRITORIO ? 1.5 : 1.25, devicePixelRatio || 1);   // 30% menos píxeles que a 1.5x; en un fondo de luz suave no se nota
   let w = 0, h = 0;
   function build(){
     w = innerWidth; h = innerHeight;
@@ -3351,7 +3353,7 @@ function scheduleSleep(){
 
 /* a los 8 s sin tocar nada, los fondos bajan de 30 a 20 cuadros: al interactuar vuelven a 30 al instante */
 let ultToque = performance.now();
-window.__reposado = () => performance.now() - ultToque > 8000;
+window.__reposado = () => !ESCRITORIO && performance.now() - ultToque > 8000;
 function activity(){
   ultToque = performance.now();
   const now = Date.now();
