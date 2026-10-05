@@ -243,7 +243,7 @@ body:not([class*="mode-"]) #thread.sinChat{ overflow-y:hidden; }
 .msg.bot .body > :not(.tools){ animation:materialize .6s cubic-bezier(.2,.75,.25,1) both; }
 @keyframes lift{ from{ opacity:0; transform:translateY(28px) scale(.97); } to{ opacity:1; transform:none; } }
 @keyframes materialize{
-  from{ opacity:0; filter:blur(9px); transform:translateY(7px); }
+  from{ opacity:0; filter:blur(4px); transform:translateY(7px); }
   to{ opacity:1; filter:blur(0); transform:none; }
 }
 
@@ -1150,7 +1150,7 @@ body.mode-gmail footer, body.mode-glim footer{ display:none; }
 .wsT{ font-size:2.1rem; font-weight:700; letter-spacing:-.035em; line-height:1.08; margin:0 0 16px; }
 .wsBig{ font-size:clamp(2.2rem, 12.2vw, 3.5rem); padding-bottom:.08em; font-weight:700; letter-spacing:-.045em; line-height:1; font-variant-numeric:tabular-nums; margin:4px 0 18px; background:linear-gradient(180deg, #fff 35%, var(--c2)); -webkit-background-clip:text; background-clip:text; color:transparent; }
 .wsCuerpo > .wsEmoji{ width:92px; height:92px; border-radius:28px; display:grid; place-items:center; font-size:3rem; line-height:1; margin-bottom:22px; background:linear-gradient(145deg, rgba(255,255,255,.16), rgba(255,255,255,.04)); border:1px solid rgba(255,255,255,.16); box-shadow:inset 0 1px 0 rgba(255,255,255,.2), 0 24px 50px -22px var(--c1); animation:wsPop .9s cubic-bezier(.34,1.56,.64,1) forwards, wsFlota 3.6s ease-in-out 1s infinite; }
-@keyframes wsPop{ from{ opacity:0; transform:scale(.5) rotate(-8deg); filter:blur(8px); } to{ opacity:1; transform:none; filter:blur(0); } }
+@keyframes wsPop{ from{ opacity:0; transform:scale(.5) rotate(-8deg); filter:blur(4px); } to{ opacity:1; transform:none; filter:blur(0); } }
 @keyframes wsFlota{ 50%{ transform:translateY(-7px); } }
 .wsChip{ align-self:flex-start; display:inline-flex; align-items:center; gap:6px; padding:11px 16px; border-radius:999px; background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.16); -webkit-backdrop-filter:blur(12px); backdrop-filter:blur(12px); font-weight:600; font-size:.95rem; }
 .wsP{ font-size:1.08rem; line-height:1.5; color:rgba(255,255,255,.82); margin:0; }
@@ -1325,6 +1325,25 @@ body.mode-gmail footer, body.mode-glim footer{ display:none; }
 :root[data-season] .seasonTag{ display:inline-block; }
 #snow{ position:fixed; inset:0; z-index:2; pointer-events:none; }
 
+
+/* ═════════ sistema de movimiento (misma sensación de iOS en toda la app) ═════════
+   salida suave con frenado largo, resorte con un pequeño rebote, y toques que responden al instante */
+:root{
+  --ease-out:cubic-bezier(.32,.72,0,1);
+  --ease-spring:cubic-bezier(.34,1.56,.64,1);
+  --t-tap:.18s; --t-base:.32s; --t-slow:.55s;
+}
+/* respuesta al toque: se hunde un poco y vuelve con suavidad */
+button, .restCard, .cat, .item{ -webkit-tap-highlight-color:transparent; }
+button{ transition:transform var(--t-tap) var(--ease-out); }
+.go:active, .notifBtn:active, .gmBtn:active, .rmAsk:active, .recChip:active, .inCat:active, .pgRow button:active, .cfRow button:active, .mkBtn:active, .svBanner .go:active, .restRail .cat:active .tile{ transform:scale(.965); }
+/* elementos que se mueven al abrir: la GPU los prepara antes */
+.sheetCard, .pgCard, .inWrap, .exitoFicha .sheetCard{ will-change:transform, opacity; }
+/* quien prefiere menos movimiento: todo cambia sin animar */
+@media (prefers-reduced-motion:reduce){
+  *, *::before, *::after{ animation-duration:.01ms !important; animation-delay:0s !important; animation-iteration-count:1 !important; transition-duration:.01ms !important; scroll-behavior:auto !important; }
+}
+
 /* ═════════ ficha emergente: una sola pieza de vidrio para todo ═════════
    sirve tanto para la lista de una categoría como para el detalle de un
    lugar — comparten el mismo marco y las mismas transiciones. */
@@ -1378,7 +1397,7 @@ body.mode-gmail footer, body.mode-glim footer{ display:none; }
 @keyframes sheetOutF{ to{ opacity:0; transform:scale(.98); } }
 @keyframes sheetInR{ from{ opacity:0; transform:translateX(26px); } to{ opacity:1; transform:none; } }
 @keyframes sheetInL{ from{ opacity:0; transform:translateX(-26px); } to{ opacity:1; transform:none; } }
-@keyframes sheetInF{ from{ opacity:0; filter:blur(6px); transform:translateY(6px); } to{ opacity:1; filter:blur(0); transform:none; } }
+@keyframes sheetInF{ from{ opacity:0; filter:blur(3px); transform:translateY(6px); } to{ opacity:1; filter:blur(0); transform:none; } }
 
 /* cabecera de la ficha de categoría */
 .sheetHead{ display:flex; align-items:center; gap:14px; padding-right:38px; margin-bottom:16px; }
@@ -2012,7 +2031,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-05.65";
+const APP_VERSION = "2026-10-05.66";
 (function autoActualizar(){
   const patron = new RegExp("const APP_" + "VERSION = \"([^\"]+)\"");
   async function revisar(){
@@ -3010,14 +3029,9 @@ void main(){
     window.__campoTonos = () => campo.tonos();
     campo.atenua(leyendo);
     /* en reposo (la app "duerme") el campo también se detiene */
-    new MutationObserver(() => { if(document.body.classList.contains("asleep") || document.documentElement.classList.contains("dpOn")) campo.pausa(); else campo.sigue(); })
+    new MutationObserver(() => { if(document.body.classList.contains("asleep")) campo.pausa(); else campo.sigue(); })
       .observe(document.body, { attributes: true, attributeFilter: ["class"] });
-    /* con el menú abierto o en movimiento el campo queda desenfocado y atenuado detrás: se congela para que el menú se mueva más fluido */
-    const enMenu = () => document.documentElement.classList.contains("dpOn");
-    new MutationObserver(() => {
-      if(enMenu()) campo.pausa();
-      else if(!document.body.classList.contains("asleep")) campo.sigue();
-    }).observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
+
   }
   /* se prepara cuando el navegador está libre, para no competir con el inicio de la app */
   if(window.requestIdleCallback) requestIdleCallback(arranca, { timeout: 3000 }); else setTimeout(arranca, 1500);
