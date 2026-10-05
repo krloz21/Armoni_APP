@@ -1923,7 +1923,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
 /* ═════════ VERSIÓN ═════════
    Súbela en cada entrega: si el servidor tiene una versión distinta a la que está corriendo,
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
-const APP_VERSION = "2026-10-05.38";
+const APP_VERSION = "2026-10-05.39";
 (function autoActualizar(){
   const patron = new RegExp("const APP_" + "VERSION = \"([^\"]+)\"");
   async function revisar(){
@@ -4710,8 +4710,8 @@ function pedirMontoJardin(){
 const GastoManual = (function(){
   /* todas menos "Servicios": energía, agua, gas e internet ya se registran solos desde su aviso */
   const CATS_GASTO = ["Alimentación", "Salidas", "Hogar", "Carro", "Hijo", "Salud", "Tarjetas", "Ahorro", "Otros"];
-  /* lo que entra "a mano": salarios y demás (Hogar) y lo que te devuelven al dividir una cuenta (Salidas / Alimentación) */
-  const CATS_INGRESO = ["Hogar", "Alimentación", "Salidas"];
+  /* lo que entra "a mano": salarios (Hogar), lo que te devuelven al dividir una cuenta (Salidas / Alimentación) y lo demás (Otros) */
+  const CATS_INGRESO = ["Hogar", "Alimentación", "Salidas", "Otros"];
   /* pagos que ya tienen su propio flujo: aquí no se registran para no duplicarlos */
   const AUTOMATICOS = /arriendo|jard[ií]n|cuota\s+(del\s+)?(carro|cr[eé]dito)/i;
   const P = 'fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"';
