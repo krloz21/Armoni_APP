@@ -653,7 +653,8 @@ body.ribbon .typer h1{ filter:drop-shadow(0 2px 14px rgba(0,0,0,.5)); }
 body.ribbon #drawer{ background:var(--drawer); -webkit-backdrop-filter:blur(26px) saturate(1.5); backdrop-filter:blur(26px) saturate(1.5); }
 
 body.no-gl{ background:radial-gradient(120% 80% at 70% 8%, var(--nogl-a) 0%, var(--nogl-b) 62%) fixed; }
-body.no-gl .bar, body.no-gl .composer{ background:var(--drawer-solid); }
+body.no-gl .bar{ background:var(--drawer); -webkit-backdrop-filter:blur(18px) saturate(1.4); backdrop-filter:blur(18px) saturate(1.4); }
+body.no-gl .composer{ background:var(--composer); -webkit-backdrop-filter:blur(18px) saturate(1.4); backdrop-filter:blur(18px) saturate(1.4); }
 
 
 /* ───────── menú lateral ───────── */
@@ -687,7 +688,7 @@ body.drawer-open #scrim{ pointer-events:auto; }
   transform:translateX(calc((1 - var(--dp, 0)) * (-100% - 24px)));
   will-change:transform;
 }
-body.no-gl #drawer{ background:var(--drawer-solid); }
+body.no-gl #drawer{ background:var(--drawer); -webkit-backdrop-filter:blur(24px) saturate(1.4); backdrop-filter:blur(24px) saturate(1.4); }
 :root:not(.dpOn) #drawer{ visibility:hidden; }   /* cerrado no deja ni la sombra asomando por el borde */
 
 .dHead{ display:flex; align-items:center; gap:11px; padding:0 6px 22px; }
@@ -2012,7 +2013,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-05.59";
+const APP_VERSION = "2026-10-05.60";
 (function autoActualizar(){
   const patron = new RegExp("const APP_" + "VERSION = \"([^\"]+)\"");
   async function revisar(){
@@ -2169,7 +2170,7 @@ function ringCanvas(canvas, cssSize){
    ════════════════════════════════════════════════════════════ */
 const Rain = (function(){
   const canvas = document.getElementById("rain");
-  const gl = canvas.getContext("webgl", { antialias:false, alpha:false, depth:false, stencil:false, powerPreference:"low-power" });
+  const gl = null;   // el fondo de líneas se retiró: queda el campo de puntos (Campo) y el vidrio hecho con CSS
 
   const api = { send(){}, settle(){}, reading(){}, sleep(){}, wake(){}, glass(){}, moved(){}, redraw(){}, theme(){} };
   if(!gl){ document.body.classList.add("no-gl"); canvas.style.display = "none"; return api; }
@@ -2587,6 +2588,7 @@ uniform float uProjF;
 uniform float uAspect;
 uniform float uCamDist;
 uniform float uPointScale;
+uniform float uGlow;
 ${estatico ? `uniform vec2  uRingPos;
 uniform float uRingRadius;
 uniform float uRingWidth;
@@ -2614,7 +2616,7 @@ ${estatico ? `    vec2 disp; float t; float t2;
 
     gl_Position = vec4(world.x * uProjF / uAspect, world.y * uProjF, 0.0, uCamDist);
 
-    gl_PointSize = max(vScale, 0.0) * 7.0 * uPointScale;
+    gl_PointSize = max(vScale, 0.0) * 7.0 * uPointScale * (1.0 + uGlow * 0.3);
 }
 `;
 
@@ -2629,6 +2631,7 @@ uniform vec3  uColors[${MAX_COLORS}];
 uniform int   uColorCount;
 uniform vec2  uRingPos;
 uniform float uTime;
+uniform float uGlow;
 
 ${NOISE}
 
@@ -2672,8 +2675,9 @@ void main(){
 
     color = clamp(color, 0.0, 1.0);
     color *= clamp(vEnergy, 0.0, 1.0);
+    color = mix(color, vec3(1.0), uGlow * 0.18) * (1.0 + uGlow * 0.7);   // al escribir, los puntos se encienden
 
-    gl_FragColor = vec4(color, clamp(a, 0.0, 1.0));
+    gl_FragColor = vec4(color, clamp(a * (1.0 + uGlow * 0.8), 0.0, 1.0));
 }
 `;
 
@@ -2832,7 +2836,7 @@ void main(){
     let simProg = null, renderProg = null;
     try{
       if(sim) simProg = programa(gl, SIM_VERT, SIM_FRAG, ["uState", "uRefs", "uRingPos", "uRingRadius", "uRingWidth", "uRingWidth2", "uPush", "uTurb", "uTime"]);
-      const nombres = ["uProjF", "uAspect", "uCamDist", "uPointScale", "uColors[0]", "uColorCount", "uRingPos", "uTime"];
+      const nombres = ["uProjF", "uAspect", "uCamDist", "uPointScale", "uColors[0]", "uColorCount", "uRingPos", "uTime", "uGlow"];
       if(sim) nombres.push("uState"); else nombres.push("uRingRadius", "uRingWidth", "uRingWidth2", "uTurb");
       renderProg = programa(gl, RENDER_VERT(!sim), RENDER_FRAG, nombres);
     }catch(err){
@@ -2887,6 +2891,7 @@ void main(){
 
     const anillo = { x: 0, y: 0 };
     let raf = 0, last = 0, lastDraw = 0, simTime = 0, wander = 0, ping = true, visible = false, fuerza = opacidad;
+    let glow = 0, glowObj = 0, esperando = false, opAplicada = -1;   // brillo: sube al escribir/enviar y se apaga solo
     const posSim = simProg ? gl.getAttribLocation(simProg.prog, "aPos") : -1;
     const uvLoc = gl.getAttribLocation(renderProg.prog, "aUV"), refLoc = gl.getAttribLocation(renderProg.prog, "aRef");
 
@@ -2967,6 +2972,12 @@ void main(){
       gl.uniform1i(renderProg.u.uColorCount, muestras.length);
       gl.uniform2f(renderProg.u.uRingPos, anillo.x, anillo.y);
       gl.uniform1f(renderProg.u.uTime, simTime);
+      glowObj *= Math.exp(-dt * 1.7);
+      const meta = Math.max(glowObj, esperando ? 0.5 : 0);
+      glow += (meta - glow) * (1 - Math.exp(-dt * (meta > glow ? 14 : 3)));
+      gl.uniform1f(renderProg.u.uGlow, glow);
+      const op = Math.min(1, fuerza + glow * 0.4);
+      if(visible && Math.abs(op - opAplicada) > 0.01){ canvas.style.opacity = String(op); opAplicada = op; }
       gl.drawArrays(gl.POINTS, 0, count);
 
       if(!visible){ visible = true; canvas.style.opacity = String(fuerza); }   // aparece con un fundido, sin destello
@@ -2985,8 +2996,10 @@ void main(){
     if(opts.reducido){ simTime = 20; wander = 20; for(let k = 0; k < 45; k++) dibuja(k * FRAME_MS); }   // una imagen fija, ya asentada
     else sigue();
     /* al leer una conversación o ver información el campo se oscurece para camuflarse */
-    function atenua(si){ fuerza = si ? opacidad * 0.35 : opacidad; if(visible) canvas.style.opacity = String(fuerza); }
-    return { sigue, pausa, atenua, tonos: calculaTonos };
+    function atenua(si){ fuerza = si ? opacidad * 0.35 : opacidad; if(visible){ canvas.style.opacity = String(fuerza); opAplicada = fuerza; } }
+    function brilla(v){ glowObj = Math.max(glowObj, v); }
+    function espera(on){ esperando = !!on; }
+    return { sigue, pausa, atenua, brilla, espera, tonos: calculaTonos };
   }
 
   return { iniciar };
@@ -3008,6 +3021,11 @@ void main(){
     });
     if(!campo) return;
     window.__campoTonos = () => campo.tonos();
+    window.__campoBrilla = v => campo.brilla(v);
+    window.__campoEspera = on => campo.espera(on);
+    Rain.send = () => campo.brilla(1);        // al enviar y al llegar la respuesta, los puntos se encienden
+    Rain.settle = () => campo.brilla(.85);
+    field.addEventListener("input", () => campo.brilla(.6));   // al escribir, un brillo suave
     campo.atenua(leyendo);
     /* en reposo (la app "duerme") el campo también se detiene */
     new MutationObserver(() => { if(document.body.classList.contains("asleep")) campo.pausa(); else campo.sigue(); })
@@ -3602,6 +3620,7 @@ function startStates(){
   el.textContent = ESTADOS[0];
   el.classList.remove("swap");
   pending.classList.add("on");
+  if(window.__campoEspera) window.__campoEspera(true);
   clearInterval(stateTimer);
   stateTimer = setInterval(() => {
     if(i >= ESTADOS.length - 1){ clearInterval(stateTimer); return; }
@@ -3610,7 +3629,7 @@ function startStates(){
     setTimeout(() => { el.textContent = ESTADOS[i]; el.classList.remove("swap"); }, 280);
   }, 2600);
 }
-function stopStates(){ clearInterval(stateTimer); stateTimer = null; pending.classList.remove("on"); }
+function stopStates(){ if(window.__campoEspera) window.__campoEspera(false); clearInterval(stateTimer); stateTimer = null; pending.classList.remove("on"); }
 
 /* copia texto al portapapeles con respaldo: navigator.clipboard.writeText() devuelve una
    promesa, y si iOS le niega el permiso (pasa seguido en apps standalone) esa promesa se
