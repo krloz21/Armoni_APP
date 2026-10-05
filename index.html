@@ -2031,7 +2031,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-05.66";
+const APP_VERSION = "2026-10-05.67";
 (function autoActualizar(){
   const patron = new RegExp("const APP_" + "VERSION = \"([^\"]+)\"");
   async function revisar(){
@@ -2595,6 +2595,9 @@ void main(){
 }
 `;
 
+  /* ── dibujo de cada punto ──
+     Todo lo que es igual en los píxeles de un mismo punto (su color, su giro, si se ve o no) se calcula
+     UNA vez por punto aquí, y no en cada píxel: el resultado es idéntico, pero la GPU trabaja mucho menos. */
   const RENDER_VERT = estatico => `
 precision highp float;
 
@@ -2606,18 +2609,20 @@ uniform float uProjF;
 uniform float uAspect;
 uniform float uCamDist;
 uniform float uPointScale;
-${estatico ? `uniform vec2  uRingPos;
-uniform float uRingRadius;
+uniform vec3  uColors[${MAX_COLORS}];
+uniform int   uColorCount;
+uniform vec2  uRingPos;
+uniform float uTime;
+${estatico ? `uniform float uRingRadius;
 uniform float uRingWidth;
 uniform float uRingWidth2;
-uniform float uTurb;
-uniform float uTime;` : ``}
+uniform float uTurb;` : ``}
 
-varying vec2  vLocalPos;
-varying float vScale;
-varying float vEnergy;
+varying vec3  vColor;
+varying vec2  vGiro;     // coseno y seno del giro del trazo
+varying float vVis;      // 0 = el punto no se ve
 
-${estatico ? NOISE : ``}
+${NOISE}
 ${estatico ? FIELD_TERMS : ``}
 
 void main(){
@@ -2625,55 +2630,24 @@ ${estatico ? `    vec2 disp; float t; float t2;
     fieldTerms(aRef, uRingPos, uTime * 0.5, uRingRadius, uRingWidth, uRingWidth2, uTurb, disp, t, t2);
     vec4 state = vec4(aRef + disp, t, t * 0.5);` : `    vec4 state = texture2D(uState, aUV);`}
 
-    vLocalPos = state.xy;
-    vScale    = state.z;
-    vEnergy   = state.w;
+    vec2  pos    = state.xy;
+    float escala = state.z;
+    float energia = state.w;
 
-    vec2 world = state.xy * ${WORLD.toFixed(1)};
-
+    vec2 world = pos * ${WORLD.toFixed(1)};
     gl_Position = vec4(world.x * uProjF / uAspect, world.y * uProjF, 0.0, uCamDist);
 
-    gl_PointSize = max(vScale, 0.0) * 7.0 * uPointScale;
-}
-`;
+    vVis = smoothstep(0.1, 0.2, escala);
+    /* un punto invisible no se dibuja: tamaño 0, la GPU ni lo toca */
+    gl_PointSize = vVis > 0.0 ? max(escala, 0.0) * 7.0 * uPointScale : 0.0;
 
-  const RENDER_FRAG = `
-precision highp float;
+    float ruidoGiro  = snoise(vec3(pos * 10.0 + vec2(18.4924, 72.9744), uTime * 0.85));
+    float ruidoColor = (snoise(vec3(pos * 2.0 + vec2(74.664, 91.556), uTime * 0.5)) + 1.0) * 0.5;
 
-varying vec2  vLocalPos;
-varying float vScale;
-varying float vEnergy;
+    float giro = -atan(pos.y - uRingPos.y, pos.x - uRingPos.x) + ruidoGiro * 0.5;
+    vGiro = vec2(cos(giro), sin(giro));
 
-uniform vec3  uColors[${MAX_COLORS}];
-uniform int   uColorCount;
-uniform vec2  uRingPos;
-uniform float uTime;
-
-${NOISE}
-
-float sdRoundBox(in vec2 p, in vec2 b, in float r){
-    vec2 q = abs(p) - b + r;
-    return min(max(q.x, q.y), 0.0) + length(max(q, 0.0)) - r;
-}
-
-vec2 rotate(vec2 v, float a){
-    float s = sin(a);
-    float c = cos(a);
-    return mat2(c, s, -s, c) * v;
-}
-
-void main(){
-    float noiseAngle = snoise(vec3(vLocalPos * 10.0 + vec2(18.4924, 72.9744), uTime * 0.85));
-    float noiseColor = snoise(vec3(vLocalPos * 2.0  + vec2(74.664,  91.556),  uTime * 0.5));
-    noiseColor = (noiseColor + 1.0) * 0.5;
-
-    float angle = atan(vLocalPos.y - uRingPos.y, vLocalPos.x - uRingPos.x);
-
-    vec2 uv = gl_PointCoord.xy - vec2(0.5);
-    uv.y *= -1.0;
-    uv = rotate(uv, -angle + (noiseAngle * 0.5));
-
-    float p = smoothstep(0.0, 0.75, pow(noiseColor, 2.0));
+    float p = smoothstep(0.0, 0.75, pow(ruidoColor, 2.0));
     vec3 color = uColors[0];
     for (int i = 0; i < ${MAX_COLORS - 1}; i++) {
         if (i < uColorCount - 1) {
@@ -2682,17 +2656,29 @@ void main(){
             color = mix(color, uColors[i + 1], t);
         }
     }
+    vColor = clamp(color, 0.0, 1.0) * clamp(energia, 0.0, 1.0);
+}
+`;
 
-    float d = sdRoundBox(uv, vec2(0.5, 0.2), 0.25);
-    float mask = smoothstep(0.1, 0.0, d);
+  const RENDER_FRAG = `
+precision mediump float;
 
-    float a = mask * smoothstep(0.1, 0.2, vScale);
+varying vec3  vColor;
+varying vec2  vGiro;
+varying float vVis;
+
+void main(){
+    vec2 uv = gl_PointCoord.xy - vec2(0.5);
+    uv.y = -uv.y;
+    uv = mat2(vGiro.x, vGiro.y, -vGiro.y, vGiro.x) * uv;
+
+    /* trazo de puntas redondeadas (caja redondeada 0.5 × 0.2, radio 0.25) */
+    vec2 q = abs(uv) - vec2(0.25, -0.05);
+    float d = min(max(q.x, q.y), 0.0) + length(max(q, 0.0)) - 0.25;
+
+    float a = smoothstep(0.1, 0.0, d) * vVis;
     if (a < 0.01) discard;
-
-    color = clamp(color, 0.0, 1.0);
-    color *= clamp(vEnergy, 0.0, 1.0);
-
-    gl_FragColor = vec4(color, clamp(a, 0.0, 1.0));
+    gl_FragColor = vec4(vColor, min(a, 1.0));
 }
 `;
 
@@ -2874,7 +2860,7 @@ void main(){
     calculaTonos(); colores.set(objColores);
 
     const campo = armaCampo(DENSITY);
-    const count = campo.count, texSize = campo.texSize;
+    const count = campo.count, texSize = campo.texSize, filas = Math.ceil(count / texSize);
     const quad = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, quad);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
@@ -2939,6 +2925,7 @@ void main(){
         const src = ping ? rt1 : rt2, dst = ping ? rt2 : rt1;
         gl.bindFramebuffer(gl.FRAMEBUFFER, dst.fbo);
         gl.viewport(0, 0, texSize, texSize);
+        gl.enable(gl.SCISSOR_TEST); gl.scissor(0, 0, texSize, filas);   // solo las filas que tienen puntos: el resto nunca se lee
         gl.disable(gl.BLEND);
         gl.useProgram(simProg.prog);
         gl.bindBuffer(gl.ARRAY_BUFFER, quad);
@@ -2954,6 +2941,7 @@ void main(){
         gl.uniform1f(simProg.u.uTurb, RING.turb);
         gl.uniform1f(simProg.u.uTime, simTime);
         gl.drawArrays(gl.TRIANGLES, 0, 3);
+        gl.disable(gl.SCISSOR_TEST);
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
         gl.enable(gl.BLEND);
         ping = !ping;
