@@ -954,24 +954,21 @@ body.mode-gmail footer, body.mode-glim footer{ display:none; }
 .restRail .cat{ animation:catIn .6s cubic-bezier(.16,1,.3,1) backwards; animation-delay:calc(var(--i, 0) * 45ms); }
 @keyframes catIn{ from{ opacity:0; transform:translateY(14px) scale(.9); } to{ opacity:1; transform:none; } }
 .restRail .tile{ position:relative; }
-.restRail .tile::after{ content:""; position:absolute; inset:-1px; border-radius:inherit; padding:1.5px; pointer-events:none; opacity:0; transition:opacity .45s ease;
-  background:conic-gradient(from var(--inAng), #6ff0ff, #3a78ff, #5a3fe0, #3a78ff, #6ff0ff);
-  -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite:xor; mask:linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0); }
-.restRail .cat[aria-pressed="true"] .tile{ border-color:transparent; background:radial-gradient(120% 120% at 30% 20%, rgba(111,240,255,.2), rgba(90,63,224,.12)); box-shadow:inset 0 1px 0 rgba(var(--hi),.2), 0 8px 26px rgba(58,120,255,.4); }
-.restRail .cat[aria-pressed="true"] .tile::after{ opacity:1; animation:inIAflow 3.2s linear infinite; }
+.restRail .cat[aria-pressed="true"] .tile{ border-color:rgba(var(--ink),.16); transform:translateY(-4px) scale(1.06); background:radial-gradient(120% 120% at 30% 20%, rgba(111,240,255,.24), rgba(90,63,224,.14)); box-shadow:inset 0 1px 0 rgba(var(--hi),.22), 0 14px 30px -6px rgba(58,120,255,.5); }
+.restRail .cat[aria-pressed="true"] .tile > span, .restRail .cat[aria-pressed="true"] .tile{ animation:catElige .6s cubic-bezier(.34,1.56,.64,1); }
 .restRail .cat[aria-pressed="true"] .lbl{ color:var(--strong); font-weight:600; }
 .restRail .tile{ transition:transform .35s cubic-bezier(.34,1.56,.64,1), border-color .3s, box-shadow .4s, background .3s; }
 .restRail .cat:active .tile{ transform:scale(.9); }
-.sheetCard.flash::after{ content:""; position:absolute; inset:-1px; border-radius:inherit; padding:1.5px; pointer-events:none;
-  background:conic-gradient(from var(--inAng), #6ff0ff, #3a78ff, #5a3fe0, #3a78ff, #6ff0ff);
-  -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite:xor; mask:linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
-  animation:inIAflow 1.4s linear, inNeonRing 1.4s ease-out forwards; }
+.sheetCard.flash .sheetHead .emo{ animation:catElige .7s cubic-bezier(.34,1.56,.64,1) .1s backwards; }
+.sheetCard.flash::before{ animation:sheetLuz 1.1s ease-out; }
+@keyframes catElige{ 0%{ filter:brightness(1); } 35%{ filter:brightness(1.45); } 100%{ filter:brightness(1); } }
+@keyframes sheetLuz{ 0%{ opacity:0; transform:scaleX(.2); } 40%{ opacity:1; transform:scaleX(1); } 100%{ opacity:1; transform:none; } }
 .sheetHead .emo{ background:radial-gradient(120% 120% at 30% 20%, rgba(111,240,255,.18), rgba(90,63,224,.08)); border-color:rgba(111,240,255,.28); box-shadow:0 6px 20px rgba(58,120,255,.22); }
 .restCard{ border-radius:16px; background:linear-gradient(180deg, rgba(var(--ink),.045), rgba(var(--ink),.02)); box-shadow:inset 0 1px 0 rgba(var(--hi),.08); }
 .restCard:hover, .restCard:active{ border-color:rgba(111,240,255,.35); }
 .restNum.top{ filter:drop-shadow(0 0 8px rgba(111,240,255,.45)); }
 .restNum.low{ background:none; color:var(--dim); -webkit-text-fill-color:var(--dim); }
-@media (prefers-reduced-motion:reduce){ .restRail .cat{ animation:none; } .restRail .cat[aria-pressed="true"] .tile::after, .sheetCard.flash::after{ animation:none; } }
+@media (prefers-reduced-motion:reduce){ .restRail .cat{ animation:none; } .restRail .cat[aria-pressed="true"] .tile, .sheetCard.flash::before, .sheetCard.flash .sheetHead .emo{ animation:none; } }
 
 /* ── ajustes, abajo del menú ── */
 .dFoot{ margin-top:auto; padding:14px 4px 2px; border-top:1px solid var(--line); }
@@ -1654,6 +1651,8 @@ body[class*="mode-"] #masIngreso{ display:none; }
 .inWrap.guardado{ animation:inGuarda .72s cubic-bezier(.5,0,.2,1) forwards; }
 .inCard.guardado::before{ animation:inIAflow .8s linear infinite, inNeonSale .72s ease-out forwards; }
 .inWrap.guardado::after{ animation:inIAflow .8s linear infinite, inNeonSale .72s ease-out forwards; }
+#inGuardar{ position:relative; overflow:hidden; }
+#inGuardar:not(:disabled)::after{ content:""; position:absolute; top:0; bottom:0; left:0; width:38%; background:linear-gradient(100deg, transparent, rgba(255,255,255,.55), transparent); animation:mkBrilla 3.6s ease-in-out .6s infinite; pointer-events:none; }
 @keyframes inNeonRing{ 0%{ opacity:0; } 22%{ opacity:1; } 100%{ opacity:0; } }
 @keyframes inNeonGlow{ 0%{ opacity:0; } 22%{ opacity:.9; } 100%{ opacity:0; } }
 @keyframes inNeonSale{ 0%{ opacity:0; } 25%{ opacity:1; } 70%{ opacity:1; } 100%{ opacity:0; } }
@@ -2006,7 +2005,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
 /* ═════════ VERSIÓN ═════════
    Súbela en cada entrega: si el servidor tiene una versión distinta a la que está corriendo,
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
-const APP_VERSION = "2026-10-05.51";
+const APP_VERSION = "2026-10-05.52";
 (function autoActualizar(){
   const patron = new RegExp("const APP_" + "VERSION = \"([^\"]+)\"");
   async function revisar(){
