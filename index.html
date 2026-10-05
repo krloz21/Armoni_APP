@@ -1958,7 +1958,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
 /* ═════════ VERSIÓN ═════════
    Súbela en cada entrega: si el servidor tiene una versión distinta a la que está corriendo,
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
-const APP_VERSION = "2026-10-05.44";
+const APP_VERSION = "2026-10-05.45";
 (function autoActualizar(){
   const patron = new RegExp("const APP_" + "VERSION = \"([^\"]+)\"");
   async function revisar(){
@@ -4838,8 +4838,7 @@ const GastoManual = (function(){
         '<textarea id="inNota" rows="1" placeholder="Algo que quieras recordar" maxlength="300"></textarea>' +
         '<button type="button" class="inIA" id="inIA" aria-pressed="false"><i class="inIAdot" aria-hidden="true"></i><b>Pasar por Armoni</b></button>' +
         '<p class="inErr" id="inErr" role="alert"></p>' +
-        '<p class="inSub" id="inNotaAuto" style="margin-top:8px;font-size:.7rem">Servicios, jardín, arriendo y cuota del carro se registran solos.</p>' +
-        '</div>' +
+                '</div>' +
         '<div class="pgRow"><button type="button" class="pgNo" id="inCancel">Cancelar</button><button type="button" class="pgSi" id="inGuardar" disabled>Guardar</button></div>' +
       '</div>';
     document.body.appendChild(scrim);
@@ -4891,7 +4890,6 @@ const GastoManual = (function(){
       $("inTipo").dataset.on = g ? "gasto" : "ingreso";
       scrim.querySelectorAll("#inTipo button").forEach(x => x.setAttribute("aria-checked", String(x.dataset.t === t)));
       $("inT").textContent = g ? "Registrar un gasto" : "Registrar un ingreso";
-      $("inNotaAuto").hidden = !g;
       concepto.placeholder = g ? "Ej: Almuerzo, gasolina, droguería…" : "Ej: Salario, trabajo extra…";
       pintaCats(); pintaFrecuentes();
     }
