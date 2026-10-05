@@ -1611,7 +1611,7 @@ body[class*="mode-"] #masIngreso{ display:none; }
 .inFrecs{ display:flex; gap:7px; overflow-x:auto; padding:2px 1px 4px; scrollbar-width:none; }
 .inFrecs::-webkit-scrollbar{ display:none; }
 .inFrecs .recChip{ flex:none; padding:7px 13px; font-size:.78rem; white-space:nowrap; }
-.inIA{ display:flex; align-items:center; gap:10px; margin-top:12px; padding:10px 12px; border-radius:14px; border:1px solid var(--line); background:var(--panel); cursor:pointer; }
+.inIA{ display:flex; align-items:center; gap:10px; margin-top:10px; padding:8px 12px; border-radius:14px; border:1px solid var(--line); background:var(--panel); cursor:pointer; }
 .inIA input{ width:18px; height:18px; accent-color:var(--blue); flex:none; }
 .inIA span{ display:grid; gap:1px; font-size:.84rem; color:var(--white); line-height:1.25; }
 .inIA small{ color:var(--dim); font-size:.72rem; }
@@ -1624,6 +1624,19 @@ body[class*="mode-"] #masIngreso{ display:none; }
 .inMonto{ position:relative; }
 .inMonto b{ position:absolute; left:14px; top:50%; transform:translateY(-50%); color:var(--dim); font-weight:600; pointer-events:none; }
 .inMonto input{ padding-left:30px !important; font-weight:600; font-variant-numeric:tabular-nums; }
+.inDos{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.inDos .inLbl{ margin-top:12px; }
+.inSel{ position:relative; }
+.inSel::after{ content:""; position:absolute; right:14px; top:50%; width:8px; height:8px; margin-top:-6px; border-right:2px solid var(--dim); border-bottom:2px solid var(--dim); transform:rotate(45deg); pointer-events:none; }
+.inSel select{ -webkit-appearance:none; appearance:none; width:100%; padding:13px 34px 13px 14px; border-radius:14px; border:1px solid var(--line); background:rgba(var(--ink),.05); color:var(--white); font:inherit; font-size:16px; text-align:left; text-overflow:ellipsis; }
+.inSel select.vacio{ color:var(--dim); }
+.inSel select:focus{ outline:none; border-color:rgba(var(--cyan-rgb),.6); box-shadow:0 0 0 3px rgba(var(--cyan-rgb),.15); }
+.inSel select option{ color:#111; }
+.inCard .inLbl{ margin-top:12px; }
+.inCard input[type="text"], .inCard textarea{ padding:11px 14px; }
+.inCard textarea{ min-height:44px; }
+.inCard .recDia{ gap:6px; }
+.inCard .recChip{ padding:6px 13px; }
 .inCats{ display:flex; flex-wrap:wrap; gap:8px; }
 .inCat{ display:inline-flex; align-items:center; gap:7px; font:inherit; font-size:.85rem; padding:9px 14px 9px 11px; border-radius:999px; border:1px solid var(--line); background:var(--panel); color:var(--ghost); cursor:pointer; transition:background .25s ease, color .25s ease, border-color .25s ease, transform .35s cubic-bezier(.34,1.56,.64,1); }
 .inCat svg{ width:16px; height:16px; }
@@ -1931,7 +1944,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
 /* ═════════ VERSIÓN ═════════
    Súbela en cada entrega: si el servidor tiene una versión distinta a la que está corriendo,
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
-const APP_VERSION = "2026-10-05.40";
+const APP_VERSION = "2026-10-05.41";
 (function autoActualizar(){
   const patron = new RegExp("const APP_" + "VERSION = \"([^\"]+)\"");
   async function revisar(){
@@ -4798,21 +4811,21 @@ const GastoManual = (function(){
         '<div id="inFrecBox"><span class="inLbl">Frecuentes</span><div class="inFrecs" id="inFrecs"></div></div>' +
         '<label class="inLbl" for="inConcepto">Concepto</label>' +
         '<input id="inConcepto" type="text" placeholder="Ej: Almuerzo, gasolina, droguería…" autocomplete="off" maxlength="80">' +
-        '<span class="inLbl">Categoría</span>' +
-        '<div class="inCats" id="inCats"></div>' +
+        '<div class="inDos">' +
+          '<div><label class="inLbl" for="inCat">Categoría</label><div class="inSel"><select id="inCat" aria-label="Categoría"></select></div></div>' +
+          '<div><label class="inLbl" for="inMonto">Valor</label><div class="inMonto"><b>$</b><input id="inMonto" type="text" inputmode="numeric" placeholder="0" autocomplete="off"></div></div>' +
+        '</div>' +
         '<span class="inLbl">Fecha</span>' +
         '<div class="recDia" id="inDia" style="margin:0">' +
           '<button type="button" class="recChip" data-dia="hoy" aria-pressed="true">Hoy</button>' +
           '<button type="button" class="recChip" data-dia="ayer" aria-pressed="false">Ayer</button>' +
           '<input type="date" class="recFecha" id="inFecha" aria-label="Elegir una fecha">' +
         '</div>' +
-        '<label class="inLbl" for="inMonto">Valor</label>' +
-        '<div class="inMonto"><b>$</b><input id="inMonto" type="text" inputmode="numeric" placeholder="0" autocomplete="off"></div>' +
         '<label class="inLbl" for="inNota">Nota <span style="font-weight:400;letter-spacing:0;text-transform:none">(opcional)</span></label>' +
-        '<textarea id="inNota" rows="2" placeholder="Algo que quieras recordar" maxlength="300"></textarea>' +
+        '<textarea id="inNota" rows="1" placeholder="Algo que quieras recordar" maxlength="300"></textarea>' +
         '<label class="inIA"><input type="checkbox" id="inIA"><span><b style="font-weight:600">Que Armoni lo revise (usa IA)</b><small id="inIAhint"></small></span></label>' +
         '<p class="inErr" id="inErr" role="alert"></p>' +
-        '<p class="inSub" id="inNotaAuto" style="margin-top:10px;font-size:.74rem">Servicios, jardín, arriendo y cuota del carro se registran solos desde sus avisos.</p>' +
+        '<p class="inSub" id="inNotaAuto" style="margin-top:8px;font-size:.7rem">Servicios, jardín, arriendo y cuota del carro se registran solos.</p>' +
         '</div>' +
         '<div class="pgRow"><button type="button" class="pgNo" id="inCancel">Cancelar</button><button type="button" class="pgSi" id="inGuardar" disabled>Guardar</button></div>' +
       '</div>';
@@ -4831,7 +4844,10 @@ const GastoManual = (function(){
     function pintaCats(){
       const lista = tipo === "Gasto" ? CATS_GASTO : CATS_INGRESO;
       if(!lista.includes(categoria)) categoria = "";
-      $("inCats").innerHTML = lista.map(c => '<button type="button" class="inCat" data-c="' + c + '" aria-pressed="' + (c === categoria) + '"><svg viewBox="0 0 24 24" ' + P + '>' + ICO[c] + '</svg>' + c + '</button>').join("");
+      const sel = $("inCat");
+      sel.innerHTML = '<option value="" disabled' + (categoria ? "" : " selected") + '>Elegir…</option>' +
+        lista.map(c => '<option value="' + c + '"' + (c === categoria ? " selected" : "") + '>' + c + '</option>').join("");
+      sel.classList.toggle("vacio", !categoria);
       listo(); sugiereIA();
     }
     /* por defecto la IA solo revisa las salidas a comer (pueden faltar datos); lo demás se guarda directo.
@@ -4852,10 +4868,8 @@ const GastoManual = (function(){
         pintaCats(); concepto.focus(); err.textContent = "";
       };
     }
-    $("inCats").addEventListener("click", e => {
-      const b = e.target.closest(".inCat"); if(!b) return;
-      categoria = b.dataset.c;
-      scrim.querySelectorAll(".inCat").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+    $("inCat").addEventListener("change", e => {
+      categoria = e.target.value; e.target.classList.remove("vacio");
       listo(); sugiereIA();
     });
     function poneTipo(t){
