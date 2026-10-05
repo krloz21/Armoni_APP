@@ -2005,7 +2005,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
 /* ═════════ VERSIÓN ═════════
    Súbela en cada entrega: si el servidor tiene una versión distinta a la que está corriendo,
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
-const APP_VERSION = "2026-10-05.53";
+const APP_VERSION = "2026-10-05.54";
 (function autoActualizar(){
   const patron = new RegExp("const APP_" + "VERSION = \"([^\"]+)\"");
   async function revisar(){
@@ -4979,8 +4979,6 @@ const GastoManual = (function(){
 
     const card = scrim.querySelector(".inCard"), wrap = scrim.querySelector("#inWrap");
     const marca = (c, on) => { card.classList.toggle(c, on); wrap.classList.toggle(c, on); };   // el anillo va en la tarjeta y el resplandor en el envoltorio (queda detrás)
-    marca("flash", true);
-    setTimeout(() => marca("flash", false), 1500);
     function cierra(modo){
       document.removeEventListener("keydown", tecla);
       if(modo === "guardado"){
