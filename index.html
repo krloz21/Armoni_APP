@@ -171,12 +171,13 @@ header button svg{ width:13px; height:13px; flex:none; }
 #thread{
   overflow-y:auto; overscroll-behavior:contain;
   -webkit-overflow-scrolling:touch;
-  padding:20px var(--sp) 12px;
+  padding:20px var(--sp) 30px;
+  /* arriba y abajo el contenido se desvanece suavemente en vez de cortarse de golpe */
+  -webkit-mask-image:linear-gradient(180deg, transparent 0, #000 22px, #000 calc(100% - 38px), transparent 100%);
+          mask-image:linear-gradient(180deg, transparent 0, #000 22px, #000 calc(100% - 38px), transparent 100%);
 }
 /* sin conversación (solo el titular) no se desliza nada: el titular también se queda quieto */
 body:not([class*="mode-"]) #thread.sinChat{ overflow-y:hidden; }
-/* el desvanecido de arriba (antes era una máscara, que impedía que el aviso fijo desenfocara lo de atrás) */
-.inner::before{ content:""; position:sticky; top:0; z-index:5; display:block; height:26px; margin:-20px 0 -6px; pointer-events:none; background:linear-gradient(180deg, var(--void) 0, transparent); }
 #thread::-webkit-scrollbar{ width:7px; }
 #thread::-webkit-scrollbar-thumb{ background:rgba(var(--ink),.1); border-radius:4px; }
 /* en el celular no se dibuja la barra (iOS la deja fija y fea): se sigue deslizando igual */
@@ -1803,7 +1804,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
 /* ═════════ VERSIÓN ═════════
    Súbela en cada entrega: si el servidor tiene una versión distinta a la que está corriendo,
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
-const APP_VERSION = "2026-10-05.26";
+const APP_VERSION = "2026-10-05.27";
 (function autoActualizar(){
   const patron = new RegExp("const APP_" + "VERSION = \"([^\"]+)\"");
   async function revisar(){
