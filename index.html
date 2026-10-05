@@ -671,7 +671,7 @@ body.no-gl #drawer{ background:var(--drawer-solid); }
 #drawerClose svg{ width:15px; height:15px; }
 #drawerClose:focus-visible{ outline:2px solid var(--blue); outline-offset:2px; }
 
-.dNav{ display:flex; flex-direction:column; gap:6px; }
+.dNav{ display:flex; flex-direction:column; gap:6px; flex:1; min-height:0; overflow-y:auto; }
 .dNav button{
   position:relative; display:flex; align-items:center; gap:13px; text-align:left;
   background:none; border:1px solid transparent; border-radius:16px;
@@ -699,7 +699,7 @@ body.no-gl #drawer{ background:var(--drawer-solid); }
 .dNav button:focus-visible{ outline:2px solid var(--cyan); outline-offset:2px; }
 
 /* ───────── vista de restaurantes (ocupa el lugar del chat) ───────── */
-#restView, #creditoView, #gmailView, #glimView, #recuerdaView, #mercarView, #mesView{ display:none; padding-bottom:10px; }
+#restView, #creditoView, #gmailView, #glimView, #recuerdaView, #mercarView, #mesView, #ajustesView{ display:none; padding-bottom:10px; }
 body.mode-rest #restView{ display:block; }
 body.mode-credito #creditoView{ display:block; }
 body.mode-gmail #gmailView{ display:block; }
@@ -716,6 +716,10 @@ body.mode-mes #mesView{ display:block; }
 body.mode-mes #welcome, body.mode-mes #messages, body.mode-mes #pending, body.mode-mes #servicioBanner, body.mode-mes #glimBanner{ display:none !important; }
 body.mode-mes #reset{ visibility:hidden; }
 body.mode-mes footer{ display:none; }
+body.mode-ajustes #ajustesView{ display:block; }
+body.mode-ajustes #welcome, body.mode-ajustes #messages, body.mode-ajustes #pending, body.mode-ajustes #servicioBanner, body.mode-ajustes #glimBanner{ display:none !important; }
+body.mode-ajustes #reset{ visibility:hidden; }
+body.mode-ajustes footer{ display:none; }
 body.mode-rest #welcome, body.mode-rest #messages, body.mode-rest #pending, body.mode-rest #servicioBanner, body.mode-rest #glimBanner,
 body.mode-credito #welcome, body.mode-credito #messages, body.mode-credito #pending, body.mode-credito #servicioBanner, body.mode-credito #glimBanner,
 body.mode-gmail #welcome, body.mode-gmail #messages, body.mode-gmail #pending, body.mode-gmail #servicioBanner, body.mode-gmail #glimBanner,
@@ -918,6 +922,10 @@ body.mode-gmail footer, body.mode-glim footer{ display:none; }
 }
 .notifBtn:hover{ border-color:var(--cyan); }
 .notifBtn:disabled{ opacity:.6; cursor:default; }
+.ajGrupo{ margin:22px 4px 8px; font-size:.72rem; color:var(--dim); letter-spacing:.08em; text-transform:uppercase; }
+.ajCard{ background:var(--panel); border:1px solid var(--line); border-radius:16px; padding:4px 8px; }
+.ajCard .setRow{ padding:12px 8px; }
+.ajCard .setRow + .setRow{ border-top:1px solid var(--line); border-radius:0; }
 
 /* ventana al tocar «Ya se pagó» del jardín */
 .pgScrim{ position:fixed; inset:0; z-index:95; display:flex; align-items:center; justify-content:center; padding:20px; background:var(--scrim); opacity:0; transition:opacity .3s ease; }
@@ -1355,29 +1363,12 @@ body.mode-gmail footer, body.mode-glim footer{ display:none; }
         <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.8 4.6L18.5 9l-4.7 1.4L12 15l-1.8-4.6L5.5 9l4.7-1.4z"/><path d="M19 15l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z"/></svg></span>
         <span class="txt"><b>Tu mes</b><span>El resumen del mes, estilo historia</span></span>
       </button>
+      <button type="button" id="navAjustes">
+        <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></svg></span>
+        <span class="txt"><b>Ajustes</b><span>Apariencia y notificaciones</span></span>
+      </button>
     </nav>
 
-    <div class="dFoot">
-      <div class="dFootLbl">Ajustes</div>
-      <div class="setRow">
-        <span class="setIco" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 0 0 18z" fill="currentColor" stroke="none"/></svg>
-        </span>
-        <span class="setTxt"><b id="themeLbl">Apariencia</b><span id="themeName">Oscuro</span></span>
-        <div id="themeToggle" class="segTheme" role="radiogroup" aria-labelledby="themeLbl" data-on="dark">
-          <span class="segInd" aria-hidden="true"></span>
-          <button type="button" role="radio" data-t="dark" aria-checked="true" aria-label="Tema oscuro (Black)">B</button>
-          <button type="button" role="radio" data-t="gray" aria-checked="false" aria-label="Tema carbón (Gray)">G</button>
-        </div>
-      </div>
-      <div class="setRow">
-        <span class="setIco" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
-        </span>
-        <span class="setTxt"><b>Notificaciones</b><span id="notifStatus">Avisos de pagos pendientes</span></span>
-        <button type="button" id="notifBtn" class="notifBtn">Activar</button>
-      </div>
-    </div>
   </aside>
 
 <div id="restModalRoot"></div>
@@ -1454,6 +1445,45 @@ body.mode-gmail footer, body.mode-glim footer{ display:none; }
         <div class="restStatus" id="mkStatus"></div>
         <div id="mkStage"></div>
       </section>
+      <section id="ajustesView" aria-label="Ajustes">
+        <div class="restIntro"><h2>Ajustes</h2></div>
+        <div class="ajGrupo">Apariencia</div>
+        <div class="ajCard">
+      <div class="setRow">
+        <span class="setIco" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 0 0 18z" fill="currentColor" stroke="none"/></svg>
+        </span>
+        <span class="setTxt"><b id="themeLbl">Apariencia</b><span id="themeName">Oscuro</span></span>
+        <div id="themeToggle" class="segTheme" role="radiogroup" aria-labelledby="themeLbl" data-on="dark">
+          <span class="segInd" aria-hidden="true"></span>
+          <button type="button" role="radio" data-t="dark" aria-checked="true" aria-label="Tema oscuro (Black)">B</button>
+          <button type="button" role="radio" data-t="gray" aria-checked="false" aria-label="Tema carbón (Gray)">G</button>
+        </div>
+      </div>
+        </div>
+        <div class="ajGrupo">Notificaciones</div>
+        <div class="ajCard">
+      <div class="setRow">
+        <span class="setIco" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
+        </span>
+        <span class="setTxt"><b>Notificaciones</b><span id="notifStatus">Avisos de pagos pendientes</span></span>
+        <button type="button" id="notifBtn" class="notifBtn">Activar</button>
+      </div>
+      <div class="setRow">
+        <span class="setIco" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13"/><path d="M22 2l-7 20-4-9-9-4z"/></svg>
+        </span>
+        <span class="setTxt"><b>Probar aviso</b><span id="notifProbarEstado">Te manda uno ahora mismo</span></span>
+        <button type="button" id="notifProbar" class="notifBtn">Enviar</button>
+      </div>
+        </div>
+        <div class="ajGrupo">Acerca de</div>
+        <div class="ajCard">
+          <div class="setRow"><span class="setTxt"><b>Versión</b><span id="ajVersion"></span></span></div>
+        </div>
+      </section>
+
       <section id="mesView" aria-label="Tu mes">
         <div class="restIntro"><h2>Tu mes</h2></div>
         <p class="tmSub">Toca un mes para ver su historia</p>
@@ -1532,6 +1562,7 @@ const RESUMEN_URL = N8N + "/webhook/resumen-mes";
 const JARDIN_PAGADO_URL = N8N + "/webhook/jardin-pagado";   // pagos de una fecha: ?fecha=AAAA-MM-DD
 const JARDIN_BASE = 1120000;   // lo que normalmente se paga de jardín
 const SERVICIOS_DIA_LIMITE = 7;   // hasta qué día del mes avisa si falta pagar
+const PUSH_ENVIAR_URL = N8N + "/webhook/push-enviar";
 const PUSH_SUBSCRIBE_URL = N8N + "/webhook/push-subscribe";   // guarda la suscripción para que n8n pueda avisar
 const VAPID_PUBLIC_KEY = "BKRJjoINCgWY6PkbiGozkt2H5hGTpdPwLr5mepMMMc57GSfY2ERERh-9feitXcHOUxUBQv36nLtiC7sjbDrXp_8";
 const REPOSO_SEGUNDOS  = 90;   // sin tocar nada: la animación se congela
@@ -1551,7 +1582,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
 /* ═════════ VERSIÓN ═════════
    Súbela en cada entrega: si el servidor tiene una versión distinta a la que está corriendo,
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
-const APP_VERSION = "2026-10-05.6";
+const APP_VERSION = "2026-10-05.7";
 (function autoActualizar(){
   const patron = new RegExp("const APP_" + "VERSION = \"([^\"]+)\"");
   async function revisar(){
@@ -3994,9 +4025,10 @@ const Drawer = (function(){
   const navRecuerda = document.getElementById("navRecuerda");
   const navMercar = document.getElementById("navMercar");
   const navMes = document.getElementById("navMes");
-  const NAV = { chat: navChat, rest: navRest, credito: navCredito, gmail: navGmail, glim: navGlim, recuerda: navRecuerda, mercar: navMercar, mes: navMes };
-  const SUB = { chat: "Presupuesto de la casa", rest: "Restaurantes", credito: "Crédito Carro", gmail: "AT Gmail", glim: "Glim", recuerda: "Recuerda", mercar: "A mercar", mes: "Tu mes" };
-  const PLACEHOLDER = { chat: "Escribe aquí…", rest: "¿Qué se te antoja?", credito: "Pregúntale sobre el crédito…", gmail: "", glim: "", recuerda: "", mercar: "", mes: "" };
+  const navAjustes = document.getElementById("navAjustes");
+  const NAV = { chat: navChat, rest: navRest, credito: navCredito, gmail: navGmail, glim: navGlim, recuerda: navRecuerda, mercar: navMercar, mes: navMes, ajustes: navAjustes };
+  const SUB = { chat: "Presupuesto de la casa", rest: "Restaurantes", credito: "Crédito Carro", gmail: "AT Gmail", glim: "Glim", recuerda: "Recuerda", mercar: "A mercar", mes: "Tu mes", ajustes: "Ajustes" };
+  const PLACEHOLDER = { chat: "Escribe aquí…", rest: "¿Qué se te antoja?", credito: "Pregúntale sobre el crédito…", gmail: "", glim: "", recuerda: "", mercar: "", mes: "", ajustes: "" };
 
   /* marca del menú */
   const m2 = document.getElementById("mark2");
@@ -4046,6 +4078,7 @@ const Drawer = (function(){
     document.body.classList.toggle("mode-recuerda", mode === "recuerda");
     document.body.classList.toggle("mode-mercar", mode === "mercar");
     document.body.classList.toggle("mode-mes", mode === "mes");
+    document.body.classList.toggle("mode-ajustes", mode === "ajustes");
     Object.entries(NAV).forEach(([m, b]) => { if(m === mode) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current"); });
     sub.textContent = SUB[mode];
     field.placeholder = PLACEHOLDER[mode];
@@ -4076,6 +4109,7 @@ const Drawer = (function(){
   navRecuerda.addEventListener("click", () => go("recuerda"));
   navMercar.addEventListener("click", () => go("mercar"));
   navMes.addEventListener("click", () => go("mes"));
+  navAjustes.addEventListener("click", () => go("ajustes"));
 
   /* deslizar el menú hacia la izquierda lo cierra: sigue el dedo 1:1 y suelta con su velocidad */
   (function(){
@@ -4227,6 +4261,17 @@ const Notificaciones = (function(){
       if(sub){ estado.textContent = "Activadas"; btn.textContent = "Activadas"; btn.disabled = true; }
     }).catch(() => {});
   }
+  const probar = document.getElementById("notifProbar"), probarEstado = document.getElementById("notifProbarEstado");
+  probar.addEventListener("click", async () => {
+    probar.disabled = true; probarEstado.textContent = "Enviando…";
+    try{
+      const res = await fetch(PUSH_ENVIAR_URL, { method: "POST", body: JSON.stringify({ token: MERCADO_TOKEN, title: "Armoni", body: "Así se ven tus avisos" }) });
+      const d = await res.json();
+      probarEstado.textContent = d.enviadas > 0 ? "Listo, ya debió llegarte" : d.dispositivos === 0 ? "Primero activa las notificaciones" : "No se pudo entregar";
+    }catch{ probarEstado.textContent = "No se pudo enviar. Revisa tu internet y que Tailscale esté encendido."; }
+    probar.disabled = false;
+  });
+  document.getElementById("ajVersion").textContent = APP_VERSION;
   return { activar };
 })();
 
