@@ -1,0 +1,227 @@
+{
+  "name": "Armoni - Agregar movimiento",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "movimiento-nuevo",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "a1000000-0000-4000-8000-000000000001",
+      "name": "Recibir movimiento",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "movimiento-nuevo-armoni"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Valida lo que manda Armoni y lo deja listo para Notion\nconst TOKEN = 'mercado-7d41c2a9e05b';\nconst CAT_GASTO = ['Alimentación', 'Salidas', 'Hogar', 'Carro', 'Hijo', 'Salud', 'Tarjetas', 'Ahorro', 'Otros'];   // Servicios se registra solo\nconst CAT_INGRESO = ['Hogar', 'Alimentación', 'Salidas', 'Otros'];\nconst AUTOMATICOS = /arriendo|jard[ií]n|cuota\\s+(del\\s+)?(carro|cr[eé]dito)/i;\n\nlet b = $input.first().json.body;\nif (typeof b === 'string') { try { b = JSON.parse(b); } catch (e) { b = {}; } }\nb = b || {};\n\nconst falla = (error) => [{ json: { ok: false, error } }];\n\nif (b.token !== TOKEN) return falla('token');\nconst tipo = String(b.tipo || '');\nif (tipo !== 'Gasto' && tipo !== 'Ingreso') return falla('tipo');\nconst concepto = String(b.concepto || '').trim().slice(0, 80);\nconst categoria = String(b.categoria || '');\nconst fecha = String(b.fecha || '');\nconst monto = Math.round(Number(b.monto));\nconst notas = String(b.nota || b.notas || '').trim().slice(0, 300);\n\nif (!concepto) return falla('concepto');\nif (!(tipo === 'Gasto' ? CAT_GASTO : CAT_INGRESO).includes(categoria)) return falla('categoria');\nif (tipo === 'Gasto' && AUTOMATICOS.test(concepto)) return falla('Eso ya se registra solo desde su aviso');\nif (!/^\\d{4}-\\d{2}-\\d{2}$/.test(fecha)) return falla('fecha');\nif (!(monto > 0) || monto > 1000000000) return falla('monto');\n\nreturn [{ json: { ok: true, tipo, concepto, categoria, fecha, monto, notas } }];\n"
+      },
+      "id": "a1000000-0000-4000-8000-000000000002",
+      "name": "Validar movimiento",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        240,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ $json.ok }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "a1000000-0000-4000-8000-000000000003",
+      "name": "¿Es válido?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        480,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "dataSourceId": {
+          "__rl": true,
+          "value": "6c565ad1-789f-41c7-8ca2-8bcfb9098a68",
+          "mode": "list",
+          "cachedResultName": "Movimientos",
+          "cachedResultUrl": "https://app.notion.com/p/922bb9e4e3d648feab56d6b2d75be29d"
+        },
+        "title": "={{ $json.concepto }}",
+        "propertiesUi": {
+          "propertyValues": [
+            {
+              "key": "Concepto|title",
+              "title": "={{ $json.concepto }}"
+            },
+            {
+              "key": "Monto|number",
+              "numberValue": "={{ $json.monto }}"
+            },
+            {
+              "key": "Tipo|select",
+              "selectValue": "={{ $json.tipo }}"
+            },
+            {
+              "key": "Categoría|select",
+              "selectValue": "={{ $json.categoria }}"
+            },
+            {
+              "key": "Fecha|date",
+              "includeTime": false,
+              "date": "={{ $json.fecha }}"
+            },
+            {
+              "key": "Notas|rich_text",
+              "textContent": "={{ $json.notas }}"
+            },
+            {
+              "key": "Resumen financiero|relation",
+              "relationValue": [
+                "39b39f80-d3a5-80fb-9a19-f3198aa16cc7"
+              ]
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "a1000000-0000-4000-8000-000000000004",
+      "name": "Crear movimiento en Movimientos",
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 3,
+      "position": [
+        720,
+        -80
+      ],
+      "credentials": {
+        "notionApi": {
+          "id": "pgk4uKXwaEEnuyRO",
+          "name": "Notion account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { ok: true } }}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "id": "a1000000-0000-4000-8000-000000000005",
+      "name": "Responder bien",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        960,
+        -80
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { ok: false, error: $('Validar movimiento').item.json.error } }}",
+        "options": {
+          "responseCode": 400
+        }
+      },
+      "id": "a1000000-0000-4000-8000-000000000006",
+      "name": "Responder error",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        720,
+        100
+      ]
+    }
+  ],
+  "connections": {
+    "Recibir movimiento": {
+      "main": [
+        [
+          {
+            "node": "Validar movimiento",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validar movimiento": {
+      "main": [
+        [
+          {
+            "node": "¿Es válido?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Es válido?": {
+      "main": [
+        [
+          {
+            "node": "Crear movimiento en Movimientos",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Responder error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Crear movimiento en Movimientos": {
+      "main": [
+        [
+          {
+            "node": "Responder bien",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "America/Bogota"
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true
+  }
+}

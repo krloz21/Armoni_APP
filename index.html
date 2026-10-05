@@ -1608,6 +1608,13 @@ body[class*="mode-"] #masIngreso{ display:none; }
 .inBody::-webkit-scrollbar{ display:none; }
 .inCard .pgRow{ flex:none; margin-top:14px; }
 .inCard h3{ text-align:center; }
+.inFrecs{ display:flex; gap:7px; overflow-x:auto; padding:2px 1px 4px; scrollbar-width:none; }
+.inFrecs::-webkit-scrollbar{ display:none; }
+.inFrecs .recChip{ flex:none; padding:7px 13px; font-size:.78rem; white-space:nowrap; }
+.inIA{ display:flex; align-items:center; gap:10px; margin-top:12px; padding:10px 12px; border-radius:14px; border:1px solid var(--line); background:var(--panel); cursor:pointer; }
+.inIA input{ width:18px; height:18px; accent-color:var(--blue); flex:none; }
+.inIA span{ display:grid; gap:1px; font-size:.84rem; color:var(--white); line-height:1.25; }
+.inIA small{ color:var(--dim); font-size:.72rem; }
 .inSub{ margin:4px 0 0; text-align:center; color:var(--dim); font-size:.82rem; }
 .inLbl{ display:block; margin:16px 2px 7px; font-size:.7rem; font-weight:700; letter-spacing:.09em; text-transform:uppercase; color:var(--dim); }
 .inCard input[type="text"], .inCard textarea{ width:100%; padding:13px 14px; border-radius:14px; border:1px solid var(--line); background:rgba(var(--ink),.05); color:var(--white); font:inherit; font-size:16px; text-align:left; }
@@ -1896,6 +1903,7 @@ const MERCADO_ESTADO_URL = N8N + "/webhook/mercado-estado";
 const MERCADO_MARCAR_URL = N8N + "/webhook/mercado-marcar";
 const MERCADO_COMPRADO_URL = N8N + "/webhook/mercado-comprado";
 const MERCADO_AGREGAR_URL = N8N + "/webhook/mercado-agregar";
+const MOVIMIENTO_URL = N8N + "/webhook/movimiento-nuevo";   // guarda un gasto/ingreso directo en Notion, sin IA
 const MERCADO_TOKEN = "mercado-7d41c2a9e05b";
 const RESUMEN_URL = N8N + "/webhook/resumen-mes";
 const JARDIN_PAGADO_URL = N8N + "/webhook/jardin-pagado";   // pagos de una fecha: ?fecha=AAAA-MM-DD
@@ -1923,7 +1931,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
 /* ═════════ VERSIÓN ═════════
    Súbela en cada entrega: si el servidor tiene una versión distinta a la que está corriendo,
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
-const APP_VERSION = "2026-10-05.39";
+const APP_VERSION = "2026-10-05.40";
 (function autoActualizar(){
   const patron = new RegExp("const APP_" + "VERSION = \"([^\"]+)\"");
   async function revisar(){
@@ -4705,8 +4713,52 @@ function pedirMontoJardin(){
 /* ════════════════════════════════════════════════════════════
    REGISTRAR UN GASTO: ventana con concepto, categoría, fecha, valor y nota.
    No ofrece lo que ya es automático (servicios, jardín, arriendo, cuota del carro).
-   Al guardar, el gasto se le manda al agente del chat: él decide si lo guarda de una o si debe preguntar algo más (p. ej. en una salida a comer).
+   Al guardar: lo de siempre va directo a Movimientos (webhook movimiento-nuevo, sin IA); las salidas a comer (o si se marca la casilla) se le mandan al agente del chat.
    ════════════════════════════════════════════════════════════ */
+/* Frecuentes: atajos para lo que se registra siempre (salarios, gasolina…). Aprende solo de lo que guardas. */
+const Frecuentes = (function(){
+  const KEY = "armoni.frecuentes";
+  const SEMILLA = [
+    { tipo:"Ingreso", concepto:"Salario amor",  categoria:"Hogar",    monto:1366548, n:5 },
+    { tipo:"Ingreso", concepto:"Salario Aleja", categoria:"Hogar",    monto:7675760, n:4 },
+    { tipo:"Gasto",   concepto:"Gasolina carro",categoria:"Carro",    monto:139820,  n:3 },
+    { tipo:"Gasto",   concepto:"Psicóloga",     categoria:"Salud",    monto:90000,   n:3 },
+    { tipo:"Gasto",   concepto:"Pañales Ema",   categoria:"Hijo",     monto:214008,  n:2 },
+    { tipo:"Gasto",   concepto:"Netflix",       categoria:"Hogar",    monto:29900,   n:1 }
+  ];
+  const k = (t, c) => t + "|" + c.trim().toLowerCase();
+  function lee(){ try{ return JSON.parse(localStorage.getItem(KEY)) || {}; }catch(e){ return {}; } }
+  function todos(){
+    const m = lee(), out = {};
+    SEMILLA.forEach(f => { out[k(f.tipo, f.concepto)] = Object.assign({}, f); });
+    Object.keys(m).forEach(x => { out[x] = Object.assign(out[x] || {}, m[x]); });
+    return Object.values(out);
+  }
+  return {
+    top(tipo){
+      return todos().filter(f => f.tipo === tipo && f.concepto).sort((a, b) => (b.n || 0) - (a.n || 0)).slice(0, 8);
+    },
+    aprende(tipo, concepto, categoria, monto){
+      try{
+        const m = lee(), id = k(tipo, concepto), previo = m[id] || todos().find(f => k(f.tipo, f.concepto) === id);
+        m[id] = { tipo, concepto, categoria, monto, n: ((previo && previo.n) || 0) + 1 };
+        localStorage.setItem(KEY, JSON.stringify(m));
+      }catch(e){}
+    }
+  };
+})();
+
+function avisoOk(titulo, detalle){
+  const t = document.createElement("div");
+  t.className = "payToast";
+  t.setAttribute("role", "status");
+  const esc = x => String(x).replace(/&/g,"&amp;").replace(/</g,"&lt;");
+  t.innerHTML = '<span class="mkOkMini" aria-hidden="true">✓</span><span class="pt"><b>' + esc(titulo) + '</b><small>' + esc(detalle) + '</small></span>';
+  document.body.appendChild(t);
+  requestAnimationFrame(() => t.classList.add("on"));
+  setTimeout(() => { t.classList.remove("on"); setTimeout(() => t.remove(), 300); }, 2600);
+}
+
 const GastoManual = (function(){
   /* todas menos "Servicios": energía, agua, gas e internet ya se registran solos desde su aviso */
   const CATS_GASTO = ["Alimentación", "Salidas", "Hogar", "Carro", "Hijo", "Salud", "Tarjetas", "Ahorro", "Otros"];
@@ -4741,8 +4793,9 @@ const GastoManual = (function(){
         '<div class="inTipo" id="inTipo" data-on="gasto" role="radiogroup" aria-label="Tipo de movimiento"><span class="inInd"></span>' +
           '<button type="button" role="radio" data-t="Gasto" aria-checked="true">Gasto</button>' +
           '<button type="button" role="radio" data-t="Ingreso" aria-checked="false">Ingreso</button></div>' +
-        '<p class="inSub" id="inSub">Armoni lo revisa: lo guarda de una o, si falta algo (como en una salida), te pregunta</p>' +
+        '<p class="inSub" id="inSub"></p>' +
         '<div class="inBody">' +
+        '<div id="inFrecBox"><span class="inLbl">Frecuentes</span><div class="inFrecs" id="inFrecs"></div></div>' +
         '<label class="inLbl" for="inConcepto">Concepto</label>' +
         '<input id="inConcepto" type="text" placeholder="Ej: Almuerzo, gasolina, droguería…" autocomplete="off" maxlength="80">' +
         '<span class="inLbl">Categoría</span>' +
@@ -4757,6 +4810,7 @@ const GastoManual = (function(){
         '<div class="inMonto"><b>$</b><input id="inMonto" type="text" inputmode="numeric" placeholder="0" autocomplete="off"></div>' +
         '<label class="inLbl" for="inNota">Nota <span style="font-weight:400;letter-spacing:0;text-transform:none">(opcional)</span></label>' +
         '<textarea id="inNota" rows="2" placeholder="Algo que quieras recordar" maxlength="300"></textarea>' +
+        '<label class="inIA"><input type="checkbox" id="inIA"><span><b style="font-weight:600">Que Armoni lo revise (usa IA)</b><small id="inIAhint"></small></span></label>' +
         '<p class="inErr" id="inErr" role="alert"></p>' +
         '<p class="inSub" id="inNotaAuto" style="margin-top:10px;font-size:.74rem">Servicios, jardín, arriendo y cuota del carro se registran solos desde sus avisos.</p>' +
         '</div>' +
@@ -4768,7 +4822,8 @@ const GastoManual = (function(){
     const $ = id => scrim.querySelector("#" + id);
     const concepto = $("inConcepto"), monto = $("inMonto"), nota = $("inNota"), fechaIn = $("inFecha"), err = $("inErr"), guardar = $("inGuardar");
     const chips = [...scrim.querySelectorAll("#inDia .recChip")];
-    let categoria = "", fecha = hoy(), tipo = "Gasto";
+    let categoria = "", fecha = hoy(), tipo = "Gasto", iaManual = false;
+    const ia = $("inIA");
     const valor = () => parseInt(monto.value.replace(/\D/g, ""), 10) || 0;
     const listo = () => { guardar.disabled = !(concepto.value.trim() && categoria && valor() > 0); };
 
@@ -4777,13 +4832,31 @@ const GastoManual = (function(){
       const lista = tipo === "Gasto" ? CATS_GASTO : CATS_INGRESO;
       if(!lista.includes(categoria)) categoria = "";
       $("inCats").innerHTML = lista.map(c => '<button type="button" class="inCat" data-c="' + c + '" aria-pressed="' + (c === categoria) + '"><svg viewBox="0 0 24 24" ' + P + '>' + ICO[c] + '</svg>' + c + '</button>').join("");
-      listo();
+      listo(); sugiereIA();
+    }
+    /* por defecto la IA solo revisa las salidas a comer (pueden faltar datos); lo demás se guarda directo.
+       Si la persona toca la casilla, se respeta su elección. */
+    function sugiereIA(){
+      if(!iaManual) ia.checked = tipo === "Gasto" && categoria === "Salidas";
+      $("inIAhint").textContent = ia.checked ? "Armoni lo revisa y, si falta algo, te pregunta" : "Se guarda directo en Movimientos, sin gastar IA";
+    }
+    ia.addEventListener("change", () => { iaManual = true; sugiereIA(); });
+    function pintaFrecuentes(){
+      const lista = Frecuentes.top(tipo);
+      $("inFrecBox").hidden = !lista.length;
+      $("inFrecs").innerHTML = lista.map((f, i) => '<button type="button" class="recChip" data-i="' + i + '">' + f.concepto.replace(/&/g,"&amp;").replace(/</g,"&lt;") + '</button>').join("");
+      $("inFrecs").onclick = e => {
+        const b = e.target.closest(".recChip"); if(!b) return;
+        const f = lista[+b.dataset.i];
+        concepto.value = f.concepto; categoria = f.categoria; monto.value = Number(f.monto).toLocaleString("es-CO");
+        pintaCats(); concepto.focus(); err.textContent = "";
+      };
     }
     $("inCats").addEventListener("click", e => {
       const b = e.target.closest(".inCat"); if(!b) return;
       categoria = b.dataset.c;
       scrim.querySelectorAll(".inCat").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
-      listo();
+      listo(); sugiereIA();
     });
     function poneTipo(t){
       tipo = t; err.textContent = "";
@@ -4791,13 +4864,14 @@ const GastoManual = (function(){
       $("inTipo").dataset.on = g ? "gasto" : "ingreso";
       scrim.querySelectorAll("#inTipo button").forEach(x => x.setAttribute("aria-checked", String(x.dataset.t === t)));
       $("inT").textContent = g ? "Registrar un gasto" : "Registrar un ingreso";
-      $("inSub").textContent = g ? "Armoni lo revisa: lo guarda de una o, si falta algo (como en una salida), te pregunta" : "Salarios y lo que te devuelven al dividir una cuenta";
+      $("inSub").textContent = g ? "Lo de siempre se guarda directo; una salida a comer la revisa Armoni" : "Salarios y lo que te devuelven al dividir una cuenta";
       $("inNotaAuto").hidden = !g;
       concepto.placeholder = g ? "Ej: Almuerzo, gasolina, droguería…" : "Ej: Salario, trabajo extra…";
-      pintaCats();
+      pintaCats(); pintaFrecuentes();
     }
     scrim.querySelectorAll("#inTipo button").forEach(b => b.addEventListener("click", () => poneTipo(b.dataset.t)));
-    pintaCats();
+    $("inSub").textContent = "Lo de siempre se guarda directo; una salida a comer la revisa Armoni";
+    pintaCats(); pintaFrecuentes();
     chips.forEach(b => b.addEventListener("click", () => {
       fecha = b.dataset.dia === "hoy" ? hoy() : ayer();
       chips.forEach(x => x.setAttribute("aria-pressed", String(x === b)));
@@ -4842,9 +4916,26 @@ const GastoManual = (function(){
         (tipo === "Gasto"
           ? " Revisa si esto es una salida a comer o algo que necesite más datos (por ejemplo cuántas personas comieron, el restaurante o la puntuación): si falta algún dato, pregúntamelo antes de guardar; si no falta nada, guárdalo de una."
           : " Es plata que ENTRA (por ejemplo un salario, o alguien que me devuelve su parte al dividir una cuenta en un restaurante): guárdalo de una como ingreso. No me preguntes por personas, restaurante ni puntuación; solo pregunta si de verdad falta el concepto, el valor o la fecha.");
-      cierra();
-      ask(texto, mostrar);
+      if(ia.checked){
+        if(typeof busy !== "undefined" && busy){ err.textContent = "Armoni está respondiendo otra cosa. Espera un momento y vuelve a intentarlo."; return; }
+        Frecuentes.aprende(tipo, concepto.value.trim(), categoria, valor());
+        cierra();
+        ask(texto, mostrar);
+        return;
+      }
+      /* directo a Movimientos: no pasa por el agente, no gasta IA */
+      const dato = { tipo, concepto: concepto.value.trim(), categoria, monto: valor(), fecha, nota: nota$ };
+      guardar.disabled = true; guardar.textContent = "Guardando…"; err.textContent = "";
+      fetch(MOVIMIENTO_URL, { method: "POST", body: JSON.stringify(Object.assign({ token: MERCADO_TOKEN }, dato)) })
+        .then(r => r.json().catch(() => ({})).then(j => { if(!r.ok || j.ok === false) throw new Error(j.error || "No se pudo guardar"); }))
+        .then(() => {
+          Frecuentes.aprende(tipo, dato.concepto, categoria, dato.monto);
+          cierra();
+          avisoOk((tipo === "Gasto" ? "Gasto guardado" : "Ingreso guardado"), dato.concepto + " · " + monto$);
+        })
+        .catch(e => { guardar.disabled = false; guardar.textContent = "Guardar"; err.textContent = (e && e.message && e.message !== "Failed to fetch") ? e.message : "No pude guardarlo. Revisa la conexión e inténtalo de nuevo."; });
     });
+    sugiereIA();
     setTimeout(() => concepto.focus(), 350);
   }
   document.getElementById("masIngreso").addEventListener("click", abrir);
