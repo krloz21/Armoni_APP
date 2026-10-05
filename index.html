@@ -171,8 +171,10 @@ header button svg{ width:13px; height:13px; flex:none; }
 #thread{
   overflow-y:auto; overscroll-behavior:contain;
   -webkit-overflow-scrolling:touch;
-  padding:30px var(--sp) 12px;
+  padding:calc(30px + var(--banner-h, 0px)) var(--sp) 12px;
 }
+/* sin conversación (solo el titular) no se desliza nada: el titular también se queda quieto */
+body:not([class*="mode-"]) #thread.sinChat{ overflow-y:hidden; }
 /* el desvanecido de arriba (antes era una máscara, que impedía que el aviso fijo desenfocara lo de atrás) */
 .inner::before{ content:""; position:sticky; top:0; z-index:5; display:block; height:26px; margin:-30px 0 4px; pointer-events:none; background:linear-gradient(180deg, var(--void) 0, transparent); }
 #thread::-webkit-scrollbar{ width:7px; }
@@ -322,11 +324,19 @@ header button svg{ width:13px; height:13px; flex:none; }
 
 /* ───────── aviso de servicios pendientes ───────── */
 #servicioBanner:empty{ display:none; }
-/* queda fijo arriba mientras el chat se desliza; lo que pasa por detrás se ve borroso */
-#servicioBanner{ position:sticky; top:6px; z-index:6; }
+/* el aviso es fijo: vive encima del chat (fuera de lo que se desliza) y lo que pasa por detrás se ve borroso */
+/* cada pieza de la app en su fila, para que el aviso pueda montarse encima del chat */
+.shell > header{ grid-row:1; grid-column:1; }
+.shell > main{ grid-row:2; grid-column:1; }
+.shell > footer{ grid-row:3; grid-column:1; }
+#servicioBanner{
+  grid-row:2; grid-column:1; align-self:start; justify-self:center;
+  width:min(calc(100% - 2 * var(--sp)), 42rem); margin-top:8px; position:relative; z-index:6; pointer-events:none;
+}
+#servicioBanner > *{ pointer-events:auto; }
 #servicioBanner .svBanner{
   -webkit-backdrop-filter:blur(18px) saturate(1.5) brightness(1.08); backdrop-filter:blur(18px) saturate(1.5) brightness(1.08);
-  touch-action:pan-y;
+  touch-action:none;
   animation-fill-mode:backwards;   /* al terminar la entrada no deja ningún filtro puesto: así el desenfoque del vidrio funciona */
 }
 .svBanner{
@@ -958,7 +968,7 @@ body.mode-gmail footer, body.mode-glim footer{ display:none; }
 .notifBtn:hover{ border-color:var(--cyan); }
 .notifBtn:disabled{ opacity:.6; cursor:default; }
 .notifBtn.on{ color:var(--dim); background:transparent; }
-.ajVolver{ display:inline-flex; align-items:center; gap:4px; margin:2px 0 6px 2px; padding:8px 15px 8px 9px; border-radius:999px; border:1px solid var(--line); background:rgba(var(--ink),.05); color:var(--ghost); font:inherit; font-size:.85rem; font-weight:600; cursor:pointer; transition:transform .45s cubic-bezier(.32,.72,0,1), background .2s ease; }
+.ajVolver{ display:inline-flex; align-items:center; gap:4px; margin:2px 0 6px 2px; padding:8px 15px 8px 9px; border-radius:999px; border:1px solid rgba(var(--ink),.14); background:var(--panel); color:var(--ghost); font:inherit; font-size:.85rem; font-weight:600; cursor:pointer; position:relative; z-index:6; transition:transform .25s cubic-bezier(.32,.72,0,1), background .2s ease; }
 .ajVolver svg{ width:16px; height:16px; }
 .ajVolver:active{ transform:scale(.95); }
 .ajGrupo{ margin:22px 4px 8px; font-size:.72rem; color:var(--dim); letter-spacing:.08em; text-transform:uppercase; }
@@ -999,7 +1009,7 @@ body.mode-gmail footer, body.mode-glim footer{ display:none; }
   position:absolute; top:2px; bottom:2px; left:2px; width:calc(50% - 2px); border-radius:7px;
   background:rgba(var(--ink),.13);
   box-shadow:inset 0 1px 0 rgba(var(--hi),.2), 0 0 0 1px rgba(var(--cyan-rgb),.4);
-  transition:transform .44s cubic-bezier(.22,1,.36,1);
+  transition:transform .24s cubic-bezier(.32,.72,0,1);
 }
 .segTheme[data-on="gray"] .segInd{ transform:translateX(100%); }
 .segTheme button{
@@ -1503,8 +1513,12 @@ body.mode-gmail footer, body.mode-glim footer{ display:none; }
 @property --strong{ syntax:"<color>"; inherits:true; initial-value:#000; }
 @property --scrim{ syntax:"<color>"; inherits:true; initial-value:#000; }
 :root.tema-anim{ transition:--void .7s cubic-bezier(.4,0,.2,1), --panel .7s cubic-bezier(.4,0,.2,1), --white .7s cubic-bezier(.4,0,.2,1), --blue .7s cubic-bezier(.4,0,.2,1), --cyan .7s cubic-bezier(.4,0,.2,1), --title-b .7s cubic-bezier(.4,0,.2,1), --money .7s cubic-bezier(.4,0,.2,1), --shine .7s cubic-bezier(.4,0,.2,1), --composer .7s cubic-bezier(.4,0,.2,1), --drawer .7s cubic-bezier(.4,0,.2,1), --drawer-solid .7s cubic-bezier(.4,0,.2,1), --sheet-a .7s cubic-bezier(.4,0,.2,1), --sheet-b .7s cubic-bezier(.4,0,.2,1), --cell .7s cubic-bezier(.4,0,.2,1), --strong .7s cubic-bezier(.4,0,.2,1), --scrim .7s cubic-bezier(.4,0,.2,1); }
-:root.tema-anim .bar, :root.tema-anim .composer, :root.tema-anim .ajCard, :root.tema-anim .mkHero, :root.tema-anim #send, :root.tema-anim .segTheme, :root.tema-anim .dNav button, :root.tema-anim .dNav .ico, :root.tema-anim .mkBtn, :root.tema-anim .notifBtn{
+:root.tema-anim .bar, :root.tema-anim .composer, :root.tema-anim .ajCard, :root.tema-anim .mkHero{
   transition:background-color .7s ease, border-color .7s ease, box-shadow .7s ease, color .7s ease;
+}
+/* los botones cambian rápido (los colores de fondo siguen su propio ritmo suave) */
+:root.tema-anim #send, :root.tema-anim .segTheme, :root.tema-anim .segTheme button, :root.tema-anim .dNav button, :root.tema-anim .dNav .ico, :root.tema-anim .mkBtn, :root.tema-anim .notifBtn, :root.tema-anim .ajVolver{
+  transition:background-color .22s ease, border-color .22s ease, box-shadow .22s ease, color .22s ease, transform .25s ease;
 }
 </style>
 </head>
@@ -1592,10 +1606,9 @@ body.mode-gmail footer, body.mode-glim footer{ display:none; }
     </div>
   </header>
 
-  <main id="thread" tabindex="-1">
+  <main id="thread" class="sinChat" tabindex="-1">
     <div class="inner">
 
-      <div id="servicioBanner"></div>
       <div id="glimBanner"></div>
 
       <section id="welcome">
@@ -1715,6 +1728,9 @@ body.mode-gmail footer, body.mode-glim footer{ display:none; }
     </div>
   </main>
 
+  <!-- aviso de pagos: fijo encima del chat (no se mueve al deslizar); lo que pasa por detrás se ve borroso -->
+  <div id="servicioBanner"></div>
+
   <footer>
     <div class="frame" id="frame">
       <form class="composer" id="composer">
@@ -1787,7 +1803,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
 /* ═════════ VERSIÓN ═════════
    Súbela en cada entrega: si el servidor tiene una versión distinta a la que está corriendo,
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
-const APP_VERSION = "2026-10-05.23";
+const APP_VERSION = "2026-10-05.24";
 (function autoActualizar(){
   const patron = new RegExp("const APP_" + "VERSION = \"([^\"]+)\"");
   async function revisar(){
@@ -3103,6 +3119,7 @@ function newConversation(){
   localStorage.setItem(K_SES, sessionId);
   list.innerHTML = "";
   welcome.style.display = "";
+  thread.classList.add("sinChat");
   field.value = ""; grow(); lock();
   thread.scrollTop = 0;
   lastAsked = null;
@@ -3279,6 +3296,7 @@ addEventListener("resize", syncReading);
 function hideWelcome(){
   if(welcome.style.display === "none") return;
   welcome.style.display = "none";
+  thread.classList.remove("sinChat");
   Typer.stop();
 }
 
@@ -6009,6 +6027,16 @@ const TuMes = (function(){
 activity();
 Servicios.check();
 Glim.check();
+
+/* el chat deja sitio al aviso fijo: se mide su altura y se le pasa al chat como margen de arriba */
+(function(){
+  const aviso = document.getElementById("servicioBanner"), shell = document.querySelector(".shell");
+  if(!aviso || !shell || !window.ResizeObserver) return;
+  const mide = () => { const h = aviso.offsetParent === null ? 0 : Math.round(aviso.getBoundingClientRect().height) + 8; shell.style.setProperty("--banner-h", h + "px"); };
+  new ResizeObserver(mide).observe(aviso);
+  new MutationObserver(mide).observe(document.body, { attributes: true, attributeFilter: ["class"] });
+  mide();
+})();
 
 /* decoración de temporada: insignia en el menú y, en Navidad, una nevada muy suave. Se activa o se quita al cambiar de tema */
 const Decora = (function(){
