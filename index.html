@@ -1081,6 +1081,7 @@ body.mode-gmail footer, body.mode-glim footer{ display:none; }
 .mkBtn.sec{ background:var(--panel); color:var(--white); border:1px solid var(--line); }
 .mkBtn.full{ width:100%; }
 .mkMama{ margin:14px 0 0; padding:12px 14px; border-radius:14px; background:rgba(255,120,80,.08); border:1px solid rgba(255,120,80,.28); text-align:left; font-size:.84rem; }
+.mkMama:active{ transform:scale(.98); }
 .mkMama b{ display:block; margin-bottom:6px; }
 .mkChips{ display:flex; flex-wrap:wrap; gap:6px; }
 .mkChips span{ padding:4px 10px; border-radius:999px; background:rgba(var(--ink),.08); font-size:.78rem; }
@@ -1616,7 +1617,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
 /* ═════════ VERSIÓN ═════════
    Súbela en cada entrega: si el servidor tiene una versión distinta a la que está corriendo,
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
-const APP_VERSION = "2026-10-05.12";
+const APP_VERSION = "2026-10-05.13";
 (function autoActualizar(){
   const patron = new RegExp("const APP_" + "VERSION = \"([^\"]+)\"");
   async function revisar(){
@@ -4997,9 +4998,9 @@ const Mercar = (function(){
       '<div class="mkHero"><span class="mkBig">🧺</span><h3>Revisemos la casa</h3>' +
       '<p>' + ps.length + ' cosas · un toque por cada una' + (hace != null ? ' · último mercado ' + (hace === 0 ? 'hoy' : 'hace ' + hace + (hace === 1 ? ' día' : ' días')) : '') + '</p>' +
       '<button type="button" class="mkBtn pri full" id="mkEmpezar"' + (ps.length ? '' : ' disabled') + '>Empezar revisión</button>' +
-      (mama.length ? '<div class="mkMama"><b>Tu mamá dice que se acabó:</b><div class="mkChips">' + mama.map(p => '<span>' + emojiMercado(p.nombre) + ' ' + esc(p.nombre) + '</span>').join("") + '</div></div>' : '') +
+      (mama.length ? '<div class="mkMama" id="mkMamaCaja" role="button" tabindex="0" style="cursor:pointer"><b>Tu mamá dice que se acabó:</b><div class="mkChips">' + mama.map(p => '<span>' + emojiMercado(p.nombre) + ' ' + esc(p.nombre) + '</span>').join("") + '</div></div>' : '') +
       '</div>';
-    if(pendientes.length) html += '<button type="button" class="mkBtn sec full" id="mkVerPend" style="margin-top:12px">Ver lista pendiente (' + pendientes.length + ')</button>';
+    if(pendientes.length && !mama.length) html += '<button type="button" class="mkBtn sec full" id="mkVerPend" style="margin-top:12px">Ver lista pendiente (' + pendientes.length + ')</button>';
     if(ps.length) html += '<button type="button" class="mkBtn sec full" id="mkLibre" style="margin-top:10px">Registrar lo que compré hoy</button>';
     html += '<form class="mkAgregar" id="mkAgregar" style="margin-top:14px"><input type="text" id="mkAgregarTexto" placeholder="Agregar algo que no está en la lista" maxlength="60" autocomplete="off"><button type="submit" aria-label="Agregar">+</button></form>';
 
@@ -5016,6 +5017,12 @@ const Mercar = (function(){
     document.getElementById("mkEmpezar").addEventListener("click", empezar);
     const vp = document.getElementById("mkVerPend");
     if(vp) vp.addEventListener("click", () => final(ps.filter(p => p.falta), false));
+    const mc = document.getElementById("mkMamaCaja");
+    if(mc){
+      const abrirPend = () => final(ps.filter(p => p.falta), false);
+      mc.addEventListener("click", abrirPend);
+      mc.addEventListener("keydown", e => { if(e.key === "Enter" || e.key === " "){ e.preventDefault(); abrirPend(); } });
+    }
     const lb = document.getElementById("mkLibre");
     if(lb) lb.addEventListener("click", () => registrar(ps));
     document.getElementById("mkAgregar").addEventListener("submit", async e => {
@@ -5174,7 +5181,7 @@ const Mercar = (function(){
         esc(x.p.grupo) + (esMama(x.p) ? ' · lo marcó tu mamá' : '') + '</small></span></div>').join("") + '</div>' +
       '<div class="mkAcciones"><div class="mkFila" id="mkFila"><button type="button" class="mkBtn sec" id="mkCopiar">Copiar lista</button><button type="button" class="mkBtn sec" id="mkCompartir">Compartir</button></div>' +
       '<button type="button" class="mkBtn pri full" id="mkHecho">Ya hice el mercado</button>' +
-      '<button type="button" class="mkBtn sec full" id="mkRevisar">Volver a revisar</button></div>';
+      '<button type="button" class="mkBtn sec full" id="mkRevisar">Volver</button></div>';
     const elegidos = () => lista.filter(x => x.comprar).map(x => x.p);
     document.getElementById("mkLista").addEventListener("click", e => {
       const row = e.target.closest(".gRow"); if(!row) return;
@@ -5187,7 +5194,7 @@ const Mercar = (function(){
     if(navigator.share) comp.addEventListener("click", () => navigator.share({ text: textoLista(elegidos()) }).catch(() => {}));
     else { comp.remove(); document.getElementById("mkCopiar").style.gridColumn = "1 / -1"; }
     document.getElementById("mkHecho").addEventListener("click", mercadoHecho);
-    document.getElementById("mkRevisar").addEventListener("click", empezar);
+    document.getElementById("mkRevisar").addEventListener("click", inicio);
   }
   /* registro libre: lo que compraste hoy, sin pasar por el juego ni tocar lo que "falta" de los demás */
   function registrar(ps){
