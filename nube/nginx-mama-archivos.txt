@@ -4,6 +4,6 @@
   location = /mama.html          { }
   location = /sw.js              { }
   location = /mama.webmanifest   { }
-  location ~ ^/mama-(180|192|512|maskable-512)\.png$ { }
+  location ~ ^/mama-(192|512)\.png$ { }
 
 # Después de editar, reinicia el contenedor de nginx (docker restart <nombre-del-contenedor>).
