@@ -1890,7 +1890,6 @@ const MERCADO_COMPRADO_URL = N8N + "/webhook/mercado-comprado";
 const MERCADO_AGREGAR_URL = N8N + "/webhook/mercado-agregar";
 const MERCADO_TOKEN = "mercado-7d41c2a9e05b";
 const RESUMEN_URL = N8N + "/webhook/resumen-mes";
-const INGRESO_URL = N8N + "/webhook/ingreso-nuevo";   // guarda un ingreso nuevo en Notion
 const JARDIN_PAGADO_URL = N8N + "/webhook/jardin-pagado";   // pagos de una fecha: ?fecha=AAAA-MM-DD
 const JARDIN_BASE = 1120000;   // lo que normalmente se paga de jardín
 const SERVICIOS_DIA_LIMITE = 7;   // hasta qué día del mes avisa si falta pagar
@@ -1916,7 +1915,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
 /* ═════════ VERSIÓN ═════════
    Súbela en cada entrega: si el servidor tiene una versión distinta a la que está corriendo,
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
-const APP_VERSION = "2026-10-05.33";
+const APP_VERSION = "2026-10-05.34";
 (function autoActualizar(){
   const patron = new RegExp("const APP_" + "VERSION = \"([^\"]+)\"");
   async function revisar(){
@@ -3522,7 +3521,7 @@ function copiarReferencia(text){
   return ok;
 }
 
-async function ask(text){
+async function ask(text, mostrar){
   if(MODE === "rest"){
     if(!text.trim()) return;
     field.value = ""; grow(); lock();
@@ -3570,7 +3569,7 @@ async function ask(text){
   Rain.send();
   frame.classList.add("sending");
   send.classList.add("busy");
-  add("you", text.trim());
+  add("you", (mostrar || text).trim());
   field.value = ""; grow(); lock();
   if(TOUCH) field.blur();
   startStates();
@@ -4698,6 +4697,7 @@ function pedirMontoJardin(){
 /* ════════════════════════════════════════════════════════════
    AGREGAR UN INGRESO: ventana con concepto, categoría, fecha, valor y nota.
    Solo salen las categorías de lo que entra "a mano": lo automatizado (servicios, jardín, carro, tarjetas) no se ofrece.
+   Al guardar, el ingreso se le manda al agente del chat: él decide si lo guarda de una o si debe preguntar algo más (p. ej. en una salida a comer).
    ════════════════════════════════════════════════════════════ */
 const Ingreso = (function(){
   const CATS = ["Hogar", "Alimentación", "Salidas", "Salud", "Ahorro", "Otros"];
@@ -4715,12 +4715,6 @@ const Ingreso = (function(){
   const ayer = () => { const d = new Date(); d.setDate(d.getDate() - 1); return iso(d); };
   let abierto = false;
 
-  function aviso(txt){
-    const a = document.createElement("div"); a.className = "inAviso"; a.textContent = txt; document.body.appendChild(a);
-    requestAnimationFrame(() => a.classList.add("on"));
-    setTimeout(() => { a.classList.remove("on"); setTimeout(() => a.remove(), 400); }, 2400);
-  }
-
   function abrir(){
     if(abierto) return; abierto = true;
     const scrim = document.createElement("div");
@@ -4728,7 +4722,7 @@ const Ingreso = (function(){
     scrim.innerHTML =
       '<div class="pgCard inCard" role="dialog" aria-modal="true" aria-labelledby="inT">' +
         '<h3 id="inT">Agregar un ingreso</h3>' +
-        '<p class="inSub">Lo que entra y no está automatizado</p>' +
+        '<p class="inSub">Armoni lo revisa: lo guarda de una o, si falta algo, te pregunta</p>' +
         '<label class="inLbl" for="inConcepto">Concepto</label>' +
         '<input id="inConcepto" type="text" placeholder="Ej: Salario, trabajo extra…" autocomplete="off" maxlength="80">' +
         '<span class="inLbl">Categoría</span>' +
@@ -4788,27 +4782,25 @@ const Ingreso = (function(){
     $("inCancel").addEventListener("click", cierra);
     scrim.addEventListener("click", e => { if(e.target === scrim) cierra(); });
 
-    guardar.addEventListener("click", async () => {
+    guardar.addEventListener("click", () => {
       if(guardar.disabled) return;
-      err.textContent = "";
-      guardar.disabled = true; guardar.textContent = "Guardando…";
-      try{
-        const res = await fetch(INGRESO_URL, { method: "POST", body: JSON.stringify({
-          token: MERCADO_TOKEN, concepto: concepto.value.trim(), categoria, fecha, monto: valor(), notas: nota.value.trim()
-        }) });
-        const d = await res.json().catch(() => ({}));
-        if(!res.ok || d.ok === false) throw new Error(d.error || ("http " + res.status));
-        cierra();
-        aviso("Ingreso guardado ✓");
-        try{ vibraIngreso(); }catch{}
-      }catch(e){
-        guardar.textContent = "Guardar"; listo();
-        err.textContent = "No se pudo guardar. Revisa tu internet y que Tailscale esté encendido, e inténtalo de nuevo.";
-      }
+      if(typeof busy !== "undefined" && busy){ err.textContent = "Armoni está respondiendo otra cosa. Espera un momento y vuelve a intentarlo."; return; }
+      const cuando = fecha === hoy() ? "hoy" : fecha === ayer() ? "ayer" : fecha;
+      const monto$ = "$" + valor().toLocaleString("es-CO");
+      const nota$ = nota.value.trim();
+      /* lo que ve el chat: corto y claro */
+      const mostrar = "➕ Ingreso: " + concepto.value.trim() + " · " + categoria + " · " + monto$ + " · " + cuando + (nota$ ? " · " + nota$ : "");
+      /* lo que recibe el agente: todos los datos exactos + que él decida si lo guarda de una o necesita preguntar algo */
+      const texto =
+        "Registra este INGRESO en Movimientos (Tipo: Ingreso). Concepto: " + concepto.value.trim() +
+        ". Categoría: " + categoria + ". Valor: " + valor() + ". Fecha: " + fecha + " (" + cuando + ")." +
+        (nota$ ? " Nota: " + nota$ + "." : "") +
+        " Revisa si esto es una salida a comer o algo que necesite más datos (por ejemplo cuántas personas comieron, el restaurante o la puntuación): si falta algún dato, pregúntamelo antes de guardar; si no falta nada, guárdalo de una.";
+      cierra();
+      ask(texto, mostrar);
     });
     setTimeout(() => concepto.focus(), 350);
   }
-  const vibraIngreso = () => { if(navigator.vibrate) navigator.vibrate(12); };
   document.getElementById("masIngreso").addEventListener("click", abrir);
   return { abrir };
 })();
