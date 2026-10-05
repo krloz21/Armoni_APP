@@ -1521,6 +1521,64 @@ body.mode-gmail footer, body.mode-glim footer{ display:none; }
 :root.tema-anim #send, :root.tema-anim .segTheme, :root.tema-anim .segTheme button, :root.tema-anim .dNav button, :root.tema-anim .dNav .ico, :root.tema-anim .mkBtn, :root.tema-anim .notifBtn, :root.tema-anim .ajVolver{
   transition:background-color .22s ease, border-color .22s ease, box-shadow .22s ease, color .22s ease, transform .25s ease;
 }
+
+/* ═════════ A mercar: más de juego (todo con transform/opacity: liviano) ═════════ */
+@keyframes mkSube{ from{ opacity:0; transform:translateY(16px) scale(.97); } to{ opacity:1; transform:none; } }
+@keyframes mkEntraCarta{ from{ opacity:0; transform:translateY(26px) scale(.88) rotate(-3deg); } to{ opacity:1; transform:none; } }
+@keyframes mkChispa{ 0%{ opacity:1; transform:translate(0,0) scale(1); } 100%{ opacity:0; transform:translate(var(--x), var(--y)) scale(.2); } }
+@keyframes mkMasUno{ 0%{ opacity:0; transform:translate(-50%, 4px) scale(.6); } 25%{ opacity:1; transform:translate(-50%, -8px) scale(1.15); } 100%{ opacity:0; transform:translate(-50%, -34px) scale(1); } }
+@keyframes mkBrilla{ 0%,55%{ transform:translateX(-130%) skewX(-18deg); } 100%{ transform:translateX(260%) skewX(-18deg); } }
+@keyframes mkLatido{ 0%,100%{ box-shadow:0 8px 24px -10px rgba(var(--blue-rgb),.7), 0 0 0 0 rgba(var(--cyan-rgb),.35); } 50%{ box-shadow:0 8px 24px -10px rgba(var(--blue-rgb),.7), 0 0 0 9px rgba(var(--cyan-rgb),0); } }
+@keyframes mkAnillo{ from{ opacity:.7; transform:scale(.7); } to{ opacity:0; transform:scale(1.7); } }
+@keyframes mkRachaPop{ 0%{ transform:scale(.6) rotate(-8deg); } 55%{ transform:scale(1.25) rotate(4deg); } 100%{ transform:scale(1) rotate(0); } }
+
+/* inicio: todo llega escalonado y el botón de empezar late y brilla */
+.mkHero > *{ animation:mkSube .7s cubic-bezier(.32,.72,0,1) backwards; }
+.mkHero > :nth-child(2){ animation-delay:.07s; } .mkHero > :nth-child(3){ animation-delay:.14s; } .mkHero > :nth-child(4){ animation-delay:.21s; } .mkHero > :nth-child(5){ animation-delay:.28s; }
+.mkHero .mkBig{ animation:mkSube .7s cubic-bezier(.32,.72,0,1) backwards, mkFlota 3.2s ease-in-out .8s infinite; }
+#mkEmpezar{ position:relative; overflow:hidden; animation:mkSube .7s cubic-bezier(.32,.72,0,1) .14s backwards, mkLatido 2.6s ease-in-out 1s infinite; }
+#mkEmpezar::after{ content:""; position:absolute; top:0; bottom:0; left:0; width:38%; background:linear-gradient(100deg, transparent, rgba(255,255,255,.55), transparent); animation:mkBrilla 3.6s ease-in-out 1.2s infinite; pointer-events:none; }
+#mkEmpezar:disabled::after{ display:none; }
+.mkChips span{ animation:mkSube .5s cubic-bezier(.34,1.56,.64,1) backwards; }
+.mkChips span:nth-child(2){ animation-delay:.05s; } .mkChips span:nth-child(3){ animation-delay:.1s; } .mkChips span:nth-child(4){ animation-delay:.15s; } .mkChips span:nth-child(n+5){ animation-delay:.2s; }
+.mkDura .gRow, .mkLista .gRow{ animation:mkSube .55s cubic-bezier(.32,.72,0,1) backwards; }
+.mkDura .gRow:nth-child(2), .mkLista .gRow:nth-child(2){ animation-delay:.05s; } .mkDura .gRow:nth-child(3), .mkLista .gRow:nth-child(3){ animation-delay:.1s; }
+.mkDura .gRow:nth-child(4), .mkLista .gRow:nth-child(4){ animation-delay:.15s; } .mkDura .gRow:nth-child(5), .mkLista .gRow:nth-child(5){ animation-delay:.2s; }
+.mkDura .gRow:nth-child(n+6), .mkLista .gRow:nth-child(n+6){ animation-delay:.25s; }
+
+/* el juego: barra con brillo, marcador de racha y cartas con vida */
+.mkEntraJuego{ animation:mkSube .5s cubic-bezier(.32,.72,0,1) backwards; }
+.mkBar{ height:8px; }
+.mkBar i{ position:relative; box-shadow:0 0 12px rgba(var(--cyan-rgb),.6); transition:width .5s cubic-bezier(.34,1.3,.64,1); }
+.mkBar i::after{ content:""; position:absolute; right:-1px; top:-2px; width:12px; height:12px; border-radius:50%; background:#fff; box-shadow:0 0 12px 3px rgba(var(--cyan-rgb),.9); }
+.mkRacha{ font-size:.82rem; font-weight:700; padding:4px 10px; border-radius:999px; background:rgba(255,160,60,.14); color:#ffb066; border:1px solid rgba(255,160,60,.35); font-variant-numeric:tabular-nums; white-space:nowrap; }
+.mkRacha[hidden]{ display:none; }
+.mkRacha.pop{ animation:mkRachaPop .45s cubic-bezier(.34,1.56,.64,1); }
+.mkRacha[data-n="2"]{ background:rgba(255,110,60,.2); color:#ff9b73; border-color:rgba(255,110,60,.5); }
+.mkRacha[data-n="3"]{ background:linear-gradient(120deg, rgba(255,90,60,.3), rgba(255,200,60,.28)); color:#fff; border-color:rgba(255,160,60,.7); box-shadow:0 0 14px rgba(255,140,60,.5); }
+.mkCart{ position:relative; }
+.mkMas{ position:absolute; left:50%; top:-4px; color:#ff9b73; font-weight:800; font-size:.9rem; pointer-events:none; animation:mkMasUno .85s ease-out forwards; }
+.mkDeck::before{
+  content:""; position:absolute; inset:-50px -46px; border-radius:50%; pointer-events:none; opacity:var(--wo, 0); transition:opacity .25s ease;
+  background:radial-gradient(55% 50% at var(--wx, 50%) 52%, rgba(var(--wc, 74,222,128), .55), transparent 72%);
+}
+.mkCard{ transition:transform .55s cubic-bezier(.34,1.56,.64,1); }
+.mkCard:not(.atras){ animation:mkEntraCarta .5s cubic-bezier(.34,1.56,.64,1) backwards; box-shadow:0 26px 54px -26px rgba(0,0,0,.8), inset 0 1px 0 rgba(255,255,255,.1); }
+.mkCard.agarrada{ cursor:grabbing; box-shadow:0 34px 60px -24px rgba(0,0,0,.85), inset 0 1px 0 rgba(255,255,255,.14); }
+.mkCard::before{ content:""; position:absolute; inset:0; border-radius:inherit; pointer-events:none; opacity:calc(var(--a, 0) * .9);
+  background:linear-gradient(115deg, transparent 20%, rgba(255,255,255,.14) 45%, transparent 70%); background-position:calc(50% + var(--p, 0) * 60%) 0; background-size:220% 100%; }
+.mkCard .mkEmoji{ transform:translateX(calc(var(--p, 0) * -16px)) scale(calc(1 + var(--a, 0) * .1)) rotate(calc(var(--p, 0) * -6deg)); transition:transform .12s linear; }
+.mkStamp{ transition:transform .15s ease-out; }
+.mkChispas{ position:absolute; left:50%; top:46%; width:0; height:0; pointer-events:none; z-index:3; }
+.mkChispas i{ position:absolute; width:9px; height:9px; border-radius:50%; animation:mkChispa .7s cubic-bezier(.2,.7,.3,1) forwards; }
+.mkNo, .mkSi{ position:relative; }
+.mkNo::after, .mkSi::after{ content:""; position:absolute; inset:0; border-radius:50%; border:2px solid currentColor; opacity:0; pointer-events:none; }
+.mkNo:active::after, .mkSi:active::after{ animation:mkAnillo .5s ease-out; }
+.mkBtns button{ transition:transform .4s cubic-bezier(.34,1.56,.64,1); }
+.mkBtns button:active{ transform:scale(.88); }
+@media (prefers-reduced-motion: reduce){
+  .mkHero > *, .mkHero .mkBig, #mkEmpezar, #mkEmpezar::after, .mkChips span, .mkDura .gRow, .mkLista .gRow, .mkEntraJuego, .mkCard:not(.atras), .mkCard .mkEmoji, .mkRacha.pop, .mkMas{ animation:none; }
+}
 </style>
 </head>
 <body>
@@ -1804,7 +1862,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
 /* ═════════ VERSIÓN ═════════
    Súbela en cada entrega: si el servidor tiene una versión distinta a la que está corriendo,
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
-const APP_VERSION = "2026-10-05.27";
+const APP_VERSION = "2026-10-05.28";
 (function autoActualizar(){
   const patron = new RegExp("const APP_" + "VERSION = \"([^\"]+)\"");
   async function revisar(){
@@ -5137,7 +5195,9 @@ const Mercar = (function(){
 
   let estado = "inicio";
   let datos = null;
-  let cola = [], idx = 0, decision = [], lista = [], copiado = false, bloqueado = false;
+  let cola = [], idx = 0, decision = [], lista = [], copiado = false, bloqueado = false, rachaMax = 0;
+  const vibra = ms => { try{ if(navigator.vibrate) navigator.vibrate(ms); }catch{} };
+  const rachaActual = () => { let n = 0; for(let i = Math.min(idx, decision.length) - 1; i >= 0 && decision[i] === "si"; i--) n++; return n; };
 
   const esMama = p => p.falta && p.marcadoPor === "Mamá";
   const uso = p => (p.duraDias && p.ultimaCompra) ? diasDesde(p.ultimaCompra) / p.duraDias : 0;   // 1 = ya debería haberse acabado
@@ -5233,10 +5293,10 @@ const Mercar = (function(){
     const ps = (datos && datos.productos) || [];
     if(!ps.length) return;
     cola = ps.filter(esMama).concat(ps.filter(p => !esMama(p)));   // lo que marcó la mamá va primero
-    idx = 0; decision = []; bloqueado = false; estado = "juego";
+    idx = 0; decision = []; bloqueado = false; estado = "juego"; rachaMax = 0;
     stage.innerHTML =
-      '<div class="mkTop">' +
-      '<div class="mkBar"><i id="mkBarI"></i></div><span class="mkCount" id="mkCount"></span><span class="mkCart" id="mkCart">🛒 <b>0</b></span></div>' +
+      '<div class="mkTop mkEntraJuego">' +
+      '<div class="mkBar"><i id="mkBarI"></i></div><span class="mkCount" id="mkCount"></span><span class="mkRacha" id="mkRacha" hidden></span><span class="mkCart" id="mkCart">🛒 <b>0</b></span></div>' +
       '<div class="mkDeck" id="mkDeck"></div>' +
       '<div class="mkBtns"><button type="button" class="mkNo" id="mkNo" aria-label="Falta, hay que comprar">✕</button>' +
       '<button type="button" class="mkUndo" id="mkUndo" aria-label="Deshacer">↶</button>' +
@@ -5268,39 +5328,72 @@ const Mercar = (function(){
     document.getElementById("mkCount").textContent = Math.min(idx + 1, cola.length) + "/" + cola.length;
     document.getElementById("mkCart").innerHTML = "🛒 <b>" + decision.filter(d => d === "no").length + "</b>";
     document.getElementById("mkUndo").disabled = idx === 0;
+    const r = rachaActual(), rEl = document.getElementById("mkRacha");
+    if(rEl){
+      rEl.hidden = r < 3;
+      if(r >= 3){ rEl.textContent = "🔥 x" + r; rEl.dataset.n = r >= 10 ? "3" : r >= 6 ? "2" : "1"; rEl.classList.remove("pop"); void rEl.offsetWidth; rEl.classList.add("pop"); }
+    }
     const card = deck.querySelector(".mkCard:not(.atras)");
     if(card) arrastre(card);
   }
   function arrastre(card){
     let x0 = 0, y0 = 0, dx = 0, t0 = 0, activo = false;
+    const deck = document.getElementById("mkDeck");
     const si = card.querySelector(".mkStamp.si"), no = card.querySelector(".mkStamp.no");
+    const luz = (p) => {                              // p: -1 (falta) … 1 (hay): el resplandor del tablero y los sellos siguen al dedo
+      const a = Math.min(1, Math.abs(p));
+      card.style.setProperty("--p", p.toFixed(3)); card.style.setProperty("--a", a.toFixed(3));
+      if(deck){ deck.style.setProperty("--wo", (a * .55).toFixed(3)); deck.style.setProperty("--wc", p >= 0 ? "74,222,128" : "255,107,107"); deck.style.setProperty("--wx", p >= 0 ? "78%" : "22%"); }
+      si.style.opacity = Math.max(0, Math.min(1, p * 1.4));
+      no.style.opacity = Math.max(0, Math.min(1, -p * 1.4));
+      si.style.transform = "rotate(-14deg) scale(" + (.8 + Math.max(0, p) * .35).toFixed(2) + ")";
+      no.style.transform = "rotate(14deg) scale(" + (.8 + Math.max(0, -p) * .35).toFixed(2) + ")";
+    };
     card.addEventListener("pointerdown", e => {
       if(bloqueado) return;
       activo = true; x0 = e.clientX; y0 = e.clientY; dx = 0; t0 = performance.now();
       try{ card.setPointerCapture(e.pointerId); }catch{}
-      card.style.transition = "none";
+      card.style.transition = "none"; card.classList.add("agarrada");
     });
     card.addEventListener("pointermove", e => {
       if(!activo) return;
       dx = e.clientX - x0;
-      card.style.transform = "translate(" + dx + "px," + ((e.clientY - y0) * .25) + "px) rotate(" + (dx * .06) + "deg)";
-      si.style.opacity = Math.max(0, Math.min(1, dx / 90));
-      no.style.opacity = Math.max(0, Math.min(1, -dx / 90));
+      const dy = (e.clientY - y0) * .3;
+      card.style.transform = "perspective(700px) translate(" + dx + "px," + dy + "px) rotate(" + (dx * .055) + "deg) rotateY(" + (dx * -.06) + "deg) scale(1.02)";
+      luz(Math.max(-1, Math.min(1, dx / 110)));
     });
     const suelta = () => {
       if(!activo) return;
-      activo = false;
+      activo = false; card.classList.remove("agarrada");
       const v = dx / Math.max(1, performance.now() - t0);   // px por ms: un tirón rápido cuenta aunque sea corto
       if(dx > 90 || (v > .6 && dx > 25)) decide("si");
       else if(dx < -90 || (v < -.6 && dx < -25)) decide("no");
       else {
-        card.style.transition = "transform .45s cubic-bezier(.34,1.56,.64,1)";
+        card.style.transition = "transform .55s cubic-bezier(.34,1.56,.64,1)";
         card.style.transform = "";
-        si.style.opacity = no.style.opacity = 0;
+        luz(0);
       }
     };
     card.addEventListener("pointerup", suelta);
     card.addEventListener("pointercancel", suelta);
+  }
+  /* chispas que salen de la carta al decidir (verdes si hay, rojas si falta) */
+  function chispas(cual){
+    const deck = document.getElementById("mkDeck"); if(!deck || REDUCED) return;
+    const col = cual === "si" ? ["#4ade80", "#bbf7d0", "#fde047"] : ["#ff6b6b", "#fecaca", "#ffb066"];
+    const w = document.createElement("div"); w.className = "mkChispas"; w.setAttribute("aria-hidden", "true");
+    for(let i = 0; i < 14; i++){
+      const ang = (cual === "si" ? -0.2 : Math.PI + .2) + (Math.random() - .5) * 1.6, d = 70 + Math.random() * 120;
+      const el = document.createElement("i");
+      el.style.cssText = "background:" + col[i % 3] + ";--x:" + (Math.cos(ang) * d).toFixed(0) + "px;--y:" + (Math.sin(ang) * d - 20).toFixed(0) + "px;animation-delay:" + (Math.random() * .06).toFixed(2) + "s";
+      w.appendChild(el);
+    }
+    deck.appendChild(w); setTimeout(() => w.remove(), 900);
+  }
+  function masUno(){
+    const c = document.getElementById("mkCart"); if(!c || REDUCED) return;
+    const m = document.createElement("span"); m.className = "mkMas"; m.textContent = "+1"; c.appendChild(m);
+    setTimeout(() => m.remove(), 900);
   }
   function decide(cual){
     if(bloqueado || idx >= cola.length) return;
@@ -5312,16 +5405,18 @@ const Mercar = (function(){
     }
     const card = document.querySelector("#mkDeck .mkCard:not(.atras)");
     if(card){
-      const st = card.querySelector(cual === "si" ? ".mkStamp.si" : ".mkStamp.no"); if(st) st.style.opacity = 1;
-      card.style.transition = REDUCED ? "opacity .15s" : "transform .4s cubic-bezier(.4,0,.2,1), opacity .4s";
-      if(!REDUCED) card.style.transform = "translate(" + (cual === "si" ? 140 : -140) + "%, -6%) rotate(" + (cual === "si" ? 22 : -22) + "deg)";
+      const st = card.querySelector(cual === "si" ? ".mkStamp.si" : ".mkStamp.no"); if(st){ st.style.opacity = 1; st.style.transform = (cual === "si" ? "rotate(-14deg)" : "rotate(14deg)") + " scale(1.15)"; }
+      card.style.transition = REDUCED ? "opacity .15s" : "transform .42s cubic-bezier(.5,0,.75,0), opacity .42s ease-in";
+      if(!REDUCED) card.style.transform = "perspective(700px) translate(" + (cual === "si" ? 150 : -150) + "%, -8%) rotate(" + (cual === "si" ? 26 : -26) + "deg) rotateY(" + (cual === "si" ? -25 : 25) + "deg) scale(.9)";
       card.style.opacity = "0";
     }
+    chispas(cual); vibra(cual === "si" ? 10 : [12, 30, 12]);
+    const dk = document.getElementById("mkDeck"); if(dk){ dk.style.setProperty("--wo", "0"); }
     const back = document.querySelector("#mkDeck .mkCard.atras");
     if(back){ back.style.transition = "transform .35s cubic-bezier(.22,1,.36,1), opacity .35s"; back.classList.remove("atras"); }
     if(cual === "no"){
       const c = document.getElementById("mkCart");
-      if(c){ c.innerHTML = "🛒 <b>" + decision.filter(d => d === "no").length + "</b>"; c.classList.remove("pop"); void c.offsetWidth; c.classList.add("pop"); }
+      if(c){ c.innerHTML = "🛒 <b>" + decision.filter(d => d === "no").length + "</b>"; c.classList.remove("pop"); void c.offsetWidth; c.classList.add("pop"); masUno(); }
     }
     setTimeout(() => {
       bloqueado = false;
