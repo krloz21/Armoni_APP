@@ -1,0 +1,9 @@
+# Agrega estas líneas al nginx de mamá, DENTRO del bloque "server { ... }" y ANTES de la regla que bloquea todo lo demás.
+# Dejan pasar solo lo que la app necesita para verse con su logo y poder instalarse. Nada más queda expuesto.
+
+  location = /mama.html          { }
+  location = /sw.js              { }
+  location = /mama.webmanifest   { }
+  location ~ ^/mama-(180|192|512|maskable-512)\.png$ { }
+
+# Después de editar, reinicia el contenedor de nginx (docker restart <nombre-del-contenedor>).
