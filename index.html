@@ -2004,7 +2004,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
 /* ═════════ VERSIÓN ═════════
    Súbela en cada entrega: si el servidor tiene una versión distinta a la que está corriendo,
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
-const APP_VERSION = "2026-10-05.56";
+const APP_VERSION = "2026-10-05.57";
 (function autoActualizar(){
   const patron = new RegExp("const APP_" + "VERSION = \"([^\"]+)\"");
   async function revisar(){
@@ -2321,7 +2321,7 @@ void main(){
   const uRect = U("uRect"), uRad = U("uRad"), uDim = U("uDim"), uLight = U("uLight"), uSeason = U("uSeason");
 
   /* líneas de 1px: necesitan resolución real, pero sin pasar de 1.5x */
-  const SCALE = Math.min(1.5, devicePixelRatio || 1);
+  const SCALE = Math.min(1.25, devicePixelRatio || 1);   // 30% menos píxeles que a 1.5x; en un fondo de luz suave no se nota
   let w = 0, h = 0;
   function build(){
     w = innerWidth; h = innerHeight;
@@ -2358,7 +2358,7 @@ void main(){
   let light = document.documentElement.dataset.theme === "light" ? 1 : 0, lightTarget = light;
 
   function draw(now){
-    const dt = Math.min(0.05, (now - lastT) / 1000);
+    const dt = Math.min(0.085, (now - lastT) / 1000);
     lastT = now;
     wait += ((waiting ? 1 : 0) - wait) * 0.05;
     dim  += (dimTarget - dim) * 0.04;
@@ -2385,7 +2385,7 @@ void main(){
     raf = requestAnimationFrame(loop);
     if(manualUntil > now) return;                 // un movimiento (el menú) está dibujando él mismo, cuadro a cuadro
     const lively = waiting || wait > 0.01 || now - sendAt < 1900 || now - replyAt < 1900 || Math.abs(dim - dimTarget) > 0.005 || Math.abs(light - lightTarget) > 0.004 || now - movedAt < 900;
-    if(!lively && now - lastDraw < 42) return;   // ~24 cuadros en calma, 60 con la ola
+    if(!lively && now - lastDraw < (window.__reposado && window.__reposado() ? 50 : 32)) return;   // 30 cuadros en calma, 60 con la ola; 20 si llevas rato sin tocar
     lastDraw = now;
     draw(now);
   }
@@ -2419,7 +2419,7 @@ void main(){
    ════════════════════════════════════════════════════════════ */
 const Campo = (function(){
   const FIELD = 500, HALF = FIELD / 2, WORLD = 5, FOV = 40, MAX_POINTS = 65536, TAU = Math.PI * 2;
-  const MAX_COLORS = 5, RING_EDGE = 4 / 100, WANDER_LERP = 0.01, MAX_DPR = 1.5, FRAME_MS = 42;
+  const MAX_COLORS = 5, RING_EDGE = 4 / 100, WANDER_LERP = 0.01, MAX_DPR = 1.5, FRAME_MS = 32;
   const DENSITY = 300, SPEED = 6 / 50, CAM = 1.6;
   const RING = { radius: 0.12, width: 0.09, push: 0.5, turb: 1 };
   const COLORS = ["#7ee8ff", "#3f7cf6", "#0b0b18"];
@@ -2887,7 +2887,7 @@ void main(){
     gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
 
     function dibuja(now){
-      const dt = Math.min(last ? (now - last) / 1000 : 1 / 60, 1 / 20);
+      const dt = Math.min(last ? (now - last) / 1000 : 1 / 60, 1 / 12);
       last = now;
       simTime = (simTime + dt * SPEED) % 3600;
       wander += dt * SPEED;
@@ -2966,7 +2966,7 @@ void main(){
 
     function bucle(now){
       raf = requestAnimationFrame(bucle);
-      if(now - lastDraw < FRAME_MS) return;          // 30 cuadros por segundo: sobra para algo tan lento
+      if(now - lastDraw < (window.__reposado && window.__reposado() ? 50 : FRAME_MS)) return;   // 30 cuadros al usarla; 20 cuando llevas rato sin tocar
       if(opts.activo && !opts.activo()) return;
       lastDraw = now;
       dibuja(now);
@@ -3349,7 +3349,11 @@ function scheduleSleep(){
   sleepTimer = setTimeout(goToSleep, REPOSO_SEGUNDOS * 1000);
 }
 
+/* a los 8 s sin tocar nada, los fondos bajan de 30 a 20 cuadros: al interactuar vuelven a 30 al instante */
+let ultToque = performance.now();
+window.__reposado = () => performance.now() - ultToque > 8000;
 function activity(){
+  ultToque = performance.now();
   const now = Date.now();
   if(now - lastTouch < 800 && !sleeping) return;   // no repetir trabajo en cada toque
   lastTouch = now;
