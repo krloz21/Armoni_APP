@@ -922,6 +922,7 @@ body.mode-gmail footer, body.mode-glim footer{ display:none; }
 }
 .notifBtn:hover{ border-color:var(--cyan); }
 .notifBtn:disabled{ opacity:.6; cursor:default; }
+.notifBtn.on{ color:var(--dim); background:transparent; }
 .ajGrupo{ margin:22px 4px 8px; font-size:.72rem; color:var(--dim); letter-spacing:.08em; text-transform:uppercase; }
 .ajCard{ background:var(--panel); border:1px solid var(--line); border-radius:16px; padding:4px 8px; }
 .ajCard .setRow{ padding:12px 8px; }
@@ -1012,6 +1013,39 @@ body.mode-gmail footer, body.mode-glim footer{ display:none; }
 .tmTile .tmSpark i.v{ background:rgba(255,255,255,.14); }
 @keyframes tmCrece{ from{ transform:scaleY(0); } to{ transform:scaleY(1); } }
 
+/* leyenda de colores y etiqueta de extremos */
+.tmLey{ grid-column:1 / -1; display:flex; flex-wrap:wrap; justify-content:center; gap:8px 14px; margin:-2px 0 4px; font-size:.74rem; color:var(--dim); }
+.tmLey span{ display:inline-flex; align-items:center; gap:6px; }
+.tmLey i{ width:9px; height:9px; border-radius:50%; background:var(--c); box-shadow:0 0 8px color-mix(in srgb, var(--c) 70%, transparent); }
+/* tarjeta del año: ocupa todo el ancho */
+.tmAnio{ grid-column:1 / -1; aspect-ratio:auto; min-height:210px; }
+.tmAnio .tmSpark{ margin:46px 0 14px; height:84px; flex:none; gap:5px; }
+.tmAnio .tmSpark i{ border-radius:4px 4px 0 0; background:linear-gradient(180deg, var(--c2), var(--c1)); }
+.tmAnio .tmNom{ font-size:clamp(1.5rem, 8vw, 2.1rem); }
+.tmAnio .tmCurso{ background:linear-gradient(120deg, rgba(201,133,0,.35), rgba(213,81,129,.35)); }
+/* año: chispas, columnas de 12 meses y datos curiosos */
+.wsChispas{ position:absolute; inset:0; pointer-events:none; }
+.wsChispas u{ position:absolute; left:var(--x); top:var(--y); width:var(--z); height:var(--z); border-radius:50%; background:#fff; opacity:0; box-shadow:0 0 8px 1px rgba(255,255,255,.7); animation:wsChispa var(--t) ease-in-out var(--w) infinite; }
+@keyframes wsChispa{ 0%{ opacity:0; transform:translateY(14px) scale(.4); } 45%{ opacity:.9; } 100%{ opacity:0; transform:translateY(-46px) scale(1); } }
+.wsAnioNum{ font-size:clamp(4.4rem, 26vw, 7rem); font-weight:800; letter-spacing:-.06em; line-height:.95; margin:0 0 14px; background:linear-gradient(180deg, #fff 30%, var(--c2) 70%, var(--c1)); -webkit-background-clip:text; background-clip:text; color:transparent; padding-bottom:.06em; }
+.wsCols{ display:flex; gap:6px; margin-top:12px; }
+.wsCol{ flex:1; min-width:0; display:flex; flex-direction:column; align-items:center; gap:8px; }
+.wsCol .p{ width:100%; height:196px; display:flex; flex-direction:column; justify-content:flex-end; align-items:center; gap:5px; }
+.wsCol i{ display:block; width:100%; height:calc(var(--h) * 1.5px); border-radius:4px 4px 0 0; background:linear-gradient(180deg, var(--c2), var(--c1)); transform-origin:bottom; transform:scaleY(0); animation:wsCrece 1s cubic-bezier(.16,1,.3,1) forwards; animation-delay:calc(.55s + var(--j) * 75ms); box-shadow:0 0 16px -4px var(--c1); }
+.wsCol em{ font-style:normal; font-size:.62rem; font-weight:700; color:#fff; white-space:nowrap; opacity:0; animation:wsFade .5s ease forwards; animation-delay:calc(1.1s + var(--j) * 75ms); }
+.wsCol span{ font-size:.66rem; font-weight:600; color:rgba(255,255,255,.6); text-transform:uppercase; }
+@keyframes wsCrece{ to{ transform:scaleY(1); } }
+@keyframes wsFade{ to{ opacity:1; } }
+.wsLey{ display:flex; flex-wrap:wrap; gap:6px 14px; margin-top:16px; font-size:.72rem; color:rgba(255,255,255,.7); }
+.wsLey span{ display:inline-flex; align-items:center; gap:6px; }
+.wsLey i{ width:9px; height:9px; border-radius:50%; background:var(--c); }
+.wsDatos{ display:grid; gap:12px; margin-top:6px; }
+.wsDato{ display:flex; align-items:center; gap:14px; padding:14px 16px; border-radius:20px; background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.12); -webkit-backdrop-filter:blur(14px); backdrop-filter:blur(14px); opacity:0; transform:translateX(-24px); filter:blur(6px); animation:wsEntraDato .8s cubic-bezier(.16,1,.3,1) forwards; animation-delay:calc(.35s + var(--j) * .28s); }
+@keyframes wsEntraDato{ to{ opacity:1; transform:none; filter:blur(0); } }
+.wsDato .e{ font-size:1.9rem; line-height:1; flex:none; }
+.wsDato small{ display:block; font-size:.66rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:rgba(255,255,255,.6); margin-bottom:2px; }
+.wsDato b{ font-size:1.12rem; font-weight:700; letter-spacing:-.02em; line-height:1.2; }
+
 .ws{
   position:fixed; inset:0; z-index:400; background:#05070d; color:#fff; display:flex; flex-direction:column;
   animation:wsEntra .45s cubic-bezier(.16,1,.3,1); touch-action:none; user-select:none; -webkit-user-select:none; overflow:hidden;
@@ -1063,7 +1097,8 @@ body.mode-gmail footer, body.mode-glim footer{ display:none; }
 .wsAcc .a{ background:linear-gradient(140deg, #7ee8ff, #3f7cf6); color:#03070f; }
 .wsAcc .b{ background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.16); color:#fff; }
 @media (prefers-reduced-motion: reduce){
-  .wsFondo i, .wsCuerpo > .wsEmoji, .tmTile, .tmTile .tmSpark i{ animation:none; }
+  .wsFondo i, .wsCuerpo > .wsEmoji, .tmTile, .tmTile .tmSpark i, .wsChispas u{ animation:none; }
+  .wsCol i{ animation:none; transform:none; } .wsCol em, .wsDato{ animation:none; opacity:1; transform:none; filter:none; }
   .wsCuerpo > *{ animation-duration:.01s; animation-delay:0s; }
 }
 @media (prefers-reduced-motion: reduce){ .wsCuerpo > *{ animation:none; opacity:1; transform:none; } .wsFondo i{ animation:none; } }
@@ -1617,7 +1652,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
 /* ═════════ VERSIÓN ═════════
    Súbela en cada entrega: si el servidor tiene una versión distinta a la que está corriendo,
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
-const APP_VERSION = "2026-10-05.14";
+const APP_VERSION = "2026-10-05.15";
 (function autoActualizar(){
   const patron = new RegExp("const APP_" + "VERSION = \"([^\"]+)\"");
   async function revisar(){
@@ -4267,33 +4302,53 @@ const Notificaciones = (function(){
     return Uint8Array.from([...raw].map(c => c.charCodeAt(0)));
   }
 
+  let activas = false;
+  function pinta(on, msg){
+    activas = on;
+    btn.disabled = false;
+    btn.textContent = on ? "Desactivar" : "Activar";
+    btn.classList.toggle("on", on);
+    estado.textContent = msg || (on ? "Activadas en este dispositivo" : "Avisos de pagos pendientes");
+  }
+
   async function activar(){
     btn.disabled = true; btn.textContent = "Activando…";
     try{
       const permiso = await Notification.requestPermission();
       if(permiso !== "granted"){
-        estado.textContent = "Permiso denegado en el navegador";
-        btn.disabled = false; btn.textContent = "Activar";
+        pinta(false, "El permiso está bloqueado: actívalo en los ajustes del teléfono o del navegador");
         return;
       }
       const reg = await navigator.serviceWorker.register("sw.js");
       await navigator.serviceWorker.ready;
-      const sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: comoBytes(VAPID_PUBLIC_KEY) });
+      const sub = (await reg.pushManager.getSubscription()) || await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: comoBytes(VAPID_PUBLIC_KEY) });
       const res = await fetch(PUSH_SUBSCRIBE_URL, { method: "POST", body: JSON.stringify({ token: MERCADO_TOKEN, subscription: sub.toJSON() }) });
       if(!res.ok) throw new Error("http " + res.status);
-      estado.textContent = "Activadas"; btn.textContent = "Activadas"; btn.disabled = true;
+      pinta(true);
     }catch{
-      estado.textContent = "No se pudo activar. ¿Tienes internet y Tailscale encendido?";
-      btn.disabled = false; btn.textContent = "Activar";
+      pinta(false, "No se pudo activar. ¿Tienes internet y Tailscale encendido?");
+    }
+  }
+
+  /* desactivar: este dispositivo deja de recibir avisos (el servidor lo descarta solo en el próximo envío) */
+  async function desactivar(){
+    btn.disabled = true; btn.textContent = "Desactivando…";
+    try{
+      const reg = await navigator.serviceWorker.getRegistration("sw.js");
+      const sub = reg && await reg.pushManager.getSubscription();
+      if(sub) await sub.unsubscribe();
+      pinta(false, "Desactivadas. Cuando quieras las vuelves a activar");
+    }catch{
+      pinta(true, "No se pudo desactivar, intenta de nuevo");
     }
   }
 
   if(!SOPORTADO){
     estado.textContent = "No disponible en este navegador"; btn.disabled = true;
   } else {
-    btn.addEventListener("click", activar);
+    btn.addEventListener("click", () => activas ? desactivar() : activar());
     navigator.serviceWorker.getRegistration("sw.js").then(reg => reg && reg.pushManager.getSubscription()).then(sub => {
-      if(sub){ estado.textContent = "Activadas"; btn.textContent = "Activadas"; btn.disabled = true; }
+      if(sub) pinta(true);
     }).catch(() => {});
   }
   const probar = document.getElementById("notifProbar"), probarEstado = document.getElementById("notifProbarEstado");
@@ -5316,25 +5371,61 @@ const TuMes = (function(){
   const diaDeFecha = f => { try{ const d = new Date(f + "T12:00:00").toLocaleDateString("es-CO", { weekday: "long" }); return d.charAt(0).toUpperCase() + d.slice(1); }catch{ return ""; } };
   const plural = d => /s$/.test(d) ? d : d + "s";
   const mesHoy = () => { const d = new Date(); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0"); };
-  const acentoDe = m => ACENTOS[+m.slice(5, 7) % ACENTOS.length];   // cada mes de calendario conserva siempre su tono
+  /* el color dice cuánto gastaste frente a tus otros meses: verde = de los más bajos, azul = en el medio, naranja = de los más altos */
+  const TONOS = { bajo: ["#199e70", "#6fe0b5"], medio: ["#3987e5", "#9085e9"], alto: ["#d95926", "#e66767"] };
+  const cerrados = () => ((datos && datos.meses) || []).filter(m => m.mes !== mesHoy() && m.gastos > 0);
+  function nivelDe(M){
+    if(M.mes === mesHoy()) return "curso";
+    const c = cerrados();
+    if(c.length < 2) return "medio";
+    const t = c.filter(x => x.gastos < M.gastos).length / (c.length - 1);
+    return t < 1 / 3 ? "bajo" : t < 2 / 3 ? "medio" : "alto";
+  }
+  const tonoDe = M => { const n = nivelDe(M); return n === "curso" ? ACENTOS[0] : TONOS[n]; };
+  const INICIALES = ["E", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D"];
+  const corto = n => "$" + (n / 1e6).toFixed(1).replace(".", ",") + "M";
 
   let datos = null;
 
   /* ── la lista de meses ── */
+  /* los años ya terminados (el resumen del año aparece recién cuando el año acaba) */
+  function aniosListos(){
+    const hoyA = new Date().getFullYear(), meses = (datos && datos.meses) || [];
+    return [...new Set(meses.map(m => +m.mes.slice(0, 4)))].filter(a => a < hoyA).sort((a, b) => b - a);
+  }
   function pintaLista(){
     const meses = (datos && datos.meses) || [];
     if(!meses.length){ grid.innerHTML = ""; statusEl.innerHTML = "Todavía no hay movimientos para armar un resumen."; return; }
     statusEl.innerHTML = "";
-    grid.innerHTML = meses.map((M, k) => {
-      const [c1, c2] = acentoDe(M.mes);
+    const c = cerrados(), bajoMax = c.length >= 3 ? Math.min(...c.map(m => m.gastos)) : null, altoMax = c.length >= 3 ? Math.max(...c.map(m => m.gastos)) : null;
+    let k0 = 0;
+    const anios = aniosListos().map(a => {
+      const ms = meses.filter(m => +m.mes.slice(0, 4) === a).sort((x, y) => x.mes < y.mes ? -1 : 1);
+      const total = ms.reduce((t, m) => t + m.gastos, 0), max = Math.max(1, ...ms.map(m => m.gastos));
+      const barras = Array.from({ length: 12 }, (_, j) => {
+        const m = ms.find(x => +x.mes.slice(5, 7) === j + 1);
+        const [a1, a2] = m ? tonoDe(m) : ["#fff", "#fff"];
+        return '<i class="' + (m ? '' : 'v') + '" style="--j:' + j + ';--c1:' + a1 + ';--c2:' + a2 + ';height:' + (m ? Math.max(8, Math.round(m.gastos / max * 100)) : 5) + '%"></i>';
+      }).join("");
+      return '<button type="button" class="tmTile tmAnio" data-anio="' + a + '" style="--c1:#c98500;--c2:#d55181;--k:' + (k0++) + '">' +
+        '<span class="tmCurso">RESUMEN DEL AÑO ✨</span>' +
+        '<span class="tmPlay" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l13-7.5z"/></svg></span>' +
+        '<span class="tmSpark" aria-hidden="true">' + barras + '</span>' +
+        '<span class="tmAno">Todo el</span><span class="tmNom">Año ' + a + '</span>' +
+        '<span class="tmTot">' + peso(total) + ' gastados en ' + ms.length + (ms.length === 1 ? ' mes' : ' meses') + '</span></button>';
+    }).join("");
+    const ley = '<div class="tmLey" aria-hidden="true"><span style="--c:' + TONOS.bajo[0] + '"><i></i>Gastaste menos</span><span style="--c:' + TONOS.medio[0] + '"><i></i>En el medio</span><span style="--c:' + TONOS.alto[0] + '"><i></i>Gastaste más</span></div>';
+    grid.innerHTML = anios + ley + meses.map((M, k) => {
+      const [c1, c2] = tonoDe(M);
       const dias = new Date(+M.mes.slice(0, 4), +M.mes.slice(5, 7), 0).getDate();
       const pd = M.porDia || [], max = Math.max(1, ...pd.slice(1, dias + 1));
       const spark = Array.from({ length: dias }, (_, j) => {
         const v = pd[j + 1] || 0;
         return '<i class="' + (v ? '' : 'v') + '" style="--j:' + j + ';height:' + (v ? Math.max(8, Math.round(v / max * 100)) : 5) + '%"></i>';
       }).join("");
-      return '<button type="button" class="tmTile" data-mes="' + M.mes + '" style="--c1:' + c1 + ';--c2:' + c2 + ';--k:' + k + '">' +
-        (M.mes === mesHoy() ? '<span class="tmCurso">EN CURSO</span>' : '') +
+      const etiqueta = M.mes === mesHoy() ? 'EN CURSO' : M.gastos === bajoMax ? 'EL MÁS BAJO' : M.gastos === altoMax ? 'EL MÁS ALTO' : '';
+      return '<button type="button" class="tmTile" data-mes="' + M.mes + '" style="--c1:' + c1 + ';--c2:' + c2 + ';--k:' + (k + k0) + '">' +
+        (etiqueta ? '<span class="tmCurso">' + etiqueta + '</span>' : '') +
         '<span class="tmPlay" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l13-7.5z"/></svg></span>' +
         '<span class="tmSpark" aria-hidden="true">' + spark + '</span>' +
         '<span class="tmAno">' + M.mes.slice(0, 4) + '</span>' +
@@ -5345,6 +5436,7 @@ const TuMes = (function(){
   }
   grid.addEventListener("click", e => {
     const t = e.target.closest(".tmTile"); if(!t) return;
+    if(t.dataset.anio){ abrir(anual(+t.dataset.anio), null); return; }
     const meses = datos.meses, k = meses.findIndex(m => m.mes === t.dataset.mes);
     if(k >= 0) abrir(meses[k], meses[k + 1] || null);
   });
@@ -5357,8 +5449,8 @@ const TuMes = (function(){
     const enCurso = M.mes === mesHoy();
     const hoyDia = new Date().getDate();
     const nom = mesNombre(M.mes), nomP = P ? mesNombre(P.mes) : null;
-    const s = [];
-    s.push({ fondo: 0, html:
+    const s = [], tono = tonoDe(M);
+    s.push({ fondo: 0, ac: tono, html:
       '<div class="wsEmoji" style="--d:0">💸</div>' +
       '<div class="wsK" style="--d:.15">' + (enCurso ? 'Va así' : 'Tu resumen') + '</div>' +
       '<h2 class="wsT" style="--d:.3">' + (enCurso ? 'Tu ' + nom + ' hasta hoy' : 'Así se movió tu plata en ' + nom) + '</h2>' +
@@ -5373,7 +5465,7 @@ const TuMes = (function(){
         comp = pct < 0 ? '↓ ' + Math.abs(pct) + '% menos que ' + ref + ' 🎉' : pct > 0 ? '↑ ' + pct + '% más que ' + ref : 'Igualito a ' + ref;
       }
     }
-    s.push({ fondo: 1, html:
+    s.push({ fondo: 1, ac: tono, html:
       '<div class="wsK" style="--d:0">En ' + nom + ' gastaste</div>' +
       '<div class="wsBig" style="--d:.15" data-monto="' + M.gastos + '">$0</div>' +
       '<span class="wsChip" style="--d:.9">' + comp + '</span>' });
@@ -5415,7 +5507,7 @@ const TuMes = (function(){
       '<div class="wsK" style="--d:.15">Tu día más gastador</div>' +
       '<h2 class="wsT" style="--d:.3">' + (diaDeFecha(M.diaTop.fecha) || "Un día") + '</h2>' +
       '<p class="wsP" style="--d:.55">El día que más se movió la plata fue el ' + fechaLarga(M.diaTop.fecha) + ': ' + peso(M.diaTop.total) + '.</p>' });
-    s.push({ fondo: 0, final: true, html:
+    s.push({ fondo: 0, ac: tono, final: true, html:
       '<div class="wsK" style="--d:0">' + (enCurso ? 'Tu ' + nom + ' hasta ahora' : 'Tu ' + nom) + ' en 3 datos</div>' +
       '<div class="wsRecap" style="--d:.2"><div><small>Gastaste</small><b>' + peso(M.gastos) + '</b></div>' +
         (M.categorias && M.categorias[0] ? '<div><small>Lo que más pesó</small><b>' + esc(M.categorias[0].nombre) + '</b></div>' : '') +
@@ -5425,16 +5517,126 @@ const TuMes = (function(){
     return s;
   }
 
+  /* ── el resumen del año: junta los meses del año en un solo "mes" gigante ── */
+  const DIAS_SEM = ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"];
+  function anual(a){
+    const ms = ((datos && datos.meses) || []).filter(m => +m.mes.slice(0, 4) === a).sort((x, y) => x.mes < y.mes ? -1 : 1);
+    const A = { anio: true, mes: String(a), ms, n: ms.reduce((t, m) => t + (m.n || 0), 0), gastos: 0, ingresos: 0 };
+    const cats = {}, clasicos = {}, favs = {}, sem = Array(7).fill(0);
+    let sinGasto = 0, diasTotal = 0, salVeces = 0, salTotal = 0;
+    ms.forEach(m => {
+      A.gastos += m.gastos; A.ingresos += m.ingresos || 0;
+      (m.categorias || []).forEach(c => { cats[c.nombre] = (cats[c.nombre] || 0) + c.total; });
+      if(m.repetido){ const c = clasicos[m.repetido.concepto] || (clasicos[m.repetido.concepto] = { concepto: m.repetido.concepto, veces: 0, total: 0 }); c.veces += m.repetido.veces; c.total += m.repetido.total; }
+      if(m.salidas){ salVeces += m.salidas.veces || 0; salTotal += m.salidas.total || 0;
+        if(m.salidas.favorito){ const f = favs[m.salidas.favorito.nombre] || (favs[m.salidas.favorito.nombre] = { nombre: m.salidas.favorito.nombre, veces: 0 }); f.veces += m.salidas.favorito.veces; } }
+      if(m.mayor && (!A.mayor || m.mayor.monto > A.mayor.monto)) A.mayor = m.mayor;
+      if(m.diaTop && (!A.diaTop || m.diaTop.total > A.diaTop.total)) A.diaTop = m.diaTop;
+      const y = +m.mes.slice(0, 4), mo = +m.mes.slice(5, 7), dias = new Date(y, mo, 0).getDate(), pd = m.porDia || [];
+      for(let d = 1; d <= dias; d++){ const v = pd[d] || 0; sem[new Date(y, mo - 1, d).getDay()] += v; diasTotal++; if(!v) sinGasto++; }
+    });
+    A.categorias = Object.entries(cats).map(([nombre, total]) => ({ nombre, total })).sort((x, y) => y.total - x.total);
+    A.repetido = Object.values(clasicos).sort((x, y) => y.veces - x.veces || y.total - x.total)[0] || null;
+    if(A.repetido && A.repetido.veces < 2) A.repetido = null;
+    A.salidas = salVeces ? { veces: salVeces, total: salTotal, favorito: Object.values(favs).sort((x, y) => y.veces - x.veces)[0] || null } : null;
+    const conGasto = ms.filter(m => m.gastos > 0);
+    A.caro = conGasto.slice().sort((x, y) => y.gastos - x.gastos)[0] || null;
+    A.barato = conGasto.slice().sort((x, y) => x.gastos - y.gastos)[0] || null;
+    A.verdes = ms.filter(m => m.ingresos > m.gastos).length;
+    A.semTop = sem.some(v => v > 0) ? sem.indexOf(Math.max(...sem)) : -1; A.semTotal = Math.max(...sem);
+    A.sinGasto = sinGasto; A.diasTotal = diasTotal;
+    return A;
+  }
+  function armarAnio(A){
+    const a = A.mes, nMes = A.ms.length;
+    const s = [];
+    const prom = A.gastos / Math.max(1, nMes);
+    s.push({ ac: ["#c98500", "#d55181"], html:
+      '<div class="wsK" style="--d:0">Resumen del año</div>' +
+      '<div class="wsAnioNum" style="--d:.2">' + a + '</div>' +
+      '<h2 class="wsT" style="--d:.5">Tu año en Armoni</h2>' +
+      '<p class="wsP" style="--d:.75">' + nMes + (nMes === 1 ? ' mes' : ' meses') + ', ' + A.n + ' movimientos. Vamos a repasarlo.</p>' });
+    s.push({ ac: ["#3987e5", "#9085e9"], html:
+      '<div class="wsK" style="--d:0">En ' + a + ' gastaste</div>' +
+      '<div class="wsBig" style="--d:.15" data-monto="' + A.gastos + '">$0</div>' +
+      '<span class="wsChip" style="--d:.9">' + peso(prom) + ' al mes en promedio</span>' });
+    const maxM = Math.max(1, ...A.ms.map(m => m.gastos));
+    const cols = Array.from({ length: 12 }, (_, j) => {
+      const m = A.ms.find(x => +x.mes.slice(5, 7) === j + 1);
+      const [c1, c2] = m ? tonoDe(m) : ["#fff", "#fff"];
+      const etq = m && (m === A.caro || m === A.barato) ? '<em>' + corto(m.gastos) + '</em>' : '';
+      return '<div class="wsCol" style="--j:' + j + ';--c1:' + c1 + ';--c2:' + c2 + ';--h:' + (m ? Math.max(6, Math.round(m.gastos / maxM * 100)) : 3) + '"><div class="p">' + etq + '<i' + (m ? '' : ' style="opacity:.25"') + '></i></div><span>' + INICIALES[j] + '</span></div>';
+    }).join("");
+    s.push({ ac: ["#199e70", "#3987e5"], html:
+      '<div class="wsK" style="--d:0">Mes por mes</div>' +
+      (A.caro && A.barato && A.caro !== A.barato ?
+        '<h2 class="wsT" style="--d:.15">' + mesNombre(A.caro.mes).replace(/^./, c => c.toUpperCase()) + ' fue el más caro y ' + mesNombre(A.barato.mes) + ' el más bajo</h2>' :
+        '<h2 class="wsT" style="--d:.15">Así se movió cada mes</h2>') +
+      '<div class="wsCols" style="--d:.3">' + cols + '</div>' +
+      '<div class="wsLey" style="--d:.5"><span style="--c:' + TONOS.bajo[0] + '"><i></i>Gastaste menos</span><span style="--c:' + TONOS.medio[0] + '"><i></i>En el medio</span><span style="--c:' + TONOS.alto[0] + '"><i></i>Gastaste más</span></div>' });
+    if(A.ingresos > 0){
+      const quedo = A.ingresos - A.gastos, max = Math.max(A.ingresos, A.gastos);
+      s.push({ ac: ["#199e70", "#3f7cf6"], html:
+        '<div class="wsK" style="--d:0">Entró vs. salió</div>' +
+        '<h2 class="wsT" style="--d:.15">' + (quedo >= 0 ? 'En el año te quedaron' : 'Salió más de lo que entró') + '</h2>' +
+        '<div class="wsBig" style="--d:.3" data-monto="' + Math.abs(quedo) + '">$0</div>' +
+        '<div class="wsBars" style="--d:.6">' + barra("Entró", A.ingresos, max, "--b1:#199e70;--b2:#6fe0b5") + barra("Salió", A.gastos, max, "--b1:#d95926;--b2:#ff9d73") + '</div>' +
+        '<p class="wsP" style="--d:.9;margin-top:16px">' + A.verdes + ' de ' + nMes + (nMes === 1 ? ' mes' : ' meses') + ' cerraste con plata de sobra.</p>' });
+    }
+    if(A.categorias.length){
+      const top = A.categorias.slice(0, 4), max = top[0].total;
+      s.push({ ac: ["#199e70", "#3987e5"], html:
+        '<div class="wsK" style="--d:0">¿En qué se fue el año?</div>' +
+        '<h2 class="wsT" style="--d:.15">' + esc(top[0].nombre) + ' se llevó el ' + Math.round(top[0].total / Math.max(1, A.gastos) * 100) + '%</h2>' +
+        '<div class="wsBars" style="--d:.4">' + top.map((c, k) => barra(c.nombre, c.total, max, k ? "opacity:.55" : "")).join("") + '</div>' });
+    }
+    if(A.mayor) s.push({ ac: ["#c98500", "#d95926"], html:
+      '<div class="wsEmoji" style="--d:0">🏆</div>' +
+      '<div class="wsK" style="--d:.15">El gasto más grande del año</div>' +
+      '<h2 class="wsT" style="--d:.3">' + esc(A.mayor.concepto) + '</h2>' +
+      '<div class="wsBig" style="--d:.45" data-monto="' + A.mayor.monto + '">$0</div>' +
+      '<p class="wsP" style="--d:.8">el ' + fechaLarga(A.mayor.fecha) + '</p>' });
+    if(A.repetido) s.push({ ac: ["#9085e9", "#d55181"], html:
+      '<div class="wsEmoji" style="--d:0">🔁</div>' +
+      '<div class="wsK" style="--d:.15">Tu clásico del año</div>' +
+      '<h2 class="wsT" style="--d:.3">' + esc(A.repetido.concepto) + '</h2>' +
+      '<span class="wsChip" style="--d:.55">' + A.repetido.veces + ' veces · ' + peso(A.repetido.total) + '</span>' });
+    if(A.salidas) s.push({ ac: ["#d55181", "#9085e9"], html:
+      '<div class="wsEmoji" style="--d:0">🍽️</div>' +
+      '<div class="wsK" style="--d:.15">Salidas a comer</div>' +
+      '<h2 class="wsT" style="--d:.3">Salieron ' + A.salidas.veces + (A.salidas.veces === 1 ? ' vez' : ' veces') + '</h2>' +
+      '<div class="wsBig" style="--d:.45" data-monto="' + A.salidas.total + '">$0</div>' +
+      (A.salidas.favorito && A.salidas.favorito.veces > 1 ? '<span class="wsChip" style="--d:.8">Su favorito: ' + esc(A.salidas.favorito.nombre) + ' · ' + A.salidas.favorito.veces + ' veces</span>' : '') });
+    const curiosos = [];
+    if(A.semTop >= 0) curiosos.push(['🗓️', 'Tu día de la semana más gastador', 'Los ' + plural(DIAS_SEM[A.semTop]) + ' · ' + peso(A.semTotal) + ' en total']);
+    if(A.diasTotal) curiosos.push(['🧘', 'Días sin gastar nada', A.sinGasto + (A.sinGasto === 1 ? ' día' : ' días') + ' de ' + A.diasTotal]);
+    if(A.diaTop) curiosos.push(['📅', 'Tu día más gastador del año', (diaDeFecha(A.diaTop.fecha) || '') + ' ' + fechaLarga(A.diaTop.fecha).replace(/^[^,]*,\s*/, '') + ' · ' + peso(A.diaTop.total)]);
+    curiosos.push(['📈', 'Cada día gastaste en promedio', peso(A.gastos / Math.max(1, A.diasTotal))]);
+    s.push({ ac: ["#7ee8ff", "#3f7cf6"], html:
+      '<div class="wsK" style="--d:0">Datos curiosos</div>' +
+      '<h2 class="wsT" style="--d:.1">Lo que tal vez no sabías</h2>' +
+      '<div class="wsDatos">' + curiosos.map((c, j) => '<div class="wsDato" style="--j:' + j + '"><span class="e">' + c[0] + '</span><span><small>' + c[1] + '</small><b>' + esc(c[2]) + '</b></span></div>').join('') + '</div>' });
+    s.push({ ac: ["#c98500", "#d55181"], final: true, html:
+      '<div class="wsK" style="--d:0">Tu ' + a + ' en 4 datos</div>' +
+      '<div class="wsRecap" style="--d:.2"><div><small>Gastaste</small><b>' + peso(A.gastos) + '</b></div>' +
+        (A.categorias[0] ? '<div><small>Lo que más pesó</small><b>' + esc(A.categorias[0].nombre) + '</b></div>' : '') +
+        (A.caro ? '<div><small>Tu mes más caro</small><b>' + mesNombre(A.caro.mes).replace(/^./, c => c.toUpperCase()) + ' · ' + peso(A.caro.gastos) + '</b></div>' : '') +
+        (A.barato ? '<div><small>Tu mes más bajo</small><b>' + mesNombre(A.barato.mes).replace(/^./, c => c.toUpperCase()) + ' · ' + peso(A.barato.gastos) + '</b></div>' : '') +
+      '</div>' +
+      '<div class="wsAcc" style="--d:.7"><button type="button" class="a" data-acc="compartir">Compartir</button><button type="button" class="b" data-acc="otra">Ver otra vez</button></div>' });
+    return s;
+  }
+
   /* ── el reproductor ── */
   let el = null, slides = [], i = 0, t0 = 0, acum = 0, pausa = false, raf = null, toques = [];
   function abrir(M, P){
-    slides = armar(M, P);
+    slides = M.anio ? armarAnio(M) : armar(M, P);
     el = document.createElement("div");
-    el.className = "ws";
+    el.className = "ws" + (M.anio ? " anio" : "");
     el.innerHTML =
-      '<div class="wsFondo" aria-hidden="true"><i></i><i></i></div>' +
+      '<div class="wsFondo" aria-hidden="true"><i></i><i></i>' + (M.anio ? '<div class="wsChispas">' + Array.from({ length: 30 }, (_, q) => '<u style="--x:' + ((q * 37) % 100) + '%;--y:' + ((q * 53 + 11) % 100) + '%;--z:' + (2 + q % 3) + 'px;--t:' + (3.4 + (q % 5) * .7).toFixed(1) + 's;--w:' + ((q % 9) * .45).toFixed(2) + 's"></u>').join("") + '</div>' : '') + '</div>' +
       '<div class="wsSegs">' + slides.map(() => "<i><b></b></i>").join("") + '</div>' +
-      '<div class="wsTop"><span>' + mesNombre(M.mes) + ' ' + M.mes.slice(0, 4) + '</span><button type="button" class="wsX" aria-label="Cerrar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>' +
+      '<div class="wsTop"><span>' + (M.anio ? 'Año ' + M.mes : mesNombre(M.mes) + ' ' + M.mes.slice(0, 4)) + '</span><button type="button" class="wsX" aria-label="Cerrar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>' +
       '<div class="wsCuerpo"></div>';
     document.body.appendChild(el);
     el.querySelector(".wsX").addEventListener("click", cerrar);
@@ -5466,7 +5668,7 @@ const TuMes = (function(){
     i = n; acum = 0; t0 = performance.now(); pausa = false;
     toques.forEach(clearTimeout); toques = [];
     const s = slides[i];
-    const ac = ACENTOS[s.fondo % ACENTOS.length];
+    const ac = s.ac || ACENTOS[s.fondo % ACENTOS.length];
     el.style.setProperty("--c1", ac[0]); el.style.setProperty("--c2", ac[1]);   // los tonos se funden entre pantallas
     const cuerpo = el.querySelector(".wsCuerpo");
     cuerpo.innerHTML = s.html;
@@ -5492,6 +5694,15 @@ const TuMes = (function(){
     setTimeout(() => viejo.remove(), 280);
   }
   function compartir(M, btn){
+    if(M.anio){
+      const t = "Mi " + M.mes + " en Armoni ✨\nGasté " + peso(M.gastos) +
+        (M.categorias[0] ? "\nLo que más pesó: " + M.categorias[0].nombre : "") +
+        (M.barato ? "\nMi mes más bajo: " + mesNombre(M.barato.mes) : "") +
+        (M.repetido ? "\nMi clásico: " + M.repetido.concepto + " (" + M.repetido.veces + " veces)" : "");
+      if(navigator.share) navigator.share({ text: t }).catch(() => {});
+      else if(copiarReferencia(t)) btn.textContent = "¡Copiado!";
+      return;
+    }
     const nom = mesNombre(M.mes);
     const t = "Mi " + nom + " en Armoni 💸\nGasté " + peso(M.gastos) +
       (M.categorias && M.categorias[0] ? "\nLo que más pesó: " + M.categorias[0].nombre : "") +
