@@ -105,7 +105,7 @@ body{
 body.asleep *, body.asleep *::before, body.asleep *::after{ animation-play-state:paused !important; }
 
 #rain{ position:fixed; inset:0; z-index:0; display:block; }
-#campo{ position:fixed; inset:0; z-index:0; display:block; width:100%; height:100%; pointer-events:none; opacity:0; transition:opacity 1.4s ease; filter:blur(calc(6px * var(--dpc, 0))); }
+#campo{ position:fixed; inset:0; z-index:0; display:block; width:100%; height:100%; pointer-events:none; opacity:0; transition:opacity .9s ease; filter:blur(calc(6px * var(--dpc, 0))); }
 body.ribbon #campo{ display:none; }
 
 .shell{
@@ -2031,7 +2031,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-05.67";
+const APP_VERSION = "2026-10-05.68";
 (function autoActualizar(){
   const patron = new RegExp("const APP_" + "VERSION = \"([^\"]+)\"");
   async function revisar(){
@@ -3022,7 +3022,8 @@ void main(){
 
   }
   /* se prepara cuando el navegador está libre, para no competir con el inicio de la app */
-  if(window.requestIdleCallback) requestIdleCallback(arranca, { timeout: 3000 }); else setTimeout(arranca, 1500);
+  /* arranca en cuanto pinta la primera imagen (antes esperaba a que el celular estuviera "libre", y con la intro eso tardaba hasta 3 s) */
+  requestAnimationFrame(() => requestAnimationFrame(() => setTimeout(arranca, 80)));
 })();
 
 
