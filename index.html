@@ -1631,6 +1631,12 @@ body[class*="mode-"] #masIngreso{ display:none; }
 .inErr:empty{ display:none; }
 .inAviso{ position:fixed; left:50%; bottom:calc(var(--safe-bot) + 96px); z-index:99; transform:translate(-50%, 16px); opacity:0; padding:12px 20px; border-radius:999px; background:var(--panel); border:1px solid rgba(74,222,128,.45); color:#86efac; font-size:.9rem; font-weight:600; pointer-events:none; transition:opacity .3s ease, transform .45s cubic-bezier(.34,1.56,.64,1); white-space:nowrap; }
 .inAviso.on{ opacity:1; transform:translate(-50%, 0); }
+
+.inTipo{ position:relative; display:grid; grid-template-columns:1fr 1fr; margin:12px auto 0; width:min(100%, 260px); padding:3px; border-radius:14px; border:1px solid rgba(var(--ink),.16); background:rgba(var(--ink),.06); }
+.inInd{ position:absolute; top:3px; bottom:3px; left:3px; width:calc(50% - 3px); border-radius:11px; background:linear-gradient(140deg, var(--cyan), var(--blue)); box-shadow:0 6px 16px -8px rgba(var(--blue-rgb),.7); transition:transform .3s cubic-bezier(.32,.72,0,1); }
+.inTipo[data-on="ingreso"] .inInd{ transform:translateX(100%); }
+.inTipo button{ position:relative; z-index:1; border:0; background:none; padding:9px 0; font:inherit; font-size:.88rem; font-weight:650; color:var(--ghost); cursor:pointer; transition:color .25s ease; }
+.inTipo button[aria-checked="true"]{ color:var(--on-accent); }
 </style>
 </head>
 <body>
@@ -1917,7 +1923,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
 /* ═════════ VERSIÓN ═════════
    Súbela en cada entrega: si el servidor tiene una versión distinta a la que está corriendo,
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
-const APP_VERSION = "2026-10-05.36";
+const APP_VERSION = "2026-10-05.37";
 (function autoActualizar(){
   const patron = new RegExp("const APP_" + "VERSION = \"([^\"]+)\"");
   async function revisar(){
@@ -4703,7 +4709,9 @@ function pedirMontoJardin(){
    ════════════════════════════════════════════════════════════ */
 const GastoManual = (function(){
   /* todas menos "Servicios": energía, agua, gas e internet ya se registran solos desde su aviso */
-  const CATS = ["Alimentación", "Salidas", "Hogar", "Carro", "Hijo", "Salud", "Tarjetas", "Ahorro", "Otros"];
+  const CATS_GASTO = ["Alimentación", "Salidas", "Hogar", "Carro", "Hijo", "Salud", "Tarjetas", "Ahorro", "Otros"];
+  /* lo que entra "a mano": sin lo automatizado (servicios, jardín, carro, tarjetas) */
+  const CATS_INGRESO = ["Hogar", "Alimentación", "Salidas", "Salud", "Ahorro", "Otros"];
   /* pagos que ya tienen su propio flujo: aquí no se registran para no duplicarlos */
   const AUTOMATICOS = /arriendo|jard[ií]n|cuota\s+(del\s+)?(carro|cr[eé]dito)/i;
   const P = 'fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"';
@@ -4730,12 +4738,15 @@ const GastoManual = (function(){
     scrim.innerHTML =
       '<div class="pgCard inCard" role="dialog" aria-modal="true" aria-labelledby="inT">' +
         '<h3 id="inT">Registrar un gasto</h3>' +
-        '<p class="inSub">Armoni lo revisa: lo guarda de una o, si falta algo (como en una salida), te pregunta</p>' +
+        '<div class="inTipo" id="inTipo" data-on="gasto" role="radiogroup" aria-label="Tipo de movimiento"><span class="inInd"></span>' +
+          '<button type="button" role="radio" data-t="Gasto" aria-checked="true">Gasto</button>' +
+          '<button type="button" role="radio" data-t="Ingreso" aria-checked="false">Ingreso</button></div>' +
+        '<p class="inSub" id="inSub">Armoni lo revisa: lo guarda de una o, si falta algo (como en una salida), te pregunta</p>' +
         '<div class="inBody">' +
         '<label class="inLbl" for="inConcepto">Concepto</label>' +
         '<input id="inConcepto" type="text" placeholder="Ej: Almuerzo, gasolina, droguería…" autocomplete="off" maxlength="80">' +
         '<span class="inLbl">Categoría</span>' +
-        '<div class="inCats" id="inCats">' + CATS.map(c => '<button type="button" class="inCat" data-c="' + c + '" aria-pressed="false"><svg viewBox="0 0 24 24" ' + P + '>' + ICO[c] + '</svg>' + c + '</button>').join("") + '</div>' +
+        '<div class="inCats" id="inCats"></div>' +
         '<span class="inLbl">Fecha</span>' +
         '<div class="recDia" id="inDia" style="margin:0">' +
           '<button type="button" class="recChip" data-dia="hoy" aria-pressed="true">Hoy</button>' +
@@ -4747,7 +4758,7 @@ const GastoManual = (function(){
         '<label class="inLbl" for="inNota">Nota <span style="font-weight:400;letter-spacing:0;text-transform:none">(opcional)</span></label>' +
         '<textarea id="inNota" rows="2" placeholder="Algo que quieras recordar" maxlength="300"></textarea>' +
         '<p class="inErr" id="inErr" role="alert"></p>' +
-        '<p class="inSub" style="margin-top:10px;font-size:.74rem">Servicios, jardín, arriendo y cuota del carro se registran solos desde sus avisos.</p>' +
+        '<p class="inSub" id="inNotaAuto" style="margin-top:10px;font-size:.74rem">Servicios, jardín, arriendo y cuota del carro se registran solos desde sus avisos.</p>' +
         '</div>' +
         '<div class="pgRow"><button type="button" class="pgNo" id="inCancel">Cancelar</button><button type="button" class="pgSi" id="inGuardar" disabled>Guardar</button></div>' +
       '</div>';
@@ -4756,16 +4767,37 @@ const GastoManual = (function(){
 
     const $ = id => scrim.querySelector("#" + id);
     const concepto = $("inConcepto"), monto = $("inMonto"), nota = $("inNota"), fechaIn = $("inFecha"), err = $("inErr"), guardar = $("inGuardar");
-    const chips = [...scrim.querySelectorAll("#inDia .recChip")], cats = [...scrim.querySelectorAll(".inCat")];
-    let categoria = "", fecha = hoy();
+    const chips = [...scrim.querySelectorAll("#inDia .recChip")];
+    let categoria = "", fecha = hoy(), tipo = "Gasto";
     const valor = () => parseInt(monto.value.replace(/\D/g, ""), 10) || 0;
     const listo = () => { guardar.disabled = !(concepto.value.trim() && categoria && valor() > 0); };
 
-    cats.forEach(b => b.addEventListener("click", () => {
-      categoria = b.dataset.c;
-      cats.forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+    /* las categorías cambian con el tipo; si la elegida sigue existiendo, se conserva */
+    function pintaCats(){
+      const lista = tipo === "Gasto" ? CATS_GASTO : CATS_INGRESO;
+      if(!lista.includes(categoria)) categoria = "";
+      $("inCats").innerHTML = lista.map(c => '<button type="button" class="inCat" data-c="' + c + '" aria-pressed="' + (c === categoria) + '"><svg viewBox="0 0 24 24" ' + P + '>' + ICO[c] + '</svg>' + c + '</button>').join("");
       listo();
-    }));
+    }
+    $("inCats").addEventListener("click", e => {
+      const b = e.target.closest(".inCat"); if(!b) return;
+      categoria = b.dataset.c;
+      scrim.querySelectorAll(".inCat").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+      listo();
+    });
+    function poneTipo(t){
+      tipo = t; err.textContent = "";
+      const g = t === "Gasto";
+      $("inTipo").dataset.on = g ? "gasto" : "ingreso";
+      scrim.querySelectorAll("#inTipo button").forEach(x => x.setAttribute("aria-checked", String(x.dataset.t === t)));
+      $("inT").textContent = g ? "Registrar un gasto" : "Registrar un ingreso";
+      $("inSub").textContent = g ? "Armoni lo revisa: lo guarda de una o, si falta algo (como en una salida), te pregunta" : "Lo que entra y no está automatizado";
+      $("inNotaAuto").hidden = !g;
+      concepto.placeholder = g ? "Ej: Almuerzo, gasolina, droguería…" : "Ej: Salario, trabajo extra…";
+      pintaCats();
+    }
+    scrim.querySelectorAll("#inTipo button").forEach(b => b.addEventListener("click", () => poneTipo(b.dataset.t)));
+    pintaCats();
     chips.forEach(b => b.addEventListener("click", () => {
       fecha = b.dataset.dia === "hoy" ? hoy() : ayer();
       chips.forEach(x => x.setAttribute("aria-pressed", String(x === b)));
@@ -4796,15 +4828,15 @@ const GastoManual = (function(){
     guardar.addEventListener("click", () => {
       if(guardar.disabled) return;
       if(typeof busy !== "undefined" && busy){ err.textContent = "Armoni está respondiendo otra cosa. Espera un momento y vuelve a intentarlo."; return; }
-      if(AUTOMATICOS.test(concepto.value)){ err.textContent = "Eso ya se registra solo desde su aviso (jardín, arriendo, cuota del carro). Aquí va lo demás."; return; }
+      if(tipo === "Gasto" && AUTOMATICOS.test(concepto.value)){ err.textContent = "Eso ya se registra solo desde su aviso (jardín, arriendo, cuota del carro). Aquí va lo demás."; return; }
       const cuando = fecha === hoy() ? "hoy" : fecha === ayer() ? "ayer" : fecha;
       const monto$ = "$" + valor().toLocaleString("es-CO");
       const nota$ = nota.value.trim();
       /* lo que ve el chat: corto y claro */
-      const mostrar = "🧾 Gasto: " + concepto.value.trim() + " · " + categoria + " · " + monto$ + " · " + cuando + (nota$ ? " · " + nota$ : "");
+      const mostrar = (tipo === "Gasto" ? "🧾 Gasto: " : "➕ Ingreso: ") + concepto.value.trim() + " · " + categoria + " · " + monto$ + " · " + cuando + (nota$ ? " · " + nota$ : "");
       /* lo que recibe el agente: todos los datos exactos + que él decida si lo guarda de una o necesita preguntar algo */
       const texto =
-        "Registra este GASTO en Movimientos (Tipo: Gasto). Concepto: " + concepto.value.trim() +
+        "Registra este " + (tipo === "Gasto" ? "GASTO" : "INGRESO") + " en Movimientos (Tipo: " + tipo + "). Concepto: " + concepto.value.trim() +
         ". Categoría: " + categoria + ". Valor: " + valor() + ". Fecha: " + fecha + " (" + cuando + ")." +
         (nota$ ? " Nota: " + nota$ + "." : "") +
         " Revisa si esto es una salida a comer o algo que necesite más datos (por ejemplo cuántas personas comieron, el restaurante o la puntuación): si falta algún dato, pregúntamelo antes de guardar; si no falta nada, guárdalo de una.";
