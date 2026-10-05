@@ -1399,6 +1399,112 @@ body.mode-gmail footer, body.mode-glim footer{ display:none; }
   .hint{ display:none; }
   #welcome{ min-height:calc(var(--app-h, 100dvh) - 210px); }
 }
+
+/* ═════════ Tema P (carbón): vidrio líquido con luz que se mueve — el tema B no cambia ═════════
+   Todo va bajo :root[data-theme="light"]. Nada aparece de golpe: todo entra y sale con fundidos y resortes suaves. */
+@property --pg{ syntax:"<angle>"; inherits:false; initial-value:0deg; }
+@keyframes pGira{ to{ --pg:360deg; } }
+@keyframes pGlow{
+  0%  { transform:translateX(-14%) scaleX(.82); opacity:.75; }
+  50% { transform:translateX(0)    scaleX(1.06); opacity:1; }
+  100%{ transform:translateX(14%)  scaleX(.86); opacity:.78; }
+}
+@keyframes pBlob{
+  0%,100%{ border-radius:12px; }
+  25%{ border-radius:46% 54% 42% 58% / 52% 42% 58% 48%; }
+  50%{ border-radius:58% 42% 56% 44% / 44% 58% 42% 56%; }
+  75%{ border-radius:42% 58% 50% 50% / 56% 46% 54% 44%; }
+}
+@keyframes pItem{ from{ opacity:0; transform:translateX(-16px) scale(.97); filter:blur(4px); } to{ opacity:1; transform:none; filter:blur(0); } }
+@keyframes pRip{ from{ transform:translate(-50%,-50%) scale(0); opacity:.38; } to{ transform:translate(-50%,-50%) scale(1); opacity:0; } }
+@keyframes pAire{ 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-2px); } }
+
+/* el cuadro de escribir: la luz que recorre el borde pasa a ser un arcoíris suave, y abajo respira un resplandor de color (como la entrada de voz) */
+:root[data-theme="light"] .frame::before{
+  background:conic-gradient(from var(--spin),
+    transparent 0deg, transparent 28deg,
+    #5b8cf7 66deg, #9085e9 102deg, #d55181 138deg, #86e3f7 176deg, #3ecf9a 200deg,
+    transparent 236deg, transparent 360deg);
+  animation-duration:9s; opacity:.68;
+}
+:root[data-theme="light"] .frame:focus-within::before{ opacity:.95; }
+:root[data-theme="light"] .composer::after{
+  content:""; position:absolute; left:10%; right:10%; bottom:-7px; height:16px; border-radius:50%; pointer-events:none;
+  background:linear-gradient(90deg, rgba(91,140,247,.0), rgba(91,140,247,.8) 18%, rgba(144,133,233,.85) 40%, rgba(213,81,129,.8) 62%, rgba(62,207,154,.75) 82%, rgba(62,207,154,0));
+  filter:blur(12px); opacity:.22;
+  animation:pGlow 7s ease-in-out infinite alternate;
+  transition:opacity .9s ease, height .6s cubic-bezier(.16,1,.3,1);
+}
+:root[data-theme="light"] .frame:focus-within .composer::after{ opacity:.6; height:20px; }
+:root[data-theme="light"] .frame.sending .composer::after{ opacity:.9; height:26px; animation-duration:3.4s; }
+
+/* botón de enviar: anillo iridiscente que gira, y un cristal más líquido por dentro */
+:root[data-theme="light"] #send:not(:disabled){
+  background:radial-gradient(circle at 32% 26%, rgba(255,255,255,.95), rgba(220,238,255,.85) 38%, rgba(134,227,247,.9) 100%);
+  box-shadow:0 0 18px rgba(var(--blue-rgb),.4), inset 0 1px 0 rgba(255,255,255,.7);
+  transition:opacity .35s ease, transform .5s cubic-bezier(.34,1.56,.64,1), box-shadow .35s ease;
+}
+:root[data-theme="light"] #send::before{
+  content:""; position:absolute; inset:-3px; border-radius:50%; padding:1.5px; pointer-events:none;
+  background:conic-gradient(from var(--pg), transparent 0deg, #86e3f7 70deg, #d55181 150deg, #9085e9 220deg, transparent 300deg);
+  -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor;
+          mask:linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  opacity:0; transition:opacity .5s ease; animation:pGira 4.2s linear infinite;
+}
+:root[data-theme="light"] #send:not(:disabled)::before{ opacity:.9; }
+:root[data-theme="light"] #send:not(:disabled):active{ transform:scale(.88); }
+
+/* encabezado: un destello de color muy leve que lo recorre */
+:root[data-theme="light"] .bar::before{
+  content:""; position:absolute; inset:0; border-radius:inherit; padding:1px; pointer-events:none;
+  background:conic-gradient(from var(--pg), transparent 0deg, transparent 150deg, rgba(134,227,247,.6) 200deg, rgba(144,133,233,.55) 240deg, rgba(213,81,129,.45) 275deg, transparent 320deg, transparent 360deg);
+  -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor;
+          mask:linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  opacity:.8; animation:pGira 14s linear infinite;
+}
+
+/* menú: cada apartado entra en cascada, el activo se vuelve una gota que cambia de forma */
+:root[data-theme="light"] body.drawer-open .dNav button{ animation:pItem .75s cubic-bezier(.16,1,.3,1) both; }
+:root[data-theme="light"] body.drawer-open .dNav button:nth-child(1){ animation-delay:.05s; }
+:root[data-theme="light"] body.drawer-open .dNav button:nth-child(2){ animation-delay:.10s; }
+:root[data-theme="light"] body.drawer-open .dNav button:nth-child(3){ animation-delay:.15s; }
+:root[data-theme="light"] body.drawer-open .dNav button:nth-child(4){ animation-delay:.20s; }
+:root[data-theme="light"] body.drawer-open .dNav button:nth-child(5){ animation-delay:.25s; }
+:root[data-theme="light"] body.drawer-open .dNav button:nth-child(6){ animation-delay:.30s; }
+:root[data-theme="light"] body.drawer-open .dNav button:nth-child(7){ animation-delay:.35s; }
+:root[data-theme="light"] body.drawer-open .dNav button:nth-child(8){ animation-delay:.40s; }
+:root[data-theme="light"] body.drawer-open .dNav button:nth-child(n+9){ animation-delay:.45s; }
+:root[data-theme="light"] .dNav button[aria-current="page"] .ico{ animation:pBlob 8s ease-in-out infinite; }
+:root[data-theme="light"] .dNav button[aria-current="page"]{
+  background:linear-gradient(100deg, rgba(var(--blue-rgb),.12), rgba(144,133,233,.08) 55%, rgba(213,81,129,.06));
+}
+
+/* aviso de pagos: flota apenas, y su borde tiene el destello de color */
+:root[data-theme="light"] .svBanner{ animation:materialize .5s cubic-bezier(.2,.75,.25,1) both, pAire 7s ease-in-out 1s infinite; }
+:root[data-theme="light"] .svBanner::before{
+  content:""; position:absolute; inset:0; border-radius:inherit; padding:1px; pointer-events:none; z-index:1;
+  background:conic-gradient(from var(--pg), transparent 0deg, transparent 200deg, rgba(134,227,247,.7) 250deg, rgba(144,133,233,.6) 290deg, transparent 340deg);
+  -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor;
+          mask:linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  animation:pGira 10s linear infinite;
+}
+
+/* botones: al tocarlos sale una onda líquida desde el dedo */
+:root[data-theme="light"] .dNav button, :root[data-theme="light"] .mkBtn, :root[data-theme="light"] .notifBtn,
+:root[data-theme="light"] .wsAcc button, :root[data-theme="light"] .svBanner .go, :root[data-theme="light"] .glimActions button{ position:relative; overflow:hidden; }
+.pRip{
+  position:absolute; left:var(--rx); top:var(--ry); width:var(--rd); height:var(--rd); border-radius:50%; pointer-events:none;
+  background:radial-gradient(circle, rgba(255,255,255,.55), rgba(134,227,247,.28) 45%, transparent 70%);
+  animation:pRip .8s cubic-bezier(.16,1,.3,1) forwards;
+}
+@media (prefers-reduced-motion: reduce){
+  :root[data-theme="light"] .composer::after, :root[data-theme="light"] #send::before, :root[data-theme="light"] .bar::before,
+  :root[data-theme="light"] .svBanner, :root[data-theme="light"] .svBanner::before, :root[data-theme="light"] .dNav button[aria-current="page"] .ico,
+  :root[data-theme="light"] body.drawer-open .dNav button, .pRip{ animation:none; }
+}
 </style>
 </head>
 <body>
@@ -1552,7 +1658,7 @@ body.mode-gmail footer, body.mode-glim footer{ display:none; }
         <div id="themeToggle" class="segTheme" role="radiogroup" aria-labelledby="themeLbl" data-on="dark">
           <span class="segInd" aria-hidden="true"></span>
           <button type="button" role="radio" data-t="dark" aria-checked="true" aria-label="Tema oscuro (Black)">B</button>
-          <button type="button" role="radio" data-t="gray" aria-checked="false" aria-label="Tema carbón (Gray)">G</button>
+          <button type="button" role="radio" data-t="gray" aria-checked="false" aria-label="Tema P (carbón)">P</button>
         </div>
       </div>
         </div>
@@ -1677,7 +1783,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
 /* ═════════ VERSIÓN ═════════
    Súbela en cada entrega: si el servidor tiene una versión distinta a la que está corriendo,
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
-const APP_VERSION = "2026-10-05.16";
+const APP_VERSION = "2026-10-05.18";
 (function autoActualizar(){
   const patron = new RegExp("const APP_" + "VERSION = \"([^\"]+)\"");
   async function revisar(){
@@ -4310,6 +4416,21 @@ const Theme = (function(){
   sync();
   return { set, isLight };
 })();
+
+
+/* onda líquida al tocar (solo se ve en el tema P; en el B no hay estilo para ella) */
+document.addEventListener("pointerdown", e => {
+  if(document.documentElement.dataset.theme !== "light" || REDUCED) return;
+  const b = e.target.closest(".dNav button, .mkBtn, .notifBtn, .wsAcc button, .svBanner .go, .glimActions button");
+  if(!b || b.disabled) return;
+  const r = b.getBoundingClientRect(), d = Math.hypot(r.width, r.height) * 2;
+  const o = document.createElement("span");
+  o.className = "pRip";
+  o.style.cssText = "--rx:" + (e.clientX - r.left) + "px;--ry:" + (e.clientY - r.top) + "px;--rd:" + d + "px";
+  o.style.transformOrigin = "center";
+  b.appendChild(o);
+  o.addEventListener("animationend", () => o.remove());
+}, { passive: true });
 
 /* ════════════════════════════════════════════════════════════
    NOTIFICACIONES PUSH: le pide permiso al navegador y guarda la
