@@ -1650,7 +1650,8 @@ body[class*="mode-"] #masIngreso{ display:none; }
 .inCard.guardado::before{ animation:inIAflow .8s linear infinite, inNeonSale .72s ease-out forwards; }
 .inWrap.guardado::after{ animation:inIAflow .8s linear infinite, inNeonSale .72s ease-out forwards; }
 #inGuardar{ position:relative; overflow:hidden; }
-#inGuardar:not(:disabled)::after{ content:""; position:absolute; top:0; bottom:0; left:0; width:38%; background:linear-gradient(100deg, transparent, rgba(255,255,255,.55), transparent); animation:mkBrilla 3.6s ease-in-out .6s infinite; pointer-events:none; }
+#inGuardar::after{ content:""; position:absolute; top:0; bottom:0; left:0; width:38%; background:linear-gradient(100deg, transparent, rgba(255,255,255,.55), transparent); animation:mkBrilla 3.6s ease-in-out infinite; pointer-events:none; opacity:0; transition:opacity .45s ease; }
+#inGuardar:not(:disabled)::after{ opacity:1; }   /* la animación corre siempre; solo se muestra u oculta con un fundido, así no se reinicia ni se corta */
 @keyframes inNeonRing{ 0%{ opacity:0; } 22%{ opacity:1; } 100%{ opacity:0; } }
 @keyframes inNeonGlow{ 0%{ opacity:0; } 22%{ opacity:.9; } 100%{ opacity:0; } }
 @keyframes inNeonSale{ 0%{ opacity:0; } 25%{ opacity:1; } 70%{ opacity:1; } 100%{ opacity:0; } }
@@ -2003,7 +2004,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
 /* ═════════ VERSIÓN ═════════
    Súbela en cada entrega: si el servidor tiene una versión distinta a la que está corriendo,
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
-const APP_VERSION = "2026-10-05.55";
+const APP_VERSION = "2026-10-05.56";
 (function autoActualizar(){
   const patron = new RegExp("const APP_" + "VERSION = \"([^\"]+)\"");
   async function revisar(){
