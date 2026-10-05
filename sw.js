@@ -1,3 +1,8 @@
+/* instalación en Android: basta con que el service worker exista; no guarda nada en caché */
+self.addEventListener("install", () => self.skipWaiting());
+self.addEventListener("activate", e => e.waitUntil(self.clients.claim()));
+self.addEventListener("fetch", () => {});
+
 self.addEventListener("push", event => {
   let data = {};
   try{ data = event.data ? event.data.json() : {}; }

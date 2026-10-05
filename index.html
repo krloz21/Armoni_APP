@@ -12,8 +12,9 @@
 <meta name="apple-mobile-web-app-title" content="Armoni">
 <meta name="theme-color" content="#000000" id="themeColor">
 <script>try{if(localStorage.getItem("armoni.theme")==="light"){document.documentElement.dataset.theme="light";document.getElementById("themeColor").content="#111214";}}catch(e){}</script>
+<link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon.png">
-<link rel="icon" type="image/png" href="icon.png">
+<link rel="icon" type="image/png" href="icon-192.png">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -220,6 +221,8 @@ body:not([class*="mode-"]) #thread.sinChat{ overflow-y:hidden; }
 
 /* mensajes */
 .msg{ margin-bottom:26px; }
+.msg .body, .msg .body *{ -webkit-user-select:text; user-select:text; -webkit-touch-callout:default; }
+.msg .tools, .msg .tools *{ -webkit-user-select:none; user-select:none; }
 .msg .body{ font-size:.97rem; line-height:1.62; color:rgba(var(--text),.88); }
 .msg.you{ display:flex; justify-content:flex-end; }
 .msg.you .body{
@@ -285,6 +288,7 @@ body:not([class*="mode-"]) #thread.sinChat{ overflow-y:hidden; }
   transition:opacity .2s, transform .2s;
 }
 .msg.bot:hover .tools, .msg.bot:focus-within .tools{ opacity:1; transform:none; }
+@media (hover:none){ .msg.bot .tools{ opacity:.75; transform:none; } }   /* en el celular no hay «pasar el mouse»: el botón de copiar siempre se ve */
 .tools button{
   display:flex; align-items:center; justify-content:center;
   width:26px; height:26px; padding:0;
@@ -2006,7 +2010,9 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
 /* ═════════ VERSIÓN ═════════
    Súbela en cada entrega: si el servidor tiene una versión distinta a la que está corriendo,
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
-const APP_VERSION = "2026-10-05.58";
+/* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
+if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
+const APP_VERSION = "2026-10-05.59";
 (function autoActualizar(){
   const patron = new RegExp("const APP_" + "VERSION = \"([^\"]+)\"");
   async function revisar(){
@@ -3545,6 +3551,25 @@ function add(who, raw){
   if(who === "you"){ lastAsked = wrap; revealFrom(wrap); }
   else revealFrom(lastAsked);
 }
+
+/* mantener presionado un mensaje: si el celular no abre su selección de texto, se copia el mensaje completo */
+(function(){
+  let t = null, x0 = 0, y0 = 0;
+  const corta = () => { clearTimeout(t); t = null; };
+  list.addEventListener("pointerdown", e => {
+    if(e.pointerType === "mouse" || e.target.closest(".tools, a, button")) return;
+    const m = e.target.closest(".msg"); if(!m) return;
+    x0 = e.clientX; y0 = e.clientY; corta();
+    t = setTimeout(async () => {
+      if(String(getSelection() || "").trim()) return;          // el celular ya abrió su selección: se respeta
+      const txt = m.querySelector(".body").innerText.trim();
+      try{ await navigator.clipboard.writeText(txt); }catch{ copiarReferencia(txt); }
+      avisoOk("Copiado", txt.length > 40 ? txt.slice(0, 40) + "…" : txt);
+    }, 750);
+  }, { passive:true });
+  list.addEventListener("pointermove", e => { if(t && Math.hypot(e.clientX - x0, e.clientY - y0) > 10) corta(); }, { passive:true });
+  ["pointerup", "pointercancel", "pointerleave"].forEach(ev => list.addEventListener(ev, corta, { passive:true }));
+})();
 
 /* deja tu pregunta arriba y la respuesta empezando justo debajo */
 let lastAsked = null;

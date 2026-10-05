@@ -9,6 +9,9 @@
 <meta name="apple-mobile-web-app-title" content="¿Qué se acabó?">
 <meta name="theme-color" content="#000000">
 <title>¿Qué se acabó?</title>
+<link rel="manifest" href="mama.webmanifest">
+<link rel="apple-touch-icon" href="mama-180.png">
+<link rel="icon" type="image/png" href="mama-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
@@ -49,7 +52,12 @@ header p{ margin:8px 0 0; color:var(--ghost); font-size:1.02rem; }
 .busca .x[hidden]{ display:none; }
 .busca .x svg{ position:static; width:14px; height:14px; transform:none; color:inherit; }
 .cuenta[hidden]{ display:none; }
-.cuenta{ display:inline-block; margin-top:14px; padding:8px 16px; border-radius:999px; background:rgba(242,115,79,.14); color:var(--clay); font-weight:700; font-size:.92rem; }
+.cuenta{ display:inline-block; margin-top:14px; padding:9px 18px; border:1px solid transparent; border-radius:999px; background:rgba(242,115,79,.14); color:var(--clay); font:inherit; font-weight:700; font-size:.92rem; cursor:pointer; transition:background .25s, color .25s, transform .1s ease-out; }
+.cuenta:active, .gmarc:active{ transform:scale(.96); }
+.cuenta[aria-pressed="true"], .gmarc[aria-pressed="true"]{ background:var(--clay); color:#1f0a04; }
+.gcab{ display:flex; align-items:center; gap:10px; margin:26px 20px 4px; }
+.gcab .grupo{ width:auto; flex:1; margin:0; min-width:0; }
+.gmarc{ flex:none; padding:7px 13px; border:1px solid rgba(242,115,79,.45); border-radius:999px; background:rgba(242,115,79,.12); color:var(--clay); font:inherit; font-size:.82rem; font-weight:700; cursor:pointer; transition:background .25s, color .25s, transform .1s ease-out; }
 
 .grupo{
   display:flex; align-items:center; gap:8px; width:calc(100% - 40px);
@@ -118,7 +126,7 @@ body.dlg #lineas, body.dlg #campo, body.dlg .col{ filter:blur(6px); }
 <header>
   <h1>¿Qué se acabó?</h1>
   <p>Toca lo que haga falta comprar. Le llega directo a la lista del mercado.</p>
-  <span class="cuenta" id="cuenta" hidden></span>
+  <button type="button" class="cuenta" id="cuenta" hidden></button>
 </header>
 <div class="busca"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input id="buscar" type="search" placeholder="Buscar algo de la lista" autocomplete="off" autocapitalize="none" spellcheck="false" enterkeyhint="search"><button type="button" class="x" id="buscarX" aria-label="Borrar búsqueda" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
 <main id="main"><p class="estado">Cargando…</p></main>
@@ -855,10 +863,15 @@ function avisar(texto, mal){
   clearTimeout(tAviso);
   tAviso = setTimeout(() => aviso.classList.remove("on"), 2600);
 }
+/* «solo marcadas»: tocar el contador de arriba muestra solo lo marcado de todos los apartados; el de cada apartado, solo lo de ese apartado */
+let soloTodo = false;
+const soloG = new Set();
 function contar(){
   const n = productos.filter(p => p.falta).length;
   cuenta.hidden = !n;
-  cuenta.textContent = n === 1 ? "1 cosa marcada" : n + " cosas marcadas";
+  cuenta.textContent = soloTodo ? "Ver todo" : (n === 1 ? "1 cosa marcada · ver" : n + " cosas marcadas · ver");
+  cuenta.setAttribute("aria-pressed", String(soloTodo));
+  if(!n && (soloTodo || soloG.size)){ soloTodo = false; soloG.clear(); pintar(); }   // ya no queda nada marcado: vuelve la lista completa
 }
 
 const CHEV = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>';
@@ -870,13 +883,17 @@ function pintar(){
   const q = norm(buscar.value);
   let html = "", hallados = 0;
   GRUPOS.concat(["Otros"]).forEach(g => {
-    const del = productos.filter(p => (GRUPOS.includes(p.grupo) ? p.grupo : "Otros") === g && (!q || norm(p.nombre).includes(q)));
+    const delGrupo = productos.filter(p => (GRUPOS.includes(p.grupo) ? p.grupo : "Otros") === g);
+    const marcadas = delGrupo.filter(p => p.falta).length;
+    const solo = soloTodo || soloG.has(g);
+    const del = delGrupo.filter(p => (!q || norm(p.nombre).includes(q)) && (!solo || p.falta));
     if(!del.length) return;
     hallados += del.length;
-    const abierto = q ? true : abiertos.has(g);   // buscando, se abre lo que coincide
-    html += '<button type="button" class="grupo" data-g="' + esc(g) + '" aria-expanded="' + abierto + '">' +
+    const abierto = q || solo ? true : abiertos.has(g);   // buscando o filtrando, se abre lo que coincide
+    html += '<div class="gcab"><button type="button" class="grupo" data-g="' + esc(g) + '" aria-expanded="' + abierto + '">' +
       '<span class="chev" aria-hidden="true">' + CHEV + '</span><span class="n">' + g + '</span>' +
       '<span class="c">' + del.length + '</span></button>' +
+      (marcadas ? '<button type="button" class="gmarc" data-gm="' + esc(g) + '" aria-pressed="' + soloG.has(g) + '">' + (soloG.has(g) ? "Ver todo" : marcadas === 1 ? "1 marcada" : marcadas + " marcadas") + '</button>' : '') + '</div>' +
       '<div class="cuerpo' + (abierto ? ' on' : '') + '"><div><div class="lista">' + del.map(p =>
         '<button type="button" class="item' + (p.falta ? ' acabo' : '') + '" data-id="' + p.id + '">' +
         '<span class="e" aria-hidden="true">' + emoji(p.nombre) + '</span><span class="n">' + esc(p.nombre) + '</span>' +
@@ -891,7 +908,16 @@ buscar.addEventListener("input", () => { buscarX.hidden = !buscar.value; pintar(
 buscar.addEventListener("keydown", e => { if(e.key === "Enter") buscar.blur(); });
 buscarX.addEventListener("click", () => { buscar.value = ""; buscarX.hidden = true; pintar(); buscar.focus(); });
 
+cuenta.addEventListener("click", () => { soloTodo = !soloTodo; soloG.clear(); pintar(); scrollTo({ top: 0, behavior: "smooth" }); });
+
 main.addEventListener("click", async e => {
+  const gm = e.target.closest(".gmarc");
+  if(gm){
+    const g = gm.dataset.gm;
+    if(soloG.has(g)) soloG.delete(g); else soloG.add(g);
+    pintar();
+    return;
+  }
   const cab = e.target.closest(".grupo");
   if(cab){
     const g = cab.dataset.g;
@@ -943,6 +969,8 @@ async function cargar(){
 try{ const c = JSON.parse(localStorage.getItem("mama.productos")); if(c && c.length){ productos = c; pintar(); } }catch{}
 cargar();
 document.addEventListener("visibilitychange", () => { if(!document.hidden) cargar(); });
+/* Android ofrece «Instalar app» solo si hay manifest y service worker */
+if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
 </script>
 </body>
 </html>
