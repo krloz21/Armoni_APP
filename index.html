@@ -1523,7 +1523,8 @@ body.mode-gmail footer, body.mode-glim footer{ display:none; }
 
 /* ═════════ A mercar: más de juego (todo con transform/opacity: liviano) ═════════ */
 @keyframes mkSube{ from{ opacity:0; transform:translateY(16px) scale(.97); } to{ opacity:1; transform:none; } }
-@keyframes mkEntraCarta{ from{ opacity:0; transform:translateY(26px) scale(.88) rotate(-3deg); } to{ opacity:1; transform:none; } }
+@keyframes mkEntraCarta{ from{ opacity:0; transform:translateY(14px) scale(.95); } to{ opacity:1; transform:none; } }
+@keyframes mkLlega{ from{ opacity:0; transform:scale(.88) translateY(26px); } to{ opacity:.6; transform:scale(.94) translateY(14px); } }
 @keyframes mkChispa{ 0%{ opacity:1; transform:translate(0,0) scale(1); } 100%{ opacity:0; transform:translate(var(--x), var(--y)) scale(.2); } }
 @keyframes mkMasUno{ 0%{ opacity:0; transform:translate(-50%, 4px) scale(.6); } 25%{ opacity:1; transform:translate(-50%, -8px) scale(1.15); } 100%{ opacity:0; transform:translate(-50%, -34px) scale(1); } }
 @keyframes mkBrilla{ 0%,55%{ transform:translateX(-130%) skewX(-18deg); } 100%{ transform:translateX(260%) skewX(-18deg); } }
@@ -1562,7 +1563,12 @@ body.mode-gmail footer, body.mode-glim footer{ display:none; }
   background:radial-gradient(55% 50% at var(--wx, 50%) 52%, rgba(var(--wc, 74,222,128), .55), transparent 72%);
 }
 .mkCard{ transition:transform .55s cubic-bezier(.34,1.56,.64,1); }
-.mkCard:not(.atras){ animation:mkEntraCarta .5s cubic-bezier(.34,1.56,.64,1) backwards; box-shadow:0 26px 54px -26px rgba(0,0,0,.8), inset 0 1px 0 rgba(255,255,255,.1); }
+.mkCard.nueva{ animation:mkEntraCarta .45s cubic-bezier(.32,.72,0,1) backwards; }
+.mkCard:not(.atras){ box-shadow:0 26px 54px -26px rgba(0,0,0,.8), inset 0 1px 0 rgba(255,255,255,.1); }
+.mkCard{ background-color:var(--void); }   /* opaca: así no se transparenta la carta de atrás */
+.mkCard.llega{ animation:mkLlega .45s cubic-bezier(.32,.72,0,1) backwards; }
+.mkCard.volando{ pointer-events:none; z-index:2; }
+.mkDesc{ color:#ff9b9b; border-color:rgba(255,107,107,.3); }
 .mkCard.agarrada{ cursor:grabbing; box-shadow:0 34px 60px -24px rgba(0,0,0,.85), inset 0 1px 0 rgba(255,255,255,.14); }
 .mkCard::before{ content:""; position:absolute; inset:0; border-radius:inherit; pointer-events:none; opacity:calc(var(--a, 0) * .9);
   background:linear-gradient(115deg, transparent 20%, rgba(255,255,255,.14) 45%, transparent 70%); background-position:calc(50% + var(--p, 0) * 60%) 0; background-size:220% 100%; }
@@ -1576,7 +1582,7 @@ body.mode-gmail footer, body.mode-glim footer{ display:none; }
 .mkBtns button{ transition:transform .4s cubic-bezier(.34,1.56,.64,1); }
 .mkBtns button:active{ transform:scale(.88); }
 @media (prefers-reduced-motion: reduce){
-  .mkHero > *, .mkHero .mkBig, #mkEmpezar, #mkEmpezar::after, .mkChips span, .mkDura .gRow, .mkLista .gRow, .mkEntraJuego, .mkCard:not(.atras), .mkCard .mkEmoji, .mkRacha.pop, .mkMas{ animation:none; }
+  .mkHero > *, .mkHero .mkBig, #mkEmpezar, #mkEmpezar::after, .mkChips span, .mkDura .gRow, .mkLista .gRow, .mkEntraJuego, .mkCard.nueva, .mkCard.llega, .mkCard .mkEmoji, .mkRacha.pop, .mkMas{ animation:none; }
 }
 </style>
 </head>
@@ -1861,7 +1867,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
 /* ═════════ VERSIÓN ═════════
    Súbela en cada entrega: si el servidor tiene una versión distinta a la que está corriendo,
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
-const APP_VERSION = "2026-10-05.29";
+const APP_VERSION = "2026-10-05.30";
 (function autoActualizar(){
   const patron = new RegExp("const APP_" + "VERSION = \"([^\"]+)\"");
   async function revisar(){
@@ -5195,6 +5201,19 @@ const Mercar = (function(){
   let estado = "inicio";
   let datos = null;
   let cola = [], idx = 0, decision = [], lista = [], copiado = false, bloqueado = false, rachaMax = 0;
+  /* la revisión a medias se puede dejar y retomar ("Volver") o tirar ("Descartar") */
+  const PKEY = "armoni.mercar.partida";
+  const guardaPartida = () => { try{ localStorage.setItem(PKEY, JSON.stringify({ ids: cola.map(p => p.id), idx, decision: decision.slice(0, idx) })); }catch{} };
+  const borraPartida = () => { try{ localStorage.removeItem(PKEY); }catch{} };
+  function leePartida(ps){
+    try{
+      const d = JSON.parse(localStorage.getItem(PKEY));
+      if(!d || !Array.isArray(d.ids) || !(d.idx > 0) || d.idx >= d.ids.length) return null;
+      const c = d.ids.map(id => ps.find(p => p.id === id));
+      if(c.some(x => !x)) return null;
+      return { cola: c, idx: d.idx, decision: d.decision.slice(0, d.idx) };
+    }catch{ return null; }
+  }
   const vibra = ms => { try{ if(navigator.vibrate) navigator.vibrate(ms); }catch{} };
   const rachaActual = () => { let n = 0; for(let i = Math.min(idx, decision.length) - 1; i >= 0 && decision[i] === "si"; i--) n++; return n; };
 
@@ -5234,12 +5253,16 @@ const Mercar = (function(){
     const ps = (datos && datos.productos) || [];
     const mama = ps.filter(esMama);
     const pendientes = ps.filter(p => p.falta);
+    const parcial = leePartida(ps);
     const ult = datos && datos.ultimoMercado;
     const hace = ult ? diasDesde(ult) : null;
     let html =
       '<div class="mkHero"><span class="mkBig">🧺</span><h3>Revisemos la casa</h3>' +
       '<p>' + ps.length + ' cosas · un toque por cada una' + (hace != null ? ' · último mercado ' + (hace === 0 ? 'hoy' : 'hace ' + hace + (hace === 1 ? ' día' : ' días')) : '') + '</p>' +
-      '<button type="button" class="mkBtn pri full" id="mkEmpezar"' + (ps.length ? '' : ' disabled') + '>Empezar revisión</button>' +
+      (parcial
+        ? '<button type="button" class="mkBtn pri full" id="mkSeguir">Seguir revisión · ' + parcial.idx + '/' + parcial.cola.length + '</button>' +
+          '<button type="button" class="mkBtn sec full" id="mkDescartarParcial" style="margin-top:10px">Descartar y empezar de nuevo</button>'
+        : '<button type="button" class="mkBtn pri full" id="mkEmpezar"' + (ps.length ? '' : ' disabled') + '>Empezar revisión</button>') +
       (mama.length ? '<div class="mkMama" id="mkMamaCaja" role="button" tabindex="0" style="cursor:pointer"><b>Tu mamá dice que se acabó:</b><div class="mkChips">' + mama.map(p => '<span>' + emojiMercado(p.nombre) + ' ' + esc(p.nombre) + '</span>').join("") + '</div></div>' : '') +
       '</div>';
     if(pendientes.length && !mama.length) html += '<button type="button" class="mkBtn sec full" id="mkVerPend" style="margin-top:12px">Ver lista pendiente (' + pendientes.length + ')</button>';
@@ -5256,7 +5279,10 @@ const Mercar = (function(){
         }).join("") + '</div>'
       : '<p class="gEmpty">Cuando registres dos mercados empiezo a calcular cuánto te dura cada cosa.</p>';
     stage.innerHTML = html;
-    document.getElementById("mkEmpezar").addEventListener("click", empezar);
+    const be = document.getElementById("mkEmpezar"); if(be) be.addEventListener("click", () => empezar());
+    const bs = document.getElementById("mkSeguir"); if(bs) bs.addEventListener("click", () => empezar(parcial));
+    const bd = document.getElementById("mkDescartarParcial");
+    if(bd) bd.addEventListener("click", () => { if(confirm("¿Descartar la revisión que dejaste a medias?")){ borraPartida(); inicio(); } });
     const vp = document.getElementById("mkVerPend");
     if(vp) vp.addEventListener("click", () => final(ps.filter(p => p.falta), false));
     const mc = document.getElementById("mkMamaCaja");
@@ -5288,11 +5314,12 @@ const Mercar = (function(){
   }
 
   /* ── el juego ── */
-  function empezar(){
+  function empezar(part){
     const ps = (datos && datos.productos) || [];
     if(!ps.length) return;
-    cola = ps.filter(esMama).concat(ps.filter(p => !esMama(p)));   // lo que marcó la mamá va primero
-    idx = 0; decision = []; bloqueado = false; estado = "juego"; rachaMax = 0;
+    if(part && part.cola){ cola = part.cola; idx = part.idx; decision = part.decision.slice(); }
+    else { cola = ps.filter(esMama).concat(ps.filter(p => !esMama(p))); idx = 0; decision = []; borraPartida(); }   // lo que marcó la mamá va primero
+    bloqueado = false; estado = "juego"; rachaMax = 0;
     stage.innerHTML =
       '<div class="mkTop mkEntraJuego">' +
       '<div class="mkBar"><i id="mkBarI"></i></div><span class="mkCount" id="mkCount"></span><span class="mkRacha" id="mkRacha" hidden></span><span class="mkCart" id="mkCart">🛒 <b>0</b></span></div>' +
@@ -5301,12 +5328,14 @@ const Mercar = (function(){
       '<button type="button" class="mkUndo" id="mkUndo" aria-label="Deshacer">↶</button>' +
       '<button type="button" class="mkSi" id="mkSi" aria-label="Sí hay">✓</button></div>' +
       '<p class="mkLeyenda">Desliza a la derecha si <b>hay</b> · a la izquierda si <b>falta</b></p>' +
-      '<button type="button" class="mkBtn sec full" id="mkSalir" style="margin-top:14px">Volver</button>';
+      '<div class="mkFila" style="margin-top:14px"><button type="button" class="mkBtn sec" id="mkSalir">Volver</button><button type="button" class="mkBtn sec mkDesc" id="mkDescartarJuego">Descartar</button></div>' +
+      '<p class="mkLeyenda" style="margin-top:8px">Volver guarda dónde ibas · Descartar borra esta revisión</p>';
     document.getElementById("mkNo").addEventListener("click", () => decide("no"));
     document.getElementById("mkSi").addEventListener("click", () => decide("si"));
     document.getElementById("mkUndo").addEventListener("click", deshacer);
-    document.getElementById("mkSalir").addEventListener("click", () => {
-      if(idx === 0 || confirm("¿Salir sin terminar la revisión? Lo que ya marcaste en esta vuelta no se guarda.")) inicio();
+    document.getElementById("mkSalir").addEventListener("click", () => { if(idx > 0) guardaPartida(); else borraPartida(); inicio(); });
+    document.getElementById("mkDescartarJuego").addEventListener("click", () => {
+      if(idx === 0 || confirm("¿Descartar esta revisión? Lo que ya marcaste se borra y no se guarda.")){ borraPartida(); inicio(); }
     });
     pintaCartas();
   }
@@ -5318,11 +5347,8 @@ const Mercar = (function(){
       '<div class="mkEmoji">' + emojiMercado(p.nombre) + '</div><b class="mkName">' + esc(p.nombre) + '</b>' +
       '<small class="mkHint">¿Todavía hay en la casa?</small>' + flag + '</div>';
   }
-  function pintaCartas(){
-    const deck = document.getElementById("mkDeck");
-    if(!deck) return;
-    const actual = cola[idx], sig = cola[idx + 1];
-    deck.innerHTML = (sig ? tarjeta(sig, true) : '') + (actual ? tarjeta(actual, false) : '');
+  /* marcador de arriba: barra, contador, racha, carrito y deshacer */
+  function pintaHud(){
     document.getElementById("mkBarI").style.width = (idx / cola.length * 100) + "%";
     document.getElementById("mkCount").textContent = Math.min(idx + 1, cola.length) + "/" + cola.length;
     document.getElementById("mkCart").innerHTML = "🛒 <b>" + decision.filter(d => d === "no").length + "</b>";
@@ -5332,8 +5358,32 @@ const Mercar = (function(){
       rEl.hidden = r < 3;
       if(r >= 3){ rEl.textContent = "🔥 x" + r; rEl.dataset.n = r >= 10 ? "3" : r >= 6 ? "2" : "1"; rEl.classList.remove("pop"); void rEl.offsetWidth; rEl.classList.add("pop"); }
     }
+  }
+  /* dibujo completo de las cartas (al empezar, retomar o deshacer) */
+  function pintaCartas(){
+    const deck = document.getElementById("mkDeck");
+    if(!deck) return;
+    const actual = cola[idx], sig = cola[idx + 1];
+    deck.innerHTML = (sig ? tarjeta(sig, true) : '') + (actual ? tarjeta(actual, false) : '');
+    pintaHud();
     const card = deck.querySelector(".mkCard:not(.atras)");
-    if(card) arrastre(card);
+    if(card){ card.classList.add("nueva"); arrastre(card); }
+  }
+  /* al avanzar NO se vuelve a dibujar nada: la carta de atrás ya sube a su lugar, y solo llega una carta nueva al fondo */
+  function avanza(){
+    const deck = document.getElementById("mkDeck");
+    if(!deck){ return; }
+    pintaHud();
+    const top = deck.querySelector(".mkCard:not(.atras):not(.volando)");
+    if(!top){ pintaCartas(); return; }
+    top.style.transition = ""; top.style.transform = ""; top.style.opacity = "";
+    arrastre(top);
+    const sig = cola[idx + 1];
+    if(sig){
+      const t = document.createElement("div"); t.innerHTML = tarjeta(sig, true);
+      const el = t.firstElementChild; el.classList.add("llega");
+      deck.insertBefore(el, deck.firstChild);
+    }
   }
   function arrastre(card){
     let x0 = 0, y0 = 0, dx = 0, t0 = 0, activo = false;
@@ -5404,6 +5454,7 @@ const Mercar = (function(){
     }
     const card = document.querySelector("#mkDeck .mkCard:not(.atras)");
     if(card){
+      card.classList.add("volando"); card.classList.remove("agarrada");
       const st = card.querySelector(cual === "si" ? ".mkStamp.si" : ".mkStamp.no"); if(st){ st.style.opacity = 1; st.style.transform = (cual === "si" ? "rotate(-14deg)" : "rotate(14deg)") + " scale(1.15)"; }
       card.style.transition = REDUCED ? "opacity .15s" : "transform .42s cubic-bezier(.5,0,.75,0), opacity .42s ease-in";
       if(!REDUCED) card.style.transform = "perspective(700px) translate(" + (cual === "si" ? 150 : -150) + "%, -8%) rotate(" + (cual === "si" ? 26 : -26) + "deg) rotateY(" + (cual === "si" ? -25 : 25) + "deg) scale(.9)";
@@ -5420,8 +5471,9 @@ const Mercar = (function(){
     setTimeout(() => {
       bloqueado = false;
       idx++;
-      if(idx >= cola.length) terminar(); else pintaCartas();
-    }, REDUCED ? 120 : 330);
+      if(idx >= cola.length) terminar(); else avanza();
+    }, REDUCED ? 120 : 300);
+    if(card) setTimeout(() => card.remove(), REDUCED ? 160 : 520);
   }
   function deshacer(){
     if(bloqueado || idx === 0) return;
@@ -5429,6 +5481,7 @@ const Mercar = (function(){
     pintaCartas();
   }
   function terminar(){
+    borraPartida();
     const faltan = cola.filter((p, i) => decision[i] === "no");
     const yaHay = cola.filter((p, i) => decision[i] === "si" && p.falta);
     /* guarda en la torre lo que falta y lo que ya no falta */
