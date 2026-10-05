@@ -1923,7 +1923,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
 /* ═════════ VERSIÓN ═════════
    Súbela en cada entrega: si el servidor tiene una versión distinta a la que está corriendo,
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
-const APP_VERSION = "2026-10-05.37";
+const APP_VERSION = "2026-10-05.38";
 (function autoActualizar(){
   const patron = new RegExp("const APP_" + "VERSION = \"([^\"]+)\"");
   async function revisar(){
@@ -4710,8 +4710,8 @@ function pedirMontoJardin(){
 const GastoManual = (function(){
   /* todas menos "Servicios": energía, agua, gas e internet ya se registran solos desde su aviso */
   const CATS_GASTO = ["Alimentación", "Salidas", "Hogar", "Carro", "Hijo", "Salud", "Tarjetas", "Ahorro", "Otros"];
-  /* lo que entra "a mano": sin lo automatizado (servicios, jardín, carro, tarjetas) */
-  const CATS_INGRESO = ["Hogar", "Alimentación", "Salidas", "Salud", "Ahorro", "Otros"];
+  /* lo que entra "a mano": salarios y demás (Hogar) y lo que te devuelven al dividir una cuenta (Salidas / Alimentación) */
+  const CATS_INGRESO = ["Hogar", "Alimentación", "Salidas"];
   /* pagos que ya tienen su propio flujo: aquí no se registran para no duplicarlos */
   const AUTOMATICOS = /arriendo|jard[ií]n|cuota\s+(del\s+)?(carro|cr[eé]dito)/i;
   const P = 'fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"';
@@ -4791,7 +4791,7 @@ const GastoManual = (function(){
       $("inTipo").dataset.on = g ? "gasto" : "ingreso";
       scrim.querySelectorAll("#inTipo button").forEach(x => x.setAttribute("aria-checked", String(x.dataset.t === t)));
       $("inT").textContent = g ? "Registrar un gasto" : "Registrar un ingreso";
-      $("inSub").textContent = g ? "Armoni lo revisa: lo guarda de una o, si falta algo (como en una salida), te pregunta" : "Lo que entra y no está automatizado";
+      $("inSub").textContent = g ? "Armoni lo revisa: lo guarda de una o, si falta algo (como en una salida), te pregunta" : "Salarios y lo que te devuelven al dividir una cuenta";
       $("inNotaAuto").hidden = !g;
       concepto.placeholder = g ? "Ej: Almuerzo, gasolina, droguería…" : "Ej: Salario, trabajo extra…";
       pintaCats();
@@ -4839,7 +4839,9 @@ const GastoManual = (function(){
         "Registra este " + (tipo === "Gasto" ? "GASTO" : "INGRESO") + " en Movimientos (Tipo: " + tipo + "). Concepto: " + concepto.value.trim() +
         ". Categoría: " + categoria + ". Valor: " + valor() + ". Fecha: " + fecha + " (" + cuando + ")." +
         (nota$ ? " Nota: " + nota$ + "." : "") +
-        " Revisa si esto es una salida a comer o algo que necesite más datos (por ejemplo cuántas personas comieron, el restaurante o la puntuación): si falta algún dato, pregúntamelo antes de guardar; si no falta nada, guárdalo de una.";
+        (tipo === "Gasto"
+          ? " Revisa si esto es una salida a comer o algo que necesite más datos (por ejemplo cuántas personas comieron, el restaurante o la puntuación): si falta algún dato, pregúntamelo antes de guardar; si no falta nada, guárdalo de una."
+          : " Es plata que ENTRA (por ejemplo un salario, o alguien que me devuelve su parte al dividir una cuenta en un restaurante): guárdalo de una como ingreso. No me preguntes por personas, restaurante ni puntuación; solo pregunta si de verdad falta el concepto, el valor o la fecha.");
       cierra();
       ask(texto, mostrar);
     });
