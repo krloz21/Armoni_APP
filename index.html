@@ -175,6 +175,11 @@ header button svg{ width:13px; height:13px; flex:none; }
 }
 #thread::-webkit-scrollbar{ width:7px; }
 #thread::-webkit-scrollbar-thumb{ background:rgba(var(--ink),.1); border-radius:4px; }
+/* en el celular no se dibuja la barra (iOS la deja fija y fea): se sigue deslizando igual */
+@media (hover:none){
+  #thread, .dNav, .sheetBody, .scroller{ scrollbar-width:none; }
+  #thread::-webkit-scrollbar, .dNav::-webkit-scrollbar, .sheetBody::-webkit-scrollbar, .scroller::-webkit-scrollbar{ display:none; width:0; height:0; }
+}
 .inner{ width:var(--measure); margin:0 auto; }
 
 /* bienvenida: un solo titular que se escribe y se borra */
@@ -697,6 +702,26 @@ body.no-gl #drawer{ background:var(--drawer-solid); }
   box-shadow:0 0 20px rgba(var(--blue-rgb),.45);
 }
 .dNav button:focus-visible{ outline:2px solid var(--cyan); outline-offset:2px; }
+
+
+/* pantallas más bajas (iPhone Pro normal, Safari con barras): el menú se compacta para que todo quepa sin barra */
+@media (max-height:860px){
+  #drawer{ padding:14px 10px 10px; }
+  .dHead{ padding-bottom:12px; }
+  .dNav{ gap:3px; }
+  .dNav button{ padding:8px 10px; gap:11px; }
+  .dNav .ico{ width:34px; height:34px; border-radius:11px; }
+  .dNav .ico svg{ width:17px; height:17px; }
+  .dNav .txt b{ font-size:.92rem; }
+  .dNav .txt span{ font-size:.72rem; margin-top:0; }
+}
+@media (max-height:740px){
+  .dHead{ padding-bottom:6px; }
+  .dNav{ gap:1px; }
+  .dNav button{ padding:6px 10px; }
+  .dNav .ico{ width:30px; height:30px; }
+  .dNav .txt span{ display:none; }
+}
 
 /* ───────── vista de restaurantes (ocupa el lugar del chat) ───────── */
 #restView, #creditoView, #gmailView, #glimView, #recuerdaView, #mercarView, #mesView, #ajustesView{ display:none; padding-bottom:10px; }
@@ -1652,7 +1677,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
 /* ═════════ VERSIÓN ═════════
    Súbela en cada entrega: si el servidor tiene una versión distinta a la que está corriendo,
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
-const APP_VERSION = "2026-10-05.15";
+const APP_VERSION = "2026-10-05.16";
 (function autoActualizar(){
   const patron = new RegExp("const APP_" + "VERSION = \"([^\"]+)\"");
   async function revisar(){
