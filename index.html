@@ -172,9 +172,9 @@ header button svg{ width:13px; height:13px; flex:none; }
   overflow-y:auto; overscroll-behavior:contain;
   -webkit-overflow-scrolling:touch;
   padding:30px var(--sp) 12px;
-  -webkit-mask-image:linear-gradient(180deg, transparent 0, #000 26px);
-          mask-image:linear-gradient(180deg, transparent 0, #000 26px);
 }
+/* el desvanecido de arriba (antes era una máscara, que impedía que el aviso fijo desenfocara lo de atrás) */
+.inner::before{ content:""; position:sticky; top:0; z-index:5; display:block; height:26px; margin:-30px 0 4px; pointer-events:none; background:linear-gradient(180deg, var(--void) 0, transparent); }
 #thread::-webkit-scrollbar{ width:7px; }
 #thread::-webkit-scrollbar-thumb{ background:rgba(var(--ink),.1); border-radius:4px; }
 /* en el celular no se dibuja la barra (iOS la deja fija y fea): se sigue deslizando igual */
@@ -322,6 +322,13 @@ header button svg{ width:13px; height:13px; flex:none; }
 
 /* ───────── aviso de servicios pendientes ───────── */
 #servicioBanner:empty{ display:none; }
+/* queda fijo arriba mientras el chat se desliza; lo que pasa por detrás se ve borroso */
+#servicioBanner{ position:sticky; top:6px; z-index:6; }
+#servicioBanner .svBanner{
+  -webkit-backdrop-filter:blur(18px) saturate(1.5) brightness(1.08); backdrop-filter:blur(18px) saturate(1.5) brightness(1.08);
+  touch-action:pan-y;
+  animation-fill-mode:backwards;   /* al terminar la entrada no deja ningún filtro puesto: así el desenfoque del vidrio funciona */
+}
 .svBanner{
   --u:0;
   --cyan:var(--calm-a); --blue:var(--calm-b); --cyan-rgb:var(--calm-a-rgb); --blue-rgb:var(--calm-b-rgb);   /* azul fijo: así el aviso con tiempo nunca se parece al urgente */
@@ -649,7 +656,7 @@ body.no-gl .bar, body.no-gl .composer{ background:var(--drawer-solid); }
 /* con el menú abierto la app se retira, pero el fondo sigue vivo para que el vidrio lo refracte */
 #scrim{ position:fixed; inset:0; z-index:39; pointer-events:none; }
 body.drawer-open #scrim{ pointer-events:auto; }
-.shell{ opacity:calc(1 - .84 * var(--dpc, 0)); filter:blur(calc(6px * var(--dpc, 0))); }
+:root.dpOn .shell{ opacity:calc(1 - .84 * var(--dpc, 0)); filter:blur(calc(6px * var(--dpc, 0))); }   /* solo mientras el menú está abierto o en movimiento: así en reposo el vidrio del aviso puede desenfocar */
 
 /* un panel de vidrio flotante: el fondo WebGL lo refracta igual que al encabezado */
 #drawer{
@@ -666,6 +673,7 @@ body.drawer-open #scrim{ pointer-events:auto; }
   will-change:transform;
 }
 body.no-gl #drawer{ background:var(--drawer-solid); }
+:root:not(.dpOn) #drawer{ visibility:hidden; }   /* cerrado no deja ni la sombra asomando por el borde */
 
 .dHead{ display:flex; align-items:center; gap:11px; padding:0 6px 22px; }
 .dHead .markwrap .mark{ opacity:1; clip-path:none; }
@@ -1405,21 +1413,7 @@ body.mode-gmail footer, body.mode-glim footer{ display:none; }
   #welcome{ min-height:calc(var(--app-h, 100dvh) - 210px); }
 }
 
-/* ═════════ Tema P: acabado premium (grafito + metal + luz iridiscente) — el tema B no cambia ═════════
-   Todo va bajo :root[data-theme="light"]. Movimiento tipo app: resortes suaves, fundidos con desenfoque, nada aparece de golpe. */
-@property --pg{ syntax:"<angle>"; inherits:false; initial-value:0deg; }
-@keyframes pGira{ to{ --pg:360deg; } }
-@keyframes pGlow{
-  0%  { transform:translateX(-14%) scaleX(.84); opacity:.7; }
-  50% { transform:translateX(0)    scaleX(1.05); opacity:1; }
-  100%{ transform:translateX(14%)  scaleX(.88); opacity:.75; }
-}
-@keyframes pBrillo{ 0%,62%{ background-position:0% 50%; } 100%{ background-position:100% 50%; } }
-@keyframes pEntra{ from{ opacity:0; transform:translateY(14px) scale(.985); filter:blur(5px); } to{ opacity:1; transform:none; filter:blur(0); } }
-@keyframes pItem{ from{ opacity:0; transform:translateX(-18px) scale(.97); filter:blur(4px); } to{ opacity:1; transform:none; filter:blur(0); } }
-@keyframes pRip{ from{ transform:translate(-50%,-50%) scale(0); opacity:.34; } to{ transform:translate(-50%,-50%) scale(1); opacity:0; } }
-
-/* — superficies de vidrio grafito con filo de luz arriba — */
+/* ═════════ Tema P: acabado premium (grafito + metal) — solo cambia el aspecto; las animaciones son las mismas del tema B ═════════ */
 :root[data-theme="light"] .bar{
   background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
   border-color:rgba(255,255,255,.09);
@@ -1430,117 +1424,66 @@ body.mode-gmail footer, body.mode-glim footer{ display:none; }
   border-color:rgba(255,255,255,.085);
   box-shadow:inset 0 1px 0 rgba(255,255,255,.14), 0 18px 40px -22px rgba(0,0,0,.8);
 }
-
-/* — cuadro de escribir: borde de luz suave (plata + pasteles) y un resplandor que respira abajo, como la entrada de voz — */
+/* el borde de luz del cuadro de escribir: mismo movimiento que en B, con colores de plata y pasteles */
 :root[data-theme="light"] .frame::before{
   background:conic-gradient(from var(--spin),
-    transparent 0deg, transparent 28deg,
-    #d5dcec 62deg, #b7a8ff 98deg, #ff9fd0 134deg, #8fe6ff 170deg, #8ff0c4 194deg,
-    transparent 232deg, transparent 360deg);
-  animation-duration:10s; opacity:.7;
+    transparent 0deg, transparent 40deg,
+    #d5dcec 78deg, #b7a8ff 104deg, #ff9fd0 130deg, #8fe6ff 156deg,
+    transparent 195deg, transparent 360deg);
 }
-:root[data-theme="light"] .frame:focus-within::before{ opacity:.95; }
-:root[data-theme="light"] .composer::after{
-  content:""; position:absolute; left:10%; right:10%; bottom:-7px; height:16px; border-radius:50%; pointer-events:none;
-  background:linear-gradient(90deg, rgba(142,162,255,0), rgba(142,162,255,.75) 18%, rgba(183,168,255,.8) 40%, rgba(255,159,208,.72) 62%, rgba(143,240,196,.7) 82%, rgba(143,240,196,0));
-  filter:blur(13px); opacity:.2;
-  animation:pGlow 8s ease-in-out infinite alternate;
-  transition:opacity .9s var(--spring), height .7s var(--spring);
-}
-:root[data-theme="light"] .frame:focus-within .composer::after{ opacity:.55; height:20px; }
-:root[data-theme="light"] .frame.sending .composer::after{ opacity:.85; height:26px; animation-duration:3.6s; }
-
-/* — botón de enviar: cromo con un brillo que lo cruza de vez en cuando y un anillo de luz — */
+/* cromo estático en los botones principales */
 :root[data-theme="light"] #send:not(:disabled){
-  background:var(--metal); background-size:240% 240%;
-  box-shadow:0 0 0 1px rgba(255,255,255,.35), 0 8px 20px -6px rgba(142,162,255,.5), inset 0 1px 0 rgba(255,255,255,.85), inset 0 -2px 4px rgba(0,0,0,.18);
-  animation:pBrillo 7s ease-in-out infinite alternate;
-  transition:opacity .4s ease, transform .55s var(--spring), box-shadow .4s ease;
+  background:var(--metal);
+  box-shadow:0 0 0 1px rgba(255,255,255,.3), 0 8px 20px -8px rgba(142,162,255,.5), inset 0 1px 0 rgba(255,255,255,.85), inset 0 -2px 4px rgba(0,0,0,.18);
 }
-:root[data-theme="light"] #send::before{
-  content:""; position:absolute; inset:-3px; border-radius:50%; padding:1.5px; pointer-events:none;
-  background:conic-gradient(from var(--pg), transparent 0deg, #8fe6ff 70deg, #ff9fd0 150deg, #b7a8ff 220deg, transparent 300deg);
-  -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  -webkit-mask-composite:xor;
-          mask:linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
-  opacity:0; transition:opacity .6s ease; animation:pGira 5s linear infinite;
-}
-:root[data-theme="light"] #send:not(:disabled)::before{ opacity:.85; }
-:root[data-theme="light"] #send:not(:disabled):active{ transform:scale(.9); }
-
-/* — encabezado: un destello de color leve lo recorre — */
-:root[data-theme="light"] .bar::before{
-  content:""; position:absolute; inset:0; border-radius:inherit; padding:1px; pointer-events:none;
-  background:conic-gradient(from var(--pg), transparent 0deg, transparent 150deg, rgba(191,230,255,.55) 200deg, rgba(183,168,255,.5) 240deg, rgba(255,159,208,.4) 275deg, transparent 320deg, transparent 360deg);
-  -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  -webkit-mask-composite:xor;
-          mask:linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
-  opacity:.8; animation:pGira 16s linear infinite;
-}
-
-/* — menú: los apartados entran en cascada; el activo lleva un ícono de cromo — */
-:root[data-theme="light"] body.drawer-open .dNav button{ animation:pItem .8s var(--spring) both; }
-:root[data-theme="light"] body.drawer-open .dNav button:nth-child(1){ animation-delay:.04s; }
-:root[data-theme="light"] body.drawer-open .dNav button:nth-child(2){ animation-delay:.08s; }
-:root[data-theme="light"] body.drawer-open .dNav button:nth-child(3){ animation-delay:.12s; }
-:root[data-theme="light"] body.drawer-open .dNav button:nth-child(4){ animation-delay:.16s; }
-:root[data-theme="light"] body.drawer-open .dNav button:nth-child(5){ animation-delay:.20s; }
-:root[data-theme="light"] body.drawer-open .dNav button:nth-child(6){ animation-delay:.24s; }
-:root[data-theme="light"] body.drawer-open .dNav button:nth-child(7){ animation-delay:.28s; }
-:root[data-theme="light"] body.drawer-open .dNav button:nth-child(8){ animation-delay:.32s; }
-:root[data-theme="light"] body.drawer-open .dNav button:nth-child(n+9){ animation-delay:.36s; }
-:root[data-theme="light"] .dNav button{ transition:background .3s ease, border-color .3s ease, color .3s ease, transform .55s var(--spring); }
-:root[data-theme="light"] .dNav button:active{ transform:scale(.97); }
 :root[data-theme="light"] .dNav button[aria-current="page"]{
   background:linear-gradient(100deg, rgba(255,255,255,.075), rgba(255,255,255,.025));
   border-color:rgba(255,255,255,.12);
 }
 :root[data-theme="light"] .dNav button[aria-current="page"] .ico{
-  background:var(--metal); background-size:240% 240%; color:#0b0c0f; border-color:transparent;
-  box-shadow:0 6px 16px -6px rgba(142,162,255,.55), inset 0 1px 0 rgba(255,255,255,.85), inset 0 -2px 3px rgba(0,0,0,.16);
-  animation:pBrillo 8s ease-in-out infinite alternate;
+  background:var(--metal); color:#0b0c0f; border-color:transparent;
+  box-shadow:0 6px 16px -8px rgba(142,162,255,.55), inset 0 1px 0 rgba(255,255,255,.85), inset 0 -2px 3px rgba(0,0,0,.16);
 }
-
-/* — botones principales: cromo — */
 :root[data-theme="light"] .mkBtn.pri, :root[data-theme="light"] .glimActions button.primary{
-  background:var(--metal); background-size:240% 240%; color:#0b0c0f;
-  box-shadow:0 8px 22px -10px rgba(142,162,255,.6), inset 0 1px 0 rgba(255,255,255,.85), inset 0 -2px 3px rgba(0,0,0,.14);
+  background:var(--metal); color:#0b0c0f;
+  box-shadow:0 8px 22px -12px rgba(142,162,255,.6), inset 0 1px 0 rgba(255,255,255,.85), inset 0 -2px 3px rgba(0,0,0,.14);
   text-shadow:none;
 }
-
-/* — feedback al tocar: resorte suave y una onda de luz desde el dedo — */
-:root[data-theme="light"] .mkBtn, :root[data-theme="light"] .notifBtn, :root[data-theme="light"] .glimActions button, :root[data-theme="light"] .svBanner .go{
-  transition:transform .55s var(--spring), opacity .25s ease, border-color .25s ease, background .25s ease;
-}
-:root[data-theme="light"] .mkBtn:active, :root[data-theme="light"] .notifBtn:active, :root[data-theme="light"] .glimActions button:active, :root[data-theme="light"] .svBanner .go:active{ transform:scale(.96); }
-:root[data-theme="light"] .dNav button, :root[data-theme="light"] .mkBtn, :root[data-theme="light"] .notifBtn,
-:root[data-theme="light"] .wsAcc button, :root[data-theme="light"] .svBanner .go, :root[data-theme="light"] .glimActions button{ position:relative; overflow:hidden; }
-.pRip{
-  position:absolute; left:var(--rx); top:var(--ry); width:var(--rd); height:var(--rd); border-radius:50%; pointer-events:none;
-  background:radial-gradient(circle, rgba(255,255,255,.5), rgba(191,230,255,.22) 45%, transparent 70%);
-  animation:pRip .9s var(--spring) forwards;
-}
-
-/* — pantallas: cada vista entra con un fundido y sube un poco; sus bloques llegan escalonados — */
-:root[data-theme="light"] body.mode-rest #restView > *, :root[data-theme="light"] body.mode-credito #creditoView > *,
-:root[data-theme="light"] body.mode-gmail #gmailView > *, :root[data-theme="light"] body.mode-glim #glimView > *,
-:root[data-theme="light"] body.mode-recuerda #recuerdaView > *, :root[data-theme="light"] body.mode-mercar #mercarView > *,
-:root[data-theme="light"] body.mode-mes #mesView > *, :root[data-theme="light"] body.mode-ajustes #ajustesView > *{
-  animation:pEntra .75s var(--spring) both;
-}
-:root[data-theme="light"] #ajustesView > :nth-child(2), :root[data-theme="light"] #mesView > :nth-child(2), :root[data-theme="light"] #mercarView > :nth-child(2), :root[data-theme="light"] #recuerdaView > :nth-child(2), :root[data-theme="light"] #glimView > :nth-child(2), :root[data-theme="light"] #creditoView > :nth-child(2), :root[data-theme="light"] #restView > :nth-child(2), :root[data-theme="light"] #gmailView > :nth-child(2){ animation-delay:.06s; }
-:root[data-theme="light"] #ajustesView > :nth-child(3), :root[data-theme="light"] #mesView > :nth-child(3), :root[data-theme="light"] #mercarView > :nth-child(3), :root[data-theme="light"] #recuerdaView > :nth-child(3), :root[data-theme="light"] #glimView > :nth-child(3), :root[data-theme="light"] #creditoView > :nth-child(3), :root[data-theme="light"] #restView > :nth-child(3), :root[data-theme="light"] #gmailView > :nth-child(3){ animation-delay:.12s; }
-:root[data-theme="light"] #ajustesView > :nth-child(n+4), :root[data-theme="light"] #mesView > :nth-child(n+4), :root[data-theme="light"] #mercarView > :nth-child(n+4), :root[data-theme="light"] #recuerdaView > :nth-child(n+4), :root[data-theme="light"] #glimView > :nth-child(n+4), :root[data-theme="light"] #creditoView > :nth-child(n+4), :root[data-theme="light"] #restView > :nth-child(n+4), :root[data-theme="light"] #gmailView > :nth-child(n+4){ animation-delay:.18s; }
-
-/* — P no tiene temporadas: nada de insignias, nevadas ni decoración — */
+/* P no tiene temporadas: nada de insignias, nevadas ni decoración */
 :root[data-theme="light"] .seasonTag, :root[data-theme="light"] #snow, :root[data-theme="light"] .spDeco{ display:none !important; }
 
-@media (prefers-reduced-motion: reduce){
-  :root[data-theme="light"] .composer::after, :root[data-theme="light"] #send, :root[data-theme="light"] #send::before, :root[data-theme="light"] .bar::before,
-  :root[data-theme="light"] .dNav button[aria-current="page"] .ico, :root[data-theme="light"] body.drawer-open .dNav button,
-  :root[data-theme="light"] #restView > *, :root[data-theme="light"] #creditoView > *, :root[data-theme="light"] #gmailView > *, :root[data-theme="light"] #glimView > *,
-  :root[data-theme="light"] #recuerdaView > *, :root[data-theme="light"] #mercarView > *, :root[data-theme="light"] #mesView > *, :root[data-theme="light"] #ajustesView > *, .pRip{ animation:none; }
-}
+/* cambio de tema: un velo que se funde (rápido y liviano, sin capturas de pantalla) */
+.themeVeil{ position:fixed; inset:0; z-index:9999; opacity:0; pointer-events:none; transition:opacity .18s ease; }
+.themeVeil.on{ opacity:1; }
+
+/* registrar lo que compré hoy: igual que la lista de mamá (buscador + apartados que se despliegan) */
+.rgBusca{ position:relative; margin:6px 0 4px; }
+.rgBusca svg{ position:absolute; left:15px; top:50%; width:18px; height:18px; transform:translateY(-50%); color:var(--ghost); pointer-events:none; z-index:1; }
+.rgBusca input{ width:100%; padding:13px 46px; border-radius:999px; border:1px solid var(--line); background:rgba(var(--ink),.05); -webkit-backdrop-filter:blur(14px); backdrop-filter:blur(14px); color:var(--white); font:inherit; font-size:16px; outline:none; -webkit-appearance:none; appearance:none; transition:border-color .25s, background .25s; }
+.rgBusca input::placeholder{ color:var(--dim); }
+.rgBusca input:focus{ border-color:rgba(var(--cyan-rgb),.45); background:rgba(var(--ink),.08); }
+.rgBusca input::-webkit-search-cancel-button{ display:none; }
+.rgBusca .x{ position:absolute; right:7px; top:50%; width:32px; height:32px; transform:translateY(-50%); border:0; border-radius:50%; background:rgba(var(--ink),.1); color:var(--white); display:grid; place-items:center; cursor:pointer; z-index:1; }
+.rgBusca .x[hidden]{ display:none; }
+.rgBusca .x svg{ position:static; width:13px; height:13px; transform:none; color:inherit; }
+.rgGrupo{ display:flex; align-items:center; gap:10px; width:100%; margin:16px 0 2px; padding:9px 2px; border:0; background:none; color:var(--dim); font:inherit; font-size:.78rem; font-weight:700; letter-spacing:.12em; text-transform:uppercase; cursor:pointer; }
+.rgGrupo .chev{ width:14px; height:14px; flex:none; color:var(--ghost); transition:transform .35s cubic-bezier(.16,1,.3,1); }
+.rgGrupo .chev svg{ width:100%; height:100%; display:block; }
+.rgGrupo[aria-expanded="true"] .chev{ transform:rotate(90deg); }
+.rgGrupo .n{ flex:1; text-align:left; }
+.rgGrupo .c{ font-weight:400; letter-spacing:0; text-transform:none; }
+.rgCuerpo{ display:grid; grid-template-rows:0fr; transition:grid-template-rows .4s cubic-bezier(.16,1,.3,1); }
+.rgCuerpo.on{ grid-template-rows:1fr; }
+.rgCuerpo > div{ overflow:hidden; min-height:0; }
+.rgLista{ display:grid; gap:8px; padding:6px 0 4px; }
+.rgItem{ display:flex; align-items:center; gap:14px; width:100%; padding:14px 16px; border-radius:18px; border:1px solid var(--line); background:rgba(var(--ink),.04); color:var(--white); font:inherit; text-align:left; cursor:pointer; transition:background .25s, border-color .25s, transform .12s; }
+.rgItem:active{ transform:scale(.98); }
+.rgItem .e{ font-size:1.6rem; line-height:1; flex:none; }
+.rgItem .n{ flex:1; font-size:1.02rem; font-weight:600; }
+.rgItem .s{ font-size:.8rem; padding:7px 13px; border-radius:999px; background:rgba(var(--ink),.07); color:var(--dim); white-space:nowrap; flex:none; }
+.rgItem.on{ border-color:rgba(var(--cyan-rgb),.5); background:rgba(var(--cyan-rgb),.1); }
+.rgItem.on .s{ background:linear-gradient(140deg, var(--cyan), var(--blue)); color:var(--on-accent); font-weight:700; }
+.rgEstado{ margin:24px 4px; color:var(--dim); font-size:.95rem; }
 </style>
 </head>
 <body>
@@ -1822,7 +1765,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
 /* ═════════ VERSIÓN ═════════
    Súbela en cada entrega: si el servidor tiene una versión distinta a la que está corriendo,
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
-const APP_VERSION = "2026-10-05.20";
+const APP_VERSION = "2026-10-05.22";
 (function autoActualizar(){
   const patron = new RegExp("const APP_" + "VERSION = \"([^\"]+)\"");
   async function revisar(){
@@ -2050,7 +1993,7 @@ vec3 lines(vec2 pc, float t){
 }
 
 vec3 scene(vec2 pc){
-  return lines(pc, uTime);
+  return lines(pc, uTime) * (1. - .9 * uLight);   // en el tema P las líneas finas casi no se ven
 }
 
 float sdBox(vec2 p, vec2 b, float r){
@@ -4284,6 +4227,7 @@ const Drawer = (function(){
   const rootEl = document.documentElement;
   function setDp(v){
     dp = v;
+    rootEl.classList.toggle("dpOn", v > 0.05);
     rootEl.style.setProperty("--dp", (v / 100).toFixed(4));
     rootEl.style.setProperty("--dpc", Math.min(1, Math.max(0, v / 100)).toFixed(4));
     Rain.redraw();                                    // el vidrio se redibuja en este mismo cuadro, no uno después
@@ -4435,27 +4379,26 @@ const Theme = (function(){
     try{ localStorage.setItem(KEY, light ? "light" : "dark"); }catch{}
     sync();
     Rain.theme(light, instant);
+    if(typeof Decora !== "undefined") Decora.aplica();
   }
 
+  let cambiando = false;
   function set(light, origen){
-    if(light === isLight()) return;
-    /* sin transiciones de vista, o con movimiento reducido: un fundido corto */
-    if(REDUCED || !document.startViewTransition){
-      root.classList.add("theme-fade");
-      apply(light, REDUCED);
-      setTimeout(() => root.classList.remove("theme-fade"), 400);
-      return;
-    }
-    const r = (origen || seg).getBoundingClientRect();
-    const x = r.left + r.width / 2, y = r.top + r.height / 2;
-    const R = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y));
-    const vt = document.startViewTransition(() => apply(light, true));
-    vt.ready.then(() => {
-      root.animate(
-        { clipPath: ["circle(0px at " + x + "px " + y + "px)", "circle(" + R + "px at " + x + "px " + y + "px)"] },
-        { duration: 820, easing: "cubic-bezier(.7,0,.2,1)", pseudoElement: "::view-transition-new(root)" }
-      );
-    }).catch(() => {});
+    if(light === isLight() || cambiando) return;
+    cambiando = true;
+    /* un velo del color del tema nuevo se funde, se cambia el tema por detrás y se vuelve a fundir: rápido y sin trabarse */
+    const velo = document.createElement("div");
+    velo.className = "themeVeil";
+    velo.style.background = light ? "#111214" : "#000";
+    document.body.appendChild(velo);
+    const termina = () => { velo.remove(); cambiando = false; };
+    const rapido = REDUCED;
+    requestAnimationFrame(() => velo.classList.add("on"));
+    setTimeout(() => {
+      apply(light, true);
+      requestAnimationFrame(() => { velo.classList.remove("on"); setTimeout(termina, 260); });
+    }, rapido ? 0 : 190);
+    setTimeout(() => { if(cambiando) termina(); }, 1500);   // por si algo se atasca, nunca queda bloqueado
   }
 
   bDark.addEventListener("click", () => set(false, bDark));
@@ -4466,20 +4409,6 @@ const Theme = (function(){
 
 
 document.getElementById("ajVolver").addEventListener("click", () => document.getElementById("navChat").click());
-
-/* onda líquida al tocar (solo se ve en el tema P; en el B no hay estilo para ella) */
-document.addEventListener("pointerdown", e => {
-  if(document.documentElement.dataset.theme !== "light" || REDUCED) return;
-  const b = e.target.closest(".dNav button, .mkBtn, .notifBtn, .wsAcc button, .svBanner .go, .glimActions button");
-  if(!b || b.disabled) return;
-  const r = b.getBoundingClientRect(), d = Math.hypot(r.width, r.height) * 2;
-  const o = document.createElement("span");
-  o.className = "pRip";
-  o.style.cssText = "--rx:" + (e.clientX - r.left) + "px;--ry:" + (e.clientY - r.top) + "px;--rd:" + d + "px";
-  o.style.transformOrigin = "center";
-  b.appendChild(o);
-  o.addEventListener("animationend", () => o.remove());
-}, { passive: true });
 
 /* ════════════════════════════════════════════════════════════
    NOTIFICACIONES PUSH: le pide permiso al navegador y guarda la
@@ -4852,47 +4781,7 @@ const Servicios = (function(){
       marcaSegs(); reinicia();
     }
 
-    /* arrastre 1:1 con el dedo, velocidad al soltar y resistencia en los bordes */
-    if(n > 1){
-      let down = false, drag = false, sx = 0, sy = 0, base = 0, pid = null, hist = [], arrastro = false;
-      el.addEventListener("pointerdown", e => {
-        if(e.pointerType === "mouse" && e.button !== 0) return;
-        down = true; drag = false; sx = e.clientX; sy = e.clientY; pid = e.pointerId;
-        if(anim){ anim.cancel(); anim = null; }      // se puede agarrar en pleno vuelo
-        base = offset; hist = [{ p: e.clientX, t: e.timeStamp }];
-        clearInterval(ciclo); congelaSeg();
-      });
-      el.addEventListener("pointermove", e => {
-        if(!down || e.pointerId !== pid) return;
-        const dx = e.clientX - sx, dy = e.clientY - sy;
-        if(!drag){
-          if(Math.abs(dx) < 8 && Math.abs(dy) < 8) return;
-          if(Math.abs(dy) > Math.abs(dx)){ down = false; marcaSegs(); reinicia(); return; }   // era scroll vertical
-          drag = true;
-          try{ el.setPointerCapture(pid); }catch{}
-        }
-        hist.push({ p: e.clientX, t: e.timeStamp }); if(hist.length > 6) hist.shift();
-        const w = W(), min = -(n - 1) * w;
-        let x = base + dx;
-        if(x > 0) x = rubberband(x, w); else if(x < min) x = min - rubberband(min - x, w);
-        setOffset(x);
-      });
-      function soltar(e){
-        if(!down || e.pointerId !== pid) return;
-        down = false;
-        if(!drag){ marcaSegs(); reinicia(); return; }
-        drag = false; arrastro = true; setTimeout(() => { arrastro = false; }, 0);
-        const a = hist[0], b = hist[hist.length - 1];
-        const v = (b.p - a.p) / Math.max(1, b.t - a.t) * 1000;
-        const w = W();
-        let k = Math.round(-(offset + project(v)) / w);
-        k = Math.max(0, Math.min(n - 1, k));
-        ir(k, v, Math.abs(v) > 300 ? 0.85 : 1);
-      }
-      el.addEventListener("pointerup", soltar);
-      el.addEventListener("pointercancel", soltar);
-      el.addEventListener("click", e => { if(arrastro){ e.stopPropagation(); e.preventDefault(); } }, true);
-    }
+    /* el aviso es fijo: no se arrastra ni se mueve con el dedo; si hay varios pagos pendientes se van turnando solos */
 
     /* si el aviso estaba oculto (otra pantalla) o cambia el ancho, recalcula alturas */
     let ro = null;
@@ -5430,39 +5319,99 @@ const Mercar = (function(){
       '<div class="gList mkLista" id="mkLista">' + lista.map((x, i) =>
         '<div class="gRow" data-i="' + i + '"><span class="mkCheck">' + ICO_OK + '</span><span class="gTx"><b>' + emojiMercado(x.p.nombre) + ' ' + esc(x.p.nombre) + '</b><small>' +
         esc(x.p.grupo) + (esMama(x.p) ? ' · lo marcó tu mamá' : '') + '</small></span></div>').join("") + '</div>' +
-      '<div class="mkAcciones"><div class="mkFila" id="mkFila"><button type="button" class="mkBtn sec" id="mkCopiar">Copiar lista</button><button type="button" class="mkBtn sec" id="mkCompartir">Compartir</button></div>' +
+      '<div class="mkAcciones"><button type="button" class="mkBtn sec full" id="mkCompartir">Compartir</button>' +
       '<button type="button" class="mkBtn pri full" id="mkHecho">Ya hice el mercado</button>' +
+      '<button type="button" class="mkBtn sec full" id="mkDescartar">Descartar lista</button>' +
       '<button type="button" class="mkBtn sec full" id="mkRevisar">Volver</button></div>';
     const elegidos = () => lista.filter(x => x.comprar).map(x => x.p);
     document.getElementById("mkLista").addEventListener("click", e => {
       const row = e.target.closest(".gRow"); if(!row) return;
       const x = lista[+row.dataset.i]; x.comprar = !x.comprar; row.classList.toggle("off", !x.comprar);
     });
-    document.getElementById("mkCopiar").addEventListener("click", e => {
-      if(copiarReferencia(textoLista(elegidos()))) e.currentTarget.textContent = "¡Copiada!";
+    document.getElementById("mkCompartir").addEventListener("click", e => {
+      const t = textoLista(elegidos());
+      if(navigator.share) navigator.share({ text: t }).catch(() => {});
+      else if(copiarReferencia(t)) e.currentTarget.textContent = "¡Copiada!";   // sin menú de compartir (computador): se copia
     });
-    const comp = document.getElementById("mkCompartir");
-    if(navigator.share) comp.addEventListener("click", () => navigator.share({ text: textoLista(elegidos()) }).catch(() => {}));
-    else { comp.remove(); document.getElementById("mkCopiar").style.gridColumn = "1 / -1"; }
+    document.getElementById("mkDescartar").addEventListener("click", async e => {
+      if(!confirm("¿Descartar esta lista? Todo lo pendiente se quita y no vuelve a aparecer.")) return;
+      const b = e.currentTarget; b.disabled = true; b.textContent = "Descartando…";
+      try{
+        await post(MERCADO_MARCAR_URL, { ids: items.map(p => p.id), falta: false });
+        items.forEach(p => { p.falta = false; p.marcadoPor = null; });
+        guarda();
+        inicio();
+      }catch{
+        b.disabled = false; b.textContent = "Descartar lista";
+        statusEl.innerHTML = "No se pudo descartar. Revisa tu internet y que Tailscale esté encendido.";
+      }
+    });
     document.getElementById("mkHecho").addEventListener("click", mercadoHecho);
     document.getElementById("mkRevisar").addEventListener("click", inicio);
   }
-  /* registro libre: lo que compraste hoy, sin pasar por el juego ni tocar lo que "falta" de los demás */
+  /* registro libre: lo que compraste hoy, sin pasar por el juego ni tocar lo que "falta" de los demás.
+     Se ve igual que la lista de mamá: buscador arriba y apartados que se despliegan. */
   function registrar(ps){
     estado = "libre";
     lista = ps.map(p => ({ p, comprar: false }));
+    const GRUPOS_R = ["Despensa", "Lácteos", "Carnes", "Ema", "Aseo", "Otros"];
+    const abiertos = new Set();
+    const norm = t => String(t).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+    const CHEV = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>';
     stage.innerHTML =
-      '<div class="mkFin"><h3>¿Qué compraste hoy?</h3><p>Marca lo que llevaste a la casa — esto no toca el presupuesto, solo la fecha de compra</p></div>' +
-      '<div class="gList mkLista" id="mkLista">' + lista.map((x, i) =>
-        '<div class="gRow off" data-i="' + i + '"><span class="mkCheck">' + ICO_OK + '</span><span class="gTx"><b>' + emojiMercado(x.p.nombre) + ' ' + esc(x.p.nombre) + '</b><small>' + esc(x.p.grupo) + '</small></span></div>').join("") + '</div>' +
+      '<div class="mkFin"><h3>¿Qué compraste hoy?</h3><p>Marca lo que llevaste a la casa — esto no toca el presupuesto, solo la fecha de compra</p><span class="mkCopiado" id="rgCuenta" hidden></span></div>' +
+      '<div class="rgBusca"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>' +
+        '<input id="rgBuscar" type="search" placeholder="Buscar algo de la lista" autocomplete="off" autocapitalize="none" spellcheck="false" enterkeyhint="search">' +
+        '<button type="button" class="x" id="rgBuscarX" aria-label="Borrar búsqueda" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>' +
+      '<div id="rgMain"></div>' +
       '<div class="mkAcciones"><button type="button" class="mkBtn pri full" id="mkHecho">Guardar lo que compré</button>' +
       '<button type="button" class="mkBtn sec full" id="mkCancelar">Cancelar</button></div>';
-    document.getElementById("mkLista").addEventListener("click", e => {
-      const row = e.target.closest(".gRow"); if(!row) return;
-      const x = lista[+row.dataset.i]; x.comprar = !x.comprar; row.classList.toggle("off", !x.comprar);
+    const main = document.getElementById("rgMain"), buscar = document.getElementById("rgBuscar"), buscarX = document.getElementById("rgBuscarX"), cuenta = document.getElementById("rgCuenta");
+    function cuentaMarcadas(){
+      const n = lista.filter(x => x.comprar).length;
+      cuenta.hidden = !n;
+      cuenta.textContent = n === 1 ? "1 cosa marcada" : n + " cosas marcadas";
+    }
+    function pinta(){
+      const q = norm(buscar.value);
+      let html = "";
+      GRUPOS_R.forEach(g => {
+        const del = [];
+        lista.forEach((x, i) => {
+          const gp = GRUPOS_R.includes(x.p.grupo) ? x.p.grupo : "Otros";
+          if(gp === g && (!q || norm(x.p.nombre).includes(q))) del.push([x, i]);
+        });
+        if(!del.length) return;
+        const abierto = q ? true : abiertos.has(g);   // buscando, se abre lo que coincide
+        html += '<button type="button" class="rgGrupo" data-g="' + esc(g) + '" aria-expanded="' + abierto + '"><span class="chev" aria-hidden="true">' + CHEV + '</span><span class="n">' + g + '</span><span class="c">' + del.length + '</span></button>' +
+          '<div class="rgCuerpo' + (abierto ? ' on' : '') + '"><div><div class="rgLista">' + del.map(([x, i]) =>
+            '<button type="button" class="rgItem' + (x.comprar ? ' on' : '') + '" data-i="' + i + '"><span class="e" aria-hidden="true">' + emojiMercado(x.p.nombre) + '</span><span class="n">' + esc(x.p.nombre) + '</span><span class="s">' + (x.comprar ? "Compré" : "Marcar") + '</span></button>'
+          ).join("") + '</div></div></div>';
+      });
+      main.innerHTML = html || (q ? '<p class="rgEstado">No se encuentra «' + esc(buscar.value.trim()) + '» en la lista.</p>' : '<p class="rgEstado">No hay productos en la lista todavía.</p>');
+      cuentaMarcadas();
+    }
+    main.addEventListener("click", e => {
+      const cab = e.target.closest(".rgGrupo");
+      if(cab){
+        const g = cab.dataset.g, abrir = !abiertos.has(g);
+        if(abrir) abiertos.add(g); else abiertos.delete(g);
+        cab.setAttribute("aria-expanded", String(abrir));
+        cab.nextElementSibling.classList.toggle("on", abrir);
+        return;
+      }
+      const it = e.target.closest(".rgItem"); if(!it) return;
+      const x = lista[+it.dataset.i]; x.comprar = !x.comprar;
+      it.classList.toggle("on", x.comprar);
+      it.querySelector(".s").textContent = x.comprar ? "Compré" : "Marcar";
+      cuentaMarcadas();
     });
+    buscar.addEventListener("input", () => { buscarX.hidden = !buscar.value; pinta(); });
+    buscar.addEventListener("keydown", e => { if(e.key === "Enter") buscar.blur(); });
+    buscarX.addEventListener("click", () => { buscar.value = ""; buscarX.hidden = true; pinta(); buscar.focus(); });
     document.getElementById("mkHecho").addEventListener("click", mercadoHecho);
     document.getElementById("mkCancelar").addEventListener("click", inicio);
+    pinta();
   }
 
   /* mismo lenguaje visual que "enviar el comprobante" en AT Gmail: anillos + ícono en movimiento, y al final el check se dibuja con el trazo (gmOkCircle/gmOkCheck), no aparece ya hecho */
@@ -6036,19 +5985,12 @@ activity();
 Servicios.check();
 Glim.check();
 
-/* decoración de temporada: insignia en el menú y, en Navidad, una nevada muy suave */
-(function(){
-  if(!TEMPORADA) return;
-  const tag = document.getElementById("seasonTag");
-  if(tag) tag.textContent = TEMPORADA === "halloween" ? "🎃" : "🎄";
-  if(TEMPORADA !== "navidad" || REDUCED) return;
-  const c = document.createElement("canvas"); c.id = "snow"; document.body.appendChild(c);
-  const g = c.getContext("2d"); let W = 0, H = 0, flakes = [];
-  const fit = () => { const dpr = Math.min(2, devicePixelRatio || 1); W = innerWidth; H = innerHeight; c.width = W * dpr; c.height = H * dpr; g.setTransform(dpr, 0, 0, dpr, 0, 0); };
-  fit(); addEventListener("resize", fit);
-  for(let i = 0; i < 42; i++) flakes.push({ x: Math.random() * innerWidth, y: Math.random() * innerHeight, r: .8 + Math.random() * 1.7, v: 12 + Math.random() * 20, s: Math.random() * 6.28 });
-  let last = performance.now();
-  (function paso(t){
+/* decoración de temporada: insignia en el menú y, en Navidad, una nevada muy suave. Se activa o se quita al cambiar de tema */
+const Decora = (function(){
+  let c = null, g = null, W = 0, H = 0, flakes = [], corre = false, nieve = false;
+  const fit = () => { if(!c) return; const dpr = Math.min(2, devicePixelRatio || 1); W = innerWidth; H = innerHeight; c.width = W * dpr; c.height = H * dpr; g.setTransform(dpr, 0, 0, dpr, 0, 0); };
+  function paso(t){
+    if(!nieve){ corre = false; return; }
     const dt = Math.min(.05, (t - last) / 1000); last = t;
     g.clearRect(0, 0, W, H);
     for(const f of flakes){
@@ -6057,7 +5999,22 @@ Glim.check();
       g.globalAlpha = .35 + f.r * .2; g.fillStyle = "#fff"; g.beginPath(); g.arc(f.x, f.y, f.r, 0, 6.28); g.fill();
     }
     requestAnimationFrame(paso);
-  })(last);
+  }
+  let last = 0;
+  function aplica(){
+    const tag = document.getElementById("seasonTag");
+    if(tag) tag.textContent = TEMPORADA ? (TEMPORADA === "halloween" ? "🎃" : "🎄") : "";
+    nieve = TEMPORADA === "navidad" && !REDUCED;
+    if(nieve && !c){
+      c = document.createElement("canvas"); c.id = "snow"; document.body.appendChild(c);
+      g = c.getContext("2d"); fit(); addEventListener("resize", fit);
+      for(let i = 0; i < 42; i++) flakes.push({ x: Math.random() * innerWidth, y: Math.random() * innerHeight, r: .8 + Math.random() * 1.7, v: 12 + Math.random() * 20, s: Math.random() * 6.28 });
+    }
+    if(c) c.style.display = nieve ? "" : "none";
+    if(nieve && !corre){ corre = true; last = performance.now(); requestAnimationFrame(paso); }
+  }
+  aplica();
+  return { aplica };
 })();
 
 </script>
