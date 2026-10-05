@@ -113,7 +113,7 @@ body.ribbon #campo{ display:none; }
   height:var(--app-h, 100dvh);
   transform:translateY(var(--app-top, 0px));
   display:grid;
-  grid-template-rows:auto minmax(0,1fr) auto;
+  grid-template-rows:auto auto minmax(0,1fr) auto;   /* encabezado · aviso fijo · chat · escribir */
 }
 
 /* ───────── encabezado ───────── */
@@ -171,12 +171,12 @@ header button svg{ width:13px; height:13px; flex:none; }
 #thread{
   overflow-y:auto; overscroll-behavior:contain;
   -webkit-overflow-scrolling:touch;
-  padding:calc(30px + var(--banner-h, 0px)) var(--sp) 12px;
+  padding:20px var(--sp) 12px;
 }
 /* sin conversación (solo el titular) no se desliza nada: el titular también se queda quieto */
 body:not([class*="mode-"]) #thread.sinChat{ overflow-y:hidden; }
 /* el desvanecido de arriba (antes era una máscara, que impedía que el aviso fijo desenfocara lo de atrás) */
-.inner::before{ content:""; position:sticky; top:0; z-index:5; display:block; height:26px; margin:-30px 0 4px; pointer-events:none; background:linear-gradient(180deg, var(--void) 0, transparent); }
+.inner::before{ content:""; position:sticky; top:0; z-index:5; display:block; height:26px; margin:-20px 0 -6px; pointer-events:none; background:linear-gradient(180deg, var(--void) 0, transparent); }
 #thread::-webkit-scrollbar{ width:7px; }
 #thread::-webkit-scrollbar-thumb{ background:rgba(var(--ink),.1); border-radius:4px; }
 /* en el celular no se dibuja la barra (iOS la deja fija y fea): se sigue deslizando igual */
@@ -325,15 +325,15 @@ body:not([class*="mode-"]) #thread.sinChat{ overflow-y:hidden; }
 /* ───────── aviso de servicios pendientes ───────── */
 #servicioBanner:empty{ display:none; }
 /* el aviso es fijo: vive encima del chat (fuera de lo que se desliza) y lo que pasa por detrás se ve borroso */
-/* cada pieza de la app en su fila, para que el aviso pueda montarse encima del chat */
+/* cada pieza de la app en su fila: el aviso tiene la suya, así el chat se desliza debajo y nunca se monta encima */
 .shell > header{ grid-row:1; grid-column:1; }
-.shell > main{ grid-row:2; grid-column:1; }
-.shell > footer{ grid-row:3; grid-column:1; }
+.shell > main{ grid-row:3; grid-column:1; }
+.shell > footer{ grid-row:4; grid-column:1; }
 #servicioBanner{
-  grid-row:2; grid-column:1; align-self:start; justify-self:center;
-  width:min(calc(100% - 2 * var(--sp)), 42rem); margin-top:8px; position:relative; z-index:6; pointer-events:none;
+  grid-row:2; grid-column:1; justify-self:center;
+  width:min(calc(100% - 2 * var(--sp)), 42rem); padding-top:8px; position:relative; z-index:6;
 }
-#servicioBanner > *{ pointer-events:auto; }
+#servicioBanner .svBanner{ margin-bottom:0; }
 #servicioBanner .svBanner{
   -webkit-backdrop-filter:blur(18px) saturate(1.5) brightness(1.08); backdrop-filter:blur(18px) saturate(1.5) brightness(1.08);
   touch-action:none;
@@ -1803,7 +1803,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
 /* ═════════ VERSIÓN ═════════
    Súbela en cada entrega: si el servidor tiene una versión distinta a la que está corriendo,
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
-const APP_VERSION = "2026-10-05.24";
+const APP_VERSION = "2026-10-05.25";
 (function autoActualizar(){
   const patron = new RegExp("const APP_" + "VERSION = \"([^\"]+)\"");
   async function revisar(){
@@ -6027,16 +6027,6 @@ const TuMes = (function(){
 activity();
 Servicios.check();
 Glim.check();
-
-/* el chat deja sitio al aviso fijo: se mide su altura y se le pasa al chat como margen de arriba */
-(function(){
-  const aviso = document.getElementById("servicioBanner"), shell = document.querySelector(".shell");
-  if(!aviso || !shell || !window.ResizeObserver) return;
-  const mide = () => { const h = aviso.offsetParent === null ? 0 : Math.round(aviso.getBoundingClientRect().height) + 8; shell.style.setProperty("--banner-h", h + "px"); };
-  new ResizeObserver(mide).observe(aviso);
-  new MutationObserver(mide).observe(document.body, { attributes: true, attributeFilter: ["class"] });
-  mide();
-})();
 
 /* decoración de temporada: insignia en el menú y, en Navidad, una nevada muy suave. Se activa o se quita al cambiar de tema */
 const Decora = (function(){
