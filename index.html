@@ -1614,13 +1614,14 @@ body[class*="mode-"] #masIngreso{ display:none; }
 .inIA{ position:relative; display:flex; align-items:center; justify-content:center; gap:10px; width:100%; margin-top:10px; padding:12px 14px; border-radius:16px; border:1.5px solid rgba(var(--ink),.16); background:rgba(var(--ink),.05); color:var(--white); font:inherit; cursor:pointer; transition:background .4s ease, border-color .4s ease, transform .15s ease-out; }
 .inIA:active{ transform:scale(.97); }
 .inIA b{ font-weight:600; font-size:.92rem; }
-.inIA::before{ content:""; position:absolute; inset:-1.5px; border-radius:inherit; padding:1.5px; background:linear-gradient(120deg, var(--cyan), var(--blue), #c084fc, var(--cyan)); background-size:240% 100%; -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite:xor; mask:linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0); opacity:0; transition:opacity .45s ease; pointer-events:none; }
+.inIA::before{ content:""; position:absolute; inset:-1.5px; border-radius:inherit; padding:1.5px; background:conic-gradient(from var(--inAng), #6ff0ff, #3a78ff, #5a3fe0, #3a78ff, #6ff0ff); -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite:xor; mask:linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0); opacity:0; transition:opacity .45s ease; pointer-events:none; }
 .inIAdot{ position:relative; width:18px; height:18px; border-radius:50%; flex:none; background:rgba(var(--ink),.28); transition:background .4s ease, box-shadow .4s ease; }
-.inIA[aria-pressed="true"]{ background:rgba(var(--cyan-rgb),.08); border-color:transparent; }
-.inIA[aria-pressed="true"]::before{ opacity:1; animation:inIAflow 4s linear infinite; }
-.inIA[aria-pressed="true"] .inIAdot{ background:radial-gradient(circle at 32% 30%, #fff 0, var(--cyan) 30%, var(--blue) 75%); box-shadow:0 0 14px rgba(var(--cyan-rgb),.65); animation:inIApop .55s cubic-bezier(.34,1.56,.64,1); }
-.inIA[aria-pressed="true"] .inIAdot::after{ content:""; position:absolute; inset:0; border-radius:50%; border:2px solid var(--cyan); animation:inIAonda .7s ease-out forwards; }
-@keyframes inIAflow{ to{ background-position:240% 0; } }
+.inIA[aria-pressed="true"]{ background:rgba(58,120,255,.1); border-color:transparent; }
+.inIA[aria-pressed="true"]::before{ opacity:1; animation:inIAflow 3.2s linear infinite; }
+.inIA[aria-pressed="true"] .inIAdot{ background:radial-gradient(circle at 34% 30%, rgba(255,255,255,.55), rgba(255,255,255,0) 55%), linear-gradient(135deg, #6ff0ff 0%, #3a78ff 50%, #5a3fe0 100%); box-shadow:0 0 14px rgba(58,120,255,.6); animation:inIApop .55s cubic-bezier(.34,1.56,.64,1); }
+.inIA[aria-pressed="true"] .inIAdot::after{ content:""; position:absolute; inset:0; border-radius:50%; border:2px solid #6ff0ff; animation:inIAonda .7s ease-out forwards; }
+@property --inAng{ syntax:"<angle>"; inherits:false; initial-value:0deg; }
+@keyframes inIAflow{ to{ --inAng:360deg; } }
 @keyframes inIApop{ 0%{ transform:scale(.6); } 60%{ transform:scale(1.35); } 100%{ transform:scale(1); } }
 @keyframes inIAonda{ from{ transform:scale(1); opacity:.8; } to{ transform:scale(2.6); opacity:0; } }
 @media (prefers-reduced-motion:reduce){ .inIA[aria-pressed="true"]::before, .inIA[aria-pressed="true"] .inIAdot, .inIA[aria-pressed="true"] .inIAdot::after{ animation:none; } }
@@ -1957,7 +1958,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
 /* ═════════ VERSIÓN ═════════
    Súbela en cada entrega: si el servidor tiene una versión distinta a la que está corriendo,
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
-const APP_VERSION = "2026-10-05.43";
+const APP_VERSION = "2026-10-05.44";
 (function autoActualizar(){
   const patron = new RegExp("const APP_" + "VERSION = \"([^\"]+)\"");
   async function revisar(){
