@@ -954,7 +954,7 @@ body.mode-gmail footer, body.mode-glim footer{ display:none; }
 .restRail .cat{ animation:catIn .6s cubic-bezier(.16,1,.3,1) backwards; animation-delay:calc(var(--i, 0) * 45ms); }
 @keyframes catIn{ from{ opacity:0; transform:translateY(14px) scale(.9); } to{ opacity:1; transform:none; } }
 .restRail .tile{ position:relative; }
-.restRail .cat[aria-pressed="true"] .tile{ border-color:rgba(var(--ink),.16); transform:translateY(-4px) scale(1.06); background:radial-gradient(120% 120% at 30% 20%, rgba(111,240,255,.24), rgba(90,63,224,.14)); box-shadow:inset 0 1px 0 rgba(var(--hi),.22), 0 14px 30px -6px rgba(58,120,255,.5); }
+.restRail .cat[aria-pressed="true"] .tile{ border-color:rgba(var(--ink),.16); transform:none; background:radial-gradient(120% 120% at 30% 20%, rgba(111,240,255,.24), rgba(90,63,224,.14)); box-shadow:inset 0 1px 0 rgba(var(--hi),.22), 0 0 0 3px rgba(58,120,255,.16), 0 10px 28px rgba(58,120,255,.5); }
 .restRail .cat[aria-pressed="true"] .tile > span, .restRail .cat[aria-pressed="true"] .tile{ animation:catElige .6s cubic-bezier(.34,1.56,.64,1); }
 .restRail .cat[aria-pressed="true"] .lbl{ color:var(--strong); font-weight:600; }
 .restRail .tile{ transition:transform .35s cubic-bezier(.34,1.56,.64,1), border-color .3s, box-shadow .4s, background .3s; }
@@ -2005,7 +2005,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
 /* ═════════ VERSIÓN ═════════
    Súbela en cada entrega: si el servidor tiene una versión distinta a la que está corriendo,
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
-const APP_VERSION = "2026-10-05.52";
+const APP_VERSION = "2026-10-05.53";
 (function autoActualizar(){
   const patron = new RegExp("const APP_" + "VERSION = \"([^\"]+)\"");
   async function revisar(){
