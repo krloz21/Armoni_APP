@@ -1597,6 +1597,38 @@ body.mode-gmail footer, body.mode-glim footer{ display:none; }
 #restView > :nth-child(4), #creditoView > :nth-child(4), #gmailView > :nth-child(4), #glimView > :nth-child(4), #recuerdaView > :nth-child(4), #ajustesView > :nth-child(4){ animation-delay:0.15s; }
 #restView > :nth-child(n+5), #creditoView > :nth-child(n+5), #gmailView > :nth-child(n+5), #glimView > :nth-child(n+5), #recuerdaView > :nth-child(n+5), #ajustesView > :nth-child(n+5){ animation-delay:.2s; }
 @media (prefers-reduced-motion: reduce){ #restView > *, #creditoView > *, #gmailView > *, #glimView > *, #recuerdaView > *, #ajustesView > *{ animation:none; } }
+
+/* ═════════ botón + (agregar un ingreso) y su ventana ═════════ */
+#masIngreso{ flex:none; align-self:flex-end; width:38px; height:38px; border-radius:50%; border:1px solid rgba(var(--ink),.14); background:rgba(var(--ink),.07); color:var(--ghost); display:grid; place-items:center; cursor:pointer; margin-left:-8px; transition:transform .4s cubic-bezier(.34,1.56,.64,1), background .2s ease, color .2s ease; }
+#masIngreso svg{ width:18px; height:18px; }
+#masIngreso:active{ transform:scale(.88); }
+body[class*="mode-"] #masIngreso{ display:none; }
+.inCard{ max-height:calc(100dvh - 40px); overflow-y:auto; text-align:left; }
+.inCard::-webkit-scrollbar{ display:none; }
+.inCard h3{ text-align:center; }
+.inSub{ margin:4px 0 0; text-align:center; color:var(--dim); font-size:.82rem; }
+.inLbl{ display:block; margin:16px 2px 7px; font-size:.7rem; font-weight:700; letter-spacing:.09em; text-transform:uppercase; color:var(--dim); }
+.inCard input[type="text"], .inCard textarea{ width:100%; padding:13px 14px; border-radius:14px; border:1px solid var(--line); background:rgba(var(--ink),.05); color:var(--white); font:inherit; font-size:16px; text-align:left; }
+.inCard textarea{ resize:none; min-height:64px; }
+.inCard input:focus, .inCard textarea:focus{ outline:none; border-color:rgba(var(--cyan-rgb),.6); box-shadow:0 0 0 3px rgba(var(--cyan-rgb),.15); }
+.inCard input::placeholder, .inCard textarea::placeholder{ color:var(--dim); }
+.inMonto{ position:relative; }
+.inMonto b{ position:absolute; left:14px; top:50%; transform:translateY(-50%); color:var(--dim); font-weight:600; pointer-events:none; }
+.inMonto input{ padding-left:30px !important; font-weight:600; font-variant-numeric:tabular-nums; }
+.inCats{ display:flex; flex-wrap:wrap; gap:8px; }
+.inCat{ display:inline-flex; align-items:center; gap:7px; font:inherit; font-size:.85rem; padding:9px 14px 9px 11px; border-radius:999px; border:1px solid var(--line); background:var(--panel); color:var(--ghost); cursor:pointer; transition:background .25s ease, color .25s ease, border-color .25s ease, transform .35s cubic-bezier(.34,1.56,.64,1); }
+.inCat svg{ width:16px; height:16px; }
+.inCat:active{ transform:scale(.94); }
+.inCat[aria-pressed="true"]{ background:linear-gradient(140deg, var(--cyan), var(--blue)); color:var(--on-accent); border-color:transparent; font-weight:600; }
+.inCard .inCat, .inCard .recChip, .inCard .recFecha{ background:rgba(var(--ink),.06); border-color:rgba(var(--ink),.16); }
+.inCard .recChip{ color:var(--white); }
+.inCard .inCat{ color:var(--white); }
+.inCard .inCat[aria-pressed="true"], .inCard .recChip[aria-pressed="true"]{ background:linear-gradient(140deg, var(--cyan), var(--blue)); color:var(--on-accent); border-color:transparent; }
+.inCard .recFecha{ min-height:38px; }
+.inErr{ margin:12px 2px 0; color:#ff9b9b; font-size:.82rem; min-height:1em; }
+.inErr:empty{ display:none; }
+.inAviso{ position:fixed; left:50%; bottom:calc(var(--safe-bot) + 96px); z-index:99; transform:translate(-50%, 16px); opacity:0; padding:12px 20px; border-radius:999px; background:var(--panel); border:1px solid rgba(74,222,128,.45); color:#86efac; font-size:.9rem; font-weight:600; pointer-events:none; transition:opacity .3s ease, transform .45s cubic-bezier(.34,1.56,.64,1); white-space:nowrap; }
+.inAviso.on{ opacity:1; transform:translate(-50%, 0); }
 </style>
 </head>
 <body>
@@ -1811,6 +1843,9 @@ body.mode-gmail footer, body.mode-glim footer{ display:none; }
   <footer>
     <div class="frame" id="frame">
       <form class="composer" id="composer">
+        <button id="masIngreso" type="button" aria-label="Agregar un ingreso" title="Agregar un ingreso">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+        </button>
         <textarea id="field" rows="1" placeholder="Escribe aquí…" autocomplete="off" enterkeyhint="send"></textarea>
         <button id="send" type="submit" disabled aria-label="Enviar">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
@@ -1855,6 +1890,7 @@ const MERCADO_COMPRADO_URL = N8N + "/webhook/mercado-comprado";
 const MERCADO_AGREGAR_URL = N8N + "/webhook/mercado-agregar";
 const MERCADO_TOKEN = "mercado-7d41c2a9e05b";
 const RESUMEN_URL = N8N + "/webhook/resumen-mes";
+const INGRESO_URL = N8N + "/webhook/ingreso-nuevo";   // guarda un ingreso nuevo en Notion
 const JARDIN_PAGADO_URL = N8N + "/webhook/jardin-pagado";   // pagos de una fecha: ?fecha=AAAA-MM-DD
 const JARDIN_BASE = 1120000;   // lo que normalmente se paga de jardín
 const SERVICIOS_DIA_LIMITE = 7;   // hasta qué día del mes avisa si falta pagar
@@ -1880,7 +1916,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
 /* ═════════ VERSIÓN ═════════
    Súbela en cada entrega: si el servidor tiene una versión distinta a la que está corriendo,
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
-const APP_VERSION = "2026-10-05.32";
+const APP_VERSION = "2026-10-05.33";
 (function autoActualizar(){
   const patron = new RegExp("const APP_" + "VERSION = \"([^\"]+)\"");
   async function revisar(){
@@ -4657,6 +4693,125 @@ function pedirMontoJardin(){
     scrim.addEventListener("click", e => { if(e.target === scrim) cierra(null); });
   });
 }
+
+
+/* ════════════════════════════════════════════════════════════
+   AGREGAR UN INGRESO: ventana con concepto, categoría, fecha, valor y nota.
+   Solo salen las categorías de lo que entra "a mano": lo automatizado (servicios, jardín, carro, tarjetas) no se ofrece.
+   ════════════════════════════════════════════════════════════ */
+const Ingreso = (function(){
+  const CATS = ["Hogar", "Alimentación", "Salidas", "Salud", "Ahorro", "Otros"];
+  const P = 'fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"';
+  const ICO = {
+    "Hogar":        '<path d="M3 11 12 4l9 7"/><path d="M5.5 9.5V20h13V9.5"/>',
+    "Alimentación": '<path d="M3 4h2l2.3 10.5h10.4L20 8H6.4"/><circle cx="9" cy="19" r="1.4"/><circle cx="17" cy="19" r="1.4"/>',
+    "Salud":        '<path d="M12 5v14M5 12h14"/>',
+    "Salidas":      '<path d="M8 3h8l-1 7a3 3 0 0 1-6 0L8 3z"/><path d="M12 13v7M8.5 20.5h7"/>',
+    "Ahorro":       '<path d="M12 3v18"/><path d="M16.5 7H10a3 3 0 0 0 0 6h4a3 3 0 0 1 0 6H7"/>',
+    "Otros":        '<path d="M7 17 17 7M9 7h8v8"/>'
+  };
+  const iso = d => d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+  const hoy = () => iso(new Date());
+  const ayer = () => { const d = new Date(); d.setDate(d.getDate() - 1); return iso(d); };
+  let abierto = false;
+
+  function aviso(txt){
+    const a = document.createElement("div"); a.className = "inAviso"; a.textContent = txt; document.body.appendChild(a);
+    requestAnimationFrame(() => a.classList.add("on"));
+    setTimeout(() => { a.classList.remove("on"); setTimeout(() => a.remove(), 400); }, 2400);
+  }
+
+  function abrir(){
+    if(abierto) return; abierto = true;
+    const scrim = document.createElement("div");
+    scrim.className = "pgScrim";
+    scrim.innerHTML =
+      '<div class="pgCard inCard" role="dialog" aria-modal="true" aria-labelledby="inT">' +
+        '<h3 id="inT">Agregar un ingreso</h3>' +
+        '<p class="inSub">Lo que entra y no está automatizado</p>' +
+        '<label class="inLbl" for="inConcepto">Concepto</label>' +
+        '<input id="inConcepto" type="text" placeholder="Ej: Salario, trabajo extra…" autocomplete="off" maxlength="80">' +
+        '<span class="inLbl">Categoría</span>' +
+        '<div class="inCats" id="inCats">' + CATS.map(c => '<button type="button" class="inCat" data-c="' + c + '" aria-pressed="false"><svg viewBox="0 0 24 24" ' + P + '>' + ICO[c] + '</svg>' + c + '</button>').join("") + '</div>' +
+        '<span class="inLbl">Fecha</span>' +
+        '<div class="recDia" id="inDia" style="margin:0">' +
+          '<button type="button" class="recChip" data-dia="hoy" aria-pressed="true">Hoy</button>' +
+          '<button type="button" class="recChip" data-dia="ayer" aria-pressed="false">Ayer</button>' +
+          '<input type="date" class="recFecha" id="inFecha" aria-label="Elegir una fecha">' +
+        '</div>' +
+        '<label class="inLbl" for="inMonto">Valor</label>' +
+        '<div class="inMonto"><b>$</b><input id="inMonto" type="text" inputmode="numeric" placeholder="0" autocomplete="off"></div>' +
+        '<label class="inLbl" for="inNota">Nota <span style="font-weight:400;letter-spacing:0;text-transform:none">(opcional)</span></label>' +
+        '<textarea id="inNota" rows="2" placeholder="Algo que quieras recordar" maxlength="300"></textarea>' +
+        '<p class="inErr" id="inErr" role="alert"></p>' +
+        '<div class="pgRow"><button type="button" class="pgNo" id="inCancel">Cancelar</button><button type="button" class="pgSi" id="inGuardar" disabled>Guardar</button></div>' +
+      '</div>';
+    document.body.appendChild(scrim);
+    requestAnimationFrame(() => scrim.classList.add("on"));
+
+    const $ = id => scrim.querySelector("#" + id);
+    const concepto = $("inConcepto"), monto = $("inMonto"), nota = $("inNota"), fechaIn = $("inFecha"), err = $("inErr"), guardar = $("inGuardar");
+    const chips = [...scrim.querySelectorAll("#inDia .recChip")], cats = [...scrim.querySelectorAll(".inCat")];
+    let categoria = "", fecha = hoy();
+    const valor = () => parseInt(monto.value.replace(/\D/g, ""), 10) || 0;
+    const listo = () => { guardar.disabled = !(concepto.value.trim() && categoria && valor() > 0); };
+
+    cats.forEach(b => b.addEventListener("click", () => {
+      categoria = b.dataset.c;
+      cats.forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+      listo();
+    }));
+    chips.forEach(b => b.addEventListener("click", () => {
+      fecha = b.dataset.dia === "hoy" ? hoy() : ayer();
+      chips.forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+      fechaIn.value = ""; fechaIn.classList.remove("on");
+    }));
+    fechaIn.addEventListener("change", () => {
+      if(!fechaIn.value){ return; }
+      fecha = fechaIn.value; fechaIn.classList.add("on");
+      chips.forEach(x => x.setAttribute("aria-pressed", String(false)));
+    });
+    monto.addEventListener("input", () => {
+      const d = monto.value.replace(/\D/g, "");
+      monto.value = d ? Number(d).toLocaleString("es-CO") : "";
+      listo();
+    });
+    concepto.addEventListener("input", listo);
+
+    function cierra(){
+      scrim.classList.remove("on");
+      setTimeout(() => { scrim.remove(); abierto = false; }, 300);
+      document.removeEventListener("keydown", tecla);
+    }
+    const tecla = e => { if(e.key === "Escape") cierra(); };
+    document.addEventListener("keydown", tecla);
+    $("inCancel").addEventListener("click", cierra);
+    scrim.addEventListener("click", e => { if(e.target === scrim) cierra(); });
+
+    guardar.addEventListener("click", async () => {
+      if(guardar.disabled) return;
+      err.textContent = "";
+      guardar.disabled = true; guardar.textContent = "Guardando…";
+      try{
+        const res = await fetch(INGRESO_URL, { method: "POST", body: JSON.stringify({
+          token: MERCADO_TOKEN, concepto: concepto.value.trim(), categoria, fecha, monto: valor(), notas: nota.value.trim()
+        }) });
+        const d = await res.json().catch(() => ({}));
+        if(!res.ok || d.ok === false) throw new Error(d.error || ("http " + res.status));
+        cierra();
+        aviso("Ingreso guardado ✓");
+        try{ vibraIngreso(); }catch{}
+      }catch(e){
+        guardar.textContent = "Guardar"; listo();
+        err.textContent = "No se pudo guardar. Revisa tu internet y que Tailscale esté encendido, e inténtalo de nuevo.";
+      }
+    });
+    setTimeout(() => concepto.focus(), 350);
+  }
+  const vibraIngreso = () => { if(navigator.vibrate) navigator.vibrate(12); };
+  document.getElementById("masIngreso").addEventListener("click", abrir);
+  return { abrir };
+})();
 
 const Servicios = (function(){
   const root = document.getElementById("servicioBanner");
