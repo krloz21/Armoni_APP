@@ -1949,7 +1949,7 @@ const SERVICIOS_DIA_LIMITE = 7;   // hasta qué día del mes avisa si falta paga
 const PUSH_ENVIAR_URL = N8N + "/webhook/push-enviar";
 const PUSH_SUBSCRIBE_URL = N8N + "/webhook/push-subscribe";   // guarda la suscripción para que n8n pueda avisar
 const VAPID_PUBLIC_KEY = "BKRJjoINCgWY6PkbiGozkt2H5hGTpdPwLr5mepMMMc57GSfY2ERERh-9feitXcHOUxUBQv36nLtiC7sjbDrXp_8";
-const REPOSO_SEGUNDOS  = 90;   // sin tocar nada: la animación se congela
+const REPOSO_SEGUNDOS  = 45;   // sin tocar nada: la animación se congela
 const REINICIO_MINUTOS = 15;   // sin usarla: la conversación empieza de cero
 
 /* ═════════ TEMPORADA ═════════ */
@@ -1968,7 +1968,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
 /* ═════════ VERSIÓN ═════════
    Súbela en cada entrega: si el servidor tiene una versión distinta a la que está corriendo,
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
-const APP_VERSION = "2026-10-05.46";
+const APP_VERSION = "2026-10-05.47";
 (function autoActualizar(){
   const patron = new RegExp("const APP_" + "VERSION = \"([^\"]+)\"");
   async function revisar(){
@@ -2349,7 +2349,7 @@ void main(){
     raf = requestAnimationFrame(loop);
     if(manualUntil > now) return;                 // un movimiento (el menú) está dibujando él mismo, cuadro a cuadro
     const lively = waiting || wait > 0.01 || now - sendAt < 1900 || now - replyAt < 1900 || Math.abs(dim - dimTarget) > 0.005 || Math.abs(light - lightTarget) > 0.004 || now - movedAt < 900;
-    if(!lively && now - lastDraw < 33) return;   // 30 cuadros en calma, 60 con la ola
+    if(!lively && now - lastDraw < 42) return;   // ~24 cuadros en calma, 60 con la ola
     lastDraw = now;
     draw(now);
   }
@@ -2383,7 +2383,7 @@ void main(){
    ════════════════════════════════════════════════════════════ */
 const Campo = (function(){
   const FIELD = 500, HALF = FIELD / 2, WORLD = 5, FOV = 40, MAX_POINTS = 65536, TAU = Math.PI * 2;
-  const MAX_COLORS = 5, RING_EDGE = 4 / 100, WANDER_LERP = 0.01, MAX_DPR = 1.5, FRAME_MS = 33;
+  const MAX_COLORS = 5, RING_EDGE = 4 / 100, WANDER_LERP = 0.01, MAX_DPR = 1.5, FRAME_MS = 42;
   const DENSITY = 300, SPEED = 6 / 50, CAM = 1.6;
   const RING = { radius: 0.12, width: 0.09, push: 0.5, turb: 1 };
   const COLORS = ["#7ee8ff", "#3f7cf6", "#0b0b18"];
@@ -3292,8 +3292,8 @@ function newConversation(){
   if(!sleeping) Typer.start(true);
 }
 
-function goToSleep(){
-  if(busy){ scheduleSleep(); return; }
+function goToSleep(forzar){
+  if((busy || document.querySelector(".ws")) && !forzar){ scheduleSleep(); return; }   // respondiendo o viendo un resumen: aún no
   sleeping = true;
   document.body.classList.add("asleep");
   Rain.sleep();
@@ -3329,9 +3329,11 @@ function activity(){
 thread.addEventListener("scroll", activity, { passive:true });
 
 document.addEventListener("visibilitychange", () => {
-  if(document.hidden){ clearTimeout(sleepTimer); goToSleep(); }
+  if(document.hidden){ clearTimeout(sleepTimer); goToSleep(true); }   // pantalla bloqueada u otra app: se apaga todo, aunque esté respondiendo
   else { activity(); if(MODE === "rest") Restaurantes.refresh(); if(MODE === "credito") CreditoCarro.refresh(); if(MODE === "glim") Glim.refresh(); if(MODE === "recuerda") Recuerda.refresh(true); if(MODE === "mercar") Mercar.refresh(); if(MODE === "mes") TuMes.refresh(); }
 });
+
+addEventListener("pagehide", () => { clearTimeout(sleepTimer); goToSleep(true); });
 
 /* al abrir: si pasó mucho tiempo, arrancar limpio */
 if(lastAct && Date.now() - lastAct > RESET_MS){
@@ -6519,8 +6521,9 @@ Glim.check();
 const Decora = (function(){
   let c = null, g = null, W = 0, H = 0, flakes = [], corre = false, nieve = false;
   const fit = () => { if(!c) return; const dpr = Math.min(2, devicePixelRatio || 1); W = innerWidth; H = innerHeight; c.width = W * dpr; c.height = H * dpr; g.setTransform(dpr, 0, 0, dpr, 0, 0); };
+  const quieta = () => document.hidden || document.body.classList.contains("asleep");
   function paso(t){
-    if(!nieve){ corre = false; return; }
+    if(!nieve || quieta()){ corre = false; return; }
     const dt = Math.min(.05, (t - last) / 1000); last = t;
     g.clearRect(0, 0, W, H);
     for(const f of flakes){
@@ -6544,6 +6547,9 @@ const Decora = (function(){
     if(nieve && !corre){ corre = true; last = performance.now(); requestAnimationFrame(paso); }
   }
   aplica();
+  /* la nevada se detiene cuando la app duerme o la pantalla se apaga, y sigue al volver */
+  new MutationObserver(() => { if(!quieta()) aplica(); }).observe(document.body, { attributes: true, attributeFilter: ["class"] });
+  document.addEventListener("visibilitychange", () => { if(!quieta()) aplica(); });
   return { aplica };
 })();
 
