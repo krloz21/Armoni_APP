@@ -185,11 +185,11 @@ body:not([class*="mode-"]) #thread.sinChat{ overflow-y:hidden; }
   #thread, .dNav, .sheetBody, .scroller{ scrollbar-width:none; }
   #thread::-webkit-scrollbar, .dNav::-webkit-scrollbar, .sheetBody::-webkit-scrollbar, .scroller::-webkit-scrollbar{ display:none; width:0; height:0; }
 }
-.inner{ width:var(--measure); margin:0 auto; }
+.inner{ width:var(--measure); margin:0 auto; min-height:100%; display:flex; flex-direction:column; }
 
 /* bienvenida: un solo titular que se escribe y se borra */
 #welcome{
-  min-height:calc(var(--app-h, 100dvh) - 250px);
+  flex:1 1 auto; min-height:0;   /* ocupa todo el espacio libre: el titular queda centrado en lo que se ve */
   display:flex; align-items:center; justify-content:center;
   text-align:center;
 }
@@ -1421,7 +1421,6 @@ body.mode-gmail footer, body.mode-glim footer{ display:none; }
   #reset{ padding:7px; border-radius:50%; margin-left:auto; }
   #thread{ padding-top:22px; }
   .hint{ display:none; }
-  #welcome{ min-height:calc(var(--app-h, 100dvh) - 210px); }
 }
 
 /* ═════════ Tema P: acabado premium (grafito + metal) — solo cambia el aspecto; las animaciones son las mismas del tema B ═════════ */
@@ -1862,7 +1861,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
 /* ═════════ VERSIÓN ═════════
    Súbela en cada entrega: si el servidor tiene una versión distinta a la que está corriendo,
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
-const APP_VERSION = "2026-10-05.28";
+const APP_VERSION = "2026-10-05.29";
 (function autoActualizar(){
   const patron = new RegExp("const APP_" + "VERSION = \"([^\"]+)\"");
   async function revisar(){
