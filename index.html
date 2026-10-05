@@ -1612,15 +1612,13 @@ body[class*="mode-"] #masIngreso{ display:none; }
 .inFrecs::-webkit-scrollbar{ display:none; }
 .inFrecs .recChip{ flex:none; padding:7px 13px; font-size:.78rem; white-space:nowrap; }
 .inCard{ position:relative; transition:transform .38s cubic-bezier(.16,1,.3,1), box-shadow .6s ease, border-color .6s ease; }
-.inCard::before, .inCard::after{ content:""; position:absolute; inset:-1px; border-radius:inherit; pointer-events:none; opacity:0; transition:opacity .7s ease; }
-.inCard::before{ background:conic-gradient(from var(--inAng), #6ff0ff, #3a78ff, #5a3fe0, #3a78ff, #6ff0ff); }
+.inCard::before, .inCard::after{ content:""; position:absolute; inset:-1px; border-radius:inherit; pointer-events:none; opacity:0; transition:opacity .7s ease; background:conic-gradient(from var(--inAng), #6ff0ff, #3a78ff, #5a3fe0, #3a78ff, #6ff0ff); }
 .inCard::before{ padding:1.5px; -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite:xor; mask:linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0); }
-.inCard::after{ inset:0; background:none; border-radius:inherit; box-shadow:inset 18px 0 34px -14px #6ff0ff, inset -18px 0 34px -14px #5a3fe0, inset 0 18px 34px -16px #7af7d0, inset 0 -18px 34px -16px #3a78ff; }
+.inCard::after{ inset:-3px; z-index:-1; filter:blur(22px); }
 .inCard.armoni{ border-color:transparent; box-shadow:inset 0 0 26px rgba(58,120,255,.14), inset 0 1px 0 rgba(var(--hi),.16), 0 30px 70px rgba(var(--shade),var(--shadow-b)); }
 .inCard.armoni::before{ opacity:1; animation:inIAflow 3.2s linear infinite; }
-.inCard.armoni::after{ opacity:.7; animation:inAurora 7s ease-in-out infinite alternate, inCardGlow 1.2s ease-out; }
-@keyframes inAurora{ from{ filter:hue-rotate(-35deg); } to{ filter:hue-rotate(40deg) brightness(1.15); } }
-@keyframes inCardGlow{ 0%{ opacity:0; } 100%{ opacity:.7; } }
+.inCard.armoni::after{ opacity:.6; animation:inIAflow 3.2s linear infinite, inCardGlow 1s ease-out; }
+@keyframes inCardGlow{ 0%{ opacity:0; } 35%{ opacity:.95; } 100%{ opacity:.6; } }
 @media (prefers-reduced-motion:reduce){ .inCard.armoni::before, .inCard.armoni::after{ animation:none; } }
 .inIA{ position:relative; display:flex; align-items:center; justify-content:center; gap:10px; width:100%; margin-top:10px; padding:12px 14px; border-radius:16px; border:1.5px solid rgba(var(--ink),.16); background:rgba(var(--ink),.05); color:var(--white); font:inherit; cursor:pointer; transition:background .4s ease, border-color .4s ease, transform .15s ease-out; }
 .inIA:active{ transform:scale(.97); }
@@ -1969,7 +1967,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
 /* ═════════ VERSIÓN ═════════
    Súbela en cada entrega: si el servidor tiene una versión distinta a la que está corriendo,
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
-const APP_VERSION = "2026-10-05.48";
+const APP_VERSION = "2026-10-05.49";
 (function autoActualizar(){
   const patron = new RegExp("const APP_" + "VERSION = \"([^\"]+)\"");
   async function revisar(){
