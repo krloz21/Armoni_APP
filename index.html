@@ -2037,7 +2037,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-05.63";
+const APP_VERSION = "2026-10-05.64";
 (function autoActualizar(){
   const patron = new RegExp("const APP_" + "VERSION = \"([^\"]+)\"");
   async function revisar(){
@@ -3035,8 +3035,14 @@ void main(){
     window.__campoTonos = () => campo.tonos();
     campo.atenua(leyendo);
     /* en reposo (la app "duerme") el campo también se detiene */
-    new MutationObserver(() => { if(document.body.classList.contains("asleep")) campo.pausa(); else campo.sigue(); })
+    new MutationObserver(() => { if(document.body.classList.contains("asleep") || document.documentElement.classList.contains("dpOn")) campo.pausa(); else campo.sigue(); })
       .observe(document.body, { attributes: true, attributeFilter: ["class"] });
+    /* con el menú abierto o en movimiento el campo queda desenfocado y atenuado detrás: se congela para que el menú se mueva más fluido */
+    const enMenu = () => document.documentElement.classList.contains("dpOn");
+    new MutationObserver(() => {
+      if(enMenu()) campo.pausa();
+      else if(!document.body.classList.contains("asleep")) campo.sigue();
+    }).observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
   }
   /* se prepara cuando el navegador está libre, para no competir con el inicio de la app */
   if(window.requestIdleCallback) requestIdleCallback(arranca, { timeout: 3000 }); else setTimeout(arranca, 1500);
