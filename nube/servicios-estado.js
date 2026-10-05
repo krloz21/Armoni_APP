@@ -41,20 +41,20 @@ const yaPagado = (re, inicioVentana) => {
   const s = f && f.property_último_envío && f.property_último_envío.start;
   return !!s && Date.parse(s.slice(0, 10) + 'T00:00:00Z') >= inicioVentana;
 };
-const movPagado = (re, inicioVentana) => movFijos.some(x => {
-  if (!re.test(x.name || '')) return false;
+const movPagado = (re, categoria, inicioVentana) => movFijos.some(x => {
+  if (!re.test(x.name || '') || x.property_categoría !== categoria) return false;   // nombre y categoría: así «jardín plaza» (Salidas) no cuenta
   let f = x.property_fecha; f = f && (f.start || (f.date && f.date.start) || f);
   const t = Date.parse(String(f || '').slice(0, 10) + 'T00:00:00Z');
   return !isNaN(t) && t >= inicioVentana;
 });
 
-const arriendoPagado = ARRIENDO_POR_MOVIMIENTO ? movPagado(/arriendo/i, inicioArriendo) : yaPagado(/arriendo/i, inicioArriendo);
+const arriendoPagado = ARRIENDO_POR_MOVIMIENTO ? movPagado(/arriendo/i, 'Hogar', inicioArriendo) : yaPagado(/arriendo/i, inicioArriendo);
 if (!arriendoPagado) {
   const item = { id: 'arriendo', nombre: 'el arriendo' };
   if (esUltimoDiaMes || dia <= 3) pendientes.push(item);
   sinPagar.push(item);
 }
-if (!movPagado(/jard/i, inicioArriendo)) {
+if (!movPagado(/jard/i, 'Hijo', inicioArriendo)) {
   const item = { id: 'jardin', nombre: 'el jardín de Emanuel' };
   if (esUltimoDiaMes || dia <= 5) pendientes.push(item);
   sinPagar.push(item);
