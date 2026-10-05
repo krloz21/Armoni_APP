@@ -2012,7 +2012,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-05.61";
+const APP_VERSION = "2026-10-05.62";
 (function autoActualizar(){
   const patron = new RegExp("const APP_" + "VERSION = \"([^\"]+)\"");
   async function revisar(){
@@ -5333,7 +5333,7 @@ const Servicios = (function(){
     let pendientes = [];
     try{
       const res = await fetch(SERVICIOS_ESTADO_URL, { cache: "no-store" });
-      if(res.ok){ const data = await res.json(); pendientes = data.pendientes || []; }
+      if(res.ok){ const data = await res.json(); pendientes = data.sinPagar || data.pendientes || []; }   // también lo ya vencido, hasta que se pague
     }catch{ /* sin conexión: seguimos solo con lo que se pueda calcular local */ }
     banner(pendientes);
   }
