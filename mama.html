@@ -831,10 +831,8 @@ const aviso = document.getElementById("aviso");
 let productos = [];
 let tAviso = null;
 
-/* qué grupos están cerrados: se guarda para que al volver a abrir la app quede como lo dejaste */
-let cerrados;
-try{ cerrados = new Set(JSON.parse(localStorage.getItem("mama.cerrados")) || []); }catch{ cerrados = new Set(); }
-function guardarCerrados(){ try{ localStorage.setItem("mama.cerrados", JSON.stringify([...cerrados])); }catch{} }
+/* qué grupos están abiertos: al entrar siempre empiezan todos cerrados (solo se recuerda mientras la página sigue abierta) */
+const abiertos = new Set();
 
 function avisar(texto, mal){
   aviso.textContent = texto;
@@ -856,7 +854,7 @@ function pintar(){
   GRUPOS.concat(["Otros"]).forEach(g => {
     const del = productos.filter(p => (GRUPOS.includes(p.grupo) ? p.grupo : "Otros") === g);
     if(!del.length) return;
-    const abierto = !cerrados.has(g);
+    const abierto = abiertos.has(g);
     html += '<button type="button" class="grupo" data-g="' + esc(g) + '" aria-expanded="' + abierto + '">' +
       '<span class="chev" aria-hidden="true">' + CHEV + '</span><span class="n">' + g + '</span>' +
       '<span class="c">' + del.length + '</span></button>' +
@@ -875,11 +873,10 @@ main.addEventListener("click", async e => {
   if(cab){
     const g = cab.dataset.g;
     const cuerpo = cab.nextElementSibling;
-    const abrir = cerrados.has(g);
-    if(abrir) cerrados.delete(g); else cerrados.add(g);
+    const abrir = !abiertos.has(g);
+    if(abrir) abiertos.add(g); else abiertos.delete(g);
     cab.setAttribute("aria-expanded", String(abrir));
     cuerpo.classList.toggle("on", abrir);
-    guardarCerrados();
     return;
   }
   const btn = e.target.closest(".item");
