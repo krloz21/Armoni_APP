@@ -1484,6 +1484,28 @@ body.mode-gmail footer, body.mode-glim footer{ display:none; }
 .rgItem.on{ border-color:rgba(var(--cyan-rgb),.5); background:rgba(var(--cyan-rgb),.1); }
 .rgItem.on .s{ background:linear-gradient(140deg, var(--cyan), var(--blue)); color:var(--on-accent); font-weight:700; }
 .rgEstado{ margin:24px 4px; color:var(--dim); font-size:.95rem; }
+
+/* cambio de tema natural: los colores del tema son propiedades tipadas, así el navegador las funde en vez de cambiarlas de golpe */
+@property --void{ syntax:"<color>"; inherits:true; initial-value:#000; }
+@property --panel{ syntax:"<color>"; inherits:true; initial-value:#000; }
+@property --white{ syntax:"<color>"; inherits:true; initial-value:#000; }
+@property --blue{ syntax:"<color>"; inherits:true; initial-value:#000; }
+@property --cyan{ syntax:"<color>"; inherits:true; initial-value:#000; }
+@property --title-b{ syntax:"<color>"; inherits:true; initial-value:#000; }
+@property --money{ syntax:"<color>"; inherits:true; initial-value:#000; }
+@property --shine{ syntax:"<color>"; inherits:true; initial-value:#000; }
+@property --composer{ syntax:"<color>"; inherits:true; initial-value:#000; }
+@property --drawer{ syntax:"<color>"; inherits:true; initial-value:#000; }
+@property --drawer-solid{ syntax:"<color>"; inherits:true; initial-value:#000; }
+@property --sheet-a{ syntax:"<color>"; inherits:true; initial-value:#000; }
+@property --sheet-b{ syntax:"<color>"; inherits:true; initial-value:#000; }
+@property --cell{ syntax:"<color>"; inherits:true; initial-value:#000; }
+@property --strong{ syntax:"<color>"; inherits:true; initial-value:#000; }
+@property --scrim{ syntax:"<color>"; inherits:true; initial-value:#000; }
+:root.tema-anim{ transition:--void .7s cubic-bezier(.4,0,.2,1), --panel .7s cubic-bezier(.4,0,.2,1), --white .7s cubic-bezier(.4,0,.2,1), --blue .7s cubic-bezier(.4,0,.2,1), --cyan .7s cubic-bezier(.4,0,.2,1), --title-b .7s cubic-bezier(.4,0,.2,1), --money .7s cubic-bezier(.4,0,.2,1), --shine .7s cubic-bezier(.4,0,.2,1), --composer .7s cubic-bezier(.4,0,.2,1), --drawer .7s cubic-bezier(.4,0,.2,1), --drawer-solid .7s cubic-bezier(.4,0,.2,1), --sheet-a .7s cubic-bezier(.4,0,.2,1), --sheet-b .7s cubic-bezier(.4,0,.2,1), --cell .7s cubic-bezier(.4,0,.2,1), --strong .7s cubic-bezier(.4,0,.2,1), --scrim .7s cubic-bezier(.4,0,.2,1); }
+:root.tema-anim .bar, :root.tema-anim .composer, :root.tema-anim .ajCard, :root.tema-anim .mkHero, :root.tema-anim #send, :root.tema-anim .segTheme, :root.tema-anim .dNav button, :root.tema-anim .dNav .ico, :root.tema-anim .mkBtn, :root.tema-anim .notifBtn{
+  transition:background-color .7s ease, border-color .7s ease, box-shadow .7s ease, color .7s ease;
+}
 </style>
 </head>
 <body>
@@ -1765,7 +1787,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
 /* ═════════ VERSIÓN ═════════
    Súbela en cada entrega: si el servidor tiene una versión distinta a la que está corriendo,
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
-const APP_VERSION = "2026-10-05.22";
+const APP_VERSION = "2026-10-05.23";
 (function autoActualizar(){
   const patron = new RegExp("const APP_" + "VERSION = \"([^\"]+)\"");
   async function revisar(){
@@ -2593,13 +2615,19 @@ void main(){
       return null;
     }
 
-    const colores = new Float32Array(MAX_COLORS * 3);
+    const colores = new Float32Array(MAX_COLORS * 3);       // lo que se dibuja ahora
+    const objColores = new Float32Array(MAX_COLORS * 3);      // a lo que tiende (cambia con el tema y la temporada)
     const clamp01 = x => Math.max(0, Math.min(1, x));
-    const muestras = COLORS.slice(0, MAX_COLORS).map(hexRgb).map(c => opts.tinte ? opts.tinte(c).map(clamp01) : c);
-    for(let i = 0; i < MAX_COLORS; i++){
-      const c = muestras[Math.min(i, muestras.length - 1)];
-      colores[i * 3] = c[0]; colores[i * 3 + 1] = c[1]; colores[i * 3 + 2] = c[2];
+    let muestras = [];
+    function calculaTonos(){
+      const base = (opts.paleta && opts.paleta()) || COLORS;
+      muestras = base.slice(0, MAX_COLORS).map(hexRgb).map(c => opts.tinte ? opts.tinte(c).map(clamp01) : c);
+      for(let i = 0; i < MAX_COLORS; i++){
+        const c = muestras[Math.min(i, muestras.length - 1)];
+        objColores[i * 3] = c[0]; objColores[i * 3 + 1] = c[1]; objColores[i * 3 + 2] = c[2];
+      }
     }
+    calculaTonos(); colores.set(objColores);
 
     const campo = armaCampo(DENSITY);
     const count = campo.count, texSize = campo.texSize;
@@ -2708,6 +2736,8 @@ void main(){
       gl.uniform1f(renderProg.u.uAspect, aspect);
       gl.uniform1f(renderProg.u.uCamDist, cam);
       gl.uniform1f(renderProg.u.uPointScale, paso * 0.0116 * dpr * (vertical ? 1.5 : 1));
+      const kc = 1 - Math.exp(-dt * 5);                  // los colores se funden en medio segundo al cambiar de tema
+      for(let q = 0; q < colores.length; q++) colores[q] += (objColores[q] - colores[q]) * kc;
       gl.uniform3fv(renderProg.u["uColors[0]"], colores);
       gl.uniform1i(renderProg.u.uColorCount, muestras.length);
       gl.uniform2f(renderProg.u.uRingPos, anillo.x, anillo.y);
@@ -2731,7 +2761,7 @@ void main(){
     else sigue();
     /* al leer una conversación o ver información el campo se oscurece para camuflarse */
     function atenua(si){ fuerza = si ? opacidad * 0.35 : opacidad; if(visible) canvas.style.opacity = String(fuerza); }
-    return { sigue, pausa, atenua };
+    return { sigue, pausa, atenua, tonos: calculaTonos };
   }
 
   return { iniciar };
@@ -2748,9 +2778,11 @@ void main(){
   function arranca(){
     campo = Campo.iniciar(document.getElementById("campo"), {
       opacidad: .32, reducido: REDUCED, tinte,
+      paleta: () => document.documentElement.dataset.theme === "light" ? ["#bfe6ff", "#8ea2ff", "#0b0b18"] : null,
       activo: () => !document.body.classList.contains("ribbon")
     });
     if(!campo) return;
+    window.__campoTonos = () => campo.tonos();
     campo.atenua(leyendo);
     /* en reposo (la app "duerme") el campo también se detiene */
     new MutationObserver(() => { if(document.body.classList.contains("asleep")) campo.pausa(); else campo.sigue(); })
@@ -4380,25 +4412,18 @@ const Theme = (function(){
     sync();
     Rain.theme(light, instant);
     if(typeof Decora !== "undefined") Decora.aplica();
+    if(window.__campoTonos) window.__campoTonos();
   }
 
   let cambiando = false;
   function set(light, origen){
     if(light === isLight() || cambiando) return;
     cambiando = true;
-    /* un velo del color del tema nuevo se funde, se cambia el tema por detrás y se vuelve a fundir: rápido y sin trabarse */
-    const velo = document.createElement("div");
-    velo.className = "themeVeil";
-    velo.style.background = light ? "#111214" : "#000";
-    document.body.appendChild(velo);
-    const termina = () => { velo.remove(); cambiando = false; };
-    const rapido = REDUCED;
-    requestAnimationFrame(() => velo.classList.add("on"));
-    setTimeout(() => {
-      apply(light, true);
-      requestAnimationFrame(() => { velo.classList.remove("on"); setTimeout(termina, 260); });
-    }, rapido ? 0 : 190);
-    setTimeout(() => { if(cambiando) termina(); }, 1500);   // por si algo se atasca, nunca queda bloqueado
+    /* los colores del tema (fondo, tarjetas, acentos) se funden solos en ~.7 s; el fondo animado hace lo mismo con su propio suavizado */
+    root.classList.add("tema-anim");
+    void root.offsetWidth;                       // para que la transición ya esté activa cuando cambien los colores
+    apply(light, REDUCED);
+    setTimeout(() => { root.classList.remove("tema-anim"); cambiando = false; }, 900);
   }
 
   bDark.addEventListener("click", () => set(false, bDark));
