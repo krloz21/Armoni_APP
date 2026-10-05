@@ -953,31 +953,6 @@ body.mode-gmail footer, body.mode-glim footer{ display:none; }
 
 
 
-/* ── registro completado: círculo con el degradado del logo, check que se dibuja, onda de luz y texto ── */
-.exito{ position:fixed; inset:0; z-index:120; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:22px; background:rgba(var(--shade),.5); -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px); opacity:0; transition:opacity .35s ease; cursor:pointer; }
-.exito.on{ opacity:1; }
-.exito .eCirc{ position:relative; width:112px; height:112px; border-radius:50%; display:grid; place-items:center;
-  background:radial-gradient(circle at 34% 28%, rgba(255,255,255,.45), rgba(255,255,255,0) 52%), linear-gradient(135deg, #6ff0ff 0%, #3a78ff 52%, #5a3fe0 100%);
-  box-shadow:0 18px 50px -8px rgba(58,120,255,.7); transform:scale(.4); opacity:0; }
-.exito.on .eCirc{ animation:eAparece .65s cubic-bezier(.34,1.56,.64,1) .08s forwards; }
-.exito .eCirc::before, .exito .eCirc::after{ content:""; position:absolute; inset:0; border-radius:50%; border:2px solid #6ff0ff; opacity:0; }
-.exito.on .eCirc::before{ animation:eOnda 1.1s ease-out .55s; }
-.exito.on .eCirc::after{ animation:eOnda 1.1s ease-out .8s; }
-.exito svg{ width:76px; height:76px; }
-.exito svg path{ fill:none; stroke:#fff; stroke-width:4.2; stroke-linecap:round; stroke-linejoin:round; stroke-dasharray:34; stroke-dashoffset:34; }
-.exito.on svg path{ animation:eCheck .5s cubic-bezier(.65,0,.35,1) .5s forwards; }
-.exito .eTxt{ text-align:center; opacity:0; transform:translateY(10px); }
-.exito.on .eTxt{ animation:eTexto .5s cubic-bezier(.16,1,.3,1) .75s forwards; }
-.exito .eTxt b{ display:block; font-size:1.25rem; font-weight:600; letter-spacing:-.015em; color:var(--white); }
-.exito .eTxt span{ display:block; margin-top:5px; font-size:.92rem; color:var(--ghost); font-variant-numeric:tabular-nums; }
-.exito.sale .eCirc{ animation:eSale .4s cubic-bezier(.4,0,1,1) forwards; }
-@keyframes eAparece{ from{ transform:scale(.4); opacity:0; } to{ transform:scale(1); opacity:1; } }
-@keyframes eCheck{ to{ stroke-dashoffset:0; } }
-@keyframes eOnda{ 0%{ transform:scale(1); opacity:.7; } 100%{ transform:scale(2.4); opacity:0; } }
-@keyframes eTexto{ to{ opacity:1; transform:none; } }
-@keyframes eSale{ to{ transform:scale(.8); opacity:0; } }
-@media (prefers-reduced-motion:reduce){ .exito .eCirc{ transform:none; opacity:1; animation:none !important; } .exito svg path{ stroke-dashoffset:0; animation:none !important; } .exito .eTxt{ opacity:1; transform:none; animation:none !important; } .exito .eCirc::before, .exito .eCirc::after{ display:none; } }
-
 /* ── mejoras de comida: carrusel con entrada escalonada, ícono abierto con neón, ficha con destello ── */
 .restRail .cat{ animation:catIn .6s cubic-bezier(.16,1,.3,1) backwards; animation-delay:calc(var(--i, 0) * 45ms); }
 @keyframes catIn{ from{ opacity:0; transform:translateY(14px) scale(.9); } to{ opacity:1; transform:none; } }
@@ -2037,7 +2012,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-05.64";
+const APP_VERSION = "2026-10-05.65";
 (function autoActualizar(){
   const patron = new RegExp("const APP_" + "VERSION = \"([^\"]+)\"");
   async function revisar(){
@@ -4897,20 +4872,23 @@ const Frecuentes = (function(){
 })();
 
 
-/* pantalla de «registro completado»: se cierra sola o al tocarla */
+/* «registro completado»: usa la misma ficha, el mismo círculo y el mismo check que al enviar el comprobante del arriendo (AT Gmail) */
 function exito(titulo, detalle){
-  if(document.querySelector(".exito")) return;
-  const el = document.createElement("div");
-  el.className = "exito"; el.setAttribute("role", "status");
+  if(document.querySelector(".sheetScrim.exitoFicha")) return;
   const esc2 = x => String(x).replace(/&/g,"&amp;").replace(/</g,"&lt;");
-  el.innerHTML = '<div class="eCirc"><svg viewBox="0 0 56 56" aria-hidden="true"><path d="M14 29.5l9.5 9.5L42 18.5"/></svg></div>' +
-    '<div class="eTxt"><b>' + esc2(titulo) + '</b>' + (detalle ? '<span>' + esc2(detalle) + '</span>' : '') + '</div>';
-  document.body.appendChild(el);
-  requestAnimationFrame(() => el.classList.add("on"));
+  const scrim = document.createElement("div");
+  scrim.className = "sheetScrim gmCenter exitoFicha";
+  scrim.innerHTML =
+    '<div class="sheetCard" role="status"><div class="gmModal done">' +
+      '<div class="gmStage" aria-hidden="true"><svg class="gmOk" viewBox="0 0 120 120"><circle class="gmOkCircle" cx="60" cy="60" r="27"/><path class="gmOkCheck" d="M47 61 L57 71 L75 50"/></svg></div>' +
+      '<h3>' + esc2(titulo) + '</h3>' + (detalle ? '<p>' + esc2(detalle) + '</p>' : '') +
+    '</div></div>';
+  document.body.appendChild(scrim);
+  requestAnimationFrame(() => scrim.classList.add("on"));
   let cerrado = false;
-  const cierra = () => { if(cerrado) return; cerrado = true; el.classList.add("sale"); el.classList.remove("on"); setTimeout(() => el.remove(), 420); };
-  el.addEventListener("click", cierra);
-  setTimeout(cierra, REDUCED ? 1600 : 2300);
+  const cierra = () => { if(cerrado) return; cerrado = true; scrim.classList.remove("on"); setTimeout(() => scrim.remove(), 420); };
+  scrim.addEventListener("click", cierra);
+  setTimeout(cierra, 2400);
 }
 
 function avisoOk(titulo, detalle){
