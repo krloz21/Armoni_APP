@@ -1608,13 +1608,25 @@ body[class*="mode-"] #masIngreso{ display:none; }
 .inBody::-webkit-scrollbar{ display:none; }
 .inCard .pgRow{ flex:none; margin-top:14px; }
 .inCard h3{ text-align:center; }
-.inFrecs{ display:flex; gap:7px; overflow-x:auto; padding:2px 1px 4px; scrollbar-width:none; }
+.inFrecs{ display:flex; gap:7px; overflow-x:auto; padding:2px 18px 4px; margin:0 -18px; scrollbar-width:none; -webkit-mask-image:linear-gradient(90deg, transparent 0, #000 18px, #000 calc(100% - 28px), transparent 100%); mask-image:linear-gradient(90deg, transparent 0, #000 18px, #000 calc(100% - 28px), transparent 100%); }
 .inFrecs::-webkit-scrollbar{ display:none; }
 .inFrecs .recChip{ flex:none; padding:7px 13px; font-size:.78rem; white-space:nowrap; }
-.inIA{ display:flex; align-items:center; gap:10px; margin-top:10px; padding:8px 12px; border-radius:14px; border:1px solid var(--line); background:var(--panel); cursor:pointer; }
-.inIA input{ width:18px; height:18px; accent-color:var(--blue); flex:none; }
-.inIA span{ display:grid; gap:1px; font-size:.84rem; color:var(--white); line-height:1.25; }
+.inIA{ display:flex; align-items:center; gap:11px; width:100%; margin-top:10px; padding:10px 14px; border-radius:16px; border:1px solid rgba(var(--ink),.16); background:rgba(var(--ink),.06); color:var(--white); font:inherit; text-align:left; cursor:pointer; transition:background .3s ease, border-color .3s ease, transform .1s ease-out; }
+.inIA:active{ transform:scale(.985); }
+.inIA > svg{ width:20px; height:20px; flex:none; color:var(--dim); transition:color .3s ease; }
+.inIA span{ display:grid; gap:1px; flex:1; min-width:0; line-height:1.25; }
+.inIA b{ font-weight:600; font-size:.88rem; }
 .inIA small{ color:var(--dim); font-size:.72rem; }
+.inIAsw{ position:relative; flex:none; width:36px; height:22px; border-radius:999px; background:rgba(var(--ink),.18); transition:background .3s ease; }
+.inIAsw::after{ content:""; position:absolute; top:3px; left:3px; width:16px; height:16px; border-radius:50%; background:#fff; box-shadow:0 1px 3px rgba(0,0,0,.35); transition:transform .35s cubic-bezier(.34,1.56,.64,1); }
+.inIA[aria-pressed="true"]{ border-color:rgba(var(--cyan-rgb),.55); background:rgba(var(--cyan-rgb),.1); }
+.inIA[aria-pressed="true"] > svg{ color:var(--cyan); }
+.inIA[aria-pressed="true"] .inIAsw{ background:linear-gradient(140deg, var(--cyan), var(--blue)); }
+.inIA[aria-pressed="true"] .inIAsw::after{ transform:translateX(14px); }
+.inFechaBtn{ position:relative; display:inline-flex; align-items:center; gap:7px; overflow:hidden; }
+.inFechaBtn svg{ width:16px; height:16px; flex:none; }
+.inFechaBtn input{ position:absolute; inset:0; width:100%; height:100%; opacity:0; cursor:pointer; font-size:16px; }
+.inCard .inFechaBtn[aria-pressed="true"]{ background:linear-gradient(140deg, var(--cyan), var(--blue)); color:var(--on-accent); border-color:transparent; }
 .inSub{ margin:4px 0 0; text-align:center; color:var(--dim); font-size:.82rem; }
 .inLbl{ display:block; margin:16px 2px 7px; font-size:.7rem; font-weight:700; letter-spacing:.09em; text-transform:uppercase; color:var(--dim); }
 .inCard input[type="text"], .inCard textarea{ width:100%; padding:13px 14px; border-radius:14px; border:1px solid var(--line); background:rgba(var(--ink),.05); color:var(--white); font:inherit; font-size:16px; text-align:left; }
@@ -1944,7 +1956,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
 /* ═════════ VERSIÓN ═════════
    Súbela en cada entrega: si el servidor tiene una versión distinta a la que está corriendo,
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
-const APP_VERSION = "2026-10-05.41";
+const APP_VERSION = "2026-10-05.42";
 (function autoActualizar(){
   const patron = new RegExp("const APP_" + "VERSION = \"([^\"]+)\"");
   async function revisar(){
@@ -4806,8 +4818,7 @@ const GastoManual = (function(){
         '<div class="inTipo" id="inTipo" data-on="gasto" role="radiogroup" aria-label="Tipo de movimiento"><span class="inInd"></span>' +
           '<button type="button" role="radio" data-t="Gasto" aria-checked="true">Gasto</button>' +
           '<button type="button" role="radio" data-t="Ingreso" aria-checked="false">Ingreso</button></div>' +
-        '<p class="inSub" id="inSub"></p>' +
-        '<div class="inBody">' +
+                '<div class="inBody">' +
         '<div id="inFrecBox"><span class="inLbl">Frecuentes</span><div class="inFrecs" id="inFrecs"></div></div>' +
         '<label class="inLbl" for="inConcepto">Concepto</label>' +
         '<input id="inConcepto" type="text" placeholder="Ej: Almuerzo, gasolina, droguería…" autocomplete="off" maxlength="80">' +
@@ -4819,11 +4830,11 @@ const GastoManual = (function(){
         '<div class="recDia" id="inDia" style="margin:0">' +
           '<button type="button" class="recChip" data-dia="hoy" aria-pressed="true">Hoy</button>' +
           '<button type="button" class="recChip" data-dia="ayer" aria-pressed="false">Ayer</button>' +
-          '<input type="date" class="recFecha" id="inFecha" aria-label="Elegir una fecha">' +
+          '<label class="recChip inFechaBtn" id="inFechaBtn" aria-pressed="false"><svg viewBox="0 0 24 24" ' + P + '><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg><span id="inFechaTxt">Otra fecha</span><input type="date" id="inFecha" aria-label="Elegir otra fecha"></label>' +
         '</div>' +
         '<label class="inLbl" for="inNota">Nota <span style="font-weight:400;letter-spacing:0;text-transform:none">(opcional)</span></label>' +
         '<textarea id="inNota" rows="1" placeholder="Algo que quieras recordar" maxlength="300"></textarea>' +
-        '<label class="inIA"><input type="checkbox" id="inIA"><span><b style="font-weight:600">Que Armoni lo revise (usa IA)</b><small id="inIAhint"></small></span></label>' +
+        '<button type="button" class="inIA" id="inIA" aria-pressed="false"><svg viewBox="0 0 24 24" ' + P + '><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="M19 16v4M17 18h4"/></svg><span><b>Pasar por Armoni</b><small id="inIAhint"></small></span><i class="inIAsw" aria-hidden="true"></i></button>' +
         '<p class="inErr" id="inErr" role="alert"></p>' +
         '<p class="inSub" id="inNotaAuto" style="margin-top:8px;font-size:.7rem">Servicios, jardín, arriendo y cuota del carro se registran solos.</p>' +
         '</div>' +
@@ -4834,9 +4845,9 @@ const GastoManual = (function(){
 
     const $ = id => scrim.querySelector("#" + id);
     const concepto = $("inConcepto"), monto = $("inMonto"), nota = $("inNota"), fechaIn = $("inFecha"), err = $("inErr"), guardar = $("inGuardar");
-    const chips = [...scrim.querySelectorAll("#inDia .recChip")];
+    const chips = [...scrim.querySelectorAll("#inDia .recChip[data-dia]")];
     let categoria = "", fecha = hoy(), tipo = "Gasto", iaManual = false;
-    const ia = $("inIA");
+    const iaBtn = $("inIA"), ia = { checked: false };
     const valor = () => parseInt(monto.value.replace(/\D/g, ""), 10) || 0;
     const listo = () => { guardar.disabled = !(concepto.value.trim() && categoria && valor() > 0); };
 
@@ -4854,9 +4865,10 @@ const GastoManual = (function(){
        Si la persona toca la casilla, se respeta su elección. */
     function sugiereIA(){
       if(!iaManual) ia.checked = tipo === "Gasto" && categoria === "Salidas";
-      $("inIAhint").textContent = ia.checked ? "Armoni lo revisa y, si falta algo, te pregunta" : "Se guarda directo en Movimientos, sin gastar IA";
+      iaBtn.setAttribute("aria-pressed", String(ia.checked));
+      $("inIAhint").textContent = ia.checked ? "Armoni lo revisa y, si falta algo, te pregunta" : "Apagado: se guarda directo, sin IA";
     }
-    ia.addEventListener("change", () => { iaManual = true; sugiereIA(); });
+    iaBtn.addEventListener("click", () => { iaManual = true; ia.checked = !ia.checked; sugiereIA(); });
     function pintaFrecuentes(){
       const lista = Frecuentes.top(tipo);
       $("inFrecBox").hidden = !lista.length;
@@ -4878,22 +4890,23 @@ const GastoManual = (function(){
       $("inTipo").dataset.on = g ? "gasto" : "ingreso";
       scrim.querySelectorAll("#inTipo button").forEach(x => x.setAttribute("aria-checked", String(x.dataset.t === t)));
       $("inT").textContent = g ? "Registrar un gasto" : "Registrar un ingreso";
-      $("inSub").textContent = g ? "Lo de siempre se guarda directo; una salida a comer la revisa Armoni" : "Salarios y lo que te devuelven al dividir una cuenta";
       $("inNotaAuto").hidden = !g;
       concepto.placeholder = g ? "Ej: Almuerzo, gasolina, droguería…" : "Ej: Salario, trabajo extra…";
       pintaCats(); pintaFrecuentes();
     }
     scrim.querySelectorAll("#inTipo button").forEach(b => b.addEventListener("click", () => poneTipo(b.dataset.t)));
-    $("inSub").textContent = "Lo de siempre se guarda directo; una salida a comer la revisa Armoni";
     pintaCats(); pintaFrecuentes();
     chips.forEach(b => b.addEventListener("click", () => {
       fecha = b.dataset.dia === "hoy" ? hoy() : ayer();
       chips.forEach(x => x.setAttribute("aria-pressed", String(x === b)));
-      fechaIn.value = ""; fechaIn.classList.remove("on");
+      fechaIn.value = ""; $("inFechaTxt").textContent = "Otra fecha"; $("inFechaBtn").setAttribute("aria-pressed", "false");
     }));
     fechaIn.addEventListener("change", () => {
       if(!fechaIn.value){ return; }
-      fecha = fechaIn.value; fechaIn.classList.add("on");
+      fecha = fechaIn.value;
+      const [y, m, d] = fecha.split("-").map(Number);
+      $("inFechaTxt").textContent = new Date(y, m - 1, d).toLocaleDateString("es-CO", { day: "numeric", month: "short" }).replace(".", "");
+      $("inFechaBtn").setAttribute("aria-pressed", "true");
       chips.forEach(x => x.setAttribute("aria-pressed", String(false)));
     });
     monto.addEventListener("input", () => {
