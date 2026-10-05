@@ -813,8 +813,10 @@ function confirmar(titulo, texto, si){
     scrim.addEventListener("click", e => { if(e.target === scrim) cierra(false); });
   });
 }
-const ESTADO_URL = "http://192.168.1.7:5678/webhook/mercado-estado";
-const MARCAR_URL = "http://192.168.1.7:5678/webhook/mercado-marcar";
+/* con https (Tailscale) las páginas llaman a n8n por la misma dirección; en la red de casa, por la IP de siempre */
+const N8N = location.protocol === "https:" ? "" : "http://192.168.1.7:5678";
+const ESTADO_URL = N8N + "/webhook/mercado-estado";
+const MARCAR_URL = N8N + "/webhook/mercado-marcar";
 const TOKEN = "mercado-7d41c2a9e05b";
 const GRUPOS = ["Despensa", "Lácteos", "Carnes", "Ema", "Aseo"];
 const EMOJIS = [["panqueque","🥞"],["panela","🟫"],["pan","🍞"],["arroz","🍚"],["chocolate","🍫"],["leche","🥛"],["guisamar","🧂"],["sal","🧂"],
@@ -901,7 +903,7 @@ main.addEventListener("click", async e => {
     btn.classList.toggle("acabo", !nuevo);
     btn.querySelector(".s").textContent = !nuevo ? "Ya hay que comprar" : "Hay";
     contar();
-    avisar(err && err.http ? "Armoni no pudo guardarlo (error " + err.http + ")" : "No se pudo enviar. ¿Estás conectada al WiFi de la casa?", true);
+    avisar(err && err.http ? "Armoni no pudo guardarlo (error " + err.http + ")" : "No se pudo enviar. Revisa tu internet y que Tailscale esté encendido.", true);
   }finally{
     btn.classList.remove("envio");
   }
@@ -915,7 +917,7 @@ async function cargar(){
     try{ localStorage.setItem("mama.productos", JSON.stringify(productos)); }catch{}
     pintar();
   }catch{
-    if(!productos.length) main.innerHTML = '<p class="estado">No se pudo cargar. Revisa que estés conectada al WiFi de la casa.</p>';
+    if(!productos.length) main.innerHTML = '<p class="estado">No se pudo cargar. Revisa tu internet y que Tailscale esté encendido.</p>';
   }
 }
 try{ const c = JSON.parse(localStorage.getItem("mama.productos")); if(c && c.length){ productos = c; pintar(); } }catch{}

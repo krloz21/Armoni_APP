@@ -1500,11 +1500,13 @@ body.mode-gmail footer, body.mode-glim footer{ display:none; }
 /* ════════════════════════════════════════════════════════════
    AJUSTES
    ════════════════════════════════════════════════════════════ */
-const WEBHOOK_URL = "http://192.168.1.7:5678/webhook/81c2fc99-c68b-40bb-9655-9cadb658f250/chat";
-const RESTAURANTES_URL = "http://192.168.1.7:5678/webhook/restaurantes";
-const ACTUALIZAR_PUNTUACION_URL = "http://192.168.1.7:5678/webhook/actualizar-puntuacion";
-const RESTAURANTES_CHAT_URL = "http://192.168.1.7:5678/webhook/restaurantes-chat";   // el agente de comida
-const SERVICIOS_ESTADO_URL = "http://192.168.1.7:5678/webhook/servicios-estado";
+/* con https (Tailscale) las páginas llaman a n8n por la misma dirección; en la red de casa, por la IP de siempre */
+const N8N = location.protocol === "https:" ? "" : "http://192.168.1.7:5678";
+const WEBHOOK_URL = N8N + "/webhook/81c2fc99-c68b-40bb-9655-9cadb658f250/chat";
+const RESTAURANTES_URL = N8N + "/webhook/restaurantes";
+const ACTUALIZAR_PUNTUACION_URL = N8N + "/webhook/actualizar-puntuacion";
+const RESTAURANTES_CHAT_URL = N8N + "/webhook/restaurantes-chat";   // el agente de comida
+const SERVICIOS_ESTADO_URL = N8N + "/webhook/servicios-estado";
 const PAGO_ENERGIA_URL = "https://energia.enertotalesp.com/payment";
 const PAGO_ENERGIA_REFERENCIA = "60123";   // contrato Enertotal
 const PAGO_CARRO_URL = "https://personas.bbvanet.com.co/";   // banco donde pagas la cuota del crédito del carro
@@ -1514,23 +1516,23 @@ const PAGO_GAS_URL = "https://portalrecaudos.gdo.com.co/pagorecaudo.aspx";
 const PAGO_GAS_REFERENCIA = "604711";   // contrato gas
 const PAGO_INTERNET_URL = "https://payment.movistar.co/";
 const PAGO_INTERNET_REFERENCIA = "60436399841";   // fija: no cambia cada mes
-const CREDITO_CARRO_URL = "http://192.168.1.7:5678/webhook/credito-carro";
-const CREDITO_CARRO_CHAT_URL = "http://192.168.1.7:5678/webhook/credito-carro-chat";
-const AT_GMAIL_URL = "http://192.168.1.7:5678/webhook/at-gmail";   // recibe el comprobante y lo manda por Gmail
-const GLIM_ESTADO_URL = "http://192.168.1.7:5678/webhook/glim-estado";
-const GLIM_ATENDIDO_URL = "http://192.168.1.7:5678/webhook/glim-atendido";
+const CREDITO_CARRO_URL = N8N + "/webhook/credito-carro";
+const CREDITO_CARRO_CHAT_URL = N8N + "/webhook/credito-carro-chat";
+const AT_GMAIL_URL = N8N + "/webhook/at-gmail";   // recibe el comprobante y lo manda por Gmail
+const GLIM_ESTADO_URL = N8N + "/webhook/glim-estado";
+const GLIM_ATENDIDO_URL = N8N + "/webhook/glim-atendido";
 const GLIM_TOKEN = "glim-18b591f040b1c3f897ce331a";
-const RECUERDA_URL = "http://192.168.1.7:5678/webhook/pagos-dia";
-const MERCADO_ESTADO_URL = "http://192.168.1.7:5678/webhook/mercado-estado";
-const MERCADO_MARCAR_URL = "http://192.168.1.7:5678/webhook/mercado-marcar";
-const MERCADO_COMPRADO_URL = "http://192.168.1.7:5678/webhook/mercado-comprado";
-const MERCADO_AGREGAR_URL = "http://192.168.1.7:5678/webhook/mercado-agregar";
+const RECUERDA_URL = N8N + "/webhook/pagos-dia";
+const MERCADO_ESTADO_URL = N8N + "/webhook/mercado-estado";
+const MERCADO_MARCAR_URL = N8N + "/webhook/mercado-marcar";
+const MERCADO_COMPRADO_URL = N8N + "/webhook/mercado-comprado";
+const MERCADO_AGREGAR_URL = N8N + "/webhook/mercado-agregar";
 const MERCADO_TOKEN = "mercado-7d41c2a9e05b";
-const RESUMEN_URL = "http://192.168.1.7:5678/webhook/resumen-mes";
-const JARDIN_PAGADO_URL = "http://192.168.1.7:5678/webhook/jardin-pagado";   // pagos de una fecha: ?fecha=AAAA-MM-DD
+const RESUMEN_URL = N8N + "/webhook/resumen-mes";
+const JARDIN_PAGADO_URL = N8N + "/webhook/jardin-pagado";   // pagos de una fecha: ?fecha=AAAA-MM-DD
 const JARDIN_BASE = 1120000;   // lo que normalmente se paga de jardín
 const SERVICIOS_DIA_LIMITE = 7;   // hasta qué día del mes avisa si falta pagar
-const PUSH_SUBSCRIBE_URL = "http://192.168.1.7:5678/webhook/push-subscribe";   // guarda la suscripción para que n8n pueda avisar
+const PUSH_SUBSCRIBE_URL = N8N + "/webhook/push-subscribe";   // guarda la suscripción para que n8n pueda avisar
 const VAPID_PUBLIC_KEY = "BKRJjoINCgWY6PkbiGozkt2H5hGTpdPwLr5mepMMMc57GSfY2ERERh-9feitXcHOUxUBQv36nLtiC7sjbDrXp_8";
 const REPOSO_SEGUNDOS  = 90;   // sin tocar nada: la animación se congela
 const REINICIO_MINUTOS = 15;   // sin usarla: la conversación empieza de cero
@@ -1549,7 +1551,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
 /* ═════════ VERSIÓN ═════════
    Súbela en cada entrega: si el servidor tiene una versión distinta a la que está corriendo,
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
-const APP_VERSION = "2026-10-05.5";
+const APP_VERSION = "2026-10-05.6";
 (function autoActualizar(){
   const patron = new RegExp("const APP_" + "VERSION = \"([^\"]+)\"");
   async function revisar(){
@@ -3216,7 +3218,7 @@ async function ask(text){
     }
   }catch(e){
     problem("No se pudo conectar con Armoni",
-            "Verifica que la torre esté prendida, que Docker esté corriendo y que estés en el WiFi de la casa.");
+            "Verifica tu internet, que Tailscale esté encendido y que el servidor esté funcionando.");
   }finally{
     stopStates();
     frame.classList.remove("sending");
@@ -3563,7 +3565,7 @@ const Restaurantes = (function(){
     pidiendo = true;
     fetchLive(cache && JSON.stringify(cache.items))
       .catch(() => {
-        if(!cache) statusEl.innerHTML = 'No se pudo cargar tus restaurantes. Revisa que la torre esté prendida y que estés en el WiFi de la casa.';
+        if(!cache) statusEl.innerHTML = 'No se pudo cargar tus restaurantes. Revisa tu internet y que Tailscale esté encendido.';
       })
       .finally(() => { pidiendo = false; });
   }
@@ -3624,7 +3626,7 @@ const Restaurantes = (function(){
       }
     }catch{
       falla = ["No se pudo hablar con el agente",
-        "La petición no llegó a n8n. Revisa que estés en el WiFi de la casa y que el workflow del agente esté publicado."];
+        "La petición no llegó a n8n. Revisa tu internet y que Tailscale esté encendido, y que el workflow del agente esté publicado."];
     }
     if(respuesta) wait.replaceWith(burbuja("bot", render(respuesta)));
     else {
@@ -3731,7 +3733,7 @@ const CreditoCarro = (function(){
     pidiendo = true;
     fetchLive(cache && JSON.stringify(cache.datos))
       .catch(() => {
-        if(!datos) statusEl.innerHTML = 'No se pudo cargar. Revisa que la torre esté prendida y que estés en el WiFi de la casa.';
+        if(!datos) statusEl.innerHTML = 'No se pudo cargar. Revisa tu internet y que Tailscale esté encendido.';
       })
       .finally(() => { pidiendo = false; });
   }
@@ -3781,7 +3783,7 @@ const CreditoCarro = (function(){
         else falla = ["El agente respondió vacío", "Revisa que Respond to Webhook esté en First Incoming Item."];
       }
     }catch{
-      falla = ["No se pudo hablar con el agente", "Revisa que estés en el WiFi de la casa y que el workflow esté publicado."];
+      falla = ["No se pudo hablar con el agente", "Revisa tu internet y que Tailscale esté encendido, y que el workflow esté publicado."];
     }
     if(respuesta) wait.replaceWith(burbuja("bot", render(respuesta)));
     else {
@@ -4212,7 +4214,7 @@ const Notificaciones = (function(){
       if(!res.ok) throw new Error("http " + res.status);
       estado.textContent = "Activadas"; btn.textContent = "Activadas"; btn.disabled = true;
     }catch{
-      estado.textContent = "No se pudo activar. ¿Estás en el WiFi de la casa?";
+      estado.textContent = "No se pudo activar. ¿Tienes internet y Tailscale encendido?";
       btn.disabled = false; btn.textContent = "Activar";
     }
   }
@@ -4621,7 +4623,7 @@ const Glim = (function(){
       render();
     }catch{
       btns.forEach(b => b.disabled = false);
-      alert("No se pudo avisarle a n8n. Revisa el WiFi de la casa e inténtalo de nuevo.");
+      alert("No se pudo avisarle a n8n. Revisa tu internet y que Tailscale esté encendido e inténtalo de nuevo.");
     }
   }
 
@@ -4726,7 +4728,7 @@ const Glim = (function(){
     }
     if(datos) render(); else statusEl.innerHTML = '<span class="dot" aria-hidden="true"></span>Cargando Glim…';
     fetchLive().catch(() => {
-      if(!datos) statusEl.innerHTML = "No se pudo cargar. Revisa que la torre esté prendida y que estés en el WiFi de la casa.";
+      if(!datos) statusEl.innerHTML = "No se pudo cargar. Revisa tu internet y que Tailscale esté encendido.";
     });
   }
 
@@ -4837,7 +4839,7 @@ const Recuerda = (function(){
     }catch{
       if(n !== pedido) return;
       cardEl.classList.remove("cargando");
-      if(!cache[f]){ cardEl.innerHTML = ""; statusEl.innerHTML = "No se pudo cargar. Revisa que la torre esté prendida y que estés en el WiFi de la casa."; }
+      if(!cache[f]){ cardEl.innerHTML = ""; statusEl.innerHTML = "No se pudo cargar. Revisa tu internet y que Tailscale esté encendido."; }
     }
   }
 
@@ -4951,7 +4953,7 @@ const Mercar = (function(){
         datos = null;
         refresh();   // trae la lista de nuevo, ya con lo que acabas de agregar
       }catch{
-        statusEl.innerHTML = "No se pudo agregar. Revisa que la torre esté prendida y que estés en el WiFi de la casa.";
+        statusEl.innerHTML = "No se pudo agregar. Revisa tu internet y que Tailscale esté encendido.";
         btn.disabled = false;
       }
     });
@@ -5166,7 +5168,7 @@ const Mercar = (function(){
       document.getElementById("mkListo").addEventListener("click", () => { inicio(); cargar(); });
     }catch{
       final(comprados, false);   // vuelve a la lista tal como estaba, sin perder lo marcado
-      statusEl.innerHTML = "No se pudo guardar. Revisa que la torre esté prendida y que estés en el WiFi de la casa.";
+      statusEl.innerHTML = "No se pudo guardar. Revisa tu internet y que Tailscale esté encendido.";
     }
   }
 
@@ -5181,7 +5183,7 @@ const Mercar = (function(){
       statusEl.innerHTML = "";
       if(cambio && estado === "inicio") inicio();      // nunca interrumpe un juego o una lista en curso
     }catch{
-      if(!datos) statusEl.innerHTML = "No se pudo cargar. Revisa que la torre esté prendida y que estés en el WiFi de la casa.";
+      if(!datos) statusEl.innerHTML = "No se pudo cargar. Revisa tu internet y que Tailscale esté encendido.";
     }
   }
   function refresh(){
@@ -5408,7 +5410,7 @@ const TuMes = (function(){
       try{ localStorage.setItem(KEY, JSON.stringify(d)); }catch{}
       if(cambio) pintaLista();
     }catch{
-      if(!datos) statusEl.innerHTML = "No se pudo cargar. Revisa que la torre esté prendida y que estés en el WiFi de la casa.";
+      if(!datos) statusEl.innerHTML = "No se pudo cargar. Revisa tu internet y que Tailscale esté encendido.";
     }
   }
   function refresh(){
