@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Armoni">
 <meta name="theme-color" content="#000000" id="themeColor">
-<script>try{if(localStorage.getItem("armoni.theme")==="light"){document.documentElement.dataset.theme="light";document.getElementById("themeColor").content="#1c1f24";}}catch(e){}</script>
+<script>try{if(localStorage.getItem("armoni.theme")==="light"){document.documentElement.dataset.theme="light";document.getElementById("themeColor").content="#111214";}}catch(e){}</script>
 <link rel="apple-touch-icon" href="icon.png">
 <link rel="icon" type="image/png" href="icon.png">
 
@@ -56,25 +56,27 @@
 }
 /* claro: papel frío con acentos azul eléctrico, mismo lenguaje tech */
 :root[data-theme="light"]{
-  /* tema CARBÓN: oscuro pero grisáceo — mismo lenguaje del oscuro, sobre gris en vez de negro */
-  --void:#1c1f24;
-  --panel:rgba(38,42,49,.9);
-  --line:rgba(var(--ink),.12);
+  /* tema P: grafito profundo con acabado metálico — siempre igual, sin temporadas */
+  --void:#111214;
+  --panel:rgba(24,25,29,.9);
+  --line:rgba(var(--ink),.1);
   --ghost:rgba(var(--ink),.6);
-  --dim:rgba(var(--ink),.44);
-  --white:#eceef1;
-  --blue:#5b8cf7; --cyan:#86e3f7; --clay:#f2734f;
+  --dim:rgba(var(--ink),.42);
+  --white:#f3f4f6;
+  --blue:#8ea2ff; --cyan:#bfe6ff; --clay:#f2734f;
   --ink:255,255,255; --hi:255,255,255;
-  --text:236,238,241;
-  --shade:0,0,0; --shadow-a:.32; --shadow-b:.48;
-  --cyan-rgb:134,227,247; --blue-rgb:91,140,247;
-  --strong:#fff; --title-a:#ffffff; --title-b:#9aa6b8;
-  --money:#e6eaf0; --shine:#eaf8ff; --late:#ffc58a; --num-a:#fff;
-  --composer:rgba(40,44,51,.62); --drawer:rgba(36,40,46,.42); --drawer-solid:rgba(36,40,47,.96);
-  --nogl-a:#2a2f37; --nogl-b:#17191d; --scrim:rgba(8,10,14,.55);
-  --sheet-a:rgba(40,44,51,.95); --sheet-b:rgba(30,33,39,.97); --cell:rgba(46,50,58,.8);
-  --on-accent:#05080f;
-  --calm-a:#86e3f7; --calm-b:#5b8cf7; --calm-a-rgb:134,227,247; --calm-b-rgb:91,140,247;
+  --text:243,244,246;
+  --shade:0,0,0; --shadow-a:.4; --shadow-b:.55;
+  --cyan-rgb:191,230,255; --blue-rgb:142,162,255;
+  --strong:#fff; --title-a:#ffffff; --title-b:#a9b1bf;
+  --money:#eceef2; --shine:#f4f8ff; --late:#ffc58a; --num-a:#fff;
+  --composer:rgba(27,28,32,.72); --drawer:rgba(26,27,31,.5); --drawer-solid:rgba(25,26,30,.97);
+  --nogl-a:#202125; --nogl-b:#0e0f11; --scrim:rgba(4,5,7,.6);
+  --sheet-a:rgba(30,31,35,.96); --sheet-b:rgba(22,23,26,.98); --cell:rgba(38,39,44,.8);
+  --on-accent:#0b0c0f;
+  --calm-a:#bfe6ff; --calm-b:#8ea2ff; --calm-a-rgb:191,230,255; --calm-b-rgb:142,162,255;
+  --metal:linear-gradient(150deg,#fbfcfe 0%,#c9cfda 34%,#f3f5f9 52%,#a4acba 78%,#dfe3ea 100%);
+  --spring:cubic-bezier(.32,.72,0,1);
   color-scheme:dark;
 }
 
@@ -1004,7 +1006,7 @@ body.mode-gmail footer, body.mode-glim footer{ display:none; }
 .segTheme button[aria-checked="true"] i{ box-shadow:0 0 0 2px rgba(var(--cyan-rgb),.35), inset 0 1px 0 rgba(var(--hi),.25); transform:scale(1.08); }
 #themeName{ display:none; }
 .segTheme button i.d{ background:#000; }
-.segTheme button i.g{ background:linear-gradient(140deg, #3d434c, #1c1f24); }
+.segTheme button i.g{ background:linear-gradient(140deg, #4a4d55, #16171a); }
 
 
 /* ═════════ Tu mes: resumen estilo historia ═════════ */
@@ -1400,110 +1402,141 @@ body.mode-gmail footer, body.mode-glim footer{ display:none; }
   #welcome{ min-height:calc(var(--app-h, 100dvh) - 210px); }
 }
 
-/* ═════════ Tema P (carbón): vidrio líquido con luz que se mueve — el tema B no cambia ═════════
-   Todo va bajo :root[data-theme="light"]. Nada aparece de golpe: todo entra y sale con fundidos y resortes suaves. */
+/* ═════════ Tema P: acabado premium (grafito + metal + luz iridiscente) — el tema B no cambia ═════════
+   Todo va bajo :root[data-theme="light"]. Movimiento tipo app: resortes suaves, fundidos con desenfoque, nada aparece de golpe. */
 @property --pg{ syntax:"<angle>"; inherits:false; initial-value:0deg; }
 @keyframes pGira{ to{ --pg:360deg; } }
 @keyframes pGlow{
-  0%  { transform:translateX(-14%) scaleX(.82); opacity:.75; }
-  50% { transform:translateX(0)    scaleX(1.06); opacity:1; }
-  100%{ transform:translateX(14%)  scaleX(.86); opacity:.78; }
+  0%  { transform:translateX(-14%) scaleX(.84); opacity:.7; }
+  50% { transform:translateX(0)    scaleX(1.05); opacity:1; }
+  100%{ transform:translateX(14%)  scaleX(.88); opacity:.75; }
 }
-@keyframes pBlob{
-  0%,100%{ border-radius:12px; }
-  25%{ border-radius:46% 54% 42% 58% / 52% 42% 58% 48%; }
-  50%{ border-radius:58% 42% 56% 44% / 44% 58% 42% 56%; }
-  75%{ border-radius:42% 58% 50% 50% / 56% 46% 54% 44%; }
-}
-@keyframes pItem{ from{ opacity:0; transform:translateX(-16px) scale(.97); filter:blur(4px); } to{ opacity:1; transform:none; filter:blur(0); } }
-@keyframes pRip{ from{ transform:translate(-50%,-50%) scale(0); opacity:.38; } to{ transform:translate(-50%,-50%) scale(1); opacity:0; } }
-@keyframes pAire{ 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-2px); } }
+@keyframes pBrillo{ 0%,62%{ background-position:0% 50%; } 100%{ background-position:100% 50%; } }
+@keyframes pEntra{ from{ opacity:0; transform:translateY(14px) scale(.985); filter:blur(5px); } to{ opacity:1; transform:none; filter:blur(0); } }
+@keyframes pItem{ from{ opacity:0; transform:translateX(-18px) scale(.97); filter:blur(4px); } to{ opacity:1; transform:none; filter:blur(0); } }
+@keyframes pRip{ from{ transform:translate(-50%,-50%) scale(0); opacity:.34; } to{ transform:translate(-50%,-50%) scale(1); opacity:0; } }
 
-/* el cuadro de escribir: la luz que recorre el borde pasa a ser un arcoíris suave, y abajo respira un resplandor de color (como la entrada de voz) */
+/* — superficies de vidrio grafito con filo de luz arriba — */
+:root[data-theme="light"] .bar{
+  background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+  border-color:rgba(255,255,255,.09);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.2), inset 0 -1px 0 rgba(255,255,255,.03), 0 18px 40px -12px rgba(0,0,0,.65);
+}
+:root[data-theme="light"] .ajCard, :root[data-theme="light"] .mkHero{
+  background-image:linear-gradient(180deg, rgba(255,255,255,.055), rgba(255,255,255,.015));
+  border-color:rgba(255,255,255,.085);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.14), 0 18px 40px -22px rgba(0,0,0,.8);
+}
+
+/* — cuadro de escribir: borde de luz suave (plata + pasteles) y un resplandor que respira abajo, como la entrada de voz — */
 :root[data-theme="light"] .frame::before{
   background:conic-gradient(from var(--spin),
     transparent 0deg, transparent 28deg,
-    #5b8cf7 66deg, #9085e9 102deg, #d55181 138deg, #86e3f7 176deg, #3ecf9a 200deg,
-    transparent 236deg, transparent 360deg);
-  animation-duration:9s; opacity:.68;
+    #d5dcec 62deg, #b7a8ff 98deg, #ff9fd0 134deg, #8fe6ff 170deg, #8ff0c4 194deg,
+    transparent 232deg, transparent 360deg);
+  animation-duration:10s; opacity:.7;
 }
 :root[data-theme="light"] .frame:focus-within::before{ opacity:.95; }
 :root[data-theme="light"] .composer::after{
   content:""; position:absolute; left:10%; right:10%; bottom:-7px; height:16px; border-radius:50%; pointer-events:none;
-  background:linear-gradient(90deg, rgba(91,140,247,.0), rgba(91,140,247,.8) 18%, rgba(144,133,233,.85) 40%, rgba(213,81,129,.8) 62%, rgba(62,207,154,.75) 82%, rgba(62,207,154,0));
-  filter:blur(12px); opacity:.22;
-  animation:pGlow 7s ease-in-out infinite alternate;
-  transition:opacity .9s ease, height .6s cubic-bezier(.16,1,.3,1);
+  background:linear-gradient(90deg, rgba(142,162,255,0), rgba(142,162,255,.75) 18%, rgba(183,168,255,.8) 40%, rgba(255,159,208,.72) 62%, rgba(143,240,196,.7) 82%, rgba(143,240,196,0));
+  filter:blur(13px); opacity:.2;
+  animation:pGlow 8s ease-in-out infinite alternate;
+  transition:opacity .9s var(--spring), height .7s var(--spring);
 }
-:root[data-theme="light"] .frame:focus-within .composer::after{ opacity:.6; height:20px; }
-:root[data-theme="light"] .frame.sending .composer::after{ opacity:.9; height:26px; animation-duration:3.4s; }
+:root[data-theme="light"] .frame:focus-within .composer::after{ opacity:.55; height:20px; }
+:root[data-theme="light"] .frame.sending .composer::after{ opacity:.85; height:26px; animation-duration:3.6s; }
 
-/* botón de enviar: anillo iridiscente que gira, y un cristal más líquido por dentro */
+/* — botón de enviar: cromo con un brillo que lo cruza de vez en cuando y un anillo de luz — */
 :root[data-theme="light"] #send:not(:disabled){
-  background:radial-gradient(circle at 32% 26%, rgba(255,255,255,.95), rgba(220,238,255,.85) 38%, rgba(134,227,247,.9) 100%);
-  box-shadow:0 0 18px rgba(var(--blue-rgb),.4), inset 0 1px 0 rgba(255,255,255,.7);
-  transition:opacity .35s ease, transform .5s cubic-bezier(.34,1.56,.64,1), box-shadow .35s ease;
+  background:var(--metal); background-size:240% 240%;
+  box-shadow:0 0 0 1px rgba(255,255,255,.35), 0 8px 20px -6px rgba(142,162,255,.5), inset 0 1px 0 rgba(255,255,255,.85), inset 0 -2px 4px rgba(0,0,0,.18);
+  animation:pBrillo 7s ease-in-out infinite alternate;
+  transition:opacity .4s ease, transform .55s var(--spring), box-shadow .4s ease;
 }
 :root[data-theme="light"] #send::before{
   content:""; position:absolute; inset:-3px; border-radius:50%; padding:1.5px; pointer-events:none;
-  background:conic-gradient(from var(--pg), transparent 0deg, #86e3f7 70deg, #d55181 150deg, #9085e9 220deg, transparent 300deg);
+  background:conic-gradient(from var(--pg), transparent 0deg, #8fe6ff 70deg, #ff9fd0 150deg, #b7a8ff 220deg, transparent 300deg);
   -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   -webkit-mask-composite:xor;
           mask:linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
-  opacity:0; transition:opacity .5s ease; animation:pGira 4.2s linear infinite;
+  opacity:0; transition:opacity .6s ease; animation:pGira 5s linear infinite;
 }
-:root[data-theme="light"] #send:not(:disabled)::before{ opacity:.9; }
-:root[data-theme="light"] #send:not(:disabled):active{ transform:scale(.88); }
+:root[data-theme="light"] #send:not(:disabled)::before{ opacity:.85; }
+:root[data-theme="light"] #send:not(:disabled):active{ transform:scale(.9); }
 
-/* encabezado: un destello de color muy leve que lo recorre */
+/* — encabezado: un destello de color leve lo recorre — */
 :root[data-theme="light"] .bar::before{
   content:""; position:absolute; inset:0; border-radius:inherit; padding:1px; pointer-events:none;
-  background:conic-gradient(from var(--pg), transparent 0deg, transparent 150deg, rgba(134,227,247,.6) 200deg, rgba(144,133,233,.55) 240deg, rgba(213,81,129,.45) 275deg, transparent 320deg, transparent 360deg);
+  background:conic-gradient(from var(--pg), transparent 0deg, transparent 150deg, rgba(191,230,255,.55) 200deg, rgba(183,168,255,.5) 240deg, rgba(255,159,208,.4) 275deg, transparent 320deg, transparent 360deg);
   -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   -webkit-mask-composite:xor;
           mask:linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
-  opacity:.8; animation:pGira 14s linear infinite;
+  opacity:.8; animation:pGira 16s linear infinite;
 }
 
-/* menú: cada apartado entra en cascada, el activo se vuelve una gota que cambia de forma */
-:root[data-theme="light"] body.drawer-open .dNav button{ animation:pItem .75s cubic-bezier(.16,1,.3,1) both; }
-:root[data-theme="light"] body.drawer-open .dNav button:nth-child(1){ animation-delay:.05s; }
-:root[data-theme="light"] body.drawer-open .dNav button:nth-child(2){ animation-delay:.10s; }
-:root[data-theme="light"] body.drawer-open .dNav button:nth-child(3){ animation-delay:.15s; }
-:root[data-theme="light"] body.drawer-open .dNav button:nth-child(4){ animation-delay:.20s; }
-:root[data-theme="light"] body.drawer-open .dNav button:nth-child(5){ animation-delay:.25s; }
-:root[data-theme="light"] body.drawer-open .dNav button:nth-child(6){ animation-delay:.30s; }
-:root[data-theme="light"] body.drawer-open .dNav button:nth-child(7){ animation-delay:.35s; }
-:root[data-theme="light"] body.drawer-open .dNav button:nth-child(8){ animation-delay:.40s; }
-:root[data-theme="light"] body.drawer-open .dNav button:nth-child(n+9){ animation-delay:.45s; }
-:root[data-theme="light"] .dNav button[aria-current="page"] .ico{ animation:pBlob 8s ease-in-out infinite; }
+/* — menú: los apartados entran en cascada; el activo lleva un ícono de cromo — */
+:root[data-theme="light"] body.drawer-open .dNav button{ animation:pItem .8s var(--spring) both; }
+:root[data-theme="light"] body.drawer-open .dNav button:nth-child(1){ animation-delay:.04s; }
+:root[data-theme="light"] body.drawer-open .dNav button:nth-child(2){ animation-delay:.08s; }
+:root[data-theme="light"] body.drawer-open .dNav button:nth-child(3){ animation-delay:.12s; }
+:root[data-theme="light"] body.drawer-open .dNav button:nth-child(4){ animation-delay:.16s; }
+:root[data-theme="light"] body.drawer-open .dNav button:nth-child(5){ animation-delay:.20s; }
+:root[data-theme="light"] body.drawer-open .dNav button:nth-child(6){ animation-delay:.24s; }
+:root[data-theme="light"] body.drawer-open .dNav button:nth-child(7){ animation-delay:.28s; }
+:root[data-theme="light"] body.drawer-open .dNav button:nth-child(8){ animation-delay:.32s; }
+:root[data-theme="light"] body.drawer-open .dNav button:nth-child(n+9){ animation-delay:.36s; }
+:root[data-theme="light"] .dNav button{ transition:background .3s ease, border-color .3s ease, color .3s ease, transform .55s var(--spring); }
+:root[data-theme="light"] .dNav button:active{ transform:scale(.97); }
 :root[data-theme="light"] .dNav button[aria-current="page"]{
-  background:linear-gradient(100deg, rgba(var(--blue-rgb),.12), rgba(144,133,233,.08) 55%, rgba(213,81,129,.06));
+  background:linear-gradient(100deg, rgba(255,255,255,.075), rgba(255,255,255,.025));
+  border-color:rgba(255,255,255,.12);
+}
+:root[data-theme="light"] .dNav button[aria-current="page"] .ico{
+  background:var(--metal); background-size:240% 240%; color:#0b0c0f; border-color:transparent;
+  box-shadow:0 6px 16px -6px rgba(142,162,255,.55), inset 0 1px 0 rgba(255,255,255,.85), inset 0 -2px 3px rgba(0,0,0,.16);
+  animation:pBrillo 8s ease-in-out infinite alternate;
 }
 
-/* aviso de pagos: flota apenas, y su borde tiene el destello de color */
-:root[data-theme="light"] .svBanner{ animation:materialize .5s cubic-bezier(.2,.75,.25,1) both, pAire 7s ease-in-out 1s infinite; }
-:root[data-theme="light"] .svBanner::before{
-  content:""; position:absolute; inset:0; border-radius:inherit; padding:1px; pointer-events:none; z-index:1;
-  background:conic-gradient(from var(--pg), transparent 0deg, transparent 200deg, rgba(134,227,247,.7) 250deg, rgba(144,133,233,.6) 290deg, transparent 340deg);
-  -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  -webkit-mask-composite:xor;
-          mask:linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
-  animation:pGira 10s linear infinite;
+/* — botones principales: cromo — */
+:root[data-theme="light"] .mkBtn.pri, :root[data-theme="light"] .glimActions button.primary{
+  background:var(--metal); background-size:240% 240%; color:#0b0c0f;
+  box-shadow:0 8px 22px -10px rgba(142,162,255,.6), inset 0 1px 0 rgba(255,255,255,.85), inset 0 -2px 3px rgba(0,0,0,.14);
+  text-shadow:none;
 }
 
-/* botones: al tocarlos sale una onda líquida desde el dedo */
+/* — feedback al tocar: resorte suave y una onda de luz desde el dedo — */
+:root[data-theme="light"] .mkBtn, :root[data-theme="light"] .notifBtn, :root[data-theme="light"] .glimActions button, :root[data-theme="light"] .svBanner .go{
+  transition:transform .55s var(--spring), opacity .25s ease, border-color .25s ease, background .25s ease;
+}
+:root[data-theme="light"] .mkBtn:active, :root[data-theme="light"] .notifBtn:active, :root[data-theme="light"] .glimActions button:active, :root[data-theme="light"] .svBanner .go:active{ transform:scale(.96); }
 :root[data-theme="light"] .dNav button, :root[data-theme="light"] .mkBtn, :root[data-theme="light"] .notifBtn,
 :root[data-theme="light"] .wsAcc button, :root[data-theme="light"] .svBanner .go, :root[data-theme="light"] .glimActions button{ position:relative; overflow:hidden; }
 .pRip{
   position:absolute; left:var(--rx); top:var(--ry); width:var(--rd); height:var(--rd); border-radius:50%; pointer-events:none;
-  background:radial-gradient(circle, rgba(255,255,255,.55), rgba(134,227,247,.28) 45%, transparent 70%);
-  animation:pRip .8s cubic-bezier(.16,1,.3,1) forwards;
+  background:radial-gradient(circle, rgba(255,255,255,.5), rgba(191,230,255,.22) 45%, transparent 70%);
+  animation:pRip .9s var(--spring) forwards;
 }
+
+/* — pantallas: cada vista entra con un fundido y sube un poco; sus bloques llegan escalonados — */
+:root[data-theme="light"] body.mode-rest #restView > *, :root[data-theme="light"] body.mode-credito #creditoView > *,
+:root[data-theme="light"] body.mode-gmail #gmailView > *, :root[data-theme="light"] body.mode-glim #glimView > *,
+:root[data-theme="light"] body.mode-recuerda #recuerdaView > *, :root[data-theme="light"] body.mode-mercar #mercarView > *,
+:root[data-theme="light"] body.mode-mes #mesView > *, :root[data-theme="light"] body.mode-ajustes #ajustesView > *{
+  animation:pEntra .75s var(--spring) both;
+}
+:root[data-theme="light"] #ajustesView > :nth-child(2), :root[data-theme="light"] #mesView > :nth-child(2), :root[data-theme="light"] #mercarView > :nth-child(2), :root[data-theme="light"] #recuerdaView > :nth-child(2), :root[data-theme="light"] #glimView > :nth-child(2), :root[data-theme="light"] #creditoView > :nth-child(2), :root[data-theme="light"] #restView > :nth-child(2), :root[data-theme="light"] #gmailView > :nth-child(2){ animation-delay:.06s; }
+:root[data-theme="light"] #ajustesView > :nth-child(3), :root[data-theme="light"] #mesView > :nth-child(3), :root[data-theme="light"] #mercarView > :nth-child(3), :root[data-theme="light"] #recuerdaView > :nth-child(3), :root[data-theme="light"] #glimView > :nth-child(3), :root[data-theme="light"] #creditoView > :nth-child(3), :root[data-theme="light"] #restView > :nth-child(3), :root[data-theme="light"] #gmailView > :nth-child(3){ animation-delay:.12s; }
+:root[data-theme="light"] #ajustesView > :nth-child(n+4), :root[data-theme="light"] #mesView > :nth-child(n+4), :root[data-theme="light"] #mercarView > :nth-child(n+4), :root[data-theme="light"] #recuerdaView > :nth-child(n+4), :root[data-theme="light"] #glimView > :nth-child(n+4), :root[data-theme="light"] #creditoView > :nth-child(n+4), :root[data-theme="light"] #restView > :nth-child(n+4), :root[data-theme="light"] #gmailView > :nth-child(n+4){ animation-delay:.18s; }
+
+/* — P no tiene temporadas: nada de insignias, nevadas ni decoración — */
+:root[data-theme="light"] .seasonTag, :root[data-theme="light"] #snow, :root[data-theme="light"] .spDeco{ display:none !important; }
+
 @media (prefers-reduced-motion: reduce){
-  :root[data-theme="light"] .composer::after, :root[data-theme="light"] #send::before, :root[data-theme="light"] .bar::before,
-  :root[data-theme="light"] .svBanner, :root[data-theme="light"] .svBanner::before, :root[data-theme="light"] .dNav button[aria-current="page"] .ico,
-  :root[data-theme="light"] body.drawer-open .dNav button, .pRip{ animation:none; }
+  :root[data-theme="light"] .composer::after, :root[data-theme="light"] #send, :root[data-theme="light"] #send::before, :root[data-theme="light"] .bar::before,
+  :root[data-theme="light"] .dNav button[aria-current="page"] .ico, :root[data-theme="light"] body.drawer-open .dNav button,
+  :root[data-theme="light"] #restView > *, :root[data-theme="light"] #creditoView > *, :root[data-theme="light"] #gmailView > *, :root[data-theme="light"] #glimView > *,
+  :root[data-theme="light"] #recuerdaView > *, :root[data-theme="light"] #mercarView > *, :root[data-theme="light"] #mesView > *, :root[data-theme="light"] #ajustesView > *, .pRip{ animation:none; }
 }
 </style>
 </head>
@@ -1770,7 +1803,7 @@ const REPOSO_SEGUNDOS  = 90;   // sin tocar nada: la animación se congela
 const REINICIO_MINUTOS = 15;   // sin usarla: la conversación empieza de cero
 
 /* ═════════ TEMPORADA ═════════ */
-const TEMPORADA = (function(){
+const TEMPORADA_REAL = (function(){
   const q = (location.search.match(/temporada=(\w+)/) || [])[1];
   if(q === "halloween" || q === "navidad") return q;
   const d = new Date(), m = d.getMonth() + 1, dia = d.getDate();
@@ -1778,12 +1811,14 @@ const TEMPORADA = (function(){
   if(m === 12 || (m === 1 && dia <= 6)) return "navidad";
   return null;
 })();
+/* el tema P (carbón) es siempre igual: no tiene temporadas */
+let TEMPORADA = document.documentElement.dataset.theme === "light" ? null : TEMPORADA_REAL;
 if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
 
 /* ═════════ VERSIÓN ═════════
    Súbela en cada entrega: si el servidor tiene una versión distinta a la que está corriendo,
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
-const APP_VERSION = "2026-10-05.18";
+const APP_VERSION = "2026-10-05.19";
 (function autoActualizar(){
   const patron = new RegExp("const APP_" + "VERSION = \"([^\"]+)\"");
   async function revisar(){
@@ -1834,10 +1869,14 @@ const FRASES_TEMPORADA = {
   halloween: ["Que no te asusten las cuentas 🎃", "Hasta los fantasmas llevan sus gastos 👻"],
   navidad: ["Feliz Navidad, familia 🎄", "Que el presupuesto de diciembre te alcance 🎁"]
 };
-const FRASES_EXTRA = TEMPORADA ? FRASES_TEMPORADA[TEMPORADA] : [];
 /* orden: aniversario (si es el día) → temporada → las de siempre. Así lo primero que ves al abrir es lo especial. */
-const FRASES = (ES_ANIVERSARIO ? ANIVERSARIO.mensajes(ANOS_JUNTOS).map(t => t.replace("{nombre}", ANIVERSARIO.nombre)) : [])
-  .concat(FRASES_EXTRA, FRASES_BASE);
+const FRASES = [];
+function armaFrases(){
+  const extra = TEMPORADA ? FRASES_TEMPORADA[TEMPORADA] : [];
+  FRASES.length = 0;
+  FRASES.push(...(ES_ANIVERSARIO ? ANIVERSARIO.mensajes(ANOS_JUNTOS).map(t => t.replace("{nombre}", ANIVERSARIO.nombre)) : []), ...extra, ...FRASES_BASE);
+}
+armaFrases();
 
 
 
@@ -2052,9 +2091,9 @@ void main(){
       gm = max(gm, m);
     }
   }
-  /* tema carbón: la misma luz cian del oscuro, pero sobre un gris carbón en vez de negro */
+  /* tema P: la misma luz del oscuro, pero sobre grafito profundo en vez de negro */
   if(uLight > .001){
-    vec3 base = vec3(.11, .122, .141);
+    vec3 base = vec3(.067, .071, .078);
     vec3 lightCol = base + col * vec3(.82, .86, .9);
     lightCol = mix(lightCol, lightCol * .97 + vec3(.035), gm);
     col = mix(col, lightCol, uLight);
@@ -4380,10 +4419,14 @@ const Theme = (function(){
     bGray.setAttribute("aria-checked", String(l));
     seg.dataset.on = l ? "gray" : "dark";
     name.textContent = "";
-    if(meta) meta.content = l ? "#1c1f24" : "#000000";
+    if(meta) meta.content = l ? "#111214" : "#000000";
   }
 
   function apply(light, instant){
+    /* P no tiene temporadas: se quitan al entrar y vuelven al regresar a B */
+    TEMPORADA = light ? null : TEMPORADA_REAL;
+    if(TEMPORADA) root.dataset.season = TEMPORADA; else delete root.dataset.season;
+    armaFrases();
     if(light) root.dataset.theme = "light"; else delete root.dataset.theme;
     try{ localStorage.setItem(KEY, light ? "light" : "dark"); }catch{}
     sync();
