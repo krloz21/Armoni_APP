@@ -1,6 +1,6 @@
 const items = $('Movimientos').all();                                   // servicios del mes (categoría Servicios)
 const fijos = $('Get many database pages1').all().map(i => i.json);       // base Arriendo (último envío)
-const movFijos = $input.all().map(i => i.json);                           // movimientos que dicen «jard…» o «arriendo» (nodo Movimientos jardín y arriendo)
+const movFijos = $input.all().map(i => i.json);                           // movimientos que dicen «jard…» o «arriendo» (nodo Movimientos recientes)
 const ARRIENDO_POR_MOVIMIENTO = false;   // ponlo en true cuando el arriendo también cree su movimiento en Notion
 const hoy = new Date(Date.now() - 5 * 60 * 60 * 1000);   // hora de Colombia
 const dia = hoy.getUTCDate();
