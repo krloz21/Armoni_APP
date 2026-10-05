@@ -1598,13 +1598,15 @@ body.mode-gmail footer, body.mode-glim footer{ display:none; }
 #restView > :nth-child(n+5), #creditoView > :nth-child(n+5), #gmailView > :nth-child(n+5), #glimView > :nth-child(n+5), #recuerdaView > :nth-child(n+5), #ajustesView > :nth-child(n+5){ animation-delay:.2s; }
 @media (prefers-reduced-motion: reduce){ #restView > *, #creditoView > *, #gmailView > *, #glimView > *, #recuerdaView > *, #ajustesView > *{ animation:none; } }
 
-/* ═════════ botón + (agregar un ingreso) y su ventana ═════════ */
+/* ═════════ botón + (registrar un gasto) y su ventana ═════════ */
 #masIngreso{ flex:none; align-self:flex-end; width:38px; height:38px; border-radius:50%; border:1px solid rgba(var(--ink),.14); background:rgba(var(--ink),.07); color:var(--ghost); display:grid; place-items:center; cursor:pointer; margin-left:-8px; transition:transform .4s cubic-bezier(.34,1.56,.64,1), background .2s ease, color .2s ease; }
 #masIngreso svg{ width:18px; height:18px; }
 #masIngreso:active{ transform:scale(.88); }
 body[class*="mode-"] #masIngreso{ display:none; }
-.inCard{ max-height:calc(100dvh - 40px); overflow-y:auto; text-align:left; }
-.inCard::-webkit-scrollbar{ display:none; }
+.inCard{ max-height:calc(100dvh - 40px); display:flex; flex-direction:column; text-align:left; }
+.inBody{ flex:1 1 auto; min-height:0; overflow-y:auto; margin:0 -6px; padding:0 6px; -webkit-overflow-scrolling:touch; }
+.inBody::-webkit-scrollbar{ display:none; }
+.inCard .pgRow{ flex:none; margin-top:14px; }
 .inCard h3{ text-align:center; }
 .inSub{ margin:4px 0 0; text-align:center; color:var(--dim); font-size:.82rem; }
 .inLbl{ display:block; margin:16px 2px 7px; font-size:.7rem; font-weight:700; letter-spacing:.09em; text-transform:uppercase; color:var(--dim); }
@@ -1843,7 +1845,7 @@ body[class*="mode-"] #masIngreso{ display:none; }
   <footer>
     <div class="frame" id="frame">
       <form class="composer" id="composer">
-        <button id="masIngreso" type="button" aria-label="Agregar un ingreso" title="Agregar un ingreso">
+        <button id="masIngreso" type="button" aria-label="Registrar un gasto" title="Registrar un gasto">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
         </button>
         <textarea id="field" rows="1" placeholder="Escribe aquí…" autocomplete="off" enterkeyhint="send"></textarea>
@@ -1915,7 +1917,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
 /* ═════════ VERSIÓN ═════════
    Súbela en cada entrega: si el servidor tiene una versión distinta a la que está corriendo,
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
-const APP_VERSION = "2026-10-05.34";
+const APP_VERSION = "2026-10-05.36";
 (function autoActualizar(){
   const patron = new RegExp("const APP_" + "VERSION = \"([^\"]+)\"");
   async function revisar(){
@@ -4695,18 +4697,24 @@ function pedirMontoJardin(){
 
 
 /* ════════════════════════════════════════════════════════════
-   AGREGAR UN INGRESO: ventana con concepto, categoría, fecha, valor y nota.
-   Solo salen las categorías de lo que entra "a mano": lo automatizado (servicios, jardín, carro, tarjetas) no se ofrece.
-   Al guardar, el ingreso se le manda al agente del chat: él decide si lo guarda de una o si debe preguntar algo más (p. ej. en una salida a comer).
+   REGISTRAR UN GASTO: ventana con concepto, categoría, fecha, valor y nota.
+   No ofrece lo que ya es automático (servicios, jardín, arriendo, cuota del carro).
+   Al guardar, el gasto se le manda al agente del chat: él decide si lo guarda de una o si debe preguntar algo más (p. ej. en una salida a comer).
    ════════════════════════════════════════════════════════════ */
-const Ingreso = (function(){
-  const CATS = ["Hogar", "Alimentación", "Salidas", "Salud", "Ahorro", "Otros"];
+const GastoManual = (function(){
+  /* todas menos "Servicios": energía, agua, gas e internet ya se registran solos desde su aviso */
+  const CATS = ["Alimentación", "Salidas", "Hogar", "Carro", "Hijo", "Salud", "Tarjetas", "Ahorro", "Otros"];
+  /* pagos que ya tienen su propio flujo: aquí no se registran para no duplicarlos */
+  const AUTOMATICOS = /arriendo|jard[ií]n|cuota\s+(del\s+)?(carro|cr[eé]dito)/i;
   const P = 'fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"';
   const ICO = {
     "Hogar":        '<path d="M3 11 12 4l9 7"/><path d="M5.5 9.5V20h13V9.5"/>',
     "Alimentación": '<path d="M3 4h2l2.3 10.5h10.4L20 8H6.4"/><circle cx="9" cy="19" r="1.4"/><circle cx="17" cy="19" r="1.4"/>',
+    "Carro":        '<path d="M5 16V12l1.8-4.5A2 2 0 0 1 8.7 6h6.6a2 2 0 0 1 1.9 1.5L19 12v4"/><path d="M4 12h16v4H4z"/><circle cx="7.5" cy="18" r="1.5"/><circle cx="16.5" cy="18" r="1.5"/>',
+    "Hijo":         '<path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/>',
     "Salud":        '<path d="M12 5v14M5 12h14"/>',
     "Salidas":      '<path d="M8 3h8l-1 7a3 3 0 0 1-6 0L8 3z"/><path d="M12 13v7M8.5 20.5h7"/>',
+    "Tarjetas":     '<rect x="3" y="6" width="18" height="12" rx="2.3"/><path d="M3 10h18"/>',
     "Ahorro":       '<path d="M12 3v18"/><path d="M16.5 7H10a3 3 0 0 0 0 6h4a3 3 0 0 1 0 6H7"/>',
     "Otros":        '<path d="M7 17 17 7M9 7h8v8"/>'
   };
@@ -4721,10 +4729,11 @@ const Ingreso = (function(){
     scrim.className = "pgScrim";
     scrim.innerHTML =
       '<div class="pgCard inCard" role="dialog" aria-modal="true" aria-labelledby="inT">' +
-        '<h3 id="inT">Agregar un ingreso</h3>' +
-        '<p class="inSub">Armoni lo revisa: lo guarda de una o, si falta algo, te pregunta</p>' +
+        '<h3 id="inT">Registrar un gasto</h3>' +
+        '<p class="inSub">Armoni lo revisa: lo guarda de una o, si falta algo (como en una salida), te pregunta</p>' +
+        '<div class="inBody">' +
         '<label class="inLbl" for="inConcepto">Concepto</label>' +
-        '<input id="inConcepto" type="text" placeholder="Ej: Salario, trabajo extra…" autocomplete="off" maxlength="80">' +
+        '<input id="inConcepto" type="text" placeholder="Ej: Almuerzo, gasolina, droguería…" autocomplete="off" maxlength="80">' +
         '<span class="inLbl">Categoría</span>' +
         '<div class="inCats" id="inCats">' + CATS.map(c => '<button type="button" class="inCat" data-c="' + c + '" aria-pressed="false"><svg viewBox="0 0 24 24" ' + P + '>' + ICO[c] + '</svg>' + c + '</button>').join("") + '</div>' +
         '<span class="inLbl">Fecha</span>' +
@@ -4738,6 +4747,8 @@ const Ingreso = (function(){
         '<label class="inLbl" for="inNota">Nota <span style="font-weight:400;letter-spacing:0;text-transform:none">(opcional)</span></label>' +
         '<textarea id="inNota" rows="2" placeholder="Algo que quieras recordar" maxlength="300"></textarea>' +
         '<p class="inErr" id="inErr" role="alert"></p>' +
+        '<p class="inSub" style="margin-top:10px;font-size:.74rem">Servicios, jardín, arriendo y cuota del carro se registran solos desde sus avisos.</p>' +
+        '</div>' +
         '<div class="pgRow"><button type="button" class="pgNo" id="inCancel">Cancelar</button><button type="button" class="pgSi" id="inGuardar" disabled>Guardar</button></div>' +
       '</div>';
     document.body.appendChild(scrim);
@@ -4770,7 +4781,7 @@ const Ingreso = (function(){
       monto.value = d ? Number(d).toLocaleString("es-CO") : "";
       listo();
     });
-    concepto.addEventListener("input", listo);
+    concepto.addEventListener("input", () => { err.textContent = ""; listo(); });
 
     function cierra(){
       scrim.classList.remove("on");
@@ -4785,14 +4796,15 @@ const Ingreso = (function(){
     guardar.addEventListener("click", () => {
       if(guardar.disabled) return;
       if(typeof busy !== "undefined" && busy){ err.textContent = "Armoni está respondiendo otra cosa. Espera un momento y vuelve a intentarlo."; return; }
+      if(AUTOMATICOS.test(concepto.value)){ err.textContent = "Eso ya se registra solo desde su aviso (jardín, arriendo, cuota del carro). Aquí va lo demás."; return; }
       const cuando = fecha === hoy() ? "hoy" : fecha === ayer() ? "ayer" : fecha;
       const monto$ = "$" + valor().toLocaleString("es-CO");
       const nota$ = nota.value.trim();
       /* lo que ve el chat: corto y claro */
-      const mostrar = "➕ Ingreso: " + concepto.value.trim() + " · " + categoria + " · " + monto$ + " · " + cuando + (nota$ ? " · " + nota$ : "");
+      const mostrar = "🧾 Gasto: " + concepto.value.trim() + " · " + categoria + " · " + monto$ + " · " + cuando + (nota$ ? " · " + nota$ : "");
       /* lo que recibe el agente: todos los datos exactos + que él decida si lo guarda de una o necesita preguntar algo */
       const texto =
-        "Registra este INGRESO en Movimientos (Tipo: Ingreso). Concepto: " + concepto.value.trim() +
+        "Registra este GASTO en Movimientos (Tipo: Gasto). Concepto: " + concepto.value.trim() +
         ". Categoría: " + categoria + ". Valor: " + valor() + ". Fecha: " + fecha + " (" + cuando + ")." +
         (nota$ ? " Nota: " + nota$ + "." : "") +
         " Revisa si esto es una salida a comer o algo que necesite más datos (por ejemplo cuántas personas comieron, el restaurante o la puntuación): si falta algún dato, pregúntamelo antes de guardar; si no falta nada, guárdalo de una.";
