@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Política de Privacidad - n8n</title>
+    <style>
+        body { font-family: sans-serif; max-width: 800px; margin: 40px auto; padding: 0 20px; line-height: 1.6; color: #333; }
+        h1 { color: #111; }
+    </style>
+</head>
+<body>
+    <h1>Política de Privacidad</h1>
+    <p><strong>Última actualización:</strong> 6 de octubre de 2026</p>
+    
+    <p>Esta aplicación es de uso personal y privado. Solo la usa su propietario.</p>
+    
+    <p><strong>Qué datos usa:</strong> La app accede, con permiso del propietario, a los correos de su cuenta de Gmail enviados por la tarjeta Glim, únicamente para leer el monto y el comercio de cada compra o recarga.</p>
+    
+    <p><strong>Para qué los usa:</strong> Registrar esos movimientos en una base de datos privada del propietario.</p>
+    
+    <p><strong>Qué no hace:</strong> No comparte, vende ni transfiere datos a terceros. No usa los datos para publicidad. No guarda el contenido completo de los correos fuera de la cuenta del propietario.</p>
+    
+    <p><strong>Eliminación de datos:</strong> El propietario puede revocar el acceso en cualquier momento desde la configuración de su cuenta de Google.</p>
+    
+    <p><strong>Contacto:</strong> <a href="mailto:carlosedumunos@gmail.com">carlosedumunos@gmail.com</a></p>
+</body>
+</html>
