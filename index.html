@@ -1170,7 +1170,7 @@ body.mode-gmail footer, body.mode-glim footer{ display:none; }
 .wsX{ width:36px; height:36px; border:1px solid rgba(255,255,255,.14); border-radius:50%; background:rgba(255,255,255,.1); -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px); color:#fff; display:grid; place-items:center; cursor:pointer; }
 .wsX svg{ width:16px; height:16px; }
 .wsCuerpo{ position:relative; z-index:2; flex:1; display:flex; flex-direction:column; justify-content:center; padding:24px 26px calc(env(safe-area-inset-bottom, 0px) + 46px); }
-.wsCuerpo > *{ opacity:0; transform:translateY(26px) scale(.98); filter:blur(8px); animation:wsSube .85s cubic-bezier(.16,1,.3,1) forwards; animation-delay:calc(var(--d, 0) * 1s); }
+.wsCuerpo > *{ opacity:0; transform:translateY(26px) scale(.98); filter:blur(4px); animation:wsSube .85s cubic-bezier(.16,1,.3,1) forwards; animation-delay:calc(var(--d, 0) * 1s); }
 @keyframes wsSube{ to{ opacity:1; transform:none; filter:blur(0); } }
 .wsK{ align-self:flex-start; display:inline-flex; align-items:center; gap:8px; margin-bottom:16px; padding:7px 13px; border-radius:999px; font-size:.72rem; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:rgba(255,255,255,.88); background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.14); -webkit-backdrop-filter:blur(12px); backdrop-filter:blur(12px); }
 .wsK::before{ content:""; width:7px; height:7px; border-radius:50%; background:linear-gradient(140deg, var(--c2), var(--c1)); box-shadow:0 0 10px var(--c2); }
@@ -1203,6 +1203,56 @@ body.mode-gmail footer, body.mode-glim footer{ display:none; }
   .wsCuerpo > *{ animation-duration:.01s; animation-delay:0s; }
 }
 @media (prefers-reduced-motion: reduce){ .wsCuerpo > *{ animation:none; opacity:1; transform:none; } .wsFondo i{ animation:none; } }
+
+
+/* ── Tu mes más fino: se abre desde la tarjeta, las pantallas se relevan sin cortes y se cierra arrastrando ── */
+.ws.desdeTarjeta{ animation:wsAbre .72s var(--ease-out) backwards; }
+@keyframes wsAbre{ from{ clip-path:inset(var(--oy) var(--or) var(--ob) var(--ol) round 26px); } to{ clip-path:inset(0 0 0 0 round 0px); } }
+.ws.desdeTarjeta.saliendo{ animation:wsCierra .5s var(--ease-out) forwards; }
+@keyframes wsCierra{ from{ clip-path:inset(0 0 0 0 round 0px); opacity:1; } to{ clip-path:inset(var(--oy) var(--or) var(--ob) var(--ol) round 26px); opacity:0; } }
+.ws.desdeTarjeta .wsCuerpo.primera > *{ animation-delay:calc(var(--d, 0) * 1s + .22s); }
+.ws.arrastrando{ transition:none; }
+.wsCuerpo > *{ filter:blur(4px); }
+.wsCuerpo.sale > *{ animation:wsSaleItem .26s cubic-bezier(.4,0,1,1) forwards !important; animation-delay:0s !important; }
+@keyframes wsSaleItem{ from{ opacity:1; transform:none; filter:blur(0); } to{ opacity:0; transform:translateY(calc(var(--dir, 1) * -18px)) scale(.985); filter:blur(3px); } }
+.wsCuerpo[data-dir="-1"] > *{ animation-name:wsSubeAtras; }
+@keyframes wsSubeAtras{ from{ opacity:0; transform:translateY(-22px) scale(.985); filter:blur(4px); } to{ opacity:1; transform:none; filter:blur(0); } }
+@media (prefers-reduced-motion:reduce){ .ws.desdeTarjeta, .ws.desdeTarjeta.saliendo{ animation:none; } .wsCuerpo.sale > *{ animation:none !important; opacity:0; } }
+
+/* aviso «ya está tu resumen» */
+.tmAvScrim{ position:fixed; inset:0; z-index:300; display:flex; align-items:flex-end; justify-content:center; padding:18px 14px calc(18px + env(safe-area-inset-bottom, 0px)); background:rgba(var(--shade), .55); -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px); opacity:0; transition:opacity .45s ease; }
+.tmAvScrim.on{ opacity:1; }
+.tmAv{ position:relative; width:min(100%, 420px); overflow:hidden; border-radius:30px; padding:26px 24px 20px; color:#fff; background:#070a12; border:1px solid rgba(255,255,255,.14); box-shadow:0 40px 90px -20px rgba(0,0,0,.7), inset 0 1px 0 rgba(255,255,255,.18);
+  transform:translateY(70px) scale(.94); opacity:0; transition:transform .85s var(--ease-spring), opacity .4s ease; }
+.tmAvScrim.on .tmAv{ transform:none; opacity:1; }
+.tmAvScrim.sale .tmAv{ transform:translateY(40px) scale(.96); opacity:0; transition:transform .38s cubic-bezier(.4,0,1,1), opacity .3s ease; }
+.tmAvFondo{ position:absolute; inset:0; pointer-events:none; }
+.tmAvFondo i{ position:absolute; width:120%; aspect-ratio:1; border-radius:50%; opacity:.55; filter:blur(8px); }
+.tmAvFondo i:nth-child(1){ background:radial-gradient(circle, var(--c1), transparent 62%); top:-70%; left:-40%; animation:tmAvDeriva 11s ease-in-out infinite alternate; }
+.tmAvFondo i:nth-child(2){ background:radial-gradient(circle, var(--c2), transparent 62%); bottom:-80%; right:-50%; animation:tmAvDeriva 14s ease-in-out infinite alternate-reverse; }
+@keyframes tmAvDeriva{ to{ transform:translate(14%, 10%) scale(1.1); } }
+.tmAv > *:not(.tmAvFondo){ position:relative; opacity:0; transform:translateY(14px); }
+.tmAvScrim.on .tmAv > *:not(.tmAvFondo){ animation:tmAvItem .7s var(--ease-out) forwards; animation-delay:calc(.28s + var(--i, 0) * .08s); }
+@keyframes tmAvItem{ to{ opacity:1; transform:none; } }
+.tmAvK{ display:inline-flex; align-items:center; gap:8px; padding:6px 12px; border-radius:999px; font-size:.68rem; font-weight:700; letter-spacing:.14em; text-transform:uppercase; background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.16); }
+.tmAvK::before{ content:""; width:7px; height:7px; border-radius:50%; background:linear-gradient(140deg, var(--c2), var(--c1)); box-shadow:0 0 10px var(--c2); }
+.tmAv h3{ margin:14px 0 2px; font-size:1.7rem; font-weight:700; letter-spacing:-.035em; line-height:1.1; }
+.tmAv h3::first-letter{ text-transform:uppercase; }
+.tmAvBig{ margin:10px 0 2px; font-size:clamp(2.4rem, 13vw, 3.4rem); font-weight:700; letter-spacing:-.045em; line-height:1; font-variant-numeric:tabular-nums; background:linear-gradient(180deg, #fff 30%, var(--c2)); -webkit-background-clip:text; background-clip:text; color:transparent; padding-bottom:.06em; }
+.tmAvSub{ margin:0 0 16px; font-size:.95rem; color:rgba(255,255,255,.74); }
+.tmAvSub b{ color:#fff; font-weight:650; }
+.tmAvSpark{ display:flex; align-items:flex-end; gap:2px; height:54px; margin:0 0 20px; }
+.tmAvSpark i{ flex:1; border-radius:2px 2px 0 0; background:linear-gradient(180deg, var(--c2), var(--c1)); transform-origin:bottom; transform:scaleY(0); }
+.tmAvScrim.on .tmAvSpark i{ animation:tmAvBarra .7s var(--ease-out) forwards; animation-delay:calc(.6s + var(--j) * 14ms); }
+.tmAvSpark i.v{ background:rgba(255,255,255,.14); }
+@keyframes tmAvBarra{ to{ transform:scaleY(1); } }
+.tmAvAcc{ display:flex; gap:10px; }
+.tmAvAcc button{ flex:1; font:inherit; font-weight:650; font-size:.95rem; padding:15px 12px; border-radius:16px; border:0; cursor:pointer; }
+.tmAvIr{ position:relative; overflow:hidden; background:linear-gradient(140deg, #7ee8ff, #3f7cf6 60%, #6a5cf0); color:#03070f; }
+.tmAvIr::after{ content:""; position:absolute; top:0; bottom:0; left:0; width:38%; background:linear-gradient(100deg, transparent, rgba(255,255,255,.55), transparent); transform:translateX(-130%) skewX(-18deg); animation:mkBrilla 3.6s ease-in-out infinite; pointer-events:none; }
+.tmAvNo{ flex:.7 !important; background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.16) !important; color:#fff; }
+.tmAvAcc button:active{ transform:scale(.97); }
+@media (prefers-reduced-motion:reduce){ .tmAv, .tmAv > *:not(.tmAvFondo), .tmAvSpark i{ transition:none; animation:none !important; opacity:1; transform:none; } .tmAvFondo i, .tmAvIr::after{ animation:none; } }
 
 /* ═════════ A mercar: revisión de la casa tipo juego ═════════ */
 .mkHero{ text-align:center; padding:22px 18px 18px; background:var(--panel); border:1px solid var(--line); border-radius:22px; position:relative; overflow:hidden; }
@@ -2087,7 +2137,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-09.71";
+const APP_VERSION = "2026-10-09.72";
 (function autoActualizar(){
   const patron = new RegExp("const APP_" + "VERSION = \"([^\"]+)\"");
   async function revisar(){
@@ -6437,9 +6487,9 @@ const TuMes = (function(){
       t.classList.remove("sacude"); void t.offsetWidth; t.classList.add("sacude");
       return;
     }
-    if(t.dataset.anio){ abrir(anual(+t.dataset.anio), null); return; }
+    if(t.dataset.anio){ abrir(anual(+t.dataset.anio), null, t); return; }
     const meses = datos.meses, k = meses.findIndex(m => m.mes === t.dataset.mes);
-    if(k >= 0) abrir(meses[k], meses[k + 1] || null);
+    if(k >= 0) abrir(meses[k], meses[k + 1] || null, t);
   });
 
   /* ── las historias de un mes ── */
@@ -6630,10 +6680,18 @@ const TuMes = (function(){
 
   /* ── el reproductor ── */
   let el = null, slides = [], i = 0, t0 = 0, acum = 0, pausa = false, raf = null, toques = [];
-  function abrir(M, P){
+  let cambiando = false, origenTarjeta = null;
+  function abrir(M, P, origen){
     slides = M.anio ? armarAnio(M) : armar(M, P);
     el = document.createElement("div");
     el.className = "ws" + (M.anio ? " anio" : "");
+    origenTarjeta = null;
+    if(origen && origen.getBoundingClientRect && !REDUCED){      // se abre creciendo desde la tarjeta que tocaste
+      const r = origen.getBoundingClientRect();
+      el.style.setProperty("--oy", Math.max(0, r.top) + "px"); el.style.setProperty("--ol", Math.max(0, r.left) + "px");
+      el.style.setProperty("--or", Math.max(0, innerWidth - r.right) + "px"); el.style.setProperty("--ob", Math.max(0, innerHeight - r.bottom) + "px");
+      el.classList.add("desdeTarjeta"); origenTarjeta = origen;
+    }
     el.innerHTML =
       '<div class="wsFondo" aria-hidden="true"><i></i><i></i>' + (M.anio ? '<div class="wsChispas">' + Array.from({ length: 30 }, (_, q) => '<u style="--x:' + ((q * 37) % 100) + '%;--y:' + ((q * 53 + 11) % 100) + '%;--z:' + (2 + q % 3) + 'px;--t:' + (3.4 + (q % 5) * .7).toFixed(1) + 's;--w:' + ((q % 9) * .45).toFixed(2) + 's"></u>').join("") + '</div>' : '') + '</div>' +
       '<div class="wsSegs">' + slides.map(() => "<i><b></b></i>").join("") + '</div>' +
@@ -6641,19 +6699,39 @@ const TuMes = (function(){
       '<div class="wsCuerpo"></div>';
     document.body.appendChild(el);
     el.querySelector(".wsX").addEventListener("click", cerrar);
-    let x0 = 0, y0 = 0, tDown = 0, abajo = false;
+    let x0 = 0, y0 = 0, tDown = 0, abajo = false, arr = false;
     el.addEventListener("pointerdown", e => {
       if(e.target.closest("button")) return;
-      abajo = true; x0 = e.clientX; y0 = e.clientY; tDown = e.timeStamp;   // la hora real del toque, no la de cuando corre el código
+      abajo = true; arr = false; x0 = e.clientX; y0 = e.clientY; tDown = e.timeStamp;   // la hora real del toque, no la de cuando corre el código
       if(!pausa){ acum += performance.now() - t0; pausa = true; }
     });
-    el.addEventListener("pointerup", e => {
+    /* al arrastrar hacia abajo la historia sigue el dedo, se encoge y se redondea, como una tarjeta de iOS */
+    el.addEventListener("pointermove", e => {
+      if(!abajo) return;
+      const dy = e.clientY - y0;
+      if(!arr && dy > 12 && Math.abs(e.clientX - x0) < dy){ arr = true; el.classList.add("arrastrando"); }
+      if(arr){
+        const k = Math.min(1, Math.max(0, dy) / 520);
+        el.style.transform = "translateY(" + (Math.max(0, dy) * .85).toFixed(1) + "px) scale(" + (1 - k * .14).toFixed(3) + ")";
+        el.style.borderRadius = (k * 34).toFixed(1) + "px";
+        el.style.clipPath = "inset(0 round " + (k * 34).toFixed(1) + "px)";
+      }
+    });
+    const suelta = (e, cancel) => {
       if(!abajo) return; abajo = false;
       const dy = e.clientY - y0, corto = e.timeStamp - tDown < 350 && Math.abs(e.clientX - x0) < 24 && Math.abs(dy) < 24;
-      if(dy > 90){ cerrar(); return; }                 // deslizar hacia abajo cierra
+      if(arr){
+        arr = false; el.classList.remove("arrastrando");
+        if(dy > 110 && !cancel){ el.style.transform = el.style.borderRadius = el.style.clipPath = ""; cerrar(); return; }
+        el.style.transition = "transform .55s var(--ease-spring), border-radius .4s ease, clip-path .4s ease";
+        el.style.transform = ""; el.style.borderRadius = ""; el.style.clipPath = "";
+        setTimeout(() => { if(el) el.style.transition = ""; }, 600);
+      } else if(dy > 90 && !cancel){ cerrar(); return; }
       t0 = performance.now(); pausa = false;            // al soltar sigue donde iba
-      if(corto){ if(e.clientX < innerWidth * .3) mostrar(i - 1); else mostrar(i + 1); }
-    });
+      if(corto && !cancel && !cambiando){ if(e.clientX < innerWidth * .3) mostrar(i - 1); else mostrar(i + 1); }
+    };
+    el.addEventListener("pointerup", e => suelta(e, false));
+    el.addEventListener("pointercancel", e => suelta(e, true));
     el.addEventListener("click", e => {
       const b = e.target.closest("[data-acc]"); if(!b) return;
       if(b.dataset.acc === "otra") mostrar(0);
@@ -6666,16 +6744,28 @@ const TuMes = (function(){
     if(!el) return;
     if(n < 0) n = 0;
     if(n >= slides.length) return;
-    i = n; acum = 0; t0 = performance.now(); pausa = false;
+    const cuerpo = el.querySelector(".wsCuerpo");
+    const hayContenido = cuerpo.children.length > 0 && !REDUCED;
+    const dir = hayContenido && n < i ? -1 : 1;
     toques.forEach(clearTimeout); toques = [];
+    i = n; acum = 0; pausa = true;                               // el reloj de la pantalla arranca cuando ya entró
     const s = slides[i];
     const ac = s.ac || ACENTOS[s.fondo % ACENTOS.length];
-    el.style.setProperty("--c1", ac[0]); el.style.setProperty("--c2", ac[1]);   // los tonos se funden entre pantallas
-    const cuerpo = el.querySelector(".wsCuerpo");
-    cuerpo.innerHTML = s.html;
+    el.style.setProperty("--c1", ac[0]); el.style.setProperty("--c2", ac[1]);   // los tonos se funden mientras una sale y otra entra
     el.querySelectorAll(".wsSegs b").forEach((b, k) => { b.style.width = k < i ? "100%" : "0%"; });
-    toques.push(setTimeout(() => cuerpo.querySelectorAll("[data-monto]").forEach(x => animaMonto(x, 0, +x.dataset.monto, 1300)), 260));
-    toques.push(setTimeout(() => cuerpo.querySelectorAll(".t i").forEach(x => { x.style.width = x.dataset.w + "%"; }), 700));
+    const entra = () => {
+      cambiando = false;
+      cuerpo.classList.remove("sale"); cuerpo.classList.toggle("primera", !hayContenido);
+      cuerpo.dataset.dir = String(dir); cuerpo.style.setProperty("--dir", dir);
+      cuerpo.innerHTML = s.html;
+      t0 = performance.now(); pausa = false;
+      toques.push(setTimeout(() => cuerpo.querySelectorAll("[data-monto]").forEach(x => animaMonto(x, 0, +x.dataset.monto, 1300)), 260));
+      toques.push(setTimeout(() => cuerpo.querySelectorAll(".t i").forEach(x => { x.style.width = x.dataset.w + "%"; }), 700));
+    };
+    if(hayContenido){
+      cambiando = true; cuerpo.style.setProperty("--dir", dir); cuerpo.classList.add("sale");
+      toques.push(setTimeout(entra, 230));
+    } else entra();
   }
   function bucle(now){
     if(!el) return;
@@ -6692,7 +6782,7 @@ const TuMes = (function(){
     const viejo = el; el = null;
     cancelAnimationFrame(raf); toques.forEach(clearTimeout);
     viejo.classList.add("saliendo");
-    setTimeout(() => viejo.remove(), 280);
+    setTimeout(() => viejo.remove(), origenTarjeta ? 520 : 280);
   }
   function compartir(M, btn){
     if(M.anio){
@@ -6753,19 +6843,33 @@ const TuMes = (function(){
       await new Promise(r => setTimeout(r, 450));
       try{ localStorage.setItem(K_AVISO, prev); }catch{}   // ya se mostró: pase lo que pase, no vuelve a salir
       const M = meses[k], P = meses[k + 1] || null, nom = mesNombre(prev);
+      const [c1, c2] = tonoDe(M);
+      const dias = new Date(+prev.slice(0, 4), +prev.slice(5, 7), 0).getDate();
+      const pd = M.porDia || [], max = Math.max(1, ...pd.slice(1, dias + 1));
+      const spark = Array.from({ length: dias }, (_, q) => { const v = pd[q + 1] || 0; return '<i class="' + (v ? '' : 'v') + '" style="--j:' + q + ';height:' + (v ? Math.max(10, Math.round(v / max * 100)) : 6) + '%"></i>'; }).join("");
+      let cmp = "";
+      if(P && P.gastos > 0){
+        const d = Math.round((M.gastos - P.gastos) / P.gastos * 100);
+        cmp = d === 0 ? ' · igual que ' + esc(mesNombre(P.mes)) : ' · <b>' + Math.abs(d) + '% ' + (d < 0 ? 'menos' : 'más') + '</b> que ' + esc(mesNombre(P.mes));
+      }
       const scrim = document.createElement("div");
-      scrim.className = "sheetScrim gmCenter";
+      scrim.className = "tmAvScrim";
       scrim.innerHTML =
-        '<div class="sheetCard" role="dialog" aria-modal="true" aria-labelledby="tmAvT"><div class="gmModal">' +
-          '<div style="font-size:2.6rem;line-height:1;margin:2px 0 10px" aria-hidden="true">✨</div>' +
-          '<h3 id="tmAvT">Ya está tu resumen de ' + esc(nom) + '</h3>' +
-          '<p>Mira cómo se movió tu plata el mes pasado.</p>' +
-          '<div class="gmRow split"><button type="button" class="gmBtn gmYes" id="tmAvIr">Ir a ver</button><button type="button" class="gmBtn" id="tmAvNo">Cerrar</button></div>' +
-        '</div></div>';
+        '<div class="tmAv" role="dialog" aria-modal="true" aria-labelledby="tmAvT" style="--c1:' + c1 + ';--c2:' + c2 + '">' +
+          '<div class="tmAvFondo" aria-hidden="true"><i></i><i></i></div>' +
+          '<span class="tmAvK" style="--i:0">Tu resumen está listo</span>' +
+          '<h3 id="tmAvT" style="--i:1">' + esc(nom) + ' ya terminó</h3>' +
+          '<div class="tmAvBig" style="--i:2" data-monto="' + Math.round(M.gastos) + '">' + peso(0) + '</div>' +
+          '<p class="tmAvSub" style="--i:3">gastados' + cmp + '</p>' +
+          '<div class="tmAvSpark" style="--i:4" aria-hidden="true">' + spark + '</div>' +
+          '<div class="tmAvAcc" style="--i:5"><button type="button" class="tmAvIr" id="tmAvIr">Ver mi resumen</button><button type="button" class="tmAvNo" id="tmAvNo">Ahora no</button></div>' +
+        '</div>';
       document.body.appendChild(scrim);
-      requestAnimationFrame(() => scrim.classList.add("on"));
+      requestAnimationFrame(() => requestAnimationFrame(() => scrim.classList.add("on")));
+      const cifra = scrim.querySelector(".tmAvBig");
+      setTimeout(() => animaMonto(cifra, 0, +cifra.dataset.monto, REDUCED ? 1 : 1300), REDUCED ? 0 : 520);
       let cerrado = false;
-      const cierra = () => { if(cerrado) return; cerrado = true; scrim.classList.remove("on"); setTimeout(() => scrim.remove(), 420); };
+      const cierra = () => { if(cerrado) return; cerrado = true; scrim.classList.remove("on"); scrim.classList.add("sale"); setTimeout(() => scrim.remove(), 420); };
       scrim.addEventListener("click", e => { if(e.target === scrim) cierra(); });
       scrim.querySelector("#tmAvNo").addEventListener("click", cierra);
       scrim.querySelector("#tmAvIr").addEventListener("click", () => {
