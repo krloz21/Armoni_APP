@@ -1680,6 +1680,27 @@ button{ transition:transform var(--t-tap) var(--ease-out); }
 /* detalle de cada producto (cantidad, tamaño…) y botón de agregar */
 .mkDet{ font-style:normal; color:var(--cyan); font-weight:600; }
 .rgItem .n small.mkDet{ display:block; margin-top:2px; font-size:.78rem; font-weight:500; }
+/* editar producto: buscador, lista que entra escalonada y cambio de vista deslizando */
+.mkBusca{ position:relative; display:block; }
+.mkBusca svg{ position:absolute; left:16px; top:50%; width:18px; height:18px; margin-top:-9px; color:var(--dim); pointer-events:none; transition:color .3s, transform .45s var(--ease-spring); }
+.inCard .mkBusca input[type="text"]{ width:100%; box-sizing:border-box; font:inherit; font-size:.98rem; padding:14px 44px 14px 46px !important; border-radius:999px; border:1px solid var(--line); background:rgba(var(--ink),.05); color:var(--white); outline:none; -webkit-appearance:none; appearance:none; transition:border-color .3s, background .3s, box-shadow .4s var(--ease-out); }
+.inCard .mkBusca input::placeholder{ color:var(--dim); }
+.inCard .mkBusca input[type="text"]:focus{ border-color:rgba(var(--cyan-rgb),.55); background:rgba(var(--cyan-rgb),.07); box-shadow:0 0 0 4px rgba(var(--cyan-rgb),.12), 0 10px 30px -14px rgba(var(--cyan-rgb),.5); }
+.mkBusca:focus-within svg{ color:var(--cyan); transform:scale(1.12) rotate(-8deg); }
+.mkBuscaX{ position:absolute; right:8px; top:50%; width:30px; height:30px; margin-top:-15px; border:0; border-radius:50%; background:rgba(var(--ink),.12); color:var(--white); font-size:1.05rem; line-height:1; cursor:pointer; opacity:0; transform:scale(.6); pointer-events:none; transition:opacity .25s, transform .35s var(--ease-spring); }
+.mkBuscaX.on{ opacity:1; transform:none; pointer-events:auto; }
+.mkEdV{ animation:mkEdFw .5s var(--ease-out) backwards; }
+.mkEdV.bk{ animation-name:mkEdBk; }
+@keyframes mkEdFw{ from{ opacity:0; transform:translateX(26px); } to{ opacity:1; transform:none; } }
+@keyframes mkEdBk{ from{ opacity:0; transform:translateX(-26px); } to{ opacity:1; transform:none; } }
+.mkEdLista{ margin-top:12px; max-height:46vh; overflow:auto; display:flex; flex-direction:column; gap:7px; padding:2px; -webkit-overflow-scrolling:touch; scrollbar-width:none; }
+.mkEdLista::-webkit-scrollbar{ display:none; }
+.mkEdLista.anima .rgItem{ animation:mkEdItem .55s var(--ease-out) backwards; animation-delay:calc(var(--i, 0) * 38ms + 80ms); }
+@keyframes mkEdItem{ from{ opacity:0; transform:translateY(14px) scale(.97); } to{ opacity:1; transform:none; } }
+.mkEdLista .rgItem:hover{ border-color:rgba(var(--cyan-rgb),.35); background:rgba(var(--cyan-rgb),.07); }
+.mkEdLista .rgItem::after{ content:"›"; flex:none; color:var(--dim); font-size:1.3rem; transition:transform .3s var(--ease-out), color .3s; }
+.mkEdLista .rgItem:hover::after{ transform:translateX(3px); color:var(--cyan); }
+.mkEdLista .gEmpty{ text-align:center; }
 .mkAdd span{ display:inline-grid; place-items:center; width:22px; height:22px; margin-right:6px; border-radius:50%; background:rgba(var(--ink),.1); font-size:1.05rem; line-height:1; }
 .rgFecha{ margin:0 0 14px; }
 .rgFecha .recDia{ margin:0; }
@@ -2138,7 +2159,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-09.73";
+const APP_VERSION = "2026-10-09.74";
 (function autoActualizar(){
   const patron = new RegExp("const APP_" + "VERSION = \"([^\"]+)\"");
   async function revisar(){
@@ -6018,20 +6039,27 @@ const Mercar = (function(){
     document.addEventListener("keydown", tecla);
     scrim.addEventListener("click", e => { if(e.target === scrim) cierra(); });
 
-    function lista(){
-      cuerpo.innerHTML =
-        '<input id="mkEdQ" type="search" placeholder="Buscar producto…" autocomplete="off" maxlength="60">' +
-        '<div id="mkEdLista" style="margin-top:10px;max-height:46vh;overflow:auto;display:flex;flex-direction:column;gap:6px"></div>' +
-        '<div class="pgRow"><button type="button" class="pgNo" id="mkEdCerrar" style="flex:1">Cerrar</button></div>';
-      const q = cuerpo.querySelector("#mkEdQ"), caja = cuerpo.querySelector("#mkEdLista");
+    function vista(html, atras){ cuerpo.innerHTML = '<div class="mkEdV' + (atras ? ' bk' : '') + '">' + html + '</div>'; return cuerpo.firstChild; }
+
+    function lista(atras){
+      vista(
+        '<label class="mkBusca"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.6-3.6"/></svg>' +
+        '<input id="mkEdQ" type="text" inputmode="search" enterkeyhint="search" placeholder="Buscar producto…" autocomplete="off" maxlength="60" aria-label="Buscar producto">' +
+        '<button type="button" class="mkBuscaX" aria-label="Borrar búsqueda">×</button></label>' +
+        '<div class="mkEdLista anima" id="mkEdLista"></div>' +
+        '<div class="pgRow"><button type="button" class="pgNo" id="mkEdCerrar" style="flex:1">Cerrar</button></div>', atras);
+      const q = cuerpo.querySelector("#mkEdQ"), caja = cuerpo.querySelector("#mkEdLista"), x = cuerpo.querySelector(".mkBuscaX");
       const pinta = () => {
         const t = _quitaTildes(q.value.trim());
         const vis = ps.filter(p => !t || _quitaTildes(baseDe(p)).includes(t)).sort((a, b) => baseDe(a).localeCompare(baseDe(b), "es"));
         caja.innerHTML = vis.length
-          ? vis.map(p => '<button type="button" class="rgItem" data-id="' + esc(p.id) + '"><span class="e" aria-hidden="true">' + emojiMercado(baseDe(p), p.grupo) + '</span><span class="n">' + esc(baseDe(p)) + '<small class="mkDet">' + esc(p.grupo || "Otros") + '</small></span></button>').join("")
+          ? vis.map((p, i) => '<button type="button" class="rgItem" style="--i:' + Math.min(i, 10) + '" data-id="' + esc(p.id) + '"><span class="e" aria-hidden="true">' + emojiMercado(baseDe(p), p.grupo) + '</span><span class="n">' + esc(baseDe(p)) + '<small class="mkDet">' + esc(p.grupo || "Otros") + '</small></span></button>').join("")
           : '<p class="gEmpty">No encontré ese producto.</p>';
+        x.classList.toggle("on", !!q.value);
       };
-      q.addEventListener("input", pinta); pinta();
+      q.addEventListener("input", () => { caja.classList.remove("anima"); pinta(); });
+      x.addEventListener("click", () => { q.value = ""; caja.classList.remove("anima"); pinta(); q.focus(); });
+      pinta(); setTimeout(() => caja.classList.remove("anima"), 900);
       caja.addEventListener("click", e => { const b = e.target.closest(".rgItem"); if(b) formulario(ps.find(p => p.id === b.dataset.id)); });
       cuerpo.querySelector("#mkEdCerrar").addEventListener("click", cierra);
     }
@@ -6039,15 +6067,15 @@ const Mercar = (function(){
     function formulario(p){
       if(!p) return;
       const grupos = GRUPOS.concat(["Otros"]);
-      cuerpo.innerHTML =
+      vista(
         '<label class="inLbl" for="mkEdNom">Producto</label><input id="mkEdNom" type="text" autocomplete="off" maxlength="60" value="' + esc(baseDe(p)) + '">' +
         '<label class="inLbl" for="mkEdDet">Detalle <span style="font-weight:400;letter-spacing:0;text-transform:none">(opcional)</span></label><input id="mkEdDet" type="text" autocomplete="off" maxlength="40" value="' + esc(detDe(p)) + '">' +
         '<label class="inLbl" for="mkEdGrp">Apartado</label><div class="inSel"><select id="mkEdGrp">' + grupos.map(g => '<option value="' + g + '"' + (g === (grupos.includes(p.grupo) ? p.grupo : "Otros") ? " selected" : "") + '>' + g + '</option>').join("") + '</select></div>' +
         '<p class="inErr" id="mkEdErr" role="alert"></p>' +
-        '<div class="pgRow"><button type="button" class="pgNo" id="mkEdAtras">Volver</button><button type="button" class="pgSi" id="mkEdSi">Guardar</button></div>';
+        '<div class="pgRow"><button type="button" class="pgNo" id="mkEdAtras">Volver</button><button type="button" class="pgSi" id="mkEdSi">Guardar</button></div>');
       const nom = cuerpo.querySelector("#mkEdNom"), det = cuerpo.querySelector("#mkEdDet"), grp = cuerpo.querySelector("#mkEdGrp"), si = cuerpo.querySelector("#mkEdSi"), err = cuerpo.querySelector("#mkEdErr");
       nom.addEventListener("input", () => { si.disabled = !nom.value.trim(); });
-      cuerpo.querySelector("#mkEdAtras").addEventListener("click", lista);
+      cuerpo.querySelector("#mkEdAtras").addEventListener("click", () => lista(true));
       si.addEventListener("click", async () => {
         const base = nom.value.trim(); if(!base) return;
         const nombre = base + (det.value.trim() ? SEP + det.value.trim() : "");
