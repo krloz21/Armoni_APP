@@ -1286,6 +1286,8 @@ body.mode-gmail footer, body.mode-glim footer{ display:none; }
 .mkChips span{ padding:4px 10px; border-radius:999px; background:rgba(var(--ink),.08); font-size:.78rem; }
 .mkTiles{ display:grid; grid-template-columns:repeat(3, 1fr); gap:10px; margin-top:12px; }
 .mkTiles.uno{ grid-template-columns:1fr; }
+.mkTiles.cuatro{ grid-template-columns:repeat(2, 1fr); }
+.mkTiles.cuatro .mkTile{ flex-direction:row; justify-content:flex-start; gap:12px; padding:12px 14px; text-align:left; }
 .mkTile{ display:flex; flex-direction:column; align-items:center; justify-content:center; gap:9px; padding:16px 6px 14px; border-radius:20px; border:1px solid var(--line); background:var(--panel); color:var(--white); font:inherit; font-size:.8rem; font-weight:600; line-height:1.15; text-align:center; cursor:pointer; transition:transform .2s var(--ease-out), border-color .3s, background .3s; -webkit-tap-highlight-color:transparent; }
 .mkTile:active{ transform:scale(.95); }
 .mkTile .ti{ width:42px; height:42px; border-radius:14px; display:grid; place-items:center; color:var(--cyan); background:rgba(var(--cyan-rgb),.1); border:1px solid rgba(var(--cyan-rgb),.2); }
@@ -2275,7 +2277,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-09.86";
+const APP_VERSION = "2026-10-09.87";
 (function autoActualizar(){
   const patron = new RegExp("const APP_" + "VERSION = \"([^\"]+)\"");
   async function revisar(){
@@ -6097,9 +6099,10 @@ const Mercar = (function(){
     const ICO = {
       reg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h2l2.3 10.5h10.4L20 8H6.4"/><circle cx="9" cy="19" r="1.4"/><circle cx="17" cy="19" r="1.4"/><path d="m10 10.5 1.8 1.8 3.4-3.6"/></svg>',
       add: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
-      edit: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4l10.5-10.5a2.1 2.1 0 0 0-3-3L5 17z"/><path d="m13.5 6.5 3 3"/></svg>' };
+      edit: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4l10.5-10.5a2.1 2.1 0 0 0-3-3L5 17z"/><path d="m13.5 6.5 3 3"/></svg>',
+      can: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 10h17l-1.6 9a2 2 0 0 1-2 1.7H7.1a2 2 0 0 1-2-1.7z"/><path d="M8 10l3-6M16 10l-3-6"/></svg>' };
     const tile = (id, ico, txt) => '<button type="button" class="mkTile" id="' + id + '"><span class="ti" aria-hidden="true">' + ICO[ico] + '</span><span>' + txt + '</span></button>';
-    html += '<div class="mkTiles' + (ps.length ? '' : ' uno') + '">' + (ps.length ? tile("mkLibre", "reg", "Registrar compra") : "") + tile("mkAgregarBtn", "add", "Agregar") + (ps.length ? tile("mkEditarBtn", "edit", "Editar") : "") + '</div>';
+    html += '<div class="mkTiles' + (ps.length ? ' cuatro' : ' uno') + '">' + (ps.length ? tile("mkLibre", "reg", "Registrar compra") + tile("mkCanastaBtn", "can", "Dejar en la canasta") : "") + tile("mkAgregarBtn", "add", "Agregar") + (ps.length ? tile("mkEditarBtn", "edit", "Editar") : "") + '</div>';
 
     stage.innerHTML = html;
     const be = document.getElementById("mkEmpezar"); if(be) be.addEventListener("click", () => empezar());
@@ -6121,7 +6124,8 @@ const Mercar = (function(){
     const lb = document.getElementById("mkLibre");
     if(lb) lb.addEventListener("click", () => registrar(ps));
     document.getElementById("mkAgregarBtn").addEventListener("click", abrirAgregar);
-    const eb = document.getElementById("mkEditarBtn"); if(eb) eb.addEventListener("click", abrirEditar);
+    const eb = document.getElementById("mkEditarBtn"); if(eb) eb.addEventListener("click", () => abrirEditar());
+    const cb = document.getElementById("mkCanastaBtn"); if(cb) cb.addEventListener("click", () => abrirEditar("canasta"));
   }
 
   /* ventana para agregar un producto: nombre, detalle opcional y apartado */
@@ -6171,12 +6175,12 @@ const Mercar = (function(){
   }
 
   /* ventana para editar un producto: lo buscas, y cambias su nombre, detalle o apartado */
-  function abrirEditar(){
+  function abrirEditar(modo){
     if(document.querySelector(".pgScrim.mkEdita")) return;
     const ps = ((datos && datos.productos) || []).filter(p => p.id);
     const scrim = document.createElement("div");
     scrim.className = "pgScrim mkEdita";
-    scrim.innerHTML = '<div class="inWrap"><div class="pgCard inCard" role="dialog" aria-modal="true" aria-labelledby="mkEdT"><h3 id="mkEdT">Editar un producto</h3><div class="inBody" id="mkEdBody"></div></div></div>';
+    scrim.innerHTML = '<div class="inWrap"><div class="pgCard inCard" role="dialog" aria-modal="true" aria-labelledby="mkEdT"><h3 id="mkEdT">' + (modo === "canasta" ? "¿Qué se acabó?" : "Editar un producto") + '</h3><div class="inBody" id="mkEdBody"></div></div></div>';
     document.body.appendChild(scrim);
     requestAnimationFrame(() => scrim.classList.add("on"));
     const cuerpo = scrim.querySelector("#mkEdBody");
@@ -6223,7 +6227,9 @@ const Mercar = (function(){
           gr.nextElementSibling.classList.toggle("on", abrir);
           return;
         }
-        const b = e.target.closest(".rgItem"); if(b) formulario(ps.find(p => p.id === b.dataset.id));
+        const b = e.target.closest(".rgItem"); if(!b) return;
+        const pr = ps.find(p => p.id === b.dataset.id);
+        if(modo === "canasta"){ cierra(); setTimeout(() => abrirCanasta(pr), 120); } else formulario(pr);
       });
       cuerpo.querySelector("#mkEdCerrar").addEventListener("click", cierra);
     }
