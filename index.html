@@ -18,7 +18,9 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+<!-- la fuente no bloquea el primer pintado: la app aparece al instante y la letra se cambia sola cuando llega -->
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600&display=swap" rel="stylesheet"></noscript>
 <style>
 :root{
   --void:   #000000;
@@ -2159,7 +2161,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-09.75";
+const APP_VERSION = "2026-10-09.76";
 (function autoActualizar(){
   const patron = new RegExp("const APP_" + "VERSION = \"([^\"]+)\"");
   async function revisar(){
@@ -3040,7 +3042,7 @@ void main(){
     gl.enable(gl.BLEND);
     gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
 
-    function dibuja(now){
+    function dibuja(now, omite){
       const dt = Math.min(last ? (now - last) / 1000 : 1 / 60, 1 / 12);
       last = now;
       simTime = (simTime + dt * SPEED) % 3600;
@@ -3088,6 +3090,7 @@ void main(){
         gl.enable(gl.BLEND);
         ping = !ping;
       }
+      if(omite) return;   // calentamiento: solo avanza la simulación, sin pintar los miles de puntos de cada cuadro
 
       gl.viewport(0, 0, canvas.width, canvas.height);
       gl.clearColor(0, 0, 0, 0);
@@ -3148,7 +3151,7 @@ void main(){
       if(!rafR){ last = 0; rafR = requestAnimationFrame(bucleR); }
     }
 
-    if(opts.reducido){ simTime = 20; wander = 20; for(let k = 0; k < 45; k++) dibuja(k * FRAME_MS); }   // una imagen fija, ya asentada
+    if(opts.reducido){ simTime = 20; wander = 20; for(let k = 0; k < 45; k++) dibuja(k * FRAME_MS, k < 44); }   // una imagen fija, ya asentada
     else sigue();
     listo = true;
     /* al leer una conversación o ver información el campo se oscurece para camuflarse */
@@ -3189,7 +3192,7 @@ void main(){
   }
   /* se prepara cuando el navegador está libre, para no competir con el inicio de la app */
   /* arranca en cuanto pinta la primera imagen (antes esperaba a que el celular estuviera "libre", y con la intro eso tardaba hasta 3 s) */
-  requestAnimationFrame(() => requestAnimationFrame(() => setTimeout(arranca, 80)));
+  requestAnimationFrame(() => requestAnimationFrame(() => setTimeout(arranca, 400)));   // deja que la presentación arranque suave antes de preparar el fondo
 })();
 
 
@@ -7065,7 +7068,7 @@ const TuMes = (function(){
 
   if(REDUCED){ el.remove(); document.querySelector(".shell").classList.add("revealed"); Typer.start(true); if(typeof Rain !== "undefined"){ Rain.reading(false); } return; }
 
-  const HOLD = ES_ANIVERSARIO ? 3700 : 2700;
+  const HOLD = ES_ANIVERSARIO ? 3000 : 1800;   // antes 2.7 s: la presentación es más corta y un toque igual la salta
   const orb = document.getElementById("orbwrap");
   const rc = document.getElementById("splashRing");
   const SIZE = 132;
