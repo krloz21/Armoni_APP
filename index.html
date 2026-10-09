@@ -1074,6 +1074,13 @@ body.mode-gmail footer, body.mode-glim footer{ display:none; }
 }
 @keyframes tmEntra{ from{ opacity:0; transform:translateY(16px) scale(.96); } to{ opacity:1; transform:none; } }
 .tmTile:active{ transform:scale(.96); }
+/* mes en curso: bloqueado hasta el día 1 del siguiente */
+.tmTile.bloqueado{ cursor:default; filter:saturate(.35); }
+.tmTile.bloqueado .tmSpark{ opacity:.5; }
+.tmTile.bloqueado .tmNom{ color:rgba(255,255,255,.72); }
+.tmTile.bloqueado:active{ transform:none; }
+.tmTile.bloqueado.sacude{ animation:tmSacude .42s cubic-bezier(.36,.07,.19,.97); }
+@keyframes tmSacude{ 10%,90%{ transform:translateX(-2px); } 20%,80%{ transform:translateX(4px); } 30%,50%,70%{ transform:translateX(-6px); } 40%,60%{ transform:translateX(6px); } }
 /* solo las primeras tarjetas (las que se ven al entrar) llevan animación de entrada: así la pantalla arranca ágil aunque haya muchos meses */
 .tmTile.sinAnim, .tmTile.sinAnim .tmSpark i{ animation:none; }
 .tmTile .tmAno{ position:relative; font-size:.7rem; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:rgba(255,255,255,.62); }
@@ -1385,6 +1392,14 @@ button{ transition:transform var(--t-tap) var(--ease-out); }
 .sheetClose svg{ width:15px; height:15px; }
 .sheetClose:focus-visible{ outline:2px solid var(--cyan); outline-offset:2px; }
 
+.sheetBack{
+  display:inline-flex; align-items:center; gap:6px; margin:0 0 16px; padding:7px 14px 7px 10px; border-radius:999px;
+  font:inherit; font-size:.84rem; font-weight:500; color:var(--ghost); cursor:pointer;
+  background:rgba(var(--ink),.06); border:1px solid rgba(var(--ink),.12);
+}
+.sheetBack svg{ width:14px; height:14px; }
+.sheetBack:active{ transform:scale(.96); }
+.sheetBack:focus-visible{ outline:2px solid var(--cyan); outline-offset:2px; }
 .sheetBody{ min-height:0; overflow-y:auto; overscroll-behavior:contain; margin:0 -4px; padding:0 4px; }
 .sheetBody.out-left{ animation:sheetOutL .17s ease both; }
 .sheetBody.out-right{ animation:sheetOutR .17s ease both; }
@@ -1437,8 +1452,8 @@ button{ transition:transform var(--t-tap) var(--ease-out); }
 .rmScoreWrap .num small{ font-size:.62rem; color:var(--dim); margin-top:1px; }
 
 .rmStats{ display:grid; grid-template-columns:repeat(3,1fr); gap:1px; margin-top:24px; background:var(--line); border-radius:14px; overflow:hidden; border:1px solid var(--line); }
-.rmStats div{ background:var(--cell); padding:12px 10px; text-align:center; }
-.rmStats b{ display:block; font-size:1rem; font-weight:600; }
+.rmStats div{ background:var(--cell); padding:12px 10px; text-align:center; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+.rmStats b{ display:block; font-size:1rem; font-weight:600; line-height:1.25; }
 .rmStats span{ display:block; font-size:.68rem; color:var(--dim); margin-top:3px; text-transform:uppercase; letter-spacing:.04em; }
 
 .rmNote{ margin-top:20px; }
@@ -1582,8 +1597,9 @@ button{ transition:transform var(--t-tap) var(--ease-out); }
 .mkHero > :nth-child(2){ animation-delay:.05s; } .mkHero > :nth-child(3){ animation-delay:.1s; } .mkHero > :nth-child(4){ animation-delay:.15s; } .mkHero > :nth-child(5){ animation-delay:.2s; }
 .mkHero .mkBig{ animation:mkSube .5s cubic-bezier(.32,.72,0,1) backwards, mkFlota 3.2s ease-in-out .5s infinite; }
 #mkEmpezar{ position:relative; overflow:hidden; animation:mkSube .5s cubic-bezier(.32,.72,0,1) .1s backwards, mkLatido 2.6s ease-in-out .8s infinite; }
-#mkEmpezar::after{ content:""; position:absolute; top:0; bottom:0; left:0; width:38%; background:linear-gradient(100deg, transparent, rgba(255,255,255,.55), transparent); animation:mkBrilla 3.6s ease-in-out 1s infinite; pointer-events:none; }
-#mkEmpezar:disabled::after{ display:none; }
+/* igual que #inGuardar: el brillo corre siempre desde el primer instante (sin retraso) y arranca fuera del botón, así nunca queda una barra blanca quieta al entrar */
+#mkEmpezar::after{ content:""; position:absolute; top:0; bottom:0; left:0; width:38%; background:linear-gradient(100deg, transparent, rgba(255,255,255,.55), transparent); transform:translateX(-130%) skewX(-18deg); animation:mkBrilla 3.6s ease-in-out infinite; pointer-events:none; opacity:0; transition:opacity .45s ease; }
+#mkEmpezar:not(:disabled)::after{ opacity:1; }
 .mkChips span{ animation:mkSube .5s cubic-bezier(.34,1.56,.64,1) backwards; }
 .mkChips span:nth-child(2){ animation-delay:.05s; } .mkChips span:nth-child(3){ animation-delay:.1s; } .mkChips span:nth-child(4){ animation-delay:.15s; } .mkChips span:nth-child(n+5){ animation-delay:.2s; }
 .mkDura .gRow, .mkLista .gRow{ animation:mkSube .55s cubic-bezier(.32,.72,0,1) backwards; }
@@ -1672,7 +1688,11 @@ body[class*="mode-"] #masIngreso{ display:none; }
 .inWrap.guardado{ animation:inGuarda .72s cubic-bezier(.5,0,.2,1) forwards; }
 .inCard.guardado::before{ animation:inIAflow .8s linear infinite, inNeonSale .72s ease-out forwards; }
 .inWrap.guardado::after{ animation:inIAflow .8s linear infinite, inNeonSale .72s ease-out forwards; }
-#inGuardar{ position:relative; overflow:hidden; }
+#inGuardar{ position:relative; overflow:hidden; isolation:isolate; transition:transform .18s cubic-bezier(.32,.72,0,1), color .45s ease; }
+/* con «Pasar por Armoni» activo, Guardar se vuelve azul (fijo: no cambia con la temporada) */
+#inGuardar::before{ content:""; position:absolute; inset:0; z-index:-1; background:linear-gradient(140deg, #4fd9ff, #3a78ff 55%, #5a3fe0); opacity:0; transition:opacity .45s ease; pointer-events:none; }
+.inCard.armoni #inGuardar::before{ opacity:1; }
+.inCard.armoni #inGuardar{ color:#fff; }
 #inGuardar::after{ content:""; position:absolute; top:0; bottom:0; left:0; width:38%; background:linear-gradient(100deg, transparent, rgba(255,255,255,.55), transparent); animation:mkBrilla 3.6s ease-in-out infinite; pointer-events:none; opacity:0; transition:opacity .45s ease; }
 #inGuardar:not(:disabled)::after{ opacity:1; }   /* la animación corre siempre; solo se muestra u oculta con un fundido, así no se reinicia ni se corta */
 @keyframes inNeonRing{ 0%{ opacity:0; } 22%{ opacity:1; } 100%{ opacity:0; } }
@@ -2031,7 +2051,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-05.68";
+const APP_VERSION = "2026-10-07.70";
 (function autoActualizar(){
   const patron = new RegExp("const APP_" + "VERSION = \"([^\"]+)\"");
   async function revisar(){
@@ -2381,7 +2401,8 @@ void main(){
   let clock = 0, lastT = performance.now(), wait = 0, waiting = false;
   let sendAt = -1e9, replyAt = -1e9;
   let dim = 0, dimTarget = 0;          // arranca apagado: se enciende junto con el splash, nunca antes (evita el destello)
-  let raf = null, lastDraw = 0, asleep = false, movedAt = -1e9, manualUntil = 0;
+  let raf = null, lastDraw = 0, asleep = false, movedAt = -1e9, manualUntil = 0, dirty = true;
+  const ESTATICO = !ESCRITORIO;   // solo celular/tableta: el escritorio conserva el fondo animado de siempre
   let light = document.documentElement.dataset.theme === "light" ? 1 : 0, lightTarget = light;
 
   function draw(now){
@@ -2412,11 +2433,19 @@ void main(){
     raf = requestAnimationFrame(loop);
     if(manualUntil > now) return;                 // un movimiento (el menú) está dibujando él mismo, cuadro a cuadro
     const lively = waiting || wait > 0.01 || now - sendAt < 1900 || now - replyAt < 1900 || Math.abs(dim - dimTarget) > 0.005 || Math.abs(light - lightTarget) > 0.004 || now - movedAt < 900;
+    if(ESTATICO){
+      /* celular: el fondo es una imagen quieta. Solo se redibuja cuando pasa algo (enviar, responder, tema, teclado, menú)
+         y, apenas se asienta, el bucle se apaga por completo: en calma no gasta nada de GPU */
+      if(!lively && !dirty){ cancelAnimationFrame(raf); raf = null; return; }
+      if(now - lastDraw < 33) return;                // máximo ~30 cuadros durante los movimientos
+      dirty = false; lastDraw = now; draw(now);
+      return;
+    }
     if(!lively && now - lastDraw < (window.__reposado && window.__reposado() ? 50 : 32)) return;   // 30 cuadros en calma, 60 con la ola; 20 si llevas rato sin tocar
     lastDraw = now;
     draw(now);
   }
-  function start(){ if(raf || asleep) return; lastT = performance.now(); raf = requestAnimationFrame(loop); }
+  function start(){ dirty = true; if(raf || asleep) return; lastT = performance.now(); raf = requestAnimationFrame(loop); }
   function stop(){ if(raf) cancelAnimationFrame(raf); raf = null; }
 
   build();
@@ -2879,12 +2908,15 @@ void main(){
       gl.bindTexture(gl.TEXTURE_2D, null);
     }
 
-    let dpr = 1, cssW = 1, cssH = 1;
+    let dpr = 1, cssW = 1, cssH = 1, listo = false;
     const ajusta = () => {
       dpr = Math.min(window.devicePixelRatio || 1, MAX_DPR);
       cssW = Math.max(canvas.clientWidth || 1, 1); cssH = Math.max(canvas.clientHeight || 1, 1);
       const w = Math.max(1, Math.round(cssW * dpr)), h = Math.max(1, Math.round(cssH * dpr));
-      if(canvas.width !== w || canvas.height !== h){ canvas.width = w; canvas.height = h; }
+      if(canvas.width !== w || canvas.height !== h){
+        canvas.width = w; canvas.height = h;
+        if(listo && opts.reducido) dibuja(performance.now());   // imagen fija: al cambiar de tamaño se vuelve a pintar una vez
+      }
     };
     ajusta();
     if(window.ResizeObserver) new ResizeObserver(ajusta).observe(canvas);
@@ -2986,14 +3018,21 @@ void main(){
       lastDraw = now;
       dibuja(now);
     }
-    function sigue(){ if(raf || opts.reducido) return; last = 0; raf = requestAnimationFrame(bucle); }
+    /* imagen fija: «seguir» solo repinta un cuadro (por si el sistema borró el lienzo mientras la app estaba en segundo plano) */
+    function sigue(){
+      if(opts.reducido){ if(listo && visible) dibuja(performance.now()); return; }
+      if(raf) return; last = 0; raf = requestAnimationFrame(bucle);
+    }
     function pausa(){ if(raf){ cancelAnimationFrame(raf); raf = 0; } }
 
     if(opts.reducido){ simTime = 20; wander = 20; for(let k = 0; k < 45; k++) dibuja(k * FRAME_MS); }   // una imagen fija, ya asentada
     else sigue();
+    listo = true;
     /* al leer una conversación o ver información el campo se oscurece para camuflarse */
     function atenua(si){ fuerza = si ? opacidad * 0.35 : opacidad; if(visible) canvas.style.opacity = String(fuerza); }
-    return { sigue, pausa, atenua, tonos: calculaTonos };
+    /* al cambiar de tema o temporada los colores cambian: en imagen fija se aplican de una vez y se repinta */
+    function tonos(){ calculaTonos(); if(opts.reducido && listo){ colores.set(objColores); dibuja(performance.now()); } }
+    return { sigue, pausa, atenua, tonos };
   }
 
   return { iniciar };
@@ -3009,7 +3048,7 @@ void main(){
   Rain.reading = (...a) => { lee(...a); leyendo = !!a[0]; if(campo) campo.atenua(leyendo); };
   function arranca(){
     campo = Campo.iniciar(document.getElementById("campo"), {
-      opacidad: .32, reducido: REDUCED, tinte,
+      opacidad: .32, reducido: REDUCED || !ESCRITORIO, tinte,   // celular: imagen fija (cero consumo); escritorio: animado como siempre
       paleta: () => document.documentElement.dataset.theme === "light" ? ["#bfe6ff", "#8ea2ff", "#0b0b18"] : null,
       activo: () => !document.body.classList.contains("ribbon")
     });
@@ -3827,7 +3866,9 @@ const Restaurantes = (function(){
      Un tipo que no esté en el catálogo se vuelve una categoría propia. */
   function detectar(r, tipos){
     const texto = limpio([tipos.join(" "), r.nota, r.nombre].join(" "));
-    const ids = COMIDAS.filter(c => c.re.test(texto)).map(c => c.id);
+    let ids = COMIDAS.filter(c => c.re.test(texto)).map(c => c.id);
+    /* si el nombre o el tipo dice «almuerzo», es de Almuerzos y de nada más (no entra en Carnes, Pollo, etc.) */
+    if(/almuerzo/.test(limpio([tipos.join(" "), r.nombre].join(" ")))) ids = ["colombiana"];
     tipos.forEach(t => {
       const lt = limpio(t);
       if(lt && !COMIDAS.some(c => c.re.test(lt))) ids.push("x:" + t.trim());
@@ -3843,26 +3884,70 @@ const Restaurantes = (function(){
   const leer = r => {
     let tipo = r.property_tipo ?? r.property_tipo_de_comida ?? r.property_categoría ?? r.property_categoria ?? [];
     const tipos = (Array.isArray(tipo) ? tipo : [tipo]).filter(Boolean).map(String);
-    let ult = r.property_última_visita ?? r.property_ultima_visita;
-    if(Array.isArray(ult)) ult = ult[0];
-    if(ult && typeof ult === "object") ult = ult.start || ult.date?.start || null;
-    const fecha = ult ? new Date(ult) : null;
+    /* busca la fecha de la última visita en cualquier columna que se llame «última …»; acepta texto, objeto, lista o rollup */
+    const MESES = { enero:0, febrero:1, marzo:2, abril:3, mayo:4, junio:5, julio:6, agosto:7, septiembre:8, setiembre:8, octubre:9, noviembre:10, diciembre:11 };
+    const fechaDe = v => {
+      if(v == null || v === "") return null;
+      if(Array.isArray(v)){ for(const x of v){ const f = fechaDe(x); if(f) return f; } return null; }
+      if(typeof v === "object"){
+        const f = fechaDe(v.start ?? v.date ?? v.value ?? null);
+        return f || ((JSON.stringify(v).match(/\d{4}-\d{2}-\d{2}(T[\d:.+\-Z]*)?/) || [])[0]) || null;
+      }
+      const s = String(v).trim();
+      const iso = s.match(/\d{4}-\d{2}-\d{2}(T[\d:.+\-Z]*)?/);
+      if(iso) return iso[0];
+      const es = limpio(s).match(/(\d{1,2}) de ([a-z]+)(?: de (\d{4}))?/);          // «8 de octubre de 2026»
+      if(es && MESES[es[2]] != null){
+        const y = es[3] ? +es[3] : new Date().getFullYear();
+        return y + "-" + String(MESES[es[2]] + 1).padStart(2, "0") + "-" + String(+es[1]).padStart(2, "0");
+      }
+      const d = new Date(s);                                                          // «October 8, 2026» y similares
+      return isNaN(d) ? null : d.toISOString();
+    };
+    let ult = null;
+    for(const k of Object.keys(r)){
+      if(/ultim/.test(limpio(k))){ ult = fechaDe(r[k]); if(ult) break; }
+    }
+    if(!ult && !leer.avisado){ leer.avisado = true; console.warn("Restaurantes: no encontré la última visita. Columnas recibidas:", Object.keys(r), r); }
+    /* días de calendario (no de 24 h): una visita de hoy dice «hoy» aunque ya sea de noche */
+    let dias = null;
+    if(ult){
+      const s = String(ult), solo = /^\d{4}-\d{2}-\d{2}$/.test(s);
+      const d0 = solo ? new Date(+s.slice(0, 4), +s.slice(5, 7) - 1, +s.slice(8, 10)) : new Date(s);
+      if(!isNaN(d0)){
+        const a = new Date(d0.getFullYear(), d0.getMonth(), d0.getDate()), b = new Date();
+        dias = Math.max(0, Math.round((new Date(b.getFullYear(), b.getMonth(), b.getDate()) - a) / 86400000));
+      }
+    }
+    /* las visitas pueden llegar como número, texto, lista o rollup */
+    const vecesRaw = r.property_veces ?? r.property_visitas ?? r.property_número_de_visitas;
+    const veces = (v => { if(Array.isArray(v)) v = v.length > 1 ? v.length : v[0]; if(v && typeof v === "object") v = v.number ?? v.value ?? v.count; v = Number(v); return isFinite(v) && v > 0 ? v : 0; })(vecesRaw);
     const out = {
       id: r.id,
       nombre: r.property_nombre || r.name || "Sin nombre",
       score: Number(r.property_puntuación ?? r.property_puntuacion ?? 0),
       nota: r.property_notas || "",
-      veces: r.property_veces,
+      veces,
       precio: (v => Array.isArray(v) ? v[0] : v)(r.property_precio ?? r.property_rango_de_precio) || "",
       prom: numero(r.property_promedio_de_gasto ?? r.property_gasto_promedio),
-      dias: fecha && !isNaN(fecha) ? Math.max(0, Math.floor((Date.now() - fecha) / 86400000)) : null
+      dias
     };
     out.comidas = detectar(out, tipos);
     return out;
   };
 
-  const hace = d => d == null ? null : d === 0 ? "hoy" : d === 1 ? "ayer" : d < 30 ? "hace " + d + " días"
-    : d < 60 ? "hace un mes" : "hace " + Math.floor(d / 30) + " meses";
+  /* hoy · hace 1 día · hace 3 días · hace una semana · hace 2 semanas · hace un mes · hace 3 meses · hace un año */
+  const hace = d => {
+    if(d == null) return null;
+    if(d === 0) return "hoy";
+    if(d === 1) return "hace 1 día";
+    if(d < 7) return "hace " + d + " días";
+    if(d < 14) return "hace una semana";
+    if(d < 30) return "hace " + Math.floor(d / 7) + " semanas";
+    if(d < 60) return "hace un mes";
+    if(d < 365) return "hace " + Math.floor(d / 30) + " meses";
+    return Math.floor(d / 365) === 1 ? "hace un año" : "hace " + Math.floor(d / 365) + " años";
+  };
   const nota10 = n => (Math.round(n * 10) / 10).toFixed(1);
   const esRapida = r => r.comidas.some(id => COMIDAS.find(c => c.id === id)?.rapida);
   const enCat = (r, id) => id === "todos" || (id === "rapida" ? esRapida(r) : r.comidas.includes(id));
@@ -3907,18 +3992,11 @@ const Restaurantes = (function(){
     el.type = "button";
     el.className = "restCard";
     el.setAttribute("aria-haspopup", "dialog");
-    const cuando = hace(r.dias);
-    const stats = [
-      cuando ? '<span class="' + (r.dias >= 30 ? "late" : "") + '">Última vez ' + cuando + "</span>" : "",
-      r.veces ? r.veces + (r.veces === 1 ? " visita" : " visitas") : "",
-      r.prom ? "promedio " + plata(r.prom) : r.precio ? esc(r.precio) : ""
-    ].filter(Boolean).join(", ");
     const emos = r.comidas.map(id => { const c = catDe(id); return '<span title="' + esc(c.label) + '">' + c.emo + "</span>"; }).join("");
     el.innerHTML =
       '<div class="restMain"><div class="restName">' + esc(r.nombre) + (emos ? '<span class="emos">' + emos + "</span>" : "") + "</div>" +
-      (stats ? '<div class="restStats">' + stats + "</div>" : "") +
       (r.nota ? '<div class="restNote">' + esc(r.nota) + "</div>" : "") + "</div>" +
-      '<div class="restNum' + (r.score >= 8.5 ? " top" : r.score < 6 ? " low" : "") + '" aria-label="' + nota10(r.score) + ' de 10">' + nota10(r.score) + "<small>/10</small></div>";
+      '<div class="restNum' + (r.score >= 8.5 ? " top" : r.score < 6 ? " low" : "") + '" aria-label="' + (r.score > 0 ? nota10(r.score) + ' de 10' : 'sin puntuación') + '">' + (r.score > 0 ? nota10(r.score) + "<small>/10</small>" : "<small>sin nota</small>") + "</div>";
     el.addEventListener("click", () => Sheet.openDetail(r));
     return el;
   }
@@ -4014,12 +4092,13 @@ const Restaurantes = (function(){
       card.setAttribute("aria-label", r.nombre);
       const body = card.querySelector(".sheetBody");
       const stats = [
-        { v: nota10(r.score), l: "Puntuación" },
-        { v: hace(r.dias) ? (r.dias === 0 ? "Hoy" : r.dias === 1 ? "Ayer" : r.dias + "d") : "—", l: "Última vez" },
+        { v: r.score > 0 ? nota10(r.score) : "—", l: "Puntuación" },
+        { v: hace(r.dias) ? hace(r.dias).replace(/^./, c => c.toUpperCase()) : "—", l: "Última vez" },
         { v: r.prom ? plata(r.prom) : r.precio ? esc(r.precio) : (r.veces || 0), l: r.prom || r.precio ? "Promedio" : "Visitas" }
       ];
       const c = Math.PI * 2 * 32;
       body.innerHTML =
+        '<button type="button" class="sheetBack"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>Volver</button>' +
         '<div class="rmTop">' +
           '<div style="flex:1;min-width:0">' +
             '<div class="rmName">' + esc(r.nombre) + '</div>' +
@@ -4039,6 +4118,7 @@ const Restaurantes = (function(){
         const off = c * (1 - Math.min(1, r.score / 10));
         requestAnimationFrame(() => { fg.style.strokeDashoffset = off.toFixed(1); });
       });
+      body.querySelector(".sheetBack").addEventListener("click", () => { const volver = swiping || "todos"; morph(() => fillCategory(volver), 0); });
       body.querySelector(".rmAsk").addEventListener("click", () => {
         const q = "¿Qué me cuentas de " + r.nombre + "? ¿Deberíamos volver pronto?";
         close();
@@ -4096,8 +4176,8 @@ const Restaurantes = (function(){
   function contexto(){
     const hoy = new Date().toLocaleDateString("es-CO", { weekday:"long", day:"numeric", month:"long" });
     const lineas = items.map(r =>
-      "- " + r.nombre + " | comida: " + (r.comidas.map(id => catDe(id).label).join(", ") || "sin definir") +
-      " | puntuación: " + nota10(r.score) + "/10" +
+      "- " + r.nombre + " | id: " + r.id + " | comida: " + (r.comidas.map(id => catDe(id).label).join(", ") || "sin definir") +
+      " | puntuación: " + (r.score > 0 ? nota10(r.score) + "/10" : "sin puntuación") +
       " | última visita: " + (r.dias == null ? "sin registro" : hace(r.dias)) +
       " | visitas: " + (r.veces || 0) +
       (r.prom ? " | gasto promedio: " + plata(r.prom) : "") + (r.precio ? " | precio: " + r.precio : "") +
@@ -4984,11 +5064,16 @@ const GastoManual = (function(){
     /* por defecto la IA solo revisa las salidas a comer (pueden faltar datos); lo demás se guarda directo.
        Si la persona toca la casilla, se respeta su elección. */
     function sugiereIA(){
-      if(!iaManual) ia.checked = tipo === "Gasto" && categoria === "Salidas";
+      /* las salidas a comer SIEMPRE pasan por Armoni: queda encendido y no se puede quitar */
+      const obligada = tipo === "Gasto" && categoria === "Salidas";
+      if(obligada) ia.checked = true;
+      else if(!iaManual) ia.checked = false;
+      iaBtn.disabled = obligada;
+      iaBtn.style.cursor = obligada ? "default" : "";
       iaBtn.setAttribute("aria-pressed", String(ia.checked));
       scrim.querySelector(".inCard").classList.toggle("armoni", ia.checked); scrim.querySelector("#inWrap").classList.toggle("armoni", ia.checked);
     }
-    iaBtn.addEventListener("click", () => { iaManual = true; ia.checked = !ia.checked; sugiereIA(); });
+    iaBtn.addEventListener("click", () => { if(tipo === "Gasto" && categoria === "Salidas") return; iaManual = true; ia.checked = !ia.checked; sugiereIA(); });
     function pintaFrecuentes(){
       const lista = Frecuentes.top(tipo);
       $("inFrecBox").hidden = !lista.length;
@@ -6216,7 +6301,20 @@ const TuMes = (function(){
         const v = pd[j + 1] || 0;
         return '<i class="' + (v ? '' : 'v') + '" style="--j:' + j + ';height:' + (v ? Math.max(8, Math.round(v / max * 100)) : 5) + '%"></i>';
       }).join("");
-      const etiqueta = M.mes === mesHoy() ? 'EN CURSO' : M.gastos === bajoMax ? 'EL MÁS BAJO' : M.gastos === altoMax ? 'EL MÁS ALTO' : '';
+      /* el mes en curso no se puede ver: se desbloquea el día 1 del mes siguiente */
+      if(M.mes === mesHoy()){
+        const sig = new Date(+M.mes.slice(0, 4), +M.mes.slice(5, 7), 1);
+        const cuando = sig.toLocaleDateString("es-CO", { day: "numeric", month: "long" });
+        return '<button type="button" class="tmTile bloqueado' + ((k + k0) > 5 ? ' sinAnim' : '') + '" data-bloq="1" aria-disabled="true" aria-label="' + esc(mesNombre(M.mes)) + ', bloqueado hasta el ' + esc(cuando) + '" style="--c1:#3a4458;--c2:#5b6b8a;--k:' + (k + k0) + '">' +
+          '<span class="tmCurso">EN CURSO</span>' +
+          '<span class="tmPlay tmLock" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2.4"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></span>' +
+          '<span class="tmSpark" aria-hidden="true">' + Array.from({ length: dias }, (_, j) => '<i class="v" style="--j:' + j + ';height:5%"></i>').join("") + '</span>' +
+          '<span class="tmAno">' + M.mes.slice(0, 4) + '</span>' +
+          '<span class="tmNom">' + mesNombre(M.mes) + '</span>' +
+          '<span class="tmTot">Se desbloquea el ' + esc(cuando) + '</span>' +
+        '</button>';
+      }
+      const etiqueta = M.gastos === bajoMax ? 'EL MÁS BAJO' : M.gastos === altoMax ? 'EL MÁS ALTO' : '';
       return '<button type="button" class="tmTile' + ((k + k0) > 5 ? ' sinAnim' : '') + '" data-mes="' + M.mes + '" style="--c1:' + c1 + ';--c2:' + c2 + ';--k:' + (k + k0) + '">' +
         (etiqueta ? '<span class="tmCurso">' + etiqueta + '</span>' : '') +
         '<span class="tmPlay" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l13-7.5z"/></svg></span>' +
@@ -6229,6 +6327,10 @@ const TuMes = (function(){
   }
   grid.addEventListener("click", e => {
     const t = e.target.closest(".tmTile"); if(!t) return;
+    if(t.dataset.bloq || t.dataset.mes === mesHoy()){   // mes en curso: bloqueado
+      t.classList.remove("sacude"); void t.offsetWidth; t.classList.add("sacude");
+      return;
+    }
     if(t.dataset.anio){ abrir(anual(+t.dataset.anio), null); return; }
     const meses = datos.meses, k = meses.findIndex(m => m.mes === t.dataset.mes);
     if(k >= 0) abrir(meses[k], meses[k + 1] || null);
@@ -6524,7 +6626,51 @@ const TuMes = (function(){
     cargar();
   }
 
-  return { refresh };
+  /* ── aviso al entrar: «ya está tu resumen del mes». Sale una sola vez por mes; si se cierra, no vuelve ── */
+  const K_AVISO = "armoni.tumes.avisado";
+  async function avisar(){
+    try{
+      const hoy = new Date();
+      const ant = new Date(hoy.getFullYear(), hoy.getMonth() - 1, 1);
+      const prev = ant.getFullYear() + "-" + String(ant.getMonth() + 1).padStart(2, "0");
+      if(localStorage.getItem(K_AVISO) === prev) return;
+      const res = await fetch(RESUMEN_URL, { cache: "no-store" });
+      if(!res.ok) return;
+      const d = await res.json();
+      datos = d;
+      try{ localStorage.setItem(KEY, JSON.stringify(d)); }catch{}
+      const meses = d.meses || [], k = meses.findIndex(m => m.mes === prev);
+      if(k < 0 || !(meses[k].gastos > 0)) return;
+      /* espera a que termine la pantalla de carga y a que no haya otra ventana abierta */
+      for(let n = 0; n < 60 && (document.getElementById("splash") || document.querySelector(".sheetScrim, .pgScrim, .ws")); n++) await new Promise(r => setTimeout(r, 300));
+      if(document.getElementById("splash")) return;
+      await new Promise(r => setTimeout(r, 450));
+      try{ localStorage.setItem(K_AVISO, prev); }catch{}   // ya se mostró: pase lo que pase, no vuelve a salir
+      const M = meses[k], P = meses[k + 1] || null, nom = mesNombre(prev);
+      const scrim = document.createElement("div");
+      scrim.className = "sheetScrim gmCenter";
+      scrim.innerHTML =
+        '<div class="sheetCard" role="dialog" aria-modal="true" aria-labelledby="tmAvT"><div class="gmModal">' +
+          '<div style="font-size:2.6rem;line-height:1;margin:2px 0 10px" aria-hidden="true">✨</div>' +
+          '<h3 id="tmAvT">Ya está tu resumen de ' + esc(nom) + '</h3>' +
+          '<p>Mira cómo se movió tu plata el mes pasado.</p>' +
+          '<div class="gmRow split"><button type="button" class="gmBtn gmYes" id="tmAvIr">Ir a ver</button><button type="button" class="gmBtn" id="tmAvNo">Cerrar</button></div>' +
+        '</div></div>';
+      document.body.appendChild(scrim);
+      requestAnimationFrame(() => scrim.classList.add("on"));
+      let cerrado = false;
+      const cierra = () => { if(cerrado) return; cerrado = true; scrim.classList.remove("on"); setTimeout(() => scrim.remove(), 420); };
+      scrim.addEventListener("click", e => { if(e.target === scrim) cierra(); });
+      scrim.querySelector("#tmAvNo").addEventListener("click", cierra);
+      scrim.querySelector("#tmAvIr").addEventListener("click", () => {
+        cierra();
+        Drawer.go("mes");
+        setTimeout(() => abrir(M, P), REDUCED ? 0 : 380);
+      });
+    }catch{ /* sin conexión: no molesta */ }
+  }
+
+  return { refresh, avisar };
 })();
 
 /* arranque: pantalla de carga, luego la app */
@@ -6632,6 +6778,7 @@ const TuMes = (function(){
 activity();
 Servicios.check();
 Glim.check();
+TuMes.avisar();
 
 /* decoración de temporada: insignia en el menú y, en Navidad, una nevada muy suave. Se activa o se quita al cambiar de tema */
 const Decora = (function(){
