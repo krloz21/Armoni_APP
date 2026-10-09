@@ -671,9 +671,8 @@ body.no-gl .bar, body.no-gl .composer{ background:var(--drawer-solid); }
 #menuBtn svg{ width:18px; height:18px; }
 
 /* con el menú abierto la app se retira, pero el fondo sigue vivo para que el vidrio lo refracte */
-#scrim{ position:fixed; inset:0; z-index:39; pointer-events:none; background:color-mix(in srgb, var(--void) calc(var(--dpc, 0) * 90%), transparent); }   /* oscurece lo de atrás al abrir el menú (sin desenfoque: casi no gasta) */
+#scrim{ position:fixed; inset:0; z-index:39; pointer-events:none; background:color-mix(in srgb, var(--void) calc(var(--dpc, 0) * 94%), transparent); }   /* una sola capa oscura sobre todo: queda ~6% de lo de atrás visible, sin desenfoque */
 body.drawer-open #scrim{ pointer-events:auto; }
-:root.dpOn .shell{ opacity:calc(1 - .985 * var(--dpc, 0)); }   /* solo mientras el menú está abierto o en movimiento: así en reposo el vidrio del aviso puede desenfocar */
 
 /* un panel de vidrio flotante: el fondo WebGL lo refracta igual que al encabezado */
 #drawer{
@@ -2258,7 +2257,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-09.82";
+const APP_VERSION = "2026-10-09.84";
 (function autoActualizar(){
   const patron = new RegExp("const APP_" + "VERSION = \"([^\"]+)\"");
   async function revisar(){
