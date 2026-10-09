@@ -703,7 +703,7 @@ body.no-gl #drawer{ background:var(--drawer-solid); }
 #drawerClose svg{ width:15px; height:15px; }
 #drawerClose:focus-visible{ outline:2px solid var(--blue); outline-offset:2px; }
 
-.dNav{ display:flex; flex-direction:column; gap:6px; flex:1; min-height:0; overflow-y:auto; }
+.dNav{ display:flex; flex-direction:column; gap:6px; flex:1; min-height:0; overflow-y:auto; margin:-8px 0; padding:8px 0; -webkit-mask-image:linear-gradient(transparent 0, #000 8px, #000 calc(100% - 8px), transparent 100%); mask-image:linear-gradient(transparent 0, #000 8px, #000 calc(100% - 8px), transparent 100%); }
 .dNav button{
   position:relative; display:flex; align-items:center; gap:13px; text-align:left;
   background:none; border:1px solid transparent; border-radius:16px;
@@ -1472,7 +1472,7 @@ button{ transition:transform var(--t-tap) var(--ease-out); }
 .sheetBack svg{ width:14px; height:14px; }
 .sheetBack:active{ transform:scale(.96); }
 .sheetBack:focus-visible{ outline:2px solid var(--cyan); outline-offset:2px; }
-.sheetBody{ min-height:0; overflow-y:auto; overscroll-behavior:contain; margin:0 -4px; padding:0 4px; }
+.sheetBody{ min-height:0; overflow-y:auto; overscroll-behavior:contain; margin:-10px -4px; padding:10px 4px; -webkit-mask-image:linear-gradient(transparent 0, #000 10px, #000 calc(100% - 10px), transparent 100%); mask-image:linear-gradient(transparent 0, #000 10px, #000 calc(100% - 10px), transparent 100%); }
 .sheetBody.out-left{ animation:sheetOutL .17s ease both; }
 .sheetBody.out-right{ animation:sheetOutR .17s ease both; }
 .sheetBody.out-fade{ animation:sheetOutF .17s ease both; }
@@ -1695,7 +1695,12 @@ button{ transition:transform var(--t-tap) var(--ease-out); }
 .mkEdV.bk{ animation-name:mkEdBk; }
 @keyframes mkEdFw{ from{ opacity:0; transform:translateX(26px); } to{ opacity:1; transform:none; } }
 @keyframes mkEdBk{ from{ opacity:0; transform:translateX(-26px); } to{ opacity:1; transform:none; } }
-.mkEdLista{ margin-top:12px; max-height:46vh; overflow:auto; display:flex; flex-direction:column; gap:7px; padding:2px; -webkit-overflow-scrolling:touch; scrollbar-width:none; }
+.mkEdLista{ margin-top:8px; max-height:48vh; overflow:auto; display:flex; flex-direction:column; gap:7px; padding:16px 2px; -webkit-overflow-scrolling:touch; scrollbar-width:none; -webkit-mask-image:linear-gradient(transparent 0, #000 16px, #000 calc(100% - 16px), transparent 100%); mask-image:linear-gradient(transparent 0, #000 16px, #000 calc(100% - 16px), transparent 100%); }
+.mkEdGrupo{ display:flex; align-items:center; gap:8px; margin:8px 2px 0; font-size:.72rem; font-weight:700; letter-spacing:.09em; text-transform:uppercase; color:var(--dim); }
+.mkEdGrupo:first-child{ margin-top:0; }
+.mkEdGrupo span{ font-size:1rem; letter-spacing:0; }
+.mkEdGrupo em{ margin-left:auto; font-style:normal; font-size:.7rem; padding:2px 8px; border-radius:999px; background:rgba(var(--ink),.08); letter-spacing:0; }
+.mkEdLista .rgItem{ padding:11px 14px; flex:none; }
 .mkEdLista::-webkit-scrollbar{ display:none; }
 .mkEdLista.anima .rgItem{ animation:mkEdItem .55s var(--ease-out) backwards; animation-delay:calc(var(--i, 0) * 38ms + 80ms); }
 @keyframes mkEdItem{ from{ opacity:0; transform:translateY(14px) scale(.97); } to{ opacity:1; transform:none; } }
@@ -1762,7 +1767,7 @@ button{ transition:transform var(--t-tap) var(--ease-out); }
 #masIngreso:active{ transform:scale(.88); }
 body[class*="mode-"] #masIngreso{ display:none; }
 .inCard{ max-height:calc(100dvh - 40px); display:flex; flex-direction:column; text-align:left; }
-.inBody{ flex:1 1 auto; min-height:0; overflow-y:auto; margin:0 -6px; padding:0 6px; -webkit-overflow-scrolling:touch; }
+.inBody{ flex:1 1 auto; min-height:0; overflow-y:auto; margin:0 -6px; padding:10px 6px; -webkit-overflow-scrolling:touch; -webkit-mask-image:linear-gradient(transparent 0, #000 10px, #000 calc(100% - 10px), transparent 100%); mask-image:linear-gradient(transparent 0, #000 10px, #000 calc(100% - 10px), transparent 100%); }
 .inBody::-webkit-scrollbar{ display:none; }
 .inCard .pgRow{ flex:none; margin-top:14px; }
 .inCard h3{ text-align:center; }
@@ -2161,7 +2166,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-09.77";
+const APP_VERSION = "2026-10-09.78";
 (function autoActualizar(){
   const patron = new RegExp("const APP_" + "VERSION = \"([^\"]+)\"");
   async function revisar(){
@@ -6074,9 +6079,15 @@ const Mercar = (function(){
       const pinta = () => {
         const t = _quitaTildes(q.value.trim());
         const vis = ps.filter(p => !t || _quitaTildes(baseDe(p)).includes(t)).sort((a, b) => baseDe(a).localeCompare(baseDe(b), "es"));
-        caja.innerHTML = vis.length
-          ? vis.map((p, i) => '<button type="button" class="rgItem" style="--i:' + Math.min(i, 10) + '" data-id="' + esc(p.id) + '"><span class="e" aria-hidden="true">' + emojiMercado(baseDe(p), p.grupo) + '</span><span class="n">' + esc(baseDe(p)) + '<small class="mkDet">' + esc(p.grupo || "Otros") + '</small></span></button>').join("")
-          : '<p class="gEmpty">No encontré ese producto.</p>';
+        const orden = GRUPOS.concat(["Otros"]);
+        let n = 0, html = "";
+        orden.forEach(g => {
+          const del = vis.filter(p => (orden.includes(p.grupo) ? p.grupo : "Otros") === g);
+          if(!del.length) return;
+          html += '<div class="mkEdGrupo"><span aria-hidden="true">' + EMOJI_GRUPO[g] + '</span>' + g + '<em>' + del.length + '</em></div>' +
+            del.map(p => '<button type="button" class="rgItem" style="--i:' + Math.min(n++, 10) + '" data-id="' + esc(p.id) + '"><span class="e" aria-hidden="true">' + emojiMercado(baseDe(p), p.grupo) + '</span><span class="n">' + esc(baseDe(p)) + (detDe(p) ? '<small class="mkDet">' + esc(detDe(p)) + '</small>' : '') + '</span></button>').join("");
+        });
+        caja.innerHTML = html || '<p class="gEmpty">No encontré ese producto.</p>';
         x.classList.toggle("on", !!q.value);
       };
       q.addEventListener("input", () => { caja.classList.remove("anima"); pinta(); });
