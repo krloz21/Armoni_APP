@@ -2105,6 +2105,7 @@ const MERCADO_ESTADO_URL = N8N + "/webhook/mercado-estado";
 const MERCADO_MARCAR_URL = N8N + "/webhook/mercado-marcar";
 const MERCADO_COMPRADO_URL = N8N + "/webhook/mercado-comprado";
 const MERCADO_AGREGAR_URL = N8N + "/webhook/mercado-agregar";
+const MERCADO_EDITAR_URL = N8N + "/webhook/mercado-editar";
 const MOVIMIENTO_URL = N8N + "/webhook/movimiento-nuevo";   // guarda un gasto/ingreso directo en Notion, sin IA
 const MERCADO_TOKEN = "mercado-7d41c2a9e05b";
 const RESUMEN_URL = N8N + "/webhook/resumen-mes";
@@ -2137,7 +2138,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-09.72";
+const APP_VERSION = "2026-10-09.73";
 (function autoActualizar(){
   const patron = new RegExp("const APP_" + "VERSION = \"([^\"]+)\"");
   async function revisar(){
@@ -5811,12 +5812,33 @@ const Recuerda = (function(){
 /* ════════════════════════════════════════════════════════════
    A MERCAR: revisión de la casa tipo juego → lista → "ya hice el mercado"
    ════════════════════════════════════════════════════════════ */
-const EMOJIS_MERCADO = [["papaya","🍈"],["papa","🥔"],["limon","🍋"],["limón","🍋"],["cebolla","🧅"],["zanahoria","🥕"],["cilantro","🌿"],["plátano","🍌"],["platano","🍌"],["banano","🍌"],["guayab","🍏"],["mango","🥭"],["manzana","🍎"],["pera","🍐"],["arándano","🫐"],["arandano","🫐"],["granadilla","🍊"],["espinaca","🥬"],["panqueque","🥞"],["panela","🟫"],["pan","🍞"],["arroz","🍚"],["chocolate","🍫"],["leche","🥛"],
-  ["guisamar","🧂"],["sal","🧂"],["azúcar","🍬"],["azucar","🍬"],["oliva","🫒"],["aceite","🛢️"],["pasta","🍝"],["frijol","🫘"],
-  ["lenteja","🫘"],["crispeta","🍿"],["queso","🧀"],["mantequilla","🧈"],["cereal","🥣"],["carne","🥩"],["cerdo","🍖"],["pollo","🍗"],
-  ["ariel","🧺"],["axion","🧽"],["dientes","🪥"],["shampoo","🧴"],["papel","🧻"],["desodorante","🧴"],["jabón","🧼"],["jabon","🧼"],
-  ["talco","🫧"],["tomate","🍅"],["huevo","🥚"],["fruta","🍎"],["verdura","🥬"]];
-function emojiMercado(n){ const s = String(n || "").toLowerCase(); for(const [k, e] of EMOJIS_MERCADO) if(s.includes(k)) return e; return "🛒"; }
+/* Emoji automático por palabra: sin importar tildes ni plural. Si no la conoce, usa el del apartado.
+   También puedes escribir tu propio emoji al comienzo del nombre (ej. "🥑 Aguacate") y ese manda. */
+const EMOJIS_MERCADO = [
+  ["papaya","🍈"],["papa criolla","🥔"],["papa","🥔"],["limon","🍋"],["cebolla","🧅"],["zanahoria","🥕"],["cilantro","🌿"],["perejil","🌿"],["hierbabuena","🌿"],["albahaca","🌿"],
+  ["platano","🍌"],["banano","🍌"],["guayab","🍏"],["mango","🥭"],["manzana","🍎"],["pera","🍐"],["arandano","🫐"],["mora","🫐"],["granadilla","🍊"],["maracuya","🍊"],["lulo","🍊"],["naranja","🍊"],["mandarina","🍊"],
+  ["aguacate","🥑"],["fresa","🍓"],["uva","🍇"],["sandia","🍉"],["melon","🍈"],["pina","🍍"],["coco","🥥"],["kiwi","🥝"],["durazno","🍑"],["cereza","🍒"],["ciruela","🍑"],["tomate","🍅"],
+  ["pepino","🥒"],["pimenton","🫑"],["brocoli","🥦"],["coliflor","🥦"],["lechuga","🥬"],["repollo","🥬"],["espinaca","🥬"],["apio","🥬"],["ajo","🧄"],["champinon","🍄"],["maiz","🌽"],["mazorca","🌽"],
+  ["yuca","🍠"],["batata","🍠"],["arveja","🫛"],["habichuela","🫛"],["berenjena","🍆"],["calabaza","🎃"],["ahuyama","🎃"],["fruta","🍎"],["verdura","🥬"],
+  ["panqueque","🥞"],["panela","🟫"],["pan","🍞"],["tostada","🍞"],["arepa","🫓"],["tortilla","🫓"],["arroz","🍚"],["chocolate","🍫"],["leche","🥛"],["yogur","🥛"],["kumis","🥛"],["crema de leche","🥛"],
+  ["guisamar","🧂"],["sal","🧂"],["azucar","🍬"],["oliva","🫒"],["aceite","🛢️"],["pasta","🍝"],["espagueti","🍝"],["fideo","🍝"],["frijol","🫘"],["lenteja","🫘"],["garbanzo","🫘"],
+  ["harina","🌾"],["avena","🥣"],["cereal","🥣"],["galleta","🍪"],["cafe","☕"],["te","🍵"],["agua","💧"],["gaseosa","🥤"],["jugo","🧃"],["vinagre","🫙"],["salsa","🥫"],["mayonesa","🫙"],["mermelada","🍯"],["miel","🍯"],
+  ["atun","🐟"],["pescado","🐟"],["salmon","🐟"],["tilapia","🐟"],["camaron","🦐"],["helado","🍦"],["cerveza","🍺"],["vino","🍷"],["ponque","🍰"],["torta","🍰"],["crispeta","🍿"],
+  ["queso","🧀"],["mantequilla","🧈"],["huevo","🥚"],["carne","🥩"],["res","🥩"],["cerdo","🍖"],["costilla","🍖"],["pollo","🍗"],["salchicha","🌭"],["chorizo","🌭"],["jamon","🥓"],["tocino","🥓"],["hamburguesa","🍔"],
+  ["ariel","🧺"],["detergente","🧺"],["suavizante","🧺"],["cloro","🧴"],["axion","🧽"],["esponja","🧽"],["escoba","🧹"],["trapero","🧹"],["basura","🗑️"],["limpiador","🧼"],
+  ["dientes","🪥"],["cepillo","🪥"],["shampoo","🧴"],["enjuague","🧴"],["acondicionador","🧴"],["papel","🧻"],["servilleta","🧻"],["toalla","🧻"],["algodon","🧻"],["desodorante","🧴"],["jabon","🧼"],["talco","🫧"],
+  ["panal","🍼"],["formula","🍼"],["compota","🍼"],["rasuradora","🪒"],["maquinilla","🪒"],["pila","🔋"],["bombillo","💡"]
+];
+const EMOJI_GRUPO = { "Despensa":"🥫", "Frutas y verduras":"🥬", "Lácteos":"🥛", "Carnes":"🥩", "Ema":"🧸", "Aseo":"🧼", "Otros":"🛒" };
+const _quitaTildes = t => String(t || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+const EMOJIS_RE = EMOJIS_MERCADO.map(([k, e]) => { const n = _quitaTildes(k); return [new RegExp("(^|[^a-z])" + n + (n.length <= 4 ? "(s|es)?($|[^a-z])" : "")), e]; });
+function emojiMercado(n, grupo){
+  const propio = String(n || "").trim().match(/^\p{Extended_Pictographic}\uFE0F?/u);
+  if(propio) return propio[0];
+  const s = _quitaTildes(n);
+  for(const [re, e] of EMOJIS_RE) if(re.test(s)) return e;
+  return EMOJI_GRUPO[grupo] || "🛒";
+}
 
 const Mercar = (function(){
   const stage = document.getElementById("mkStage");
@@ -5900,18 +5922,19 @@ const Mercar = (function(){
         ? '<button type="button" class="mkBtn pri full" id="mkSeguir">Seguir revisión · ' + parcial.idx + '/' + parcial.cola.length + '</button>' +
           '<button type="button" class="mkBtn sec full" id="mkDescartarParcial" style="margin-top:10px">Descartar y empezar de nuevo</button>'
         : '<button type="button" class="mkBtn pri full" id="mkEmpezar"' + (ps.length ? '' : ' disabled') + '>Empezar revisión</button>') +
-      (mama.length ? '<div class="mkMama" id="mkMamaCaja" role="button" tabindex="0" style="cursor:pointer"><b>Tu mamá dice que se acabó:</b><div class="mkChips">' + mama.map(p => '<span>' + emojiMercado(baseDe(p)) + ' ' + esc(baseDe(p)) + '</span>').join("") + '</div></div>' : '') +
+      (mama.length ? '<div class="mkMama" id="mkMamaCaja" role="button" tabindex="0" style="cursor:pointer"><b>Tu mamá dice que se acabó:</b><div class="mkChips">' + mama.map(p => '<span>' + emojiMercado(baseDe(p), p.grupo) + ' ' + esc(baseDe(p)) + '</span>').join("") + '</div></div>' : '') +
       '</div>';
     if(pendientes.length && !mama.length) html += '<button type="button" class="mkBtn sec full" id="mkVerPend" style="margin-top:12px">Ver lista pendiente (' + pendientes.length + ')</button>';
     if(ps.length) html += '<button type="button" class="mkBtn sec full" id="mkLibre" style="margin-top:10px">Registrar lo que compré</button>';
     html += '<button type="button" class="mkBtn sec full mkAdd" id="mkAgregarBtn" style="margin-top:10px"><span aria-hidden="true">+</span> Agregar un producto</button>';
+    if(ps.length) html += '<button type="button" class="mkBtn sec full" id="mkEditarBtn" style="margin-top:10px">Editar un producto</button>';
 
     const conHist = ps.filter(p => p.duraDias).sort((a, b) => uso(b) - uso(a));
     html += '<div class="mkSec">Cuánto dura cada cosa</div>';
     html += conHist.length
       ? '<div class="gList mkDura">' + conHist.map(p => {
           const pronto = uso(p) >= .85;
-          return '<div class="gRow"><span class="gIco" aria-hidden="true">' + emojiMercado(baseDe(p)) + '</span><span class="gTx"><b>' + esc(baseDe(p)) + '</b><small' + (pronto ? ' class="pronto"' : '') + '>' +
+          return '<div class="gRow"><span class="gIco" aria-hidden="true">' + emojiMercado(baseDe(p), p.grupo) + '</span><span class="gTx"><b>' + esc(baseDe(p)) + '</b><small' + (pronto ? ' class="pronto"' : '') + '>' +
             (pronto ? 'Se te debe estar acabando · ' : '') + 'comprado hace ' + diasDesde(p.ultimaCompra) + ' días</small></span><span class="gAmt">~' + p.duraDias + ' días<small>' + p.veces + ' compras</small></span></div>';
         }).join("") + '</div>'
       : '<p class="gEmpty">Cuando registres dos mercados empiezo a calcular cuánto te dura cada cosa.</p>';
@@ -5931,6 +5954,7 @@ const Mercar = (function(){
     const lb = document.getElementById("mkLibre");
     if(lb) lb.addEventListener("click", () => registrar(ps));
     document.getElementById("mkAgregarBtn").addEventListener("click", abrirAgregar);
+    const eb = document.getElementById("mkEditarBtn"); if(eb) eb.addEventListener("click", abrirEditar);
   }
 
   /* ventana para agregar un producto: nombre, detalle opcional y apartado */
@@ -5979,6 +6003,71 @@ const Mercar = (function(){
     setTimeout(() => nom.focus(), 350);
   }
 
+  /* ventana para editar un producto: lo buscas, y cambias su nombre, detalle o apartado */
+  function abrirEditar(){
+    if(document.querySelector(".pgScrim.mkEdita")) return;
+    const ps = ((datos && datos.productos) || []).filter(p => p.id);
+    const scrim = document.createElement("div");
+    scrim.className = "pgScrim mkEdita";
+    scrim.innerHTML = '<div class="inWrap"><div class="pgCard inCard" role="dialog" aria-modal="true" aria-labelledby="mkEdT"><h3 id="mkEdT">Editar un producto</h3><div class="inBody" id="mkEdBody"></div></div></div>';
+    document.body.appendChild(scrim);
+    requestAnimationFrame(() => scrim.classList.add("on"));
+    const cuerpo = scrim.querySelector("#mkEdBody");
+    const cierra = () => { scrim.classList.remove("on"); setTimeout(() => scrim.remove(), 340); document.removeEventListener("keydown", tecla); };
+    const tecla = e => { if(e.key === "Escape") cierra(); };
+    document.addEventListener("keydown", tecla);
+    scrim.addEventListener("click", e => { if(e.target === scrim) cierra(); });
+
+    function lista(){
+      cuerpo.innerHTML =
+        '<input id="mkEdQ" type="search" placeholder="Buscar producto…" autocomplete="off" maxlength="60">' +
+        '<div id="mkEdLista" style="margin-top:10px;max-height:46vh;overflow:auto;display:flex;flex-direction:column;gap:6px"></div>' +
+        '<div class="pgRow"><button type="button" class="pgNo" id="mkEdCerrar" style="flex:1">Cerrar</button></div>';
+      const q = cuerpo.querySelector("#mkEdQ"), caja = cuerpo.querySelector("#mkEdLista");
+      const pinta = () => {
+        const t = _quitaTildes(q.value.trim());
+        const vis = ps.filter(p => !t || _quitaTildes(baseDe(p)).includes(t)).sort((a, b) => baseDe(a).localeCompare(baseDe(b), "es"));
+        caja.innerHTML = vis.length
+          ? vis.map(p => '<button type="button" class="rgItem" data-id="' + esc(p.id) + '"><span class="e" aria-hidden="true">' + emojiMercado(baseDe(p), p.grupo) + '</span><span class="n">' + esc(baseDe(p)) + '<small class="mkDet">' + esc(p.grupo || "Otros") + '</small></span></button>').join("")
+          : '<p class="gEmpty">No encontré ese producto.</p>';
+      };
+      q.addEventListener("input", pinta); pinta();
+      caja.addEventListener("click", e => { const b = e.target.closest(".rgItem"); if(b) formulario(ps.find(p => p.id === b.dataset.id)); });
+      cuerpo.querySelector("#mkEdCerrar").addEventListener("click", cierra);
+    }
+
+    function formulario(p){
+      if(!p) return;
+      const grupos = GRUPOS.concat(["Otros"]);
+      cuerpo.innerHTML =
+        '<label class="inLbl" for="mkEdNom">Producto</label><input id="mkEdNom" type="text" autocomplete="off" maxlength="60" value="' + esc(baseDe(p)) + '">' +
+        '<label class="inLbl" for="mkEdDet">Detalle <span style="font-weight:400;letter-spacing:0;text-transform:none">(opcional)</span></label><input id="mkEdDet" type="text" autocomplete="off" maxlength="40" value="' + esc(detDe(p)) + '">' +
+        '<label class="inLbl" for="mkEdGrp">Apartado</label><div class="inSel"><select id="mkEdGrp">' + grupos.map(g => '<option value="' + g + '"' + (g === (grupos.includes(p.grupo) ? p.grupo : "Otros") ? " selected" : "") + '>' + g + '</option>').join("") + '</select></div>' +
+        '<p class="inErr" id="mkEdErr" role="alert"></p>' +
+        '<div class="pgRow"><button type="button" class="pgNo" id="mkEdAtras">Volver</button><button type="button" class="pgSi" id="mkEdSi">Guardar</button></div>';
+      const nom = cuerpo.querySelector("#mkEdNom"), det = cuerpo.querySelector("#mkEdDet"), grp = cuerpo.querySelector("#mkEdGrp"), si = cuerpo.querySelector("#mkEdSi"), err = cuerpo.querySelector("#mkEdErr");
+      nom.addEventListener("input", () => { si.disabled = !nom.value.trim(); });
+      cuerpo.querySelector("#mkEdAtras").addEventListener("click", lista);
+      si.addEventListener("click", async () => {
+        const base = nom.value.trim(); if(!base) return;
+        const nombre = base + (det.value.trim() ? SEP + det.value.trim() : "");
+        si.disabled = true; si.textContent = "Guardando…"; err.textContent = "";
+        try{
+          await post(MERCADO_EDITAR_URL, { id: p.id, nombre, grupo: grp.value });
+          p.nombre = nombre; p.grupo = grp.value; guarda();
+          cierra();
+          exito("Producto actualizado", base + " · " + grp.value);
+          statusEl.innerHTML = ""; datos = null;
+          refresh();
+        }catch{
+          si.disabled = false; si.textContent = "Guardar";
+          err.textContent = "No se pudo guardar. Revisa tu internet y que Tailscale esté encendido.";
+        }
+      });
+    }
+    lista();
+  }
+
   /* ── el juego ── */
   function empezar(part){
     const ps = (datos && datos.productos) || [];
@@ -6010,7 +6099,7 @@ const Mercar = (function(){
       : (uso(p) >= .85 ? '<span class="mkFlag aprende">Normalmente ya se habría acabado</span>' : '');
     return '<div class="mkCard' + (atras ? ' atras' : '') + '"><span class="mkGrupo">' + esc(p.grupo) + '</span>' +
       '<span class="mkStamp si">HAY</span><span class="mkStamp no">FALTA</span>' +
-      '<div class="mkEmoji">' + emojiMercado(baseDe(p)) + '</div><b class="mkName">' + esc(baseDe(p)) + '</b>' +
+      '<div class="mkEmoji">' + emojiMercado(baseDe(p), p.grupo) + '</div><b class="mkName">' + esc(baseDe(p)) + '</b>' +
       '<small class="mkHint">¿Todavía hay en la casa?</small>' + flag + '</div>';
   }
   /* marcador de arriba: barra, contador, racha, carrito y deshacer */
@@ -6175,7 +6264,7 @@ const Mercar = (function(){
         (celebrar && copiado ? '<div class="mkCopiado">✓ Lista copiada, ya la puedes pegar</div>' : '') +
       '</div>' +
       '<div class="gList mkLista" id="mkLista">' + lista.map((x, i) =>
-        '<div class="gRow" data-i="' + i + '"><span class="mkCheck">' + ICO_OK + '</span><span class="gTx"><b>' + emojiMercado(baseDe(x.p)) + ' ' + esc(baseDe(x.p)) + '</b><small>' +
+        '<div class="gRow" data-i="' + i + '"><span class="mkCheck">' + ICO_OK + '</span><span class="gTx"><b>' + emojiMercado(baseDe(x.p), x.p.grupo) + ' ' + esc(baseDe(x.p)) + '</b><small>' +
         (detDe(x.p) ? '<em class="mkDet">' + esc(detDe(x.p)) + '</em> · ' : '') + esc(x.p.grupo) + (esMama(x.p) ? ' · lo marcó tu mamá' : '') + '</small></span></div>').join("") + '</div>' +
       '<div class="mkAcciones"><button type="button" class="mkBtn sec full" id="mkCompartir">Compartir</button>' +
       '<button type="button" class="mkBtn pri full" id="mkHecho">Ya hice el mercado</button>' +
@@ -6264,7 +6353,7 @@ const Mercar = (function(){
         const abierto = q ? true : abiertos.has(g);   // buscando, se abre lo que coincide
         html += '<button type="button" class="rgGrupo" data-g="' + esc(g) + '" aria-expanded="' + abierto + '"><span class="chev" aria-hidden="true">' + CHEV + '</span><span class="n">' + g + '</span><span class="c">' + del.length + '</span></button>' +
           '<div class="rgCuerpo' + (abierto ? ' on' : '') + '"><div><div class="rgLista">' + del.map(([x, i]) =>
-            '<button type="button" class="rgItem' + (x.comprar ? ' on' : '') + '" data-i="' + i + '"><span class="e" aria-hidden="true">' + emojiMercado(baseDe(x.p)) + '</span><span class="n">' + esc(baseDe(x.p)) + (detDe(x.p) ? '<small class="mkDet">' + esc(detDe(x.p)) + '</small>' : '') + '</span><span class="s">' + (x.comprar ? "Compré" : "Marcar") + '</span></button>'
+            '<button type="button" class="rgItem' + (x.comprar ? ' on' : '') + '" data-i="' + i + '"><span class="e" aria-hidden="true">' + emojiMercado(baseDe(x.p), x.p.grupo) + '</span><span class="n">' + esc(baseDe(x.p)) + (detDe(x.p) ? '<small class="mkDet">' + esc(detDe(x.p)) + '</small>' : '') + '</span><span class="s">' + (x.comprar ? "Compré" : "Marcar") + '</span></button>'
           ).join("") + '</div></div></div>';
       });
       main.innerHTML = html || (q ? '<p class="rgEstado">No se encuentra «' + esc(buscar.value.trim()) + '» en la lista.</p>' : '<p class="rgEstado">No hay productos en la lista todavía.</p>');

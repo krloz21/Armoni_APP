@@ -1,0 +1,61 @@
+{
+  "name": "Mercado - Editar",
+  "nodes": [
+    {
+      "parameters": { "httpMethod": "POST", "path": "mercado-editar", "responseMode": "responseNode", "options": {} },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [0, 0],
+      "id": "b1b2c3d4-0001-4bbb-8bbb-000000000001",
+      "name": "Webhook",
+      "webhookId": "b1b2c3d4-0002-4bbb-8bbb-000000000002"
+    },
+    {
+      "parameters": {
+        "jsCode": "let body = $input.first().json.body;\nif (typeof body === \"string\") { try { body = JSON.parse(body); } catch(e) { body = {}; } }\nbody = body || {};\nif (body.token !== \"mercado-7d41c2a9e05b\") return [];\n\nconst id = String(body.id || \"\");\nif (!/^[0-9a-fA-F-]{32,36}$/.test(id)) return [];\nconst nombre = String(body.nombre || \"\").trim().slice(0, 150);\nif (!nombre) return [];\nconst GRUPOS = [\"Despensa\", \"Lácteos\", \"Carnes\", \"Ema\", \"Aseo\", \"Otros\", \"Frutas y verduras\"];\nconst grupo = GRUPOS.includes(body.grupo) ? body.grupo : \"Otros\";\n\nreturn [{ json: { id, nombre, grupo } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [224, 0],
+      "id": "b1b2c3d4-0003-4bbb-8bbb-000000000003",
+      "name": "Validar y preparar"
+    },
+    {
+      "parameters": {
+        "method": "PATCH",
+        "url": "=https://api.notion.com/v1/pages/{{ $json.id }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "notionApi",
+        "sendHeaders": true,
+        "headerParameters": { "parameters": [ { "name": "Notion-Version", "value": "2022-06-28" } ] },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ properties: { Nombre: { title: [ { text: { content: $json.nombre } } ] }, Grupo: { select: { name: $json.grupo } } } }) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [448, 0],
+      "id": "b1b2c3d4-0004-4bbb-8bbb-000000000004",
+      "name": "Actualizar producto",
+      "credentials": { "notionApi": { "id": "pgk4uKXwaEEnuyRO", "name": "Notion account" } }
+    },
+    {
+      "parameters": { "respondWith": "json", "responseBody": "{\"ok\": true}", "options": {} },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [672, 0],
+      "id": "b1b2c3d4-0005-4bbb-8bbb-000000000005",
+      "name": "Respond to Webhook"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": { "main": [ [ { "node": "Validar y preparar", "type": "main", "index": 0 } ] ] },
+    "Validar y preparar": { "main": [ [ { "node": "Actualizar producto", "type": "main", "index": 0 } ] ] },
+    "Actualizar producto": { "main": [ [ { "node": "Respond to Webhook", "type": "main", "index": 0 } ] ] }
+  },
+  "active": false,
+  "settings": { "executionOrder": "v1" },
+  "tags": []
+}
