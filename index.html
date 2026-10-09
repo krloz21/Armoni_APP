@@ -2159,7 +2159,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-09.74";
+const APP_VERSION = "2026-10-09.75";
 (function autoActualizar(){
   const patron = new RegExp("const APP_" + "VERSION = \"([^\"]+)\"");
   async function revisar(){
@@ -2510,7 +2510,7 @@ void main(){
   let sendAt = -1e9, replyAt = -1e9;
   let dim = 0, dimTarget = 0;          // arranca apagado: se enciende junto con el splash, nunca antes (evita el destello)
   let raf = null, lastDraw = 0, asleep = false, movedAt = -1e9, manualUntil = 0, dirty = true;
-  const ESTATICO = !ESCRITORIO;   // solo celular/tableta: el escritorio conserva el fondo animado de siempre
+  const ESTATICO = true;   // celular y escritorio: el fondo de líneas es una imagen quieta (sin líneas cayendo): casi cero batería
   let light = document.documentElement.dataset.theme === "light" ? 1 : 0, lightTarget = light;
 
   function draw(now){
@@ -2564,8 +2564,8 @@ void main(){
     glass(...els){ glassEls.length = 0; glassEls.push(...els); readRadii(); },
     moved(){ movedAt = performance.now(); start(); },
     redraw(){ const t = performance.now(); movedAt = t; manualUntil = t + 120; if(!asleep) draw(t); start(); },
-    send(){ sendAt = performance.now(); waiting = true; start(); },
-    settle(){ waiting = false; replyAt = performance.now(); start(); },
+    send(){},      // sin ola de luz al enviar: el fondo ya no se anima
+    settle(){},
     reading(on){ dimTarget = on ? 0.42 : 1; start(); },
     /* instant: el cambio lo anima la revelación circular, así que el fondo ya debe estar listo */
     theme(isLight, instant){ lightTarget = isLight ? 1 : 0; if(instant){ light = lightTarget; draw(performance.now()); } start(); },
@@ -3031,6 +3031,7 @@ void main(){
     else window.addEventListener("resize", ajusta);
 
     const anillo = { x: 0, y: 0 };
+    const raton = { on: false, x: 0, y: 0 };   // escritorio: hacia dónde mira el anillo (muy tenue)
     let raf = 0, last = 0, lastDraw = 0, simTime = 0, wander = 0, ping = true, visible = false, fuerza = opacidad;
     const posSim = simProg ? gl.getAttribLocation(simProg.prog, "aPos") : -1;
     const uvLoc = gl.getAttribLocation(renderProg.prog, "aUV"), refLoc = gl.getAttribLocation(renderProg.prog, "aRef");
@@ -3056,8 +3057,9 @@ void main(){
       const wx = (ruido1(wander * 0.66, 94.234) - 0.5) * 2;
       const wy = (ruido1(wander * 0.75, 21.028) - 0.5) * 2;
       const rk = 1 - Math.pow(1 - WANDER_LERP, dt * 60);
-      anillo.x += (wx * 0.2 - anillo.x) * rk;
-      anillo.y += (wy * 0.1 - anillo.y) * rk;
+      const rs = raton.on ? 1 - Math.pow(1 - 0.05, dt * 60) : rk;
+      anillo.x += ((raton.on ? raton.x * 0.05 : wx * 0.2) - anillo.x) * rs;
+      anillo.y += ((raton.on ? raton.y * 0.025 : wy * 0.1) - anillo.y) * rs;
 
       const radio = RING.radius + Math.sin(simTime) * 0.03 + Math.cos(simTime * 3) * 0.02;
 
@@ -3132,6 +3134,19 @@ void main(){
       if(raf) return; last = 0; raf = requestAnimationFrame(bucle);
     }
     function pausa(){ if(raf){ cancelAnimationFrame(raf); raf = 0; } }
+    /* seguir al mouse sin gastar: solo dibuja mientras lo mueves y ~2 s después; luego se apaga solo */
+    let rafR = 0, ultimoR = 0;
+    function bucleR(now){
+      rafR = requestAnimationFrame(bucleR);
+      if(now - lastDraw < FRAME_MS) return;
+      if((opts.activo && !opts.activo()) || document.body.classList.contains("asleep") || now - ultimoR > 2200){ cancelAnimationFrame(rafR); rafR = 0; return; }
+      lastDraw = now; dibuja(now);
+    }
+    function mira(nx, ny){
+      if(!opts.reducido || !listo) return;
+      raton.on = true; raton.x = nx; raton.y = ny; ultimoR = performance.now();
+      if(!rafR){ last = 0; rafR = requestAnimationFrame(bucleR); }
+    }
 
     if(opts.reducido){ simTime = 20; wander = 20; for(let k = 0; k < 45; k++) dibuja(k * FRAME_MS); }   // una imagen fija, ya asentada
     else sigue();
@@ -3140,7 +3155,7 @@ void main(){
     function atenua(si){ fuerza = si ? opacidad * 0.35 : opacidad; if(visible) canvas.style.opacity = String(fuerza); }
     /* al cambiar de tema o temporada los colores cambian: en imagen fija se aplican de una vez y se repinta */
     function tonos(){ calculaTonos(); if(opts.reducido && listo){ colores.set(objColores); dibuja(performance.now()); } }
-    return { sigue, pausa, atenua, tonos };
+    return { sigue, pausa, atenua, tonos, mira };
   }
 
   return { iniciar };
@@ -3156,12 +3171,16 @@ void main(){
   Rain.reading = (...a) => { lee(...a); leyendo = !!a[0]; if(campo) campo.atenua(leyendo); };
   function arranca(){
     campo = Campo.iniciar(document.getElementById("campo"), {
-      opacidad: .32, reducido: REDUCED || !ESCRITORIO, tinte,   // celular: imagen fija (cero consumo); escritorio: animado como siempre
+      opacidad: .32, reducido: true, tinte,   // imagen fija en todo (casi cero batería); en escritorio los puntos siguen al mouse muy suave
       paleta: () => document.documentElement.dataset.theme === "light" ? ["#bfe6ff", "#8ea2ff", "#0b0b18"] : null,
       activo: () => !document.body.classList.contains("ribbon")
     });
     if(!campo) return;
     window.__campoTonos = () => campo.tonos();
+    if(ESCRITORIO && !REDUCED){
+      addEventListener("pointermove", e => campo.mira((e.clientX / innerWidth) * 2 - 1, -((e.clientY / innerHeight) * 2 - 1)), { passive: true });
+      document.addEventListener("pointerout", e => { if(!e.relatedTarget) campo.mira(0, 0); });
+    }
     campo.atenua(leyendo);
     /* en reposo (la app "duerme") el campo también se detiene */
     new MutationObserver(() => { if(document.body.classList.contains("asleep")) campo.pausa(); else campo.sigue(); })
