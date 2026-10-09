@@ -1741,6 +1741,12 @@ button{ transition:transform var(--t-tap) var(--ease-out); }
 .duDatos small{ display:block; font-size:.66rem; color:var(--dim); letter-spacing:.04em; text-transform:uppercase; }
 .duDatos b{ display:block; margin-top:3px; font-size:.86rem; }
 .duNota{ margin:12px 0 0; padding-top:12px; border-top:1px solid var(--line); font-size:.84rem; color:var(--ghost); }
+.duGrupoLista{ display:flex; flex-direction:column; gap:10px; padding:8px 0 6px; }
+.duGrupo{ margin-top:8px; }
+.duGrupo .n{ flex:1; }
+.duAlerta{ flex:none; min-width:20px; padding:2px 7px; border-radius:999px; font-size:.7rem; font-weight:700; letter-spacing:0; text-align:center; color:#ffb066; background:rgba(255,138,80,.16); }
+.mkEdLista .rgGrupo{ margin-top:6px; }
+.mkEdLista .rgGrupo:first-child{ margin-top:0; }
 .duVacio{ text-align:center; padding:26px 0; }
 @keyframes duSube{ from{ opacity:0; transform:translateY(16px) scale(.98); } to{ opacity:1; transform:none; } }
 .duEntra.duHero, .duEntra.duChips{ animation:duSube .6s var(--ease-out) backwards; }
@@ -1768,7 +1774,7 @@ button{ transition:transform var(--t-tap) var(--ease-out); }
 .mkEdGrupo em{ margin-left:auto; font-style:normal; font-size:.7rem; padding:2px 8px; border-radius:999px; background:rgba(var(--ink),.08); letter-spacing:0; }
 .mkEdLista .rgItem{ padding:11px 14px; flex:none; }
 .mkEdLista::-webkit-scrollbar{ display:none; }
-.mkEdLista.anima .rgItem{ animation:mkEdItem .55s var(--ease-out) backwards; animation-delay:calc(var(--i, 0) * 38ms + 80ms); }
+.mkEdLista.anima .rgGrupo{ animation:mkEdItem .55s var(--ease-out) backwards; animation-delay:calc(var(--i, 0) * 38ms + 80ms); }
 @keyframes mkEdItem{ from{ opacity:0; transform:translateY(14px) scale(.97); } to{ opacity:1; transform:none; } }
 .mkEdLista .rgItem:hover{ border-color:rgba(var(--cyan-rgb),.35); background:rgba(var(--cyan-rgb),.07); }
 .mkEdLista .rgItem::after{ content:"›"; flex:none; color:var(--dim); font-size:1.3rem; transition:transform .3s var(--ease-out), color .3s; }
@@ -2249,7 +2255,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-09.79";
+const APP_VERSION = "2026-10-09.80";
 (function autoActualizar(){
   const patron = new RegExp("const APP_" + "VERSION = \"([^\"]+)\"");
   async function revisar(){
@@ -6151,6 +6157,7 @@ const Mercar = (function(){
     document.addEventListener("keydown", tecla);
     scrim.addEventListener("click", e => { if(e.target === scrim) cierra(); });
 
+    const abiertosE = new Set();
     function vista(html, atras){ cuerpo.innerHTML = '<div class="mkEdV' + (atras ? ' bk' : '') + '">' + html + '</div>'; return cuerpo.firstChild; }
 
     function lista(atras){
@@ -6164,13 +6171,15 @@ const Mercar = (function(){
       const pinta = () => {
         const t = _quitaTildes(q.value.trim());
         const vis = ps.filter(p => !t || _quitaTildes(baseDe(p)).includes(t)).sort((a, b) => baseDe(a).localeCompare(baseDe(b), "es"));
-        const orden = GRUPOS.concat(["Otros"]);
-        let n = 0, html = "";
-        orden.forEach(g => {
-          const del = vis.filter(p => (orden.includes(p.grupo) ? p.grupo : "Otros") === g);
+        let html = "", n = 0;
+        ORDEN_G.forEach(g => {
+          const del = vis.filter(p => grupoDe(p) === g);
           if(!del.length) return;
-          html += '<div class="mkEdGrupo"><span aria-hidden="true">' + EMOJI_GRUPO[g] + '</span>' + g + '<em>' + del.length + '</em></div>' +
-            del.map(p => '<button type="button" class="rgItem" style="--i:' + Math.min(n++, 10) + '" data-id="' + esc(p.id) + '"><span class="e" aria-hidden="true">' + emojiMercado(baseDe(p), p.grupo) + '</span><span class="n">' + esc(baseDe(p)) + (detDe(p) ? '<small class="mkDet">' + esc(detDe(p)) + '</small>' : '') + '</span></button>').join("");
+          const abierto = !!t || abiertosE.has(g);   // buscando, se abre lo que coincide
+          html += '<button type="button" class="rgGrupo" style="--i:' + Math.min(n++, 10) + '" data-g="' + esc(g) + '" aria-expanded="' + abierto + '"><span class="chev" aria-hidden="true">' + CHEV_G + '</span><span class="n">' + EMOJI_GRUPO[g] + ' ' + g + '</span><span class="c">' + del.length + '</span></button>' +
+            '<div class="rgCuerpo' + (abierto ? ' on' : '') + '"><div><div class="rgLista">' +
+            del.map(p => '<button type="button" class="rgItem" data-id="' + esc(p.id) + '"><span class="e" aria-hidden="true">' + emojiMercado(baseDe(p), p.grupo) + '</span><span class="n">' + esc(baseDe(p)) + (detDe(p) ? '<small class="mkDet">' + esc(detDe(p)) + '</small>' : '') + '</span></button>').join("") +
+            '</div></div></div>';
         });
         caja.innerHTML = html || '<p class="gEmpty">No encontré ese producto.</p>';
         x.classList.toggle("on", !!q.value);
@@ -6178,7 +6187,17 @@ const Mercar = (function(){
       q.addEventListener("input", () => { caja.classList.remove("anima"); pinta(); });
       x.addEventListener("click", () => { q.value = ""; caja.classList.remove("anima"); pinta(); q.focus(); });
       pinta(); setTimeout(() => caja.classList.remove("anima"), 900);
-      caja.addEventListener("click", e => { const b = e.target.closest(".rgItem"); if(b) formulario(ps.find(p => p.id === b.dataset.id)); });
+      caja.addEventListener("click", e => {
+        const gr = e.target.closest(".rgGrupo");
+        if(gr){
+          const g = gr.dataset.g, abrir = !abiertosE.has(g);
+          if(abrir) abiertosE.add(g); else abiertosE.delete(g);
+          gr.setAttribute("aria-expanded", String(abrir));
+          gr.nextElementSibling.classList.toggle("on", abrir);
+          return;
+        }
+        const b = e.target.closest(".rgItem"); if(b) formulario(ps.find(p => p.id === b.dataset.id));
+      });
       cuerpo.querySelector("#mkEdCerrar").addEventListener("click", cierra);
     }
 
@@ -6606,7 +6625,12 @@ const Mercar = (function(){
     cargar();
   }
 
+  const CHEV_G = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>';
+  const ORDEN_G = GRUPOS.concat(["Otros"]);
+  const grupoDe = p => ORDEN_G.includes(p.grupo) ? p.grupo : "Otros";
   /* ── DURACIÓN: cuánto te dura cada cosa, vivo y táctil ── */
+  const abiertosD = new Set();
+  let duInicia = true;   // la primera vez que llegan datos, se abren los apartados con cosas urgentes
   const duEl = document.getElementById("duStage");
   let filtroD = "todo", duAbierto = null;
   const fechaCorta = f => new Date(f + "T12:00:00").toLocaleDateString("es-CO", { day: "numeric", month: "short" }).replace(".", "");
@@ -6635,6 +6659,7 @@ const Mercar = (function(){
     const sin = todos.filter(x => x.tipo === "sin");
     const pronto = dura.filter(x => x.nivel === "pronto" || x.nivel === "ya");
     const bien = dura.length - pronto.length;
+    if(duInicia && ps.length){ duInicia = false; pronto.forEach(x => abiertosD.add(grupoDe(x.p))); }
     const vista = filtroD === "pronto" ? pronto : filtroD === "aprende" ? aprende : dura.concat(aprende, sin);
     const cls = entrando ? " duEntra" : "";
 
@@ -6656,7 +6681,7 @@ const Mercar = (function(){
     if(!vista.length){
       html += '<p class="gEmpty duVacio">' + (filtroD === "pronto" ? 'Nada se está acabando por ahora 🎉' : 'Aquí no hay nada todavía.') + '</p>';
     }
-    html += vista.map((x, i) => {
+    const tarjeta = (x, i) => {
       const p = x.p, nom = baseDe(p), det = detDe(p);
       const cab = '<span class="duEmo" aria-hidden="true">' + emojiMercado(nom, p.grupo) + '</span><span class="duTx"><b>' + esc(nom) + '</b><small>' + esc(det || p.grupo || "Otros") + '</small></span>';
       const abre = duAbierto === p.id ? " abierto" : "";
@@ -6681,7 +6706,18 @@ const Mercar = (function(){
           '<div class="duMas"><div class="duMasIn"><p class="duNota">Cuando la compres de nuevo con otra fecha, calculo cada cuánto se acaba y te aviso cuándo toca.</p></div></div></div>';
       }
       return '<div class="duCard sin' + (entrando ? ' duEntra' : '') + '" ' + dly + '><div class="duCab">' + cab + '<span class="duBadge mudo">Sin compras</span></div></div>';
-    }).join("") + '</div>';
+    };
+    let ni = 0;
+    ORDEN_G.forEach(g => {
+      const del = vista.filter(x => grupoDe(x.p) === g);
+      if(!del.length) return;
+      const urgentes = del.filter(x => x.tipo === "dura" && (x.nivel === "pronto" || x.nivel === "ya")).length;
+      const abierto = filtroD === "pronto" || abiertosD.has(g);
+      html += '<button type="button" class="rgGrupo duGrupo" data-g="' + esc(g) + '" aria-expanded="' + abierto + '"><span class="chev" aria-hidden="true">' + CHEV_G + '</span><span class="n">' + EMOJI_GRUPO[g] + ' ' + g + '</span>' +
+        (urgentes ? '<span class="duAlerta" title="Se están acabando">' + urgentes + '</span>' : '') + '<span class="c">' + del.length + '</span></button>' +
+        '<div class="rgCuerpo' + (abierto ? ' on' : '') + '"><div><div class="duGrupoLista">' + del.map(x => tarjeta(x, ni++)).join("") + '</div></div></div>';
+    });
+    html += '</div>';
     duEl.innerHTML = html;
     if(entrando){
       requestAnimationFrame(() => requestAnimationFrame(() => {
@@ -6698,6 +6734,14 @@ const Mercar = (function(){
     (function paso(t){ const k = Math.min(1, (t - t0) / 900), e = 1 - Math.pow(1 - k, 3); el.innerHTML = Math.round(n * e) + suf; if(k < 1) requestAnimationFrame(paso); })(t0);
   }
   duEl.addEventListener("click", e => {
+    const gr = e.target.closest(".duGrupo");
+    if(gr){
+      const g = gr.dataset.g, abrir = !abiertosD.has(g);
+      if(abrir) abiertosD.add(g); else abiertosD.delete(g);
+      gr.setAttribute("aria-expanded", String(abrir));
+      gr.nextElementSibling.classList.toggle("on", abrir);
+      return;
+    }
     const ch = e.target.closest(".duChip");
     if(ch){ filtroD = ch.dataset.f; duAbierto = null; pintaDura(false); duEl.querySelectorAll(".duCard").forEach(c => c.classList.add("duEntra")); return; }
     const c = e.target.closest(".duCard[data-id]");
@@ -6706,7 +6750,7 @@ const Mercar = (function(){
   duEl.addEventListener("keydown", e => { if((e.key === "Enter" || e.key === " ") && e.target.classList && e.target.classList.contains("duCard")){ e.preventDefault(); e.target.click(); } });
   function dura(entrando){
     if(!datos){ try{ datos = JSON.parse(localStorage.getItem(KEY)); }catch{} }
-    if(entrando){ filtroD = "todo"; duAbierto = null; }
+    if(entrando){ filtroD = "todo"; duAbierto = null; abiertosD.clear(); duInicia = true; }
     pintaDura(!!entrando);
     cargar();
   }
