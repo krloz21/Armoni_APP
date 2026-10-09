@@ -2161,7 +2161,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-09.76";
+const APP_VERSION = "2026-10-09.77";
 (function autoActualizar(){
   const patron = new RegExp("const APP_" + "VERSION = \"([^\"]+)\"");
   async function revisar(){
@@ -2389,7 +2389,7 @@ vec3 lines(vec2 pc, float t){
 }
 
 vec3 scene(vec2 pc){
-  return lines(pc, uTime) * (1. - .9 * uLight);   // en el tema P las líneas finas casi no se ven
+  return vec3(0.);   // sin líneas cayendo: el fondo queda limpio (solo se conserva el vidrio de la barra)
 }
 
 float sdBox(vec2 p, vec2 b, float r){
