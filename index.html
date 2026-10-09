@@ -107,7 +107,7 @@ body{
 body.asleep *, body.asleep *::before, body.asleep *::after{ animation-play-state:paused !important; }
 
 #rain{ position:fixed; inset:0; z-index:0; display:block; }
-#campo{ position:fixed; inset:0; z-index:0; display:block; width:100%; height:100%; pointer-events:none; opacity:0; transition:opacity .9s ease; filter:blur(calc(6px * var(--dpc, 0))); }
+#campo{ position:fixed; inset:0; z-index:0; display:block; width:100%; height:100%; pointer-events:none; opacity:0; transition:opacity .9s ease; }
 body.ribbon #campo{ display:none; }
 
 .shell{
@@ -673,7 +673,7 @@ body.no-gl .bar, body.no-gl .composer{ background:var(--drawer-solid); }
 /* con el menú abierto la app se retira, pero el fondo sigue vivo para que el vidrio lo refracte */
 #scrim{ position:fixed; inset:0; z-index:39; pointer-events:none; }
 body.drawer-open #scrim{ pointer-events:auto; }
-:root.dpOn .shell{ opacity:calc(1 - .84 * var(--dpc, 0)); filter:blur(calc(6px * var(--dpc, 0))); }   /* solo mientras el menú está abierto o en movimiento: así en reposo el vidrio del aviso puede desenfocar */
+:root.dpOn .shell{ opacity:calc(1 - .84 * var(--dpc, 0)); }   /* solo mientras el menú está abierto o en movimiento: así en reposo el vidrio del aviso puede desenfocar */
 
 /* un panel de vidrio flotante: el fondo WebGL lo refracta igual que al encabezado */
 #drawer{
@@ -703,7 +703,7 @@ body.no-gl #drawer{ background:var(--drawer-solid); }
 #drawerClose svg{ width:15px; height:15px; }
 #drawerClose:focus-visible{ outline:2px solid var(--blue); outline-offset:2px; }
 
-.dNav{ display:flex; flex-direction:column; gap:6px; flex:1; min-height:0; overflow-y:auto; margin:-8px 0; padding:8px 0; -webkit-mask-image:linear-gradient(transparent 0, #000 8px, #000 calc(100% - 8px), transparent 100%); mask-image:linear-gradient(transparent 0, #000 8px, #000 calc(100% - 8px), transparent 100%); }
+.dNav{ display:flex; flex-direction:column; gap:6px; flex:1; min-height:0; overflow-y:auto; }
 .dNav button{
   position:relative; display:flex; align-items:center; gap:13px; text-align:left;
   background:none; border:1px solid transparent; border-radius:16px;
@@ -1277,6 +1277,13 @@ body.mode-gmail footer, body.mode-glim footer{ display:none; }
 .mkMama b{ display:block; margin-bottom:6px; }
 .mkChips{ display:flex; flex-wrap:wrap; gap:6px; }
 .mkChips span{ padding:4px 10px; border-radius:999px; background:rgba(var(--ink),.08); font-size:.78rem; }
+.mkTiles{ display:grid; grid-template-columns:repeat(3, 1fr); gap:10px; margin-top:12px; }
+.mkTiles.uno{ grid-template-columns:1fr; }
+.mkTile{ display:flex; flex-direction:column; align-items:center; justify-content:center; gap:9px; padding:16px 6px 14px; border-radius:20px; border:1px solid var(--line); background:var(--panel); color:var(--white); font:inherit; font-size:.8rem; font-weight:600; line-height:1.15; text-align:center; cursor:pointer; transition:transform .2s var(--ease-out), border-color .3s, background .3s; -webkit-tap-highlight-color:transparent; }
+.mkTile:active{ transform:scale(.95); }
+.mkTile .ti{ width:42px; height:42px; border-radius:14px; display:grid; place-items:center; color:var(--cyan); background:rgba(var(--cyan-rgb),.1); border:1px solid rgba(var(--cyan-rgb),.2); }
+.mkTile .ti svg{ width:21px; height:21px; }
+.mkTile:hover{ border-color:rgba(var(--cyan-rgb),.35); }
 .mkSec{ margin:22px 4px 8px; font-size:.72rem; color:var(--dim); letter-spacing:.08em; text-transform:uppercase; }
 .mkTop{ display:flex; align-items:center; gap:10px; margin:0 0 14px; }
 .mkSalir{ flex:none; width:30px; height:30px; border-radius:50%; border:1px solid var(--line); background:rgba(var(--ink),.05); color:var(--ghost); display:grid; place-items:center; cursor:pointer; }
@@ -1476,7 +1483,7 @@ button{ transition:transform var(--t-tap) var(--ease-out); }
 .sheetBack svg{ width:14px; height:14px; }
 .sheetBack:active{ transform:scale(.96); }
 .sheetBack:focus-visible{ outline:2px solid var(--cyan); outline-offset:2px; }
-.sheetBody{ min-height:0; overflow-y:auto; overscroll-behavior:contain; margin:-10px -4px; padding:10px 4px; -webkit-mask-image:linear-gradient(transparent 0, #000 10px, #000 calc(100% - 10px), transparent 100%); mask-image:linear-gradient(transparent 0, #000 10px, #000 calc(100% - 10px), transparent 100%); }
+.sheetBody{ min-height:0; overflow-y:auto; overscroll-behavior:contain; margin:0 -4px; padding:0 4px; }
 .sheetBody.out-left{ animation:sheetOutL .17s ease both; }
 .sheetBody.out-right{ animation:sheetOutR .17s ease both; }
 .sheetBody.out-fade{ animation:sheetOutF .17s ease both; }
@@ -1611,13 +1618,18 @@ button{ transition:transform var(--t-tap) var(--ease-out); }
 .rgBusca .x{ position:absolute; right:7px; top:50%; width:32px; height:32px; transform:translateY(-50%); border:0; border-radius:50%; background:rgba(var(--ink),.1); color:var(--white); display:grid; place-items:center; cursor:pointer; z-index:1; }
 .rgBusca .x[hidden]{ display:none; }
 .rgBusca .x svg{ position:static; width:13px; height:13px; transform:none; color:inherit; }
-.rgGrupo{ display:flex; align-items:center; gap:10px; width:100%; margin:16px 0 2px; padding:9px 2px; border:0; background:none; color:var(--dim); font:inherit; font-size:.78rem; font-weight:700; letter-spacing:.12em; text-transform:uppercase; cursor:pointer; }
-.rgGrupo .chev{ width:14px; height:14px; flex:none; color:var(--ghost); transition:transform .35s cubic-bezier(.16,1,.3,1); }
+.rgGrupo{ display:flex; align-items:center; gap:12px; width:100%; margin:10px 0 0; padding:11px 14px; border-radius:18px; border:1px solid var(--line); background:rgba(var(--ink),.04); color:var(--white); font:inherit; cursor:pointer; text-align:left; transition:background .3s, border-color .3s, transform .15s var(--ease-out); -webkit-tap-highlight-color:transparent; }
+.rgGrupo:active{ transform:scale(.985); }
+.mkEdLista .rgGrupo, .inCard .rgGrupo{ gap:10px; padding:10px 12px; }
+.rgGrupo .e{ flex:none; width:34px; height:34px; border-radius:11px; display:grid; place-items:center; font-size:1.1rem; line-height:1; background:rgba(var(--ink),.07); }
+.rgGrupo .n{ flex:1; min-width:0; font-size:.96rem; font-weight:600; text-align:left; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.rgGrupo .c{ flex:none; min-width:24px; padding:3px 9px; border-radius:999px; font-size:.74rem; font-weight:600; text-align:center; color:var(--dim); background:rgba(var(--ink),.08); }
+.rgGrupo .al{ flex:none; min-width:22px; padding:3px 8px; border-radius:999px; font-size:.72rem; font-weight:700; text-align:center; color:#ffb066; background:rgba(255,138,80,.16); }
+.rgGrupo .chev{ width:15px; height:15px; flex:none; color:var(--dim); transition:transform .4s var(--ease-out), color .3s; }
 .rgGrupo .chev svg{ width:100%; height:100%; display:block; }
-.rgGrupo[aria-expanded="true"] .chev{ transform:rotate(90deg); }
-.rgGrupo .n{ flex:1; text-align:left; }
-.rgGrupo .c{ font-weight:400; letter-spacing:0; text-transform:none; }
-.rgCuerpo{ display:grid; grid-template-rows:0fr; transition:grid-template-rows .4s cubic-bezier(.16,1,.3,1); }
+.rgGrupo[aria-expanded="true"]{ border-color:rgba(var(--cyan-rgb),.32); background:rgba(var(--cyan-rgb),.06); }
+.rgGrupo[aria-expanded="true"] .chev{ transform:rotate(90deg); color:var(--cyan); }
+.rgCuerpo{ display:grid; grid-template-rows:0fr; transition:grid-template-rows .4s var(--ease-out); }
 .rgCuerpo.on{ grid-template-rows:1fr; }
 .rgCuerpo > div{ overflow:hidden; min-height:0; }
 .rgLista{ display:grid; gap:8px; padding:6px 0 4px; }
@@ -1709,7 +1721,7 @@ button{ transition:transform var(--t-tap) var(--ease-out); }
 .duChip em{ font-style:normal; font-size:.72rem; min-width:20px; padding:2px 6px; border-radius:999px; background:rgba(var(--ink),.1); text-align:center; transition:background .3s, color .3s; }
 .duChip.on{ color:var(--on-accent); border-color:transparent; background:linear-gradient(140deg, var(--cyan), var(--blue)); box-shadow:0 8px 22px -10px rgba(var(--blue-rgb),.7); }
 .duChip.on em{ background:rgba(0,0,0,.18); color:var(--on-accent); }
-.duLista{ display:flex; flex-direction:column; gap:10px; }
+.duLista{ display:flex; flex-direction:column; }
 .duCard{ --c1:#3987e5; --c2:#9085e9; position:relative; padding:14px 15px; border-radius:20px; border:1px solid var(--line); background:var(--panel); cursor:pointer; text-align:left; transition:border-color .35s, background .35s, transform .2s var(--ease-out); -webkit-tap-highlight-color:transparent; }
 .duCard:active{ transform:scale(.985); }
 .duCard.fresco{ --c1:#199e70; --c2:#6fe0b5; } .duCard.medio{ --c1:#3987e5; --c2:#7ee8ff; } .duCard.pronto{ --c1:#c98500; --c2:#f4c04a; } .duCard.ya{ --c1:#d95926; --c2:#ff8a6b; }
@@ -1742,11 +1754,6 @@ button{ transition:transform var(--t-tap) var(--ease-out); }
 .duDatos b{ display:block; margin-top:3px; font-size:.86rem; }
 .duNota{ margin:12px 0 0; padding-top:12px; border-top:1px solid var(--line); font-size:.84rem; color:var(--ghost); }
 .duGrupoLista{ display:flex; flex-direction:column; gap:10px; padding:8px 0 6px; }
-.duGrupo{ margin-top:8px; }
-.duGrupo .n{ flex:1; }
-.duAlerta{ flex:none; min-width:20px; padding:2px 7px; border-radius:999px; font-size:.7rem; font-weight:700; letter-spacing:0; text-align:center; color:#ffb066; background:rgba(255,138,80,.16); }
-.mkEdLista .rgGrupo{ margin-top:6px; }
-.mkEdLista .rgGrupo:first-child{ margin-top:0; }
 .duVacio{ text-align:center; padding:26px 0; }
 @keyframes duSube{ from{ opacity:0; transform:translateY(16px) scale(.98); } to{ opacity:1; transform:none; } }
 .duEntra.duHero, .duEntra.duChips{ animation:duSube .6s var(--ease-out) backwards; }
@@ -1768,10 +1775,6 @@ button{ transition:transform var(--t-tap) var(--ease-out); }
 @keyframes mkEdFw{ from{ opacity:0; transform:translateX(26px); } to{ opacity:1; transform:none; } }
 @keyframes mkEdBk{ from{ opacity:0; transform:translateX(-26px); } to{ opacity:1; transform:none; } }
 .mkEdLista{ margin-top:8px; max-height:48vh; overflow:auto; display:flex; flex-direction:column; gap:7px; padding:16px 2px; -webkit-overflow-scrolling:touch; scrollbar-width:none; -webkit-mask-image:linear-gradient(transparent 0, #000 16px, #000 calc(100% - 16px), transparent 100%); mask-image:linear-gradient(transparent 0, #000 16px, #000 calc(100% - 16px), transparent 100%); }
-.mkEdGrupo{ display:flex; align-items:center; gap:8px; margin:8px 2px 0; font-size:.72rem; font-weight:700; letter-spacing:.09em; text-transform:uppercase; color:var(--dim); }
-.mkEdGrupo:first-child{ margin-top:0; }
-.mkEdGrupo span{ font-size:1rem; letter-spacing:0; }
-.mkEdGrupo em{ margin-left:auto; font-style:normal; font-size:.7rem; padding:2px 8px; border-radius:999px; background:rgba(var(--ink),.08); letter-spacing:0; }
 .mkEdLista .rgItem{ padding:11px 14px; flex:none; }
 .mkEdLista::-webkit-scrollbar{ display:none; }
 .mkEdLista.anima .rgGrupo{ animation:mkEdItem .55s var(--ease-out) backwards; animation-delay:calc(var(--i, 0) * 38ms + 80ms); }
@@ -2255,7 +2258,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-09.80";
+const APP_VERSION = "2026-10-09.81";
 (function autoActualizar(){
   const patron = new RegExp("const APP_" + "VERSION = \"([^\"]+)\"");
   async function revisar(){
@@ -2572,7 +2575,7 @@ void main(){
   const uRect = U("uRect"), uRad = U("uRad"), uDim = U("uDim"), uLight = U("uLight"), uSeason = U("uSeason");
 
   /* líneas de 1px: necesitan resolución real, pero sin pasar de 1.5x */
-  const SCALE = Math.min(ESCRITORIO ? 1.5 : 1.25, devicePixelRatio || 1);   // 30% menos píxeles que a 1.5x; en un fondo de luz suave no se nota
+  const SCALE = Math.min(ESCRITORIO ? 1.25 : 1, devicePixelRatio || 1);   // sin líneas finas ya no hace falta más resolución: menos píxeles que pintar   // 30% menos píxeles que a 1.5x; en un fondo de luz suave no se nota
   let w = 0, h = 0;
   function build(){
     w = innerWidth; h = innerHeight;
@@ -6073,9 +6076,12 @@ const Mercar = (function(){
       (mama.length ? '<div class="mkMama" id="mkMamaCaja" role="button" tabindex="0" style="cursor:pointer"><b>Tu mamá dice que se acabó:</b><div class="mkChips">' + mama.map(p => '<span>' + emojiMercado(baseDe(p), p.grupo) + ' ' + esc(baseDe(p)) + '</span>').join("") + '</div></div>' : '') +
       '</div>';
     if(pendientes.length && !mama.length) html += '<button type="button" class="mkBtn sec full" id="mkVerPend" style="margin-top:12px">Ver lista pendiente (' + pendientes.length + ')</button>';
-    if(ps.length) html += '<button type="button" class="mkBtn sec full" id="mkLibre" style="margin-top:10px">Registrar lo que compré</button>';
-    html += '<button type="button" class="mkBtn sec full mkAdd" id="mkAgregarBtn" style="margin-top:10px"><span aria-hidden="true">+</span> Agregar un producto</button>';
-    if(ps.length) html += '<button type="button" class="mkBtn sec full" id="mkEditarBtn" style="margin-top:10px">Editar un producto</button>';
+    const ICO = {
+      reg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h2l2.3 10.5h10.4L20 8H6.4"/><circle cx="9" cy="19" r="1.4"/><circle cx="17" cy="19" r="1.4"/><path d="m10 10.5 1.8 1.8 3.4-3.6"/></svg>',
+      add: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
+      edit: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4l10.5-10.5a2.1 2.1 0 0 0-3-3L5 17z"/><path d="m13.5 6.5 3 3"/></svg>' };
+    const tile = (id, ico, txt) => '<button type="button" class="mkTile" id="' + id + '"><span class="ti" aria-hidden="true">' + ICO[ico] + '</span><span>' + txt + '</span></button>';
+    html += '<div class="mkTiles' + (ps.length ? '' : ' uno') + '">' + (ps.length ? tile("mkLibre", "reg", "Registrar compra") : "") + tile("mkAgregarBtn", "add", "Agregar") + (ps.length ? tile("mkEditarBtn", "edit", "Editar") : "") + '</div>';
 
     stage.innerHTML = html;
     const be = document.getElementById("mkEmpezar"); if(be) be.addEventListener("click", () => empezar());
@@ -6176,10 +6182,9 @@ const Mercar = (function(){
           const del = vis.filter(p => grupoDe(p) === g);
           if(!del.length) return;
           const abierto = !!t || abiertosE.has(g);   // buscando, se abre lo que coincide
-          html += '<button type="button" class="rgGrupo" style="--i:' + Math.min(n++, 10) + '" data-g="' + esc(g) + '" aria-expanded="' + abierto + '"><span class="chev" aria-hidden="true">' + CHEV_G + '</span><span class="n">' + EMOJI_GRUPO[g] + ' ' + g + '</span><span class="c">' + del.length + '</span></button>' +
-            '<div class="rgCuerpo' + (abierto ? ' on' : '') + '"><div><div class="rgLista">' +
+          html += acordeon(g, del.length, abierto, '<div class="rgLista">' +
             del.map(p => '<button type="button" class="rgItem" data-id="' + esc(p.id) + '"><span class="e" aria-hidden="true">' + emojiMercado(baseDe(p), p.grupo) + '</span><span class="n">' + esc(baseDe(p)) + (detDe(p) ? '<small class="mkDet">' + esc(detDe(p)) + '</small>' : '') + '</span></button>').join("") +
-            '</div></div></div>';
+            '</div>', 0, "--i:" + Math.min(n++, 10));
         });
         caja.innerHTML = html || '<p class="gEmpty">No encontré ese producto.</p>';
         x.classList.toggle("on", !!q.value);
@@ -6471,7 +6476,7 @@ const Mercar = (function(){
     const norm = t => String(t).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
     const CHEV = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>';
     stage.innerHTML =
-      '<div class="mkFin"><h3>¿Qué compraste?</h3><p>Marca lo que llevaste a la casa y elige cuándo — esto no toca el presupuesto, solo guarda la fecha de compra</p><span class="mkCopiado" id="rgCuenta" hidden></span></div>' +
+      '<div class="mkFin"><h3>¿Qué compraste?</h3><span class="mkCopiado" id="rgCuenta" hidden></span></div>' +
       '<div class="rgFecha"><span class="inLbl" style="margin:0 0 8px">¿Cuándo?</span><div class="recDia" id="rgDia">' +
         '<button type="button" class="recChip" data-d="0" aria-pressed="true">Hoy</button>' +
         '<button type="button" class="recChip" data-d="1" aria-pressed="false">Ayer</button>' +
@@ -6516,10 +6521,9 @@ const Mercar = (function(){
         });
         if(!del.length) return;
         const abierto = q ? true : abiertos.has(g);   // buscando, se abre lo que coincide
-        html += '<button type="button" class="rgGrupo" data-g="' + esc(g) + '" aria-expanded="' + abierto + '"><span class="chev" aria-hidden="true">' + CHEV + '</span><span class="n">' + g + '</span><span class="c">' + del.length + '</span></button>' +
-          '<div class="rgCuerpo' + (abierto ? ' on' : '') + '"><div><div class="rgLista">' + del.map(([x, i]) =>
+        html += acordeon(g, del.length, abierto, '<div class="rgLista">' + del.map(([x, i]) =>
             '<button type="button" class="rgItem' + (x.comprar ? ' on' : '') + '" data-i="' + i + '"><span class="e" aria-hidden="true">' + emojiMercado(baseDe(x.p), x.p.grupo) + '</span><span class="n">' + esc(baseDe(x.p)) + (detDe(x.p) ? '<small class="mkDet">' + esc(detDe(x.p)) + '</small>' : '') + '</span><span class="s">' + (x.comprar ? "Compré" : "Marcar") + '</span></button>'
-          ).join("") + '</div></div></div>';
+          ).join("") + '</div>');
       });
       main.innerHTML = html || (q ? '<p class="rgEstado">No se encuentra «' + esc(buscar.value.trim()) + '» en la lista.</p>' : '<p class="rgEstado">No hay productos en la lista todavía.</p>');
       cuentaMarcadas();
@@ -6625,6 +6629,11 @@ const Mercar = (function(){
     cargar();
   }
 
+  /* el apartado desplegable es el mismo en Registrar, Editar y Duración */
+  const acordeon = (g, n, abierto, cuerpo, alerta, estilo) =>
+    '<button type="button" class="rgGrupo" data-g="' + esc(g) + '" aria-expanded="' + abierto + '"' + (estilo ? ' style="' + estilo + '"' : '') + '><span class="e" aria-hidden="true">' + (EMOJI_GRUPO[g] || "🛒") + '</span><span class="n">' + g + '</span>' +
+    (alerta ? '<span class="al" title="Se están acabando">' + alerta + '</span>' : '') + '<span class="c">' + n + '</span><span class="chev" aria-hidden="true">' + CHEV_G + '</span></button>' +
+    '<div class="rgCuerpo' + (abierto ? ' on' : '') + '"><div>' + cuerpo + '</div></div>';
   const CHEV_G = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>';
   const ORDEN_G = GRUPOS.concat(["Otros"]);
   const grupoDe = p => ORDEN_G.includes(p.grupo) ? p.grupo : "Otros";
@@ -6713,9 +6722,7 @@ const Mercar = (function(){
       if(!del.length) return;
       const urgentes = del.filter(x => x.tipo === "dura" && (x.nivel === "pronto" || x.nivel === "ya")).length;
       const abierto = filtroD === "pronto" || abiertosD.has(g);
-      html += '<button type="button" class="rgGrupo duGrupo" data-g="' + esc(g) + '" aria-expanded="' + abierto + '"><span class="chev" aria-hidden="true">' + CHEV_G + '</span><span class="n">' + EMOJI_GRUPO[g] + ' ' + g + '</span>' +
-        (urgentes ? '<span class="duAlerta" title="Se están acabando">' + urgentes + '</span>' : '') + '<span class="c">' + del.length + '</span></button>' +
-        '<div class="rgCuerpo' + (abierto ? ' on' : '') + '"><div><div class="duGrupoLista">' + del.map(x => tarjeta(x, ni++)).join("") + '</div></div></div>';
+      html += acordeon(g, del.length, abierto, '<div class="duGrupoLista">' + del.map(x => tarjeta(x, ni++)).join("") + '</div>', urgentes || "");
     });
     html += '</div>';
     duEl.innerHTML = html;
@@ -6734,7 +6741,7 @@ const Mercar = (function(){
     (function paso(t){ const k = Math.min(1, (t - t0) / 900), e = 1 - Math.pow(1 - k, 3); el.innerHTML = Math.round(n * e) + suf; if(k < 1) requestAnimationFrame(paso); })(t0);
   }
   duEl.addEventListener("click", e => {
-    const gr = e.target.closest(".duGrupo");
+    const gr = e.target.closest(".rgGrupo");
     if(gr){
       const g = gr.dataset.g, abrir = !abiertosD.has(g);
       if(abrir) abiertosD.add(g); else abiertosD.delete(g);
