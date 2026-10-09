@@ -1761,6 +1761,16 @@ button{ transition:transform var(--t-tap) var(--ease-out); }
 .duDatos b{ display:block; margin-top:3px; font-size:.86rem; }
 .duNota{ margin:12px 0 0; padding-top:12px; border-top:1px solid var(--line); font-size:.84rem; color:var(--ghost); }
 .duGrupoLista{ display:flex; flex-direction:column; gap:10px; padding:8px 0 6px; }
+/* canasta: lo que ya se acabó y hay que comprar */
+.mkCanasta{ background:rgba(var(--cyan-rgb),.07); border-color:rgba(var(--cyan-rgb),.3); }
+.mkCanasta .mkChips em{ font-style:normal; font-size:.7rem; color:var(--dim); margin-left:3px; }
+.duCanasta{ display:flex; align-items:center; justify-content:center; gap:8px; width:100%; margin-top:14px; padding:12px 14px; border-radius:14px; border:1px solid rgba(var(--cyan-rgb),.3); background:rgba(var(--cyan-rgb),.08); color:var(--white); font:inherit; font-size:.88rem; font-weight:600; cursor:pointer; transition:transform .15s var(--ease-out), background .3s, border-color .3s; }
+.duCanasta:active{ transform:scale(.97); }
+.duCanasta.dentro{ background:rgba(255,138,80,.1); border-color:rgba(255,138,80,.35); color:#ffb066; }
+.duCard.canasta .duBadge{ color:#ffb066; background:rgba(255,138,80,.16); }
+.caProd{ display:flex; align-items:center; justify-content:center; gap:12px; margin:4px 0 8px; font-size:1.2rem; }
+.caProd span{ font-size:2.2rem; }
+.caNota{ margin:6px 0 0; font-size:.88rem; color:var(--ghost); text-align:center; }
 .duVacio{ text-align:center; padding:26px 0; }
 @keyframes duSube{ from{ opacity:0; transform:translateY(16px) scale(.98); } to{ opacity:1; transform:none; } }
 .duEntra.duHero, .duEntra.duChips{ animation:duSube .6s var(--ease-out) backwards; }
@@ -2265,7 +2275,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-09.85";
+const APP_VERSION = "2026-10-09.86";
 (function autoActualizar(){
   const patron = new RegExp("const APP_" + "VERSION = \"([^\"]+)\"");
   async function revisar(){
@@ -6070,6 +6080,7 @@ const Mercar = (function(){
     const ps = (datos && datos.productos) || [];
     const mama = ps.filter(esMama);
     const pendientes = ps.filter(p => p.falta);
+    const canasta = pendientes.filter(p => !esMama(p));
     const parcial = leePartida(ps);
     const ult = datos && datos.ultimoMercado;
     const hace = ult ? diasDesde(ult) : null;
@@ -6080,9 +6091,9 @@ const Mercar = (function(){
         ? '<button type="button" class="mkBtn pri full" id="mkSeguir">Seguir revisión · ' + parcial.idx + '/' + parcial.cola.length + '</button>' +
           '<button type="button" class="mkBtn sec full" id="mkDescartarParcial" style="margin-top:10px">Descartar y empezar de nuevo</button>'
         : '<button type="button" class="mkBtn pri full" id="mkEmpezar"' + (ps.length ? '' : ' disabled') + '>Empezar revisión</button>') +
+      (canasta.length ? '<div class="mkMama mkCanasta" id="mkCanastaCaja" role="button" tabindex="0" style="cursor:pointer"><b>🧺 En tu canasta · toca comprarlo:</b><div class="mkChips">' + canasta.map(p => '<span>' + emojiMercado(baseDe(p), p.grupo) + ' ' + esc(baseDe(p)) + (acaboDe(p) && diasDesde(acaboDe(p)) > 0 ? ' <em>hace ' + diasDesde(acaboDe(p)) + ' d</em>' : '') + '</span>').join("") + '</div></div>' : '') +
       (mama.length ? '<div class="mkMama" id="mkMamaCaja" role="button" tabindex="0" style="cursor:pointer"><b>Tu mamá dice que se acabó:</b><div class="mkChips">' + mama.map(p => '<span>' + emojiMercado(baseDe(p), p.grupo) + ' ' + esc(baseDe(p)) + '</span>').join("") + '</div></div>' : '') +
       '</div>';
-    if(pendientes.length && !mama.length) html += '<button type="button" class="mkBtn sec full" id="mkVerPend" style="margin-top:12px">Ver lista pendiente (' + pendientes.length + ')</button>';
     const ICO = {
       reg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h2l2.3 10.5h10.4L20 8H6.4"/><circle cx="9" cy="19" r="1.4"/><circle cx="17" cy="19" r="1.4"/><path d="m10 10.5 1.8 1.8 3.4-3.6"/></svg>',
       add: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
@@ -6095,8 +6106,12 @@ const Mercar = (function(){
     const bs = document.getElementById("mkSeguir"); if(bs) bs.addEventListener("click", () => empezar(parcial));
     const bd = document.getElementById("mkDescartarParcial");
     if(bd) bd.addEventListener("click", () => { if(confirm("¿Descartar la revisión que dejaste a medias?")){ borraPartida(); inicio(); } });
-    const vp = document.getElementById("mkVerPend");
-    if(vp) vp.addEventListener("click", () => final(ps.filter(p => p.falta), false));
+    const cc = document.getElementById("mkCanastaCaja");
+    if(cc){
+      const abrirCan = () => final(ps.filter(p => p.falta), false);
+      cc.addEventListener("click", abrirCan);
+      cc.addEventListener("keydown", e => { if(e.key === "Enter" || e.key === " "){ e.preventDefault(); abrirCan(); } });
+    }
     const mc = document.getElementById("mkMamaCaja");
     if(mc){
       const abrirPend = () => final(ps.filter(p => p.falta), false);
@@ -6220,11 +6235,13 @@ const Mercar = (function(){
         '<label class="inLbl" for="mkEdNom">Producto</label><input id="mkEdNom" type="text" autocomplete="off" maxlength="60" value="' + esc(baseDe(p)) + '">' +
         '<label class="inLbl" for="mkEdDet">Detalle <span style="font-weight:400;letter-spacing:0;text-transform:none">(opcional)</span></label><input id="mkEdDet" type="text" autocomplete="off" maxlength="40" value="' + esc(detDe(p)) + '">' +
         '<label class="inLbl" for="mkEdGrp">Apartado</label><div class="inSel"><select id="mkEdGrp">' + grupos.map(g => '<option value="' + g + '"' + (g === (grupos.includes(p.grupo) ? p.grupo : "Otros") ? " selected" : "") + '>' + g + '</option>').join("") + '</select></div>' +
+        '<button type="button" class="duCanasta' + (p.falta ? ' dentro' : '') + '" id="mkEdCanasta" style="margin-top:14px"><span aria-hidden="true">🧺</span>' + (p.falta ? 'En la canasta · ver o quitar' : 'Se acabó · dejar en la canasta') + '</button>' +
         '<p class="inErr" id="mkEdErr" role="alert"></p>' +
         '<div class="pgRow"><button type="button" class="pgNo" id="mkEdAtras">Volver</button><button type="button" class="pgSi" id="mkEdSi">Guardar</button></div>');
       const nom = cuerpo.querySelector("#mkEdNom"), det = cuerpo.querySelector("#mkEdDet"), grp = cuerpo.querySelector("#mkEdGrp"), si = cuerpo.querySelector("#mkEdSi"), err = cuerpo.querySelector("#mkEdErr");
       nom.addEventListener("input", () => { si.disabled = !nom.value.trim(); });
       cuerpo.querySelector("#mkEdAtras").addEventListener("click", () => lista(true));
+      cuerpo.querySelector("#mkEdCanasta").addEventListener("click", () => { cierra(); setTimeout(() => abrirCanasta(p), 120); });
       si.addEventListener("click", async () => {
         const base = nom.value.trim(); if(!base) return;
         const nombre = base + (det.value.trim() ? SEP + det.value.trim() : "");
@@ -6463,6 +6480,7 @@ const Mercar = (function(){
       try{
         await post(MERCADO_MARCAR_URL, { ids: items.map(p => p.id), falta: false });
         items.forEach(p => { p.falta = false; p.marcadoPor = null; });
+        limpiaAcabo(items.map(p => p.id));
         guarda();
         inicio();
       }catch{
@@ -6589,6 +6607,7 @@ const Mercar = (function(){
     try{
       const hoy = fechaCompra || hoyISO();
       await post(MERCADO_COMPRADO_URL, { ids: comprados.map(p => p.id), nombres: comprados.map(p => p.nombre), fecha: hoy });
+      limpiaAcabo(comprados.map(p => p.id));
       comprados.forEach(p => { p.falta = false; p.marcadoPor = null; if(!p.ultimaCompra || hoy >= p.ultimaCompra) p.ultimaCompra = hoy; p.veces = (p.veces || 0) + 1; });
       if(datos && (!datos.ultimoMercado || hoy >= datos.ultimoMercado)) datos.ultimoMercado = hoy;
       guarda();
@@ -6610,7 +6629,7 @@ const Mercar = (function(){
       const d = await res.json();
       const firma = x => x ? JSON.stringify([(x.productos || []).map(p => [p.id, p.nombre, p.grupo, p.falta, p.marcadoPor, p.ultimaCompra, p.duraDias, p.veces]), x.ultimoMercado]) : "";
       const cambio = firma(d) !== firma(datos);
-      datos = d; guarda();
+      datos = d; aplicaAcabo(); guarda();
       statusEl.innerHTML = "";
       if(cambio && document.body.classList.contains("mode-dura")) pintaDura(false);
       if(cambio && estado === "inicio" && document.body.classList.contains("mode-mercar")){               // nunca interrumpe un juego o una lista en curso; y nunca en mitad de la animación de entrada
@@ -6644,6 +6663,74 @@ const Mercar = (function(){
   const CHEV_G = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>';
   const ORDEN_G = GRUPOS.concat(["Otros"]);
   const grupoDe = p => ORDEN_G.includes(p.grupo) ? p.grupo : "Otros";
+  /* ── CANASTA: "ya se acabó, déjalo en la canasta para comprarlo" y se anota cuándo se acabó ── */
+  const AKEY = "armoni.mercar.acabo";
+  const leeAcabo = () => { try{ return JSON.parse(localStorage.getItem(AKEY)) || {}; }catch{ return {}; } };
+  const guardaAcabo = m => { try{ localStorage.setItem(AKEY, JSON.stringify(m)); }catch{} };
+  const acaboDe = p => p.falta ? (p.acaboEl || (p.marcadoEl ? String(p.marcadoEl).slice(0, 10) : null)) : null;
+  function limpiaAcabo(ids){ const m = leeAcabo(); ids.forEach(id => delete m[id]); guardaAcabo(m); }
+  function aplicaAcabo(){ const m = leeAcabo(); ((datos && datos.productos) || []).forEach(p => { if(p.falta && m[p.id]) p.acaboEl = m[p.id]; else delete p.acaboEl; }); }
+  function repinta(){
+    if(document.body.classList.contains("mode-dura")) pintaDura(false);
+    else if(estado === "inicio") inicio(true);
+  }
+  function abrirCanasta(p){
+    if(document.querySelector(".pgScrim.mkCanastaV")) return;
+    const dentro = !!p.falta, acabo = acaboDe(p), nom = baseDe(p);
+    const scrim = document.createElement("div");
+    scrim.className = "pgScrim mkCanastaV";
+    const hoy = hoyISO(), minF = p.ultimaCompra || "";
+    scrim.innerHTML =
+      '<div class="inWrap"><div class="pgCard inCard" role="dialog" aria-modal="true" aria-labelledby="mkCaT">' +
+        '<h3 id="mkCaT">' + (dentro ? 'En tu canasta' : 'Dejar en la canasta') + '</h3>' +
+        '<div class="inBody"><div class="caProd"><span aria-hidden="true">' + emojiMercado(nom, p.grupo) + '</span><b>' + esc(nom) + '</b></div>' +
+        (dentro
+          ? '<p class="caNota">Ya está en tu lista de compras' + (acabo ? ' · se acabó ' + (acabo === hoy ? 'hoy' : 'el ' + fechaCorta(acabo)) : '') + '.</p>'
+          : '<p class="caNota">' + (p.ultimaCompra ? 'Lo compraste hace ' + plD(diasDesde(p.ultimaCompra)) + '. ' : '') + 'Lo dejo en la canasta para que no se te olvide comprarlo y anoto cuándo se acabó.</p>' +
+            '<span class="inLbl" style="margin:12px 0 8px">¿Cuándo se acabó?</span><div class="recDia" id="caDia">' +
+            '<button type="button" class="recChip" data-d="0" aria-pressed="true">Hoy</button>' +
+            '<button type="button" class="recChip" data-d="1" aria-pressed="false">Ayer</button>' +
+            '<button type="button" class="recChip" data-d="3" aria-pressed="false">Hace 3 días</button>' +
+            '<label class="recChip inFechaBtn" id="caFechaBtn" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg><span id="caFechaTxt">Otra fecha</span><input type="date" id="caFecha" max="' + hoy + '"' + (minF ? ' min="' + minF + '"' : '') + ' aria-label="Elegir otra fecha"></label></div>') +
+        '<p class="inErr" id="caErr" role="alert"></p></div>' +
+        '<div class="pgRow"><button type="button" class="pgNo" id="caNo">' + (dentro ? 'Cerrar' : 'Cancelar') + '</button><button type="button" class="pgSi" id="caSi">' + (dentro ? 'Quitar de la canasta' : 'Dejar en la canasta') + '</button></div>' +
+      '</div></div>';
+    document.body.appendChild(scrim);
+    requestAnimationFrame(() => scrim.classList.add("on"));
+    const $ = id => scrim.querySelector("#" + id), si = $("caSi"), err = $("caErr");
+    const cierra = () => { scrim.classList.remove("on"); setTimeout(() => scrim.remove(), 340); document.removeEventListener("keydown", tecla); };
+    const tecla = e => { if(e.key === "Escape") cierra(); };
+    document.addEventListener("keydown", tecla);
+    scrim.addEventListener("click", e => { if(e.target === scrim) cierra(); });
+    $("caNo").addEventListener("click", cierra);
+    let fecha = hoy;
+    if(!dentro){
+      const chips = [...scrim.querySelectorAll("#caDia .recChip[data-d]")], fBtn = $("caFechaBtn"), fIn = $("caFecha");
+      const dia = n => { const d = new Date(); d.setDate(d.getDate() - n); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); };
+      chips.forEach(b => b.addEventListener("click", () => { fecha = dia(+b.dataset.d); if(minF && fecha < minF) fecha = minF; chips.forEach(x => x.setAttribute("aria-pressed", String(x === b))); fBtn.setAttribute("aria-pressed", "false"); $("caFechaTxt").textContent = "Otra fecha"; fIn.value = ""; }));
+      fIn.addEventListener("change", () => { if(!fIn.value) return; fecha = fIn.value > hoy ? hoy : (minF && fIn.value < minF ? minF : fIn.value); chips.forEach(x => x.setAttribute("aria-pressed", "false")); fBtn.setAttribute("aria-pressed", "true"); $("caFechaTxt").textContent = fechaCorta(fecha); });
+    }
+    si.addEventListener("click", async () => {
+      si.disabled = true; si.textContent = "Guardando…"; err.textContent = "";
+      try{
+        if(dentro){
+          await post(MERCADO_MARCAR_URL, { ids: [p.id], falta: false });
+          p.falta = false; p.marcadoPor = null; limpiaAcabo([p.id]); delete p.acaboEl;
+        } else {
+          await post(MERCADO_MARCAR_URL, { ids: [p.id], falta: true, origen: "Canasta", fecha });
+          p.falta = true; p.marcadoPor = "Canasta"; p.acaboEl = fecha;
+          const m = leeAcabo(); m[p.id] = fecha; guardaAcabo(m);
+        }
+        guarda(); cierra();
+        exito(dentro ? "Quitado de la canasta" : "En tu canasta", nom);
+        repinta();
+      }catch{
+        si.disabled = false; si.textContent = dentro ? "Quitar de la canasta" : "Dejar en la canasta";
+        err.textContent = "No se pudo guardar. Revisa tu internet y que Tailscale esté encendido.";
+      }
+    });
+  }
+
   /* ── DURACIÓN: cuánto te dura cada cosa, vivo y táctil ── */
   const abiertosD = new Set();
   let duInicia = true;   // la primera vez que llegan datos, se abren los apartados con cosas urgentes
@@ -6658,13 +6745,14 @@ const Mercar = (function(){
     if(p.duraDias && p.ultimaCompra){
       const dias = diasDesde(p.ultimaCompra), dur = p.duraDias, pct = dias / dur;
       const nivel = pct >= 1 ? "ya" : pct >= .85 ? "pronto" : pct >= .5 ? "medio" : "fresco";
-      return { tipo: "dura", p, veces, dias, dur, pct, nivel, quedan: Math.round(dur - dias), proxima: sumaDias(p.ultimaCompra, dur) };
+      return { tipo: "dura", p, veces, dias, dur, pct, nivel: p.falta ? "ya" : nivel, quedan: Math.round(dur - dias), proxima: sumaDias(p.ultimaCompra, dur) };
     }
     if(veces >= 1 || p.ultimaCompra) return { tipo: "aprende", p, veces: Math.max(1, veces), dias: p.ultimaCompra ? diasDesde(p.ultimaCompra) : null };
     return { tipo: "sin", p, veces: 0 };
   }
   const TXT_NIVEL = { fresco: "Recién comprado", medio: "Va por la mitad", pronto: "Se está acabando", ya: "Ya toca comprarlo" };
 
+  const accionCanasta = p => '<button type="button" class="duCanasta' + (p.falta ? ' dentro' : '') + '" data-canasta="' + esc(p.id) + '"><span aria-hidden="true">🧺</span>' + (p.falta ? 'En la canasta · tocar para quitar' : 'Se acabó · dejar en la canasta') + '</button>';
   function pintaDura(entrando){
     if(!datos){ try{ datos = JSON.parse(localStorage.getItem(KEY)); }catch{} }
     const ps = (datos && datos.productos) || [];
@@ -6703,23 +6791,24 @@ const Mercar = (function(){
       const abre = duAbierto === p.id ? " abierto" : "";
       const dly = 'style="--i:' + Math.min(i, 12) + '"';
       if(x.tipo === "dura"){
-        const w = Math.min(100, Math.round(x.pct * 100));
-        return '<div class="duCard ' + x.nivel + abre + (entrando ? ' duEntra' : '') + '" data-id="' + esc(p.id) + '" ' + dly + ' role="button" tabindex="0" aria-expanded="' + !!abre + '">' +
-          '<div class="duCab">' + cab + '<span class="duBadge">~' + plD(x.dur) + '</span></div>' +
+        const w = x.p.falta ? 100 : Math.min(100, Math.round(x.pct * 100));
+        const ac = acaboDe(p), real = ac && p.ultimaCompra ? Math.max(0, Math.round((new Date(ac + "T12:00:00") - new Date(p.ultimaCompra + "T12:00:00")) / 86400000)) : null;
+        return '<div class="duCard ' + x.nivel + (p.falta ? ' canasta' : '') + abre + (entrando ? ' duEntra' : '') + '" data-id="' + esc(p.id) + '" ' + dly + ' role="button" tabindex="0" aria-expanded="' + !!abre + '">' +
+          '<div class="duCab">' + cab + '<span class="duBadge">' + (p.falta ? '🧺 En la canasta' : '~' + plD(x.dur)) + '</span></div>' +
           '<div class="duPista"><i style="width:' + (entrando ? 0 : w) + '%" data-w="' + w + '"></i></div>' +
-          '<div class="duPie"><span>' + TXT_NIVEL[x.nivel] + '</span><span>' + (x.quedan > 0 ? 'quedan ~' + plD(x.quedan) : x.quedan === 0 ? 'se acaba hoy' : 'hace ' + plD(-x.quedan) + ' que debió acabarse') + '</span></div>' +
+          '<div class="duPie"><span>' + (p.falta ? 'Toca comprarlo' : TXT_NIVEL[x.nivel]) + '</span><span>' + (p.falta ? (ac ? 'se acabó ' + (diasDesde(ac) === 0 ? 'hoy' : 'hace ' + plD(diasDesde(ac))) : 'ya se acabó') : x.quedan > 0 ? 'quedan ~' + plD(x.quedan) : x.quedan === 0 ? 'se acaba hoy' : 'hace ' + plD(-x.quedan) + ' que debió acabarse') + '</span></div>' +
           '<div class="duMas"><div class="duMasIn"><div class="duDatos">' +
             '<div><small>Última compra</small><b>' + fechaCorta(p.ultimaCompra) + '</b></div>' +
             '<div><small>Compras</small><b>' + x.veces + '</b></div>' +
-            '<div><small>Te dura</small><b>~' + plD(x.dur) + '</b></div>' +
-            '<div><small>Próxima</small><b>' + fechaCorta(x.proxima) + '</b></div>' +
-          '</div></div></div></div>';
+            (ac ? '<div><small>Se acabó</small><b>' + fechaCorta(ac) + '</b></div><div><small>Duró</small><b>' + plD(real) + '</b></div>'
+                : '<div><small>Te dura</small><b>~' + plD(x.dur) + '</b></div><div><small>Próxima</small><b>' + fechaCorta(x.proxima) + '</b></div>') +
+          '</div>' + accionCanasta(p) + '</div></div></div>';
       }
       if(x.tipo === "aprende"){
         return '<div class="duCard aprende' + abre + (entrando ? ' duEntra' : '') + '" data-id="' + esc(p.id) + '" ' + dly + ' role="button" tabindex="0" aria-expanded="' + !!abre + '">' +
           '<div class="duCab">' + cab + '<span class="duPuntos" aria-label="' + x.veces + ' de 2 compras"><i class="on"></i><i></i></span></div>' +
-          '<div class="duPie"><span>Aprendiendo · falta 1 compra más</span><span>' + (x.dias != null ? 'comprado hace ' + plD(x.dias) : '') + '</span></div>' +
-          '<div class="duMas"><div class="duMasIn"><p class="duNota">Cuando la compres de nuevo con otra fecha, calculo cada cuánto se acaba y te aviso cuándo toca.</p></div></div></div>';
+          '<div class="duPie"><span>' + (p.falta ? '🧺 En la canasta · toca comprarlo' : 'Aprendiendo · falta 1 compra más') + '</span><span>' + (p.falta && acaboDe(p) ? 'se acabó ' + (diasDesde(acaboDe(p)) === 0 ? 'hoy' : 'hace ' + plD(diasDesde(acaboDe(p)))) : x.dias != null ? 'comprado hace ' + plD(x.dias) : '') + '</span></div>' +
+          '<div class="duMas"><div class="duMasIn"><p class="duNota">Cuando la compres de nuevo con otra fecha, calculo cada cuánto se acaba y te aviso cuándo toca.</p>' + accionCanasta(p) + '</div></div></div>';
       }
       return '<div class="duCard sin' + (entrando ? ' duEntra' : '') + '" ' + dly + '><div class="duCab">' + cab + '<span class="duBadge mudo">Sin compras</span></div></div>';
     };
@@ -6748,6 +6837,8 @@ const Mercar = (function(){
     (function paso(t){ const k = Math.min(1, (t - t0) / 900), e = 1 - Math.pow(1 - k, 3); el.innerHTML = Math.round(n * e) + suf; if(k < 1) requestAnimationFrame(paso); })(t0);
   }
   duEl.addEventListener("click", e => {
+    const cb = e.target.closest(".duCanasta");
+    if(cb){ e.stopPropagation(); const p = ((datos && datos.productos) || []).find(x => x.id === cb.dataset.canasta); if(p) abrirCanasta(p); return; }
     const gr = e.target.closest(".rgGrupo");
     if(gr){
       const g = gr.dataset.g, abrir = !abiertosD.has(g);
