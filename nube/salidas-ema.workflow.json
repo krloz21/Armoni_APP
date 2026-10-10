@@ -1,0 +1,217 @@
+{
+  "name": "Salidas con Ema",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "salidas-ema",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "c1000000-0001-4ccc-8ccc-000000000001",
+      "name": "Webhook",
+      "webhookId": "c1000000-0002-4ccc-8ccc-000000000002"
+    },
+    {
+      "parameters": {
+        "jsCode": "const q = $input.first().json.query || {};\nif (q.token !== 'mercado-7d41c2a9e05b') return [{ json: { ok: false } }];\n// últimos 12 meses completos + el actual\nconst d = new Date(Date.now() - 5 * 3600 * 1000);   // hora de Colombia\nd.setUTCDate(1); d.setUTCMonth(d.getUTCMonth() - 11);\nconst desde = d.toISOString().slice(0, 10);\nconst consulta = {\n  page_size: 100,\n  filter: { and: [\n    { property: 'Categoría', select: { equals: 'Salidas Ema' } },\n    { property: 'Fecha', date: { on_or_after: desde } }\n  ] },\n  sorts: [{ property: 'Fecha', direction: 'ascending' }]\n};\nreturn [{ json: { ok: true, consulta: JSON.stringify(consulta) } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        0
+      ],
+      "id": "c1000000-0003-4ccc-8ccc-000000000003",
+      "name": "Validar y preparar"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "ok1",
+              "leftValue": "={{ $json.ok }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        448,
+        0
+      ],
+      "id": "c1000000-0004-4ccc-8ccc-000000000004",
+      "name": "¿Clave válida?"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.notion.com/v1/databases/922bb9e4e3d648feab56d6b2d75be29d/query",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "notionApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Notion-Version",
+              "value": "2022-06-28"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.consulta }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        672,
+        -96
+      ],
+      "id": "c1000000-0005-4ccc-8ccc-000000000005",
+      "name": "Movimientos de Ema",
+      "credentials": {
+        "notionApi": {
+          "id": "pgk4uKXwaEEnuyRO",
+          "name": "Notion account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const filas = $input.first().json.results || [];\nconst por = {};\nfor (const p of filas) {\n  const pr = p.properties || {};\n  const f = pr['Fecha'] && pr['Fecha'].date && pr['Fecha'].date.start ? pr['Fecha'].date.start.slice(0, 10) : null;\n  if (!f) continue;\n  const mes = f.slice(0, 7);\n  const m = por[mes] || (por[mes] = { mes, veces: 0, total: 0, dias: [] });\n  m.total += (pr['Monto'] && pr['Monto'].number) || 0;\n  if (!m.dias.includes(f)) m.dias.push(f);\n}\nfor (const m of Object.values(por)) m.veces = m.dias.length;   // una salida = un día (aunque se registren varios gastos ese día)\nconst meses = Object.values(por).sort((a, b) => a.mes.localeCompare(b.mes));\nreturn [{ json: { meses } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        896,
+        -96
+      ],
+      "id": "c1000000-0006-4ccc-8ccc-000000000006",
+      "name": "Agrupar por mes"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1120,
+        -96
+      ],
+      "id": "c1000000-0007-4ccc-8ccc-000000000007",
+      "name": "Responder"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\"meses\": []}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        672,
+        112
+      ],
+      "id": "c1000000-0008-4ccc-8ccc-000000000008",
+      "name": "Responder vacío"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Validar y preparar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validar y preparar": {
+      "main": [
+        [
+          {
+            "node": "¿Clave válida?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Clave válida?": {
+      "main": [
+        [
+          {
+            "node": "Movimientos de Ema",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Responder vacío",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Movimientos de Ema": {
+      "main": [
+        [
+          {
+            "node": "Agrupar por mes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agrupar por mes": {
+      "main": [
+        [
+          {
+            "node": "Responder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": []
+}

@@ -1773,6 +1773,28 @@ button{ transition:transform var(--t-tap) var(--ease-out); }
 .caProd{ display:flex; align-items:center; justify-content:center; gap:12px; margin:4px 0 8px; font-size:1.2rem; }
 .caProd span{ font-size:2.2rem; }
 .caNota{ margin:6px 0 0; font-size:.88rem; color:var(--ghost); text-align:center; }
+/* Salidas con Ema */
+.emaCard{ margin:0 0 16px; padding:16px; border-radius:22px; border:1px solid var(--line); background:linear-gradient(150deg, rgba(255,138,80,.1), rgba(var(--blue-rgb),.05) 70%, rgba(var(--ink),.03)); box-shadow:inset 0 1px 0 rgba(var(--hi),.1); text-align:left; }
+.emaTop{ display:flex; align-items:center; gap:12px; }
+.emaEmo{ flex:none; width:46px; height:46px; border-radius:15px; display:grid; place-items:center; font-size:1.6rem; background:rgba(255,138,80,.14); }
+.emaTx{ flex:1; min-width:0; display:flex; flex-direction:column; }
+.emaTx small{ font-size:.74rem; color:var(--dim); letter-spacing:.02em; }
+.emaTx b{ font-size:1.25rem; font-weight:700; margin-top:2px; }
+.emaN{ font-size:1.7rem; background:linear-gradient(140deg, #ffb066, #ff7a4d); -webkit-background-clip:text; background-clip:text; color:transparent; }
+.emaTot{ flex:none; font-size:.84rem; font-weight:600; color:var(--ghost); }
+.emaDias{ display:flex; gap:3px; margin:14px 0 2px; }
+.emaDias i{ flex:1; height:7px; border-radius:4px; background:rgba(var(--ink),.1); }
+.emaDias i.on{ background:linear-gradient(180deg, #ffb066, #ff7a4d); box-shadow:0 0 8px rgba(255,138,80,.55); }
+.emaDias i.hoy{ outline:1px solid rgba(var(--ink),.45); outline-offset:1px; }
+.emaBarras{ display:flex; align-items:flex-end; gap:10px; margin-top:14px; padding-top:12px; border-top:1px solid var(--line); }
+.emBar{ flex:1; display:flex; flex-direction:column; align-items:center; gap:5px; }
+.emBar b{ font-size:.82rem; }
+.emCol{ width:100%; max-width:34px; height:44px; display:flex; align-items:flex-end; border-radius:8px; background:rgba(var(--ink),.06); overflow:hidden; }
+.emCol i{ width:100%; border-radius:8px; background:rgba(var(--ink),.28); }
+.emBar.act .emCol i{ background:linear-gradient(180deg, #ffb066, #ff7a4d); }
+.emBar small{ font-size:.68rem; color:var(--dim); text-transform:capitalize; }
+@keyframes emaSube{ from{ opacity:0; transform:translateY(14px); } to{ opacity:1; transform:none; } }
+.emaEntra{ animation:emaSube .6s var(--ease-out) backwards; }
 .duVacio{ text-align:center; padding:26px 0; }
 @keyframes duSube{ from{ opacity:0; transform:translateY(16px) scale(.98); } to{ opacity:1; transform:none; } }
 .duEntra.duHero, .duEntra.duChips{ animation:duSube .6s var(--ease-out) backwards; }
@@ -2169,6 +2191,7 @@ body[class*="mode-"] #masIngreso{ display:none; }
         <div class="restIntro"><h2>Tu mes</h2></div>
         <p class="tmSub">Toca un mes para ver su historia</p>
         <div class="restStatus" id="tmStatus"></div>
+        <div id="tmEma"></div>
         <div id="tmGrid" class="tmGrid"></div>
       </section>
 
@@ -2248,6 +2271,7 @@ const MERCADO_EDITAR_URL = N8N + "/webhook/mercado-editar";
 const MOVIMIENTO_URL = N8N + "/webhook/movimiento-nuevo";   // guarda un gasto/ingreso directo en Notion, sin IA
 const MERCADO_TOKEN = "mercado-7d41c2a9e05b";
 const RESUMEN_URL = N8N + "/webhook/resumen-mes";
+const EMA_URL = N8N + "/webhook/salidas-ema";   // cuántas veces se salió con Ema cada mes
 const JARDIN_PAGADO_URL = N8N + "/webhook/jardin-pagado";   // pagos de una fecha: ?fecha=AAAA-MM-DD
 const JARDIN_BASE = 1120000;   // lo que normalmente se paga de jardín
 const SERVICIOS_DIA_LIMITE = 7;   // hasta qué día del mes avisa si falta pagar
@@ -2277,7 +2301,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-09.87";
+const APP_VERSION = "2026-10-10.88";
 (function autoActualizar(){
   const patron = new RegExp("const APP_" + "VERSION = \"([^\"]+)\"");
   async function revisar(){
@@ -5251,7 +5275,7 @@ function avisoOk(titulo, detalle){
 
 const GastoManual = (function(){
   /* todas menos "Servicios": energía, agua, gas e internet ya se registran solos desde su aviso */
-  const CATS_GASTO = ["Alimentación", "Salidas", "Hogar", "Carro", "Hijo", "Salud", "Tarjetas", "Ahorro", "Otros"];
+  const CATS_GASTO = ["Alimentación", "Salidas", "Salidas Ema", "Hogar", "Carro", "Hijo", "Salud", "Tarjetas", "Ahorro", "Otros"];
   /* lo que entra "a mano": salarios (Hogar), lo que te devuelven al dividir una cuenta (Salidas / Alimentación) y lo demás (Otros) */
   const CATS_INGRESO = ["Hogar", "Alimentación", "Salidas", "Otros"];
   /* pagos que ya tienen su propio flujo: aquí no se registran para no duplicarlos */
@@ -5264,6 +5288,7 @@ const GastoManual = (function(){
     "Hijo":         '<path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/>',
     "Salud":        '<path d="M12 5v14M5 12h14"/>',
     "Salidas":      '<path d="M8 3h8l-1 7a3 3 0 0 1-6 0L8 3z"/><path d="M12 13v7M8.5 20.5h7"/>',
+    "Salidas Ema":  '<circle cx="12" cy="9" r="5.5"/><path d="M12 14.5c0 2-1.2 3-1.2 5.5"/><path d="M9.8 7.2a3 3 0 0 1 2-1"/>',
     "Tarjetas":     '<rect x="3" y="6" width="18" height="12" rx="2.3"/><path d="M3 10h18"/>',
     "Ahorro":       '<path d="M12 3v18"/><path d="M16.5 7H10a3 3 0 0 0 0 6h4a3 3 0 0 1 0 6H7"/>',
     "Otros":        '<path d="M7 17 17 7M9 7h8v8"/>'
@@ -5898,6 +5923,7 @@ const Recuerda = (function(){
     "Alimentación": '<path d="M3 4h2l2.3 10.5h10.4L20 8H6.4"/><circle cx="9" cy="19" r="1.4"/><circle cx="17" cy="19" r="1.4"/>',
     "Salud":        '<path d="M12 5v14M5 12h14"/>',
     "Salidas":      '<path d="M8 3h8l-1 7a3 3 0 0 1-6 0L8 3z"/><path d="M12 13v7M8.5 20.5h7"/>',
+    "Salidas Ema":  '<circle cx="12" cy="9" r="5.5"/><path d="M12 14.5c0 2-1.2 3-1.2 5.5"/><path d="M9.8 7.2a3 3 0 0 1 2-1"/>',
     "Tarjetas":     '<rect x="3" y="6" width="18" height="12" rx="2.3"/><path d="M3 10h18"/>',
     "Ahorro":       '<path d="M12 3v18"/><path d="M16.5 7H10a3 3 0 0 0 0 6h4a3 3 0 0 1 0 6H7"/>'
   };
@@ -7298,6 +7324,42 @@ const TuMes = (function(){
     else if(copiarReferencia(t)) btn.textContent = "¡Copiado!";
   }
 
+  /* ── Salidas con Ema: cuántas veces en el mes (y los meses anteriores) ── */
+  const emaEl = document.getElementById("tmEma"), EKEY = "armoni.tumes.ema";
+  let ema = null;
+  function pintaEma(anim){
+    const ms = (ema && ema.meses) || [];
+    const hoyM = mesHoy(), act = ms.find(m => m.mes === hoyM) || { mes: hoyM, veces: 0, total: 0, dias: [] };
+    if(!ms.length){ emaEl.innerHTML = ""; return; }
+    const ult = ms.filter(m => m.mes !== hoyM).slice(-5);
+    const diasMes = new Date(+hoyM.slice(0, 4), +hoyM.slice(5, 7), 0).getDate(), hoyDia = new Date().getDate();
+    const marcados = new Set((act.dias || []).map(f => +String(f).slice(8, 10)));
+    const puntos = Array.from({ length: diasMes }, (_, i) => '<i class="' + (marcados.has(i + 1) ? 'on' : '') + (i + 1 === hoyDia ? ' hoy' : '') + '" style="--j:' + i + '"></i>').join("");
+    const max = Math.max(1, act.veces, ...ult.map(m => m.veces));
+    const barras = ult.concat([act]).map(m => '<div class="emBar' + (m.mes === hoyM ? ' act' : '') + '"><b>' + m.veces + '</b><span class="emCol"><i style="height:' + Math.max(6, Math.round(m.veces / max * 100)) + '%"></i></span><small>' + esc(mesNombre(m.mes).slice(0, 3)) + '</small></div>').join("");
+    emaEl.innerHTML =
+      '<div class="emaCard' + (anim ? ' emaEntra' : '') + '">' +
+        '<div class="emaTop"><span class="emaEmo" aria-hidden="true">🎈</span><div class="emaTx"><small>Salidas con Ema · ' + esc(mesNombre(hoyM)) + '</small>' +
+        '<b><span class="emaN">' + act.veces + '</span> ' + (act.veces === 1 ? 'vez' : 'veces') + '</b></div>' +
+        (act.total ? '<span class="emaTot">' + peso(act.total) + '</span>' : '') + '</div>' +
+        '<div class="emaDias" aria-hidden="true">' + puntos + '</div>' +
+        (ult.length ? '<div class="emaBarras">' + barras + '</div>' : '') +
+      '</div>';
+  }
+  async function cargarEma(){
+    try{ if(!ema) ema = JSON.parse(localStorage.getItem(EKEY)); }catch{}
+    if(ema) pintaEma(false);
+    try{
+      const res = await fetch(EMA_URL + "?token=" + encodeURIComponent(MERCADO_TOKEN), { cache: "no-store" });
+      if(!res.ok) return;
+      const d = await res.json();
+      if(!d || !Array.isArray(d.meses)) return;
+      const cambio = JSON.stringify(d) !== JSON.stringify(ema);
+      ema = d; try{ localStorage.setItem(EKEY, JSON.stringify(d)); }catch{}
+      if(cambio) pintaEma(!emaEl.firstChild);
+    }catch{}
+  }
+
   /* ── datos: caché al instante + consulta a la torre ── */
   async function cargar(){
     try{
@@ -7315,7 +7377,7 @@ const TuMes = (function(){
   function refresh(){
     if(!datos){ try{ datos = JSON.parse(localStorage.getItem(KEY)); }catch{} }
     if(datos) pintaLista(); else statusEl.innerHTML = '<span class="dot" aria-hidden="true"></span>Armando tus resúmenes…';
-    cargar();
+    cargar(); cargarEma();
   }
 
   /* ── aviso al entrar: «ya está tu resumen del mes». Sale una sola vez por mes; si se cierra, no vuelve ── */
