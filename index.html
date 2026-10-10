@@ -825,14 +825,17 @@ body.mode-gmail footer, body.mode-glim footer{ display:none; }
   display:flex; flex-direction:column; align-items:center; gap:10px; text-align:center;
   padding:34px 20px; border:1.5px dashed rgba(var(--ink),.28); border-radius:18px;
   background:var(--panel); color:var(--strong); cursor:pointer;
-  transition:border-color .2s ease, background .2s ease;
+  transition:border-color .2s ease, background .2s ease, transform .15s ease;
+  position:relative; touch-action:manipulation; -webkit-tap-highlight-color:transparent;
 }
 .gmDrop:hover, .gmDrop:focus-within{ border-color:var(--cyan); }
+.gmDrop:active{ transform:scale(.98); border-color:var(--cyan); background:rgba(var(--cyan-rgb),.08); }
 .gmDrop svg{ width:30px; height:30px; color:var(--cyan); }
 .gmDrop b{ font-weight:600; font-size:1rem; }
 .gmDrop span{ font-size:.8rem; color:var(--dim); }
 .gmDrop.busy{ pointer-events:none; opacity:.55; }
-.gmFile{ position:absolute; width:1px; height:1px; opacity:0; overflow:hidden; }
+/* el selector de fotos cubre todo el recuadro: el toque cae directo en él y abre al instante (sin pasar por la etiqueta) */
+.gmFile{ position:absolute; inset:0; width:100%; height:100%; opacity:0; cursor:pointer; font-size:0; }
 .gmDrop[hidden], .gmBtn[hidden], .gmRow[hidden]{ display:none; }
 
 /* ventana de confirmación, centrada en cualquier pantalla */
@@ -2197,12 +2200,12 @@ body[class*="mode-"] #masIngreso{ display:none; }
 
       <section id="gmailView" aria-label="AT Gmail">
         <div class="restIntro"><h2>Comprobante de pago</h2></div>
-        <label class="gmDrop" id="gmDrop" for="gmFile">
+        <label class="gmDrop" id="gmDrop">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></svg>
           <b>Subir el comprobante</b>
           <span>Antes de enviarlo te vamos a pedir confirmar</span>
+          <input class="gmFile" type="file" id="gmFile" accept="image/*" aria-label="Subir el comprobante">
         </label>
-        <input class="gmFile" type="file" id="gmFile" accept="image/*">
         <div class="restStatus" id="gmStatus" aria-live="polite"></div>
         <button type="button" class="gmBtn" id="gmAgain" hidden>Enviar otro comprobante</button>
       </section>
@@ -2301,7 +2304,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-10.88";
+const APP_VERSION = "2026-10-10.89";
 (function autoActualizar(){
   const patron = new RegExp("const APP_" + "VERSION = \"([^\"]+)\"");
   async function revisar(){
