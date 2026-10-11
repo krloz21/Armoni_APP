@@ -1356,10 +1356,9 @@ body.mode-gmail footer, body.mode-glim footer{ display:none; }
 @keyframes wsPop{ from{ opacity:0; transform:scale(.5) rotate(-8deg); filter:blur(4px); } to{ opacity:1; transform:none; filter:blur(0); } }
 @keyframes wsFlota{ 50%{ transform:translateY(-7px); } }
 /* ── al salir: el contenido se apaga primero (nada se ve cortado) ── */
-.ws.saliendo .wsCuerpo, .ws.saliendo .wsSegs, .ws.saliendo .wsTop, .ws.saliendoAbajo .wsCuerpo, .ws.saliendoAbajo .wsSegs, .ws.saliendoAbajo .wsTop{ opacity:0; transition:opacity .14s ease; }
-.ws.saliendo{ animation:wsSale .32s cubic-bezier(.4,0,1,1) forwards; }
-.ws.desdeTarjeta.saliendo{ animation:wsCierra .56s cubic-bezier(.65,0,.35,1) .08s forwards; }
-@keyframes wsSale{ to{ opacity:0; transform:scale(.92); filter:blur(6px); } }
+.ws.saliendo .wsCuerpo, .ws.saliendo .wsSegs, .ws.saliendo .wsTop, .ws.saliendoAbajo .wsCuerpo, .ws.saliendoAbajo .wsSegs, .ws.saliendoAbajo .wsTop{ opacity:0; transition:opacity .18s ease; }
+.ws.saliendo, .ws.desdeTarjeta.saliendo{ animation:wsSale .3s ease .08s forwards; }
+@keyframes wsSale{ to{ opacity:0; } }
 @keyframes wsCierra{ 0%{ clip-path:inset(0 0 0 0 round 0px); opacity:1; } 80%{ opacity:1; } 100%{ clip-path:inset(var(--oy) var(--or) var(--ob) var(--ol) round 26px); opacity:0; } }
 /* ── las versiones de las primeras historias ── */
 .wsMesGigante{ font-size:clamp(3.2rem, 18vw, 5.6rem); font-weight:800; letter-spacing:-.05em; line-height:.95; margin:0 0 14px; color:#fff; text-shadow:0 0 40px var(--c2); white-space:nowrap; }
@@ -1417,6 +1416,15 @@ body.mode-gmail footer, body.mode-glim footer{ display:none; }
 .wsTicket .tot{ display:flex; justify-content:space-between; align-items:baseline; }
 .wsTicket .tot span{ font-size:.8rem; font-weight:700; }
 .wsTicket .tot strong{ font-size:1.6rem; }
+.wsTicket .rcMarca{ text-align:center; margin-bottom:10px; }
+.wsTicket .rcMarca b{ display:block; margin:0; font-size:1.15rem; letter-spacing:.3em; }
+.wsTicket .rcMeta{ display:flex; justify-content:space-between; gap:10px; font-size:.66rem; color:#6b6b74; }
+.wsTicket .rcItem{ display:grid; grid-template-columns:auto 1fr auto; gap:10px; align-items:baseline; font-size:.95rem; font-weight:700; }
+.wsTicket .rcItem i{ font-style:normal; }
+.wsTicket .rcItem em{ font-style:normal; overflow-wrap:anywhere; }
+.wsTicket .rcSub{ display:flex; justify-content:space-between; font-size:.8rem; color:#55555e; margin-bottom:4px; }
+.wsTicket .tot{ border-top:2px solid #1c1c22; margin-top:8px; padding-top:8px; }
+.wsTicket .rcGracias{ margin:14px 0 0; text-align:center; font-size:.7rem; letter-spacing:.06em; color:#6b6b74; }
 .wsTicket .cod{ height:26px; margin-top:16px; background:repeating-linear-gradient(90deg, #1c1c22 0 2px, transparent 2px 4px, #1c1c22 4px 5px, transparent 5px 8px); opacity:.75; }
 .wsCuerpo > .wsFoco{ position:absolute; inset:-40% -60%; z-index:-1; background:radial-gradient(circle at 50% 45%, rgba(255,255,255,.2), transparent 26%); opacity:1; filter:none; transform:translateX(-45%); animation:wsBarre 2.2s cubic-bezier(.45,0,.2,1) forwards; pointer-events:none; }
 @keyframes wsBarre{ 0%{ transform:translateX(-45%); } 55%{ transform:translateX(30%); } 100%{ transform:translateX(0); } }
@@ -2912,7 +2920,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-11.106";
+const APP_VERSION = "2026-10-11.107";
 (function autoActualizar(){
   const patron = new RegExp("const APP_" + "VERSION = \"([^\"]+)\"");
   async function revisar(){
@@ -8957,7 +8965,7 @@ const TuMes = (function(){
     const nom = mesNombre(M.mes), nomP = P ? mesNombre(P.mes) : null;
     const s = [], tono = tonoDe(M);
     /* las cinco primeras historias cambian de forma cada mes (cada una tiene 3 versiones) */
-    const rv = azar(semillaDe("v" + M.mes)), version = () => Math.floor(rv() * 3);
+    const rv = azar(semillaDe("v" + M.mes)), version = () => (rv(), 9);   // siempre la versión sencilla
     const Nom = nom.charAt(0).toUpperCase() + nom.slice(1);
     const vIntro = version();
     if(vIntro === 1){
@@ -9057,22 +9065,19 @@ const TuMes = (function(){
       }
     }
     if(M.mayor){
-      const vMay = version();
-      if(vMay === 1) s.push({ fondo: 5, html:
+      s.push({ fondo: 5, html:
         '<div class="wsK" style="--d:0">Tu gasto más grande</div>' +
-        '<div class="wsTicket" style="--d:.2"><div class="tk"><small>RECIBO · ' + esc(fechaLarga(M.mayor.fecha)) + '</small><b>' + esc(M.mayor.concepto) + '</b><div class="lin"></div><div class="tot"><span>TOTAL</span><strong data-monto="' + M.mayor.monto + '">$0</strong></div><div class="cod" aria-hidden="true"></div></div></div>' });
-      else if(vMay === 2) s.push({ fondo: 5, html:
-        '<div class="wsFoco" style="--d:0" aria-hidden="true"></div>' +
-        '<div class="wsK" style="--d:.5">Y el gasto más grande fue…</div>' +
-        '<h2 class="wsT wsRevela" style="--d:1.1">' + esc(M.mayor.concepto) + '</h2>' +
-        '<div class="wsBig" style="--d:1.5" data-monto="' + M.mayor.monto + '">$0</div>' +
-        '<p class="wsP" style="--d:1.8">el ' + fechaLarga(M.mayor.fecha) + '</p>' });
-      else s.push({ fondo: 5, centro: true, html:
-        '<div class="wsEmoji" style="--d:0">🏆</div>' +
-        '<div class="wsK" style="--d:.15">Tu gasto más grande</div>' +
-        '<h2 class="wsT wsHead" style="--d:.3">' + esc(M.mayor.concepto) + '</h2>' +
-        '<div class="wsBig" style="--d:.45" data-monto="' + M.mayor.monto + '">$0</div>' +
-        '<p class="wsP" style="--d:.8">el ' + fechaLarga(M.mayor.fecha) + '</p>' });
+        '<div class="wsTicket" style="--d:.2"><div class="tk">' +
+          '<div class="rcMarca"><b>ARMONI</b><small>Cuenta de la casa</small></div>' +
+          '<div class="rcMeta"><span>Mesa 1</span><span>' + esc(fechaLarga(M.mayor.fecha)) + '</span></div>' +
+          '<div class="lin"></div>' +
+          '<div class="rcItem"><span>1</span><em>' + esc(M.mayor.concepto) + '</em><i>' + peso(M.mayor.monto) + '</i></div>' +
+          '<div class="lin"></div>' +
+          '<div class="rcSub"><span>Subtotal</span><span>' + peso(M.mayor.monto) + '</span></div>' +
+          '<div class="rcSub"><span>Propina</span><span>$0</span></div>' +
+          '<div class="tot"><span>TOTAL</span><strong>' + peso(M.mayor.monto) + '</strong></div>' +
+          '<p class="rcGracias">¡Gracias por su visita!</p><div class="cod" aria-hidden="true"></div>' +
+        '</div></div>' });
     }
     if(M.repetido) s.push({ fondo: 3, html:
       '<div class="wsEmoji" style="--d:0">🔁</div>' +
@@ -9340,8 +9345,6 @@ const TuMes = (function(){
       cuerpo.dataset.dir = String(dir); cuerpo.style.setProperty("--dir", dir);
       cuerpo.innerHTML = s.html;
       cuerpo.querySelectorAll("[data-monto]").forEach(x => { x.textContent = peso(+x.dataset.monto); });   // los valores aparecen quietos, sin contar
-      cinetico(cuerpo);
-      if(s.centro) alCentro(cuerpo);
       t0 = performance.now(); pausa = false;
       toques.push(setTimeout(() => cuerpo.querySelectorAll("[data-w]").forEach(x => { x.style.width = x.dataset.w + "%"; }), 700));
     };
@@ -9388,23 +9391,14 @@ const TuMes = (function(){
     cancelAnimationFrame(raf); toques.forEach(clearTimeout);
     if(modo === "abajo" && !REDUCED){
       viejo.classList.add("saliendoAbajo");
-      viejo.style.transition = "transform .42s cubic-bezier(.4,0,.9,.6), opacity .34s ease .06s, border-radius .3s ease";
-      requestAnimationFrame(() => { viejo.style.transform = "translateY(78vh) scale(.78)"; viejo.style.opacity = "0"; viejo.style.borderRadius = "34px"; });
-      setTimeout(() => viejo.remove(), 480);
+      viejo.style.transition = "transform .36s ease, opacity .3s ease .06s";
+      requestAnimationFrame(() => { viejo.style.transform = "translateY(28px)"; viejo.style.opacity = "0"; });
+      setTimeout(() => viejo.remove(), 420);
       return;
     }
-    let aTarjeta = false;
-    if(origenTarjeta && document.contains(origenTarjeta) && !REDUCED){
-      const r = origenTarjeta.getBoundingClientRect();
-      if(r.bottom > 0 && r.top < innerHeight){
-        aTarjeta = true;
-        viejo.style.setProperty("--oy", Math.max(0, r.top) + "px"); viejo.style.setProperty("--ol", Math.max(0, r.left) + "px");
-        viejo.style.setProperty("--or", Math.max(0, innerWidth - r.right) + "px"); viejo.style.setProperty("--ob", Math.max(0, innerHeight - r.bottom) + "px");
-      }
-    }
-    if(!aTarjeta) viejo.classList.remove("desdeTarjeta");
+    viejo.classList.remove("desdeTarjeta");
     viejo.classList.add("saliendo");
-    setTimeout(() => viejo.remove(), aTarjeta ? 620 : 340);
+    setTimeout(() => viejo.remove(), 420);
   }
   function compartir(M, btn){
     if(M.anio){
