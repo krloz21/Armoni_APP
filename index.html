@@ -3003,7 +3003,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-11.125";
+const APP_VERSION = "2026-10-11.126";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -6765,8 +6765,8 @@ const Ahorro = (function(){
     if(!datos){ box.innerHTML = '<p class="gEmpty"><span class="dot" aria-hidden="true"></span>Cargando el ahorro…</p>'; return; }
     const cs = cajas(), movs = datos.movimientos || [];
     if(!cs.length && !movs.length){
-      box.innerHTML = '<div class="ahCard ahVacio"><span class="ahIco" aria-hidden="true">' + ICO_AH + '</span><b>Crea su primera cajita</b><p>Como las cajitas del banco: una para cada cosa. Por ejemplo «Casita», el fondo de emergencia.</p>' +
-        '<button type="button" class="mkBtn pri full" data-a="nueva" data-sug="Casita">Crear «Casita»</button><button type="button" class="mkBtn sec full" data-a="nueva" style="margin-top:10px">Otra cajita</button></div>';
+      box.innerHTML = '<div class="ahCard ahVacio"><span class="ahIco" aria-hidden="true">' + ICO_AH + '</span><b>Crea tu primera cajita</b><p>Como las cajitas del banco: una para cada cosa. Por ejemplo «Casita», el fondo de emergencia.</p>' +
+        '<button type="button" class="mkBtn pri full" data-a="nueva">Crear cajita</button></div>';
       return;
     }
     const mes = hoyISO().slice(0, 7), esteMes = movs.filter(m => m.fecha.startsWith(mes)).reduce((a, m) => a + m.monto, 0);
