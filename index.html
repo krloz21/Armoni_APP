@@ -2129,6 +2129,10 @@ button{ transition:transform var(--t-tap) var(--ease-out); }
 .duHecha + .duHecha{ margin-top:8px; }
 .duHecha b{ display:block; margin-bottom:4px; font-weight:600; color:var(--white); }
 .duHecha em{ display:block; font-style:normal; color:#6fe0b5; }
+.duSaber{ display:grid; gap:8px; }
+.duHecho{ display:flex; align-items:flex-start; gap:10px; padding:11px 12px 11px 14px; border-radius:16px; background:rgba(var(--ink),.05); font-size:.84rem; line-height:1.4; color:var(--ghost); }
+.duHecho span{ flex:1; min-width:0; }
+.duHecho button{ flex:none; width:32px; height:32px; margin:-4px -4px -4px 0; border:0; border-radius:50%; background:none; color:var(--dim); font-size:.9rem; cursor:pointer; }
 .duBuscar{ display:block; width:100%; margin-top:16px; min-height:46px; border-radius:14px; border:1px solid var(--line); background:none; font:inherit; font-weight:600; color:var(--white); cursor:pointer; }
 .duBuscar:disabled{ opacity:.6; }
 .navBadge{ margin-left:auto; min-width:22px; height:22px; padding:0 7px; border-radius:11px; display:grid; place-items:center; font-size:.74rem; font-weight:700; color:#fff; background:linear-gradient(140deg,#ffb066,#ff8a50); }
@@ -3094,7 +3098,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-11.135";
+const APP_VERSION = "2026-10-11.136";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -7123,7 +7127,9 @@ const Preguntas = (function(){
   const esc = t => String(t == null ? "" : t).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
   const peso = n => "$" + Math.round(Math.abs(n)).toLocaleString("es-CO");
   const fechaC = f => { try{ return new Date(f + "T12:00:00").toLocaleDateString("es-CO", { day: "numeric", month: "short" }).replace(".", ""); }catch{ return f; } };
-  const KD = "armoni.dudas";
+  const KD = "armoni.dudas", KS = "armoni.saber";
+  /* lo que Armoni ha aprendido de nuestras respuestas (copia en el celular por si se reinstala el flujo) */
+  let saber = (() => { try{ return JSON.parse(localStorage.getItem(KS)) || []; }catch{ return []; } })();
   const refDe = id => String(id).replace(/-/g, "").slice(-10);
   const limpia = q => { let t = String(q.pregunta || ""); (q.movs || []).forEach(m => { t = t.split(refDe(m.id)).join("«" + m.concepto + "»"); }); return t.replace(/\s*\(?\b[0-9a-f]{10}\b\)?/g, "").replace(/\s{2,}/g, " ").trim(); };
   let pendientes = (() => { try{ return JSON.parse(localStorage.getItem(KP)) || []; }catch{ return []; } })();
@@ -7135,11 +7141,12 @@ const Preguntas = (function(){
     if(Array.isArray(j.preguntas)){ pendientes = j.preguntas; try{ localStorage.setItem(KP, JSON.stringify(pendientes)); }catch{} }
     if(j.ajustes){ try{ localStorage.setItem(KA, JSON.stringify(j.ajustes)); }catch{} }
     if(Array.isArray(j.abiertas)){ dudas = { abiertas: j.abiertas, hechas: j.hechas || [] }; try{ localStorage.setItem(KD, JSON.stringify(dudas)); }catch{} }
+    if(Array.isArray(j.saber)){ saber = j.saber; try{ localStorage.setItem(KS, JSON.stringify(saber)); }catch{} }
     insignia(); if(document.body.classList.contains("mode-dudas")) pinta();
     document.dispatchEvent(new CustomEvent("armoni:preguntas"));
   }
   async function pide(cuerpo){
-    const r = await fetch(PREGUNTAS_URL, { method: "POST", body: JSON.stringify(Object.assign({ token: MERCADO_TOKEN }, cuerpo)) });
+    const r = await fetch(PREGUNTAS_URL, { method: "POST", body: JSON.stringify(Object.assign({ token: MERCADO_TOKEN, memoria: saber }, cuerpo)) });
     const j = await r.json().catch(() => ({}));
     if(!r.ok || j.ok === false) throw new Error(j.error || "http");
     guarda(j); return j;
@@ -7239,8 +7246,14 @@ const Preguntas = (function(){
       '<div class="duResumen' + (A.length ? '' : ' ok') + '"><span class="duNum">' + (A.length || "✓") + '</span><div><b>' + (A.length ? (A.length === 1 ? "Tienes 1 duda por resolver" : "Tienes " + A.length + " dudas por resolver") : "Todo en orden") + '</b><span class="t">' + (A.length ? "Responderlas hace que tus cuentas queden más exactas." : "Armoni no tiene preguntas pendientes por ahora.") + '</span></div></div>' +
       (A.length ? '<div class="duLista">' + A.map((q, i) => '<article class="duCard" style="--i:' + Math.min(i, 8) + '">' + (q.saltada ? '<span class="duTag dif">La dejaste para después</span>' : '<span class="duTag">Por resolver</span>') + '<h3>' + esc(limpia(q)) + '</h3>' + movs(q) + '<button type="button" class="duBtn" data-id="' + esc(q.id) + '">Responder</button></article>').join("") + '</div>' : '') +
       '<button type="button" class="duBuscar" id="duBuscar">Buscar dudas nuevas</button>' +
+      (saber.length ? '<div class="duGrupo">Lo que Armoni ya aprendió</div><div class="duSaber">' + saber.map((t, i) => '<div class="duHecho"><span>' + esc(t) + '</span><button type="button" data-o="' + i + '" aria-label="Olvidar esto">✕</button></div>').join("") + '</div>' : '') +
       (H.length ? '<div class="duGrupo">Ya resueltas</div>' + H.map(q => '<div class="duHecha"><b>' + esc(q.pregunta) + '</b><em>Tú: ' + esc(q.respuesta) + '</em></div>').join("") : '');
     cuerpo.querySelectorAll(".duBtn").forEach(b => b.addEventListener("click", () => abre(b.dataset.id)));
+    cuerpo.querySelectorAll("[data-o]").forEach(b => b.addEventListener("click", () => {
+      const t = saber[+b.dataset.o]; if(t == null) return;
+      b.closest(".duHecho").remove(); saber = saber.filter(x => x !== t); try{ localStorage.setItem(KS, JSON.stringify(saber)); }catch{}
+      pide({ accion: "olvidar", texto: t }).catch(() => {});
+    }));
     const bu = cuerpo.querySelector("#duBuscar");
     bu.addEventListener("click", async () => {
       bu.disabled = true; bu.textContent = "Revisando tus movimientos…";
