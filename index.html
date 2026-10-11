@@ -2054,13 +2054,28 @@ button{ transition:transform var(--t-tap) var(--ease-out); }
 .balTorta{ position:relative; height:300px; border-radius:24px; border:1px solid var(--line); background:radial-gradient(120% 90% at 50% 10%, rgba(var(--cyan-rgb),.08), transparent 60%), var(--panel); overflow:hidden; }
 .balLienzo{ position:absolute; inset:0; }
 .balLienzo canvas{ display:block; width:100% !important; height:100% !important; touch-action:pan-y; }
-.balInvita{ position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; padding:20px; text-align:center; transition:opacity .5s ease, transform .5s ease; }
-.balTorta.lista .balInvita{ opacity:0; transform:scale(.9); pointer-events:none; }
-.balInvita b{ font-size:1.1rem; }
-.balInvita small{ max-width:260px; font-size:.82rem; color:var(--dim); margin-bottom:10px; }
-.balTortaIco{ position:relative; width:74px; height:74px; margin-bottom:8px; border-radius:50%; background:conic-gradient(#3987e5 0 50%, #e66767 0 80%, #199e70 0); box-shadow:0 14px 30px -12px rgba(57,135,229,.8); animation:balGira 9s linear infinite; }
-.balTortaIco::after{ content:""; position:absolute; inset:-1px; border-radius:50%; background:conic-gradient(from 0deg, transparent 0 49.4%, var(--panel) 49.4% 50.6%, transparent 50.6% 79.4%, var(--panel) 79.4% 80.6%, transparent 80.6% 99.4%, var(--panel) 99.4%); }
-@keyframes balGira{ to{ transform:rotate(360deg); } }
+.balInvita{ position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; padding:14px; text-align:center; transition:opacity .5s ease, transform .5s ease; }
+.balTorta.lista .balInvita{ opacity:0; transform:scale(.92); pointer-events:none; }
+.balPreview{ position:relative; flex-shrink:0; width:150px; height:84px; margin-bottom:2px; perspective:500px; }
+.balPreview .disco{ position:absolute; left:50%; top:-6px; width:108px; height:108px; margin-left:-54px; border-radius:50%; background:conic-gradient(from -90deg, #3987e5 0 calc(var(--a) * 1%), #e66767 0 calc(var(--b) * 1%), #199e70 0); transform:rotateX(62deg); box-shadow:0 1px 0 #2a6fc9, 0 2px 0 #2565c4, 0 3px 0 #23609f, 0 4px 0 #1f5694, 0 5px 0 #1c4e88, 0 6px 0 #19467b, 0 7px 0 #163f6f, 0 8px 0 #143862, 0 22px 30px -6px rgba(0,0,0,.6); animation:balFlota 3.4s ease-in-out infinite; }
+.balPreview .disco::after{ content:""; position:absolute; inset:0; border-radius:50%; background:radial-gradient(circle at 35% 30%, rgba(255,255,255,.35), transparent 55%); }
+.balPreview .sombra{ position:absolute; left:50%; bottom:-6px; width:120px; height:16px; margin-left:-60px; border-radius:50%; background:radial-gradient(rgba(0,0,0,.55), transparent 70%); animation:balSombra 3.4s ease-in-out infinite; }
+@keyframes balFlota{ 0%, 100%{ transform:rotateX(62deg) translateY(0) rotateZ(0deg); } 50%{ transform:rotateX(62deg) translateY(-6px) rotateZ(12deg); } }
+@keyframes balSombra{ 50%{ transform:scale(.85); opacity:.7; } }
+.balInvTx{ position:relative; z-index:1; flex-shrink:0; }
+.balInvTx small{ display:block; font-size:.7rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--dim); }
+.balInvTx b{ display:block; margin:3px 0 8px; font-size:1.08rem; }
+.balReglas{ display:flex; flex-wrap:wrap; justify-content:center; gap:6px; }
+.balReglas span{ display:inline-flex; align-items:center; gap:6px; padding:4px 10px; border-radius:999px; font-size:.74rem; font-weight:600; color:var(--ghost); background:rgba(var(--ink),.05); border:1px solid var(--line); }
+.balReglas i{ width:8px; height:8px; border-radius:50%; background:var(--c); }
+.balBtnGen{ display:inline-flex; align-items:center; gap:9px; padding:13px 22px; border:0; border-radius:999px; font:inherit; font-size:.95rem; font-weight:700; color:#fff; background:linear-gradient(140deg, #3987e5, #5a3fe0); box-shadow:0 14px 30px -12px rgba(57,135,229,.9), inset 0 1px 0 rgba(255,255,255,.25); cursor:pointer; transition:transform .2s var(--ease-spring); }
+.balBtnGen svg{ width:18px; height:18px; }
+.balBtnGen:active{ transform:scale(.95); }
+.balBtnGen:disabled{ opacity:.7; }
+.balEtqs{ position:absolute; inset:0; pointer-events:none; }
+.balEtq{ position:absolute; left:0; top:0; display:flex; flex-direction:column; align-items:center; padding:3px 7px; border-radius:9px; background:rgba(8,10,16,.62); border:1px solid rgba(255,255,255,.14); color:#fff; line-height:1.1; white-space:nowrap; opacity:0; transition:opacity .4s ease; -webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px); }
+.balEtq b{ font-size:.86rem; }
+.balEtq small{ font-size:.62rem; color:rgba(255,255,255,.8); }
 .balPartes{ display:grid; gap:8px; margin-top:12px; }
 .balParte{ display:flex; align-items:center; gap:12px; width:100%; padding:12px 14px; border-radius:16px; border:1px solid var(--line); background:var(--panel); color:var(--white); font:inherit; text-align:left; cursor:pointer; transition:border-color .25s, transform .2s; }
 .balParte:active{ transform:scale(.98); }
@@ -2080,6 +2095,7 @@ button{ transition:transform var(--t-tap) var(--ease-out); }
 .balDetalle.abre{ animation:duSube .45s var(--ease-out); }
 .balDetCab b{ display:block; }
 .balDetCab small{ display:block; font-size:.76rem; color:var(--dim); margin-bottom:8px; }
+.balFila u{ display:inline-block; width:9px; height:9px; margin-right:7px; border-radius:3px; background:var(--c); }
 .balFila{ position:relative; display:flex; justify-content:space-between; gap:10px; padding:8px 0 10px; font-size:.86rem; animation:duSube .4s var(--ease-out) backwards; animation-delay:calc(var(--i) * 50ms); }
 .balFila em{ font-style:normal; font-weight:700; font-variant-numeric:tabular-nums; }
 .balFila i{ position:absolute; left:0; bottom:2px; height:4px; border-radius:4px; background:var(--c); opacity:.85; }
@@ -2109,7 +2125,7 @@ button{ transition:transform var(--t-tap) var(--ease-out); }
 .balTabla table{ width:100%; margin-top:6px; border-collapse:collapse; font-variant-numeric:tabular-nums; }
 .balTabla td, .balTabla th{ padding:4px 2px; text-align:right; border-bottom:1px solid var(--line); }
 .balTabla td:first-child, .balTabla th:first-child{ text-align:left; text-transform:capitalize; }
-@media (prefers-reduced-motion:reduce){ .balTortaIco, .balGraf .ln, .balGraf .pt, .balFila{ animation:none !important; stroke-dashoffset:0; opacity:1; } }
+@media (prefers-reduced-motion:reduce){ .balPreview .disco, .balPreview .sombra, .balGraf .ln, .balGraf .pt, .balFila{ animation:none !important; stroke-dashoffset:0; opacity:1; } }
 .restCiudades{ display:flex; align-items:center; gap:6px; margin:0 0 10px; font-size:.9rem; }
 .restCiudades button{ padding:6px 12px; border-radius:999px; border:1px solid var(--line); background:var(--panel); color:var(--ghost); font:inherit; font-size:.8rem; font-weight:600; cursor:pointer; }
 .restCiudades button small{ opacity:.7; }
@@ -2506,6 +2522,13 @@ body[class*="mode-"] #masIngreso{ display:none; }
 .fmResumen button:first-child{ grid-column:1 / -1; }
 .fmAyuda{ margin:8px 2px 0; font-size:.76rem; color:var(--dim); text-align:center; }
 .fmPareja .seParqEmo{ font-size:3.2rem; }
+.fmQuien{ display:grid; grid-template-columns:repeat(3, 1fr); gap:8px; margin-top:14px; }
+.fmQuien button{ display:flex; flex-direction:column; align-items:center; gap:3px; padding:12px 6px; border-radius:16px; border:1px solid var(--line); background:rgba(var(--ink),.04); color:var(--white); font:inherit; cursor:pointer; animation:fmCatEntra .45s var(--ease-spring) backwards; transition:transform .15s var(--ease-spring), border-color .25s, background .25s; }
+.fmQuien button:nth-child(2){ animation-delay:.06s; } .fmQuien button:nth-child(3){ animation-delay:.12s; }
+.fmQuien button:active{ transform:scale(.94); border-color:rgba(var(--fa-rgb),.6); background:rgba(var(--fa-rgb),.14); }
+.fmQuien span{ display:grid; place-items:center; width:40px; height:40px; font-size:1.6rem; }
+.fmQuien b{ font-size:.82rem; }
+.fmQuien small{ font-size:.66rem; color:var(--dim); }
 .fmCard .fmRow #inSi{ background:linear-gradient(140deg, #ff9cc0, #e0457b); color:#fff; box-shadow:0 12px 26px -14px rgba(224,69,123,.9); }
 .fmCard .sePuntos i.ok{ background:rgba(var(--fa-rgb),.55); }
 .fmCard .sePuntos i.on{ background:linear-gradient(90deg, var(--fa1), var(--fa2)); }
@@ -2577,7 +2600,7 @@ body[class*="mode-"] #masIngreso{ display:none; }
       </button>
       <button type="button" id="navBalance">
         <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v9l7.8 4.5"/><circle cx="12" cy="12" r="9"/></svg></span>
-        <span class="txt"><b>Balance</b><span>La regla 50/30/20 y cómo vamos</span></span>
+        <span class="txt"><b>Balance</b><span>Gastos fijos, entretenimiento y ahorro</span></span>
       </button>
       <button type="button" id="navRecuerda">
         <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/><path d="m9 15 2 2 4-4"/></svg></span>
@@ -2770,7 +2793,7 @@ body[class*="mode-"] #masIngreso{ display:none; }
 
       <section id="balanceView" aria-label="Balance">
         <div class="restIntro"><h2>Balance</h2></div>
-        <p class="tmSub">50% necesidades · 30% deseos · 20% ahorro</p>
+        <p class="tmSub">50% gastos fijos · 30% entretenimiento · 20% ahorro</p>
         <div id="balCuerpo"></div>
       </section>
 
@@ -2889,7 +2912,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-11.104";
+const APP_VERSION = "2026-10-11.105";
 (function autoActualizar(){
   const patron = new RegExp("const APP_" + "VERSION = \"([^\"]+)\"");
   async function revisar(){
@@ -5600,6 +5623,7 @@ const SalidaEmaForm = (function(){
     let fecha = hoyISO(), paradas = [], idx = 0, paso = "lugar", guardando = false;
     const nuevaParada = () => ({ lugar: "", puntuacion: 0, comentario: "", gastos: [], preguntado: false });
     paradas.push(nuevaParada());
+    if(opts && opts.pre && opts.pre.c && opts.pre.m > 0) paradas[0].gastos.push({ c: opts.pre.c, m: opts.pre.m, hecho: false });
     const scrim = document.createElement("div");
     scrim.className = "pgScrim seScrim";
     scrim.innerHTML =
@@ -6334,10 +6358,21 @@ const Balance = (function(){
   const mesHoy = () => { const d = new Date(); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0"); };
   /* las tres partes de la regla: color fijo para cada una (paleta validada para daltonismo sobre fondo oscuro) */
   const PARTES = [
-    { k: "nec", nombre: "Necesidades", ideal: 50, color: "#3987e5", cats: ["Hogar", "Alimentación", "Servicios", "Salud", "Carro", "Hijo", "Tarjetas"], nota: "Vivienda, comida, servicios, salud, transporte, Ema y deudas" },
-    { k: "des", nombre: "Deseos", ideal: 30, color: "#e66767", cats: ["Salidas", "Salidas Ema", "Otros"], nota: "Salidas, planes, antojos y lo demás" },
-    { k: "aho", nombre: "Ahorro", ideal: 20, color: "#199e70", cats: ["Ahorro"], nota: "Lo que se guarda y lo que quedó sin gastar" }
+    { k: "nec", nombre: "Gastos fijos", ideal: 50, color: "#3987e5", tonos: ["#3987e5", "#7ab3f5", "#2565c4", "#a9cdf8", "#1b4f9e", "#5b9be8", "#cfe3fb"], cats: ["Hogar", "Alimentación", "Servicios", "Salud", "Carro", "Hijo", "Tarjetas"], nota: "Casa, comida, servicios, salud, carro, Ema y tarjetas" },
+    { k: "des", nombre: "Entretenimiento", ideal: 30, color: "#e66767", tonos: ["#e66767", "#f5a3a3", "#c44747", "#fbc9c9"], cats: ["Salidas", "Salidas Ema", "Otros"], nota: "Salidas, planes, antojos y lo demás" },
+    { k: "aho", nombre: "Ahorro", ideal: 20, color: "#199e70", tonos: ["#199e70", "#5fcfa4", "#0f7a55"], cats: ["Ahorro"], nota: "Lo que se guarda y lo que quedó sin gastar" }
   ];
+  /* cada parte se abre en sus categorías (cada una con su tono y su porcentaje de lo que entró) */
+  function porciones(M, R){
+    const out = [];
+    PARTES.forEach(p => {
+      let filas = (M.categorias || []).filter(c => p.cats.includes(c.nombre) && c.total > 0).map(c => ({ nombre: c.nombre, v: c.total }));
+      if(p.k === "des" && R.sinCat) filas.push({ nombre: "Sin categoría", v: R.sinCat });
+      if(p.k === "aho" && R.quedo) filas.push({ nombre: "Quedó sin gastar", v: R.quedo });
+      filas.sort((a, b) => b.v - a.v).forEach((f, i) => out.push({ k: p.k, nombre: f.nombre, v: f.v, color: p.tonos[i % p.tonos.length], pct: R.base ? f.v / R.base * 100 : 0 }));
+    });
+    return out;
+  }
   let datos = null, mes = null, vista = "meses", tresListo = null, escena = null;
 
   function lee(){ try{ datos = JSON.parse(localStorage.getItem("armoni.tumes.datos")); }catch{} }
@@ -6373,8 +6408,11 @@ const Balance = (function(){
       '<div class="balMeses" role="tablist">' + ms.slice(-8).map(m => '<button type="button" role="tab" data-m="' + m.mes + '" aria-selected="' + (m.mes === mes) + '">' + esc(mesNombre(m.mes).slice(0, 3)) + (m.mes === mesHoy() ? ' ·' : '') + '</button>').join("") + '</div>' +
       '<div class="balTorta" id="balTorta">' +
         '<div class="balLienzo" id="balLienzo"></div>' +
-        '<div class="balInvita" id="balInvita"><span class="balTortaIco" aria-hidden="true"><i></i><i></i><i></i></span><b>La regla 50/30/20</b><small>Mira cómo se repartió la plata de ' + esc(mesNombre(mes)) + ' frente a lo ideal</small>' +
-          '<button type="button" class="mkBtn pri" id="balGenerar">Generar torta</button></div>' +
+        '<div class="balInvita" id="balInvita">' +
+          '<div class="balPreview" aria-hidden="true"><div class="disco" style="--a:' + Math.round(R.pct("nec")) + ';--b:' + Math.round(R.pct("nec") + R.pct("des")) + '"></div><div class="sombra"></div></div>' +
+          '<div class="balInvTx"><small>' + esc(mesNombre(mes).charAt(0).toUpperCase() + mesNombre(mes).slice(1)) + ' en 3D</small><b>¿Cómo se repartió la plata?</b>' +
+          '<div class="balReglas">' + PARTES.map(p => '<span style="--c:' + p.color + '"><i></i>' + p.ideal + '% ' + p.nombre.toLowerCase() + '</span>').join("") + '</div></div>' +
+          '<button type="button" class="balBtnGen" id="balGenerar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v9l7.8 4.5"/><circle cx="12" cy="12" r="9"/></svg><span>Generar torta</span></button></div>' +
       '</div>' +
       '<div class="balPartes">' + PARTES.map(p => { const real = R.pct(p.k), dif = real - p.ideal, bien = p.k === "aho" ? dif >= -2 : dif <= 2;
         return '<button type="button" class="balParte" data-k="' + p.k + '" style="--c:' + p.color + '"><i></i><span class="n"><b>' + p.nombre + '</b><small>' + peso(R.v[p.k]) + '</small></span>' +
@@ -6393,14 +6431,11 @@ const Balance = (function(){
     const M = meses().find(m => m.mes === mes); if(!M) return;
     const R = reparto(M), p = PARTES.find(x => x.k === k), box = view.querySelector("#balDetalle");
     view.querySelectorAll(".balParte").forEach(b => b.classList.toggle("on", b.dataset.k === k));
-    let filas = (M.categorias || []).filter(c => p.cats.includes(c.nombre)).map(c => ({ n: c.nombre, v: c.total }));
-    if(k === "des" && R.sinCat) filas.push({ n: "Sin categoría", v: R.sinCat });
-    if(k === "aho" && R.quedo) filas.push({ n: "Quedó sin gastar", v: R.quedo });
-    filas.sort((a, b) => b.v - a.v);
+    const filas = porciones(M, R).filter(x => x.k === k).map(x => ({ n: x.nombre, v: x.v, pct: x.pct, color: x.color }));
     const mx = Math.max(1, ...filas.map(f => f.v));
     box.style.setProperty("--c", p.color);
     box.innerHTML = '<div class="balDetCab"><b>' + p.nombre + '</b><small>' + p.nota + '</small></div>' +
-      (filas.length ? filas.map((f, i) => '<div class="balFila" style="--i:' + i + '"><span>' + esc(f.n) + '</span><em>' + peso(f.v) + '</em><i style="width:' + Math.max(3, f.v / mx * 100).toFixed(1) + '%"></i></div>').join("") : '<p class="gEmpty">Nada en esta parte este mes.</p>');
+      (filas.length ? filas.map((f, i) => '<div class="balFila" style="--i:' + i + ';--c:' + f.color + '"><span><u></u>' + esc(f.n) + '</span><em>' + peso(f.v) + ' · ' + Math.round(f.pct) + '%</em><i style="width:' + Math.max(3, f.v / mx * 100).toFixed(1) + '%"></i></div>').join("") : '<p class="gEmpty">Nada en esta parte este mes.</p>');
     box.classList.remove("abre"); void box.offsetWidth; box.classList.add("abre");
     if(escena) escena.elige(k);
   }
@@ -6467,46 +6502,54 @@ const Balance = (function(){
     catch{ btn.disabled = false; btn.textContent = "Generar torta"; view.querySelector("#balInvita small").textContent = "No se pudo cargar la torta. Revisa tu internet."; return; }
     const M = meses().find(m => m.mes === mes); if(!M) return;
     apaga();
-    escena = torta(view.querySelector("#balLienzo"), reparto(M));
+    const R = reparto(M);
+    escena = torta(view.querySelector("#balLienzo"), R, porciones(M, R));
     view.querySelector("#balTorta").classList.add("lista");
   }
-  function torta(cont, R){
+  function torta(cont, R, P){
     const T = window.THREE;
     const w = cont.clientWidth || 320, h = cont.clientHeight || 300;
     const renderer = new T.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setPixelRatio(Math.min(2, devicePixelRatio || 1)); renderer.setSize(w, h);
     cont.appendChild(renderer.domElement);
+    const etqs = document.createElement("div"); etqs.className = "balEtqs"; cont.appendChild(etqs);
     const scene = new T.Scene(), cam = new T.PerspectiveCamera(36, w / h, .1, 50);
     cam.position.set(0, 4.6, 6.4); cam.lookAt(0, .25, 0);
     scene.add(new T.HemisphereLight(0xffffff, 0x1a2233, .55));
     const sol = new T.DirectionalLight(0xffffff, .75); sol.position.set(3, 6, 4); scene.add(sol);
     const contra = new T.DirectionalLight(0x88aaff, .35); contra.position.set(-4, 2, -3); scene.add(contra);
     const grupo = new T.Group(); scene.add(grupo);
-    const total = PARTES.reduce((a, p) => a + R.v[p.k], 0) || 1;
+    const total = P.reduce((a, x) => a + x.v, 0) || 1;
+    const altoParte = {}; PARTES.forEach(p => { altoParte[p.k] = .28 + (P.filter(x => x.k === p.k).reduce((a, x) => a + x.v, 0) / total) * 1.05; });
     let a0 = Math.PI / 2;
     const rebanadas = [];
-    PARTES.forEach((p, i) => {
-      const frac = R.v[p.k] / total; if(frac <= .001) return;
-      const a1 = a0 - frac * Math.PI * 2, rad = 1.45, alto = .3 + frac * 1;
+    P.forEach((x, i) => {
+      const frac = x.v / total; if(frac <= .002) return;
+      const a1 = a0 - frac * Math.PI * 2, rad = 1.45, alto = altoParte[x.k];
       const sh = new T.Shape(); sh.moveTo(0, 0); sh.absarc(0, 0, rad, a1, a0, false); sh.lineTo(0, 0);
-      const geo = new T.ExtrudeGeometry(sh, { depth: alto, bevelEnabled: true, bevelThickness: .03, bevelSize: .03, bevelSegments: 3, curveSegments: 48 });
+      const geo = new T.ExtrudeGeometry(sh, { depth: alto, bevelEnabled: true, bevelThickness: .025, bevelSize: .025, bevelSegments: 3, curveSegments: Math.max(8, Math.round(frac * 120)) });
       geo.rotateX(-Math.PI / 2);
-      const mat = new T.MeshStandardMaterial({ color: new T.Color(p.color), roughness: .38, metalness: .08 });
+      const mat = new T.MeshStandardMaterial({ color: new T.Color(x.color), roughness: .4, metalness: .06 });
       const m = new T.Mesh(geo, mat);
-      const mid = (a0 + a1) / 2;
-      m.userData = { k: p.k, dir: new T.Vector3(Math.cos(mid), 0, -Math.sin(mid)), sale: 0, meta: .05, alto, t0: performance.now() + i * 160 };
-      m.position.copy(m.userData.dir).multiplyScalar(.05);
+      const mid = (a0 + a1) / 2, nuevaParte = !i || P[i - 1].k !== x.k;
+      const dir = new T.Vector3(Math.cos(mid), 0, -Math.sin(mid));
+      m.userData = { k: x.k, nombre: x.nombre, dir, sale: 0, base: nuevaParte ? .07 : .04, meta: .05, t0: performance.now() + i * 90 };
+      m.userData.meta = m.userData.base;
       m.scale.set(1, .001, 1);
       grupo.add(m); rebanadas.push(m);
+      /* etiqueta con el porcentaje (las porciones muy pequeñas van solo en la lista) */
+      if(x.pct >= 4){
+        const e = document.createElement("span"); e.className = "balEtq"; e.innerHTML = "<b>" + Math.round(x.pct) + "%</b><small>" + esc(x.nombre) + "</small>";
+        etqs.appendChild(e);
+        m.userData.etq = e; m.userData.pct = x.pct; m.userData.ancla = new T.Vector3(Math.cos(mid) * rad * .66, alto + .06, -Math.sin(mid) * rad * .66);
+      }
       a0 = a1;
     });
-    /* giroscopio: inclinar el celular inclina la torta */
     let tx = 0, tz = 0, gx = 0, gz = 0;
     const gira = e => { if(e.beta == null) return; tx = Math.max(-.5, Math.min(.5, (e.beta - 45) / 90)); tz = Math.max(-.5, Math.min(.5, e.gamma / 90)); };
     window.addEventListener("deviceorientation", gira);
-    /* arrastrar con el dedo la hace girar; un toque escoge una parte */
-    let arr = false, x0 = 0, rotY = 0, vel = .0035, mov = 0;
-    const ray = new T.Raycaster(), pt = new T.Vector2();
+    let arr = false, x0 = 0, rotY = 0, vel = .003, mov = 0;
+    const ray = new T.Raycaster(), pt = new T.Vector2(), v3 = new T.Vector3(), pos = [];
     const cnv = renderer.domElement;
     cnv.addEventListener("pointerdown", e => { arr = true; x0 = e.clientX; mov = 0; try{ cnv.setPointerCapture(e.pointerId); }catch{} });
     cnv.addEventListener("pointermove", e => { if(!arr) return; const d = e.clientX - x0; x0 = e.clientX; mov += Math.abs(d); rotY += d * .012; vel = d * .0009; });
@@ -6514,33 +6557,52 @@ const Balance = (function(){
       arr = false; if(mov > 6) return;
       const r = cnv.getBoundingClientRect(); pt.set((e.clientX - r.left) / r.width * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
       ray.setFromCamera(pt, cam); const hit = ray.intersectObjects(rebanadas)[0];
-      if(hit) detalle(hit.object.userData.k);
+      if(hit){ detalle(hit.object.userData.k); elige(hit.object.userData.k, hit.object.userData.nombre); }
     });
+    function elige(k, nombre){ rebanadas.forEach(m => { const u = m.userData, si = u.k === k && (!nombre || u.nombre === nombre); u.meta = si ? (nombre ? .42 : .3) : u.base; }); }
     let raf = 0, vivo = true;
     const bucle = now => {
       if(!vivo) return;
       raf = requestAnimationFrame(bucle);
       if(document.hidden) return;
-      if(!arr){ rotY += vel; vel += (.0035 - vel) * .02; }
+      if(!arr){ rotY += vel; vel += (.003 - vel) * .02; }
       gx += (tx - gx) * .08; gz += (tz - gz) * .08;
       grupo.rotation.set(.12 + gx * .9, rotY, gz * .9);
+      grupo.updateMatrixWorld();
       rebanadas.forEach(m => {
         const u = m.userData, p = Math.min(1, Math.max(0, (now - u.t0) / 900)), e = 1 - Math.pow(1 - p, 3);
         m.scale.y = Math.max(.001, e * (1 + Math.sin(p * Math.PI) * .12));
         u.sale += (u.meta - u.sale) * .12;
-        m.position.copy(u.dir).multiplyScalar(u.sale); m.position.y = u.meta > .1 ? .12 : 0;
+        m.position.copy(u.dir).multiplyScalar(u.sale); m.position.y = u.meta > u.base + .01 ? .1 : 0;
+        if(u.etq){
+          v3.copy(u.ancla); v3.y *= m.scale.y; v3.add(m.position); v3.applyMatrix4(grupo.matrixWorld); v3.project(cam);
+          const px = (v3.x + 1) / 2 * w, py = (1 - v3.y) / 2 * h;
+          u.etq.style.transform = "translate(" + px.toFixed(1) + "px," + py.toFixed(1) + "px) translate(-50%,-50%)";
+          pos.push({ u, px, py, listo: p > .7, prio: (u.meta > u.base + .01 ? 1000 : 0) + u.pct });
+        }
       });
+      // Etiquetas sin encimarse: primero la tajada elegida y las más grandes; las que chocan se esconden
+      pos.sort((a, b) => b.prio - a.prio);
+      const puestas = [];
+      pos.forEach(o => {
+        // Si choca, se corre arriba o abajo un poco; solo se esconde si no cabe en ningún lado
+        const corre = [0, 34, -34, 68, -68].find(d => !puestas.some(q => Math.abs(q.px - o.px) < 72 && Math.abs(q.py - (o.py + d)) < 34));
+        const ver = o.listo && corre !== undefined;
+        if(ver){ o.py += corre; puestas.push(o); o.u.etq.style.transform = "translate(" + o.px.toFixed(1) + "px," + o.py.toFixed(1) + "px) translate(-50%,-50%)"; }
+        o.u.etq.style.opacity = ver ? "1" : "0";
+      });
+      pos.length = 0;
       renderer.render(scene, cam);
     };
     raf = requestAnimationFrame(bucle);
     return {
-      elige(k){ rebanadas.forEach(m => { m.userData.meta = m.userData.k === k ? .38 : .05; }); },
+      elige(k){ elige(k); },
       apaga(){
         vivo = false; cancelAnimationFrame(raf);
         window.removeEventListener("deviceorientation", gira);
         rebanadas.forEach(m => { m.geometry.dispose(); m.material.dispose(); });
         renderer.dispose(); try{ renderer.forceContextLoss(); }catch{}
-        cnv.remove();
+        cnv.remove(); etqs.remove();
       }
     };
   }
@@ -7186,10 +7248,17 @@ const GastoManual = (function(){
         return;
       }
       if(paso === "pareja"){
-        vista.innerHTML = '<div class="seParqueo fmPareja"><div class="seParqEmo" aria-hidden="true">💑</div><div class="sePregunta">¿Fue una cita en pareja?</div><p class="fmAyuda">Solo ustedes dos. Si salieron en familia, toca «No». Las citas se cuentan en «Tu mes».</p></div>';
-        botones.innerHTML = '<button type="button" class="pgNo" id="inNo">No</button><button type="button" class="pgSi" id="inSi">Sí, cita en pareja</button>';
-        $("inNo").addEventListener("click", () => { pareja = false; preguntoPareja = true; ir(editando ? "nota" : "fecha", 1); });
-        $("inSi").addEventListener("click", () => { pareja = true; preguntoPareja = true; ir(editando ? "nota" : "fecha", 1); });
+        vista.innerHTML = '<div class="seParqueo fmPareja"><div class="seParqEmo" aria-hidden="true">🍽️</div><div class="sePregunta">¿Con quién fue la salida?</div><p class="fmAyuda">Así queda bien contada: las citas en «Tu mes» y lo de Ema en su salida completa.</p>' +
+          '<div class="fmQuien"><button type="button" data-q="pareja"><span>💑</span><b>Solo los dos</b><small>Cita en pareja</small></button><button type="button" data-q="ema"><span>' + FOTO_EMA + '</span><b>Con Ema</b><small>Va a su salida</small></button><button type="button" data-q="otro"><span>👥</span><b>Otro</b><small>Amigos, trabajo…</small></button></div></div>';
+        botones.innerHTML = '';
+        vista.querySelector(".fmQuien").addEventListener("click", e => {
+          const b = e.target.closest("[data-q]"); if(!b) return;
+          if(b.dataset.q === "ema"){
+            /* lo de Ema va a su salida completa (lugar, parqueadero…), ya con este gasto anotado */
+            cierra(); setTimeout(() => SalidaEmaForm.abrir({ pre: { c: concepto, m: monto } }), 300); return;
+          }
+          pareja = b.dataset.q === "pareja"; preguntoPareja = true; ir(editando ? "nota" : "fecha", 1);
+        });
         return;
       }
       if(paso === "fecha"){
