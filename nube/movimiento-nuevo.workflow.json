@@ -149,7 +149,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "https://api.notion.com/v1/databases/4912f5c4e91d41598e49bb8e97d02f31/query",
+        "url": "https://api.notion.com/v1/data_sources/2449dcb1-f56e-4263-acea-f4b307273e86/query",
         "authentication": "predefinedCredentialType",
         "nodeCredentialType": "notionApi",
         "sendHeaders": true,
@@ -157,7 +157,7 @@
           "parameters": [
             {
               "name": "Notion-Version",
-              "value": "2022-06-28"
+              "value": "2025-09-03"
             }
           ]
         },
@@ -183,7 +183,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const v = $('Validar movimiento').first().json;\nconst lugs = $input.first().json.results || [];\nconst norm = (t) => String(t || '').toLowerCase().normalize('NFD').replace(/[\\u0300-\\u036f]/g, '').replace(/[^a-z0-9 ]/g, ' ').replace(/\\s+/g, ' ').trim().split(' ').map(w => w.replace(/s$/, '')).join(' ');\nconst buscado = norm(v.lugar);\nlet lugarId = null;\nfor (const l of lugs) {\n  const nombre = ((l.properties && l.properties['Nombre'] && l.properties['Nombre'].title) || []).map(t => t.plain_text).join('');\n  const n = norm(nombre);\n  if (n && (n === buscado || (buscado.length > 3 && (n.includes(buscado) || buscado.includes(n))))) { lugarId = l.id; break; }\n}\nlet cuerpoLugar = null;\nif (!lugarId) {\n  const props = {\n    'Nombre': { title: [{ text: { content: v.lugar } }] },\n    'Clase': { select: { name: 'Plan Ema' } }\n  };\n  if (v.puntuacion != null) props['Puntuación'] = { number: v.puntuacion };\n  if (v.comentario) props['Notas'] = { rich_text: [{ text: { content: v.comentario } }] };\n  cuerpoLugar = JSON.stringify({ parent: { database_id: '4912f5c4e91d41598e49bb8e97d02f31' }, properties: props });\n}\nreturn [{ json: { lugarId, crear: !lugarId, cuerpoLugar } }];\n"
+        "jsCode": "const v = $('Validar movimiento').first().json;\nconst lugs = $input.first().json.results || [];\nconst norm = (t) => String(t || '').toLowerCase().normalize('NFD').replace(/[\\u0300-\\u036f]/g, '').replace(/[^a-z0-9 ]/g, ' ').replace(/\\s+/g, ' ').trim().split(' ').map(w => w.replace(/s$/, '')).join(' ');\nconst buscado = norm(v.lugar);\nlet lugarId = null;\nfor (const l of lugs) {\n  const nombre = ((l.properties && l.properties['Nombre'] && l.properties['Nombre'].title) || []).map(t => t.plain_text).join('');\n  const n = norm(nombre);\n  if (n && (n === buscado || (buscado.length > 3 && (n.includes(buscado) || buscado.includes(n))))) { lugarId = l.id; break; }\n}\nlet cuerpoLugar = null;\nif (!lugarId) {\n  const props = {\n    'Nombre': { title: [{ text: { content: v.lugar } }] },\n    'Clase': { select: { name: 'Plan Ema' } }\n  };\n  if (v.puntuacion != null) props['Puntuación'] = { number: v.puntuacion };\n  if (v.comentario) props['Notas'] = { rich_text: [{ text: { content: v.comentario } }] };\n  cuerpoLugar = JSON.stringify({ parent: { type: 'data_source_id', data_source_id: '2449dcb1-f56e-4263-acea-f4b307273e86' }, properties: props });\n}\nreturn [{ json: { lugarId, crear: !lugarId, cuerpoLugar } }];\n"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -239,7 +239,7 @@
           "parameters": [
             {
               "name": "Notion-Version",
-              "value": "2022-06-28"
+              "value": "2025-09-03"
             }
           ]
         },
@@ -265,7 +265,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const v = $('Validar movimiento').first().json;\nlet lugarId = null;\ntry { const c = $('Crear lugar').first(); if (c && c.json && c.json.id) lugarId = c.json.id; } catch (e) {}\nif (!lugarId) { try { const d = $('Decidir lugar').first(); if (d && d.json && d.json.lugarId) lugarId = d.json.lugarId; } catch (e) {} }\nconst props = {\n  'Concepto': { title: [{ text: { content: v.concepto } }] },\n  'Monto': { number: v.monto },\n  'Tipo': { select: { name: v.tipo } },\n  'Categoría': { select: { name: v.categoria } },\n  'Fecha': { date: { start: v.fecha } },\n  'Notas': { rich_text: v.notas ? [{ text: { content: v.notas } }] : [] },\n  'Resumen financiero': { relation: [{ id: '39b39f80-d3a5-80fb-9a19-f3198aa16cc7' }] }\n};\nif (lugarId) props['Restaurante'] = { relation: [{ id: lugarId }] };\nif (v.categoria === 'Salidas Ema') props['Personas'] = { number: 0 };\nreturn [{ json: { cuerpo: JSON.stringify({ parent: { database_id: '922bb9e4e3d648feab56d6b2d75be29d' }, properties: props }) } }];\n"
+        "jsCode": "const v = $('Validar movimiento').first().json;\nlet lugarId = null;\ntry { const c = $('Crear lugar').first(); if (c && c.json && c.json.id) lugarId = c.json.id; } catch (e) {}\nif (!lugarId) { try { const d = $('Decidir lugar').first(); if (d && d.json && d.json.lugarId) lugarId = d.json.lugarId; } catch (e) {} }\nconst props = {\n  'Concepto': { title: [{ text: { content: v.concepto } }] },\n  'Monto': { number: v.monto },\n  'Tipo': { select: { name: v.tipo } },\n  'Categoría': { select: { name: v.categoria } },\n  'Fecha': { date: { start: v.fecha } },\n  'Notas': { rich_text: v.notas ? [{ text: { content: v.notas } }] : [] },\n  'Resumen financiero': { relation: [{ id: '39b39f80-d3a5-80fb-9a19-f3198aa16cc7' }] }\n};\nif (lugarId) props['Restaurante'] = { relation: [{ id: lugarId }] };\nif (v.categoria === 'Salidas Ema') props['Personas'] = { number: 0 };\nreturn [{ json: { cuerpo: JSON.stringify({ parent: { type: 'data_source_id', data_source_id: '6c565ad1-789f-41c7-8ca2-8bcfb9098a68' }, properties: props }) } }];\n"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -287,7 +287,7 @@
           "parameters": [
             {
               "name": "Notion-Version",
-              "value": "2022-06-28"
+              "value": "2025-09-03"
             }
           ]
         },
