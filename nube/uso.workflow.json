@@ -1,0 +1,79 @@
+{
+  "name": "Armoni - Uso de la app",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "uso",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "c3000000-0000-4000-8000-000000000001",
+      "name": "Recibir",
+      "webhookId": "c3000000-0000-4000-8000-0000000000aa"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Junta el uso de Armoni de cada celular de la casa. Quién es se sabe por Tailscale (la cuenta que abrió la app);\n// si no llega, se usa el código que la app guarda en ese celular. Solo se guardan conteos: apartado, visitas y segundos.\nconst it = $input.first().json;\nlet b = it.body;\nif (typeof b === 'string') { try { b = JSON.parse(b); } catch (e) { b = {}; } }\nb = b || {};\nif (b.token !== 'mercado-7d41c2a9e05b') return [{ json: { ok: false, error: 'token' } }];\nconst h = it.headers || {};\nconst login = String(h['tailscale-user-login'] || '').trim().toLowerCase();\nconst quien = (login ? login.split('@')[0] : String(b.equipo || 'celular')).replace(/[^a-z0-9._-]/gi, '').slice(0, 40) || 'celular';\nconst sd = $getWorkflowStaticData('global');\nsd.equipos = sd.equipos || {};\nif (b.dias && typeof b.dias === 'object') {\n  const corte = new Date(Date.now() - 90 * 864e5).toISOString().slice(0, 10);\n  const dias = {};\n  for (const [dia, ms] of Object.entries(b.dias)) {\n    if (!/^\\d{4}-\\d{2}-\\d{2}$/.test(dia) || dia < corte || !ms || typeof ms !== 'object') continue;\n    const d = {};\n    for (const [k, m] of Object.entries(ms).slice(0, 60)) {\n      if (!m || typeof m !== 'object') continue;\n      d[String(k).slice(0, 30)] = { v: Math.max(0, Math.min(1e5, Number(m.v) || 0)), s: Math.max(0, Math.min(1e7, Number(m.s) || 0)) };\n    }\n    dias[dia] = d;\n  }\n  sd.equipos[quien] = { dias, visto: new Date().toISOString() };\n}\nreturn [{ json: { ok: true, yo: quien, equipos: sd.equipos } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        220,
+        0
+      ],
+      "id": "c3000000-0000-4000-8000-000000000002",
+      "name": "Guardar uso"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        440,
+        0
+      ],
+      "id": "c3000000-0000-4000-8000-000000000003",
+      "name": "Responder"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Recibir": {
+      "main": [
+        [
+          {
+            "node": "Guardar uso",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Guardar uso": {
+      "main": [
+        [
+          {
+            "node": "Responder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  }
+}
