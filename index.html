@@ -790,7 +790,7 @@ body.no-gl #drawer{ background:var(--drawer-solid); }
 }
 
 /* ───────── vista de restaurantes (ocupa el lugar del chat) ───────── */
-#restView, #emaView, #creditoView, #gmailView, #glimView, #recuerdaView, #mercarView, #duraView, #mesView, #ajustesView{ display:none; padding-bottom:10px; }
+#restView, #emaView, #creditoView, #gmailView, #glimView, #recuerdaView, #mercarView, #duraView, #mesView, #balanceView, #ajustesView{ display:none; padding-bottom:10px; }
 body.mode-rest #restView{ display:block; }
 body.mode-ema #emaView{ display:block; }
 body.mode-ema #welcome, body.mode-ema #messages, body.mode-ema #pending, body.mode-ema #servicioBanner, body.mode-ema #glimBanner{ display:none !important; }
@@ -810,7 +810,10 @@ body.mode-dura #duraView{ display:block; }
 body.mode-dura #welcome, body.mode-dura #messages, body.mode-dura #pending, body.mode-dura #servicioBanner, body.mode-dura #glimBanner{ display:none !important; }
 body.mode-dura #reset{ visibility:hidden; }
 body.mode-dura footer{ display:none; }
-body.mode-mes #mesView{ display:block; }
+body.mode-mes #mesView, body.mode-balance #balanceView{ display:block; }
+body.mode-balance #welcome, body.mode-balance #messages, body.mode-balance #pending, body.mode-balance #servicioBanner, body.mode-balance #glimBanner{ display:none !important; }
+body.mode-balance #reset{ visibility:hidden; }
+body.mode-balance footer{ display:none; }
 body.mode-mes #welcome, body.mode-mes #messages, body.mode-mes #pending, body.mode-mes #servicioBanner, body.mode-mes #glimBanner{ display:none !important; }
 body.mode-mes #reset{ visibility:hidden; }
 body.mode-mes footer{ display:none; }
@@ -2043,6 +2046,70 @@ button{ transition:transform var(--t-tap) var(--ease-out); }
 .emaTot small{ font-size:.7rem; font-weight:500; color:var(--dim); margin-top:2px; }
 .emaVacio{ margin:14px 0 0; font-size:.86rem; color:var(--dim); text-align:center; }
 .emaLugares{ display:flex; flex-direction:column; gap:10px; }
+/* ── Balance ── */
+.balMeses{ display:flex; gap:6px; overflow-x:auto; margin:4px -16px 14px; padding:2px 16px 4px; scrollbar-width:none; }
+.balMeses::-webkit-scrollbar{ display:none; }
+.balMeses button, .balVista button{ flex:none; padding:8px 14px; border-radius:999px; border:1px solid var(--line); background:var(--panel); color:var(--ghost); font:inherit; font-size:.82rem; font-weight:600; text-transform:capitalize; cursor:pointer; transition:background .25s, color .25s, border-color .25s; }
+.balMeses button[aria-selected="true"], .balVista button[aria-selected="true"]{ color:var(--on-accent); border-color:transparent; background:linear-gradient(140deg, var(--cyan), var(--blue)); }
+.balTorta{ position:relative; height:300px; border-radius:24px; border:1px solid var(--line); background:radial-gradient(120% 90% at 50% 10%, rgba(var(--cyan-rgb),.08), transparent 60%), var(--panel); overflow:hidden; }
+.balLienzo{ position:absolute; inset:0; }
+.balLienzo canvas{ display:block; width:100% !important; height:100% !important; touch-action:pan-y; }
+.balInvita{ position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; padding:20px; text-align:center; transition:opacity .5s ease, transform .5s ease; }
+.balTorta.lista .balInvita{ opacity:0; transform:scale(.9); pointer-events:none; }
+.balInvita b{ font-size:1.1rem; }
+.balInvita small{ max-width:260px; font-size:.82rem; color:var(--dim); margin-bottom:10px; }
+.balTortaIco{ position:relative; width:74px; height:74px; margin-bottom:8px; border-radius:50%; background:conic-gradient(#3987e5 0 50%, #e66767 0 80%, #199e70 0); box-shadow:0 14px 30px -12px rgba(57,135,229,.8); animation:balGira 9s linear infinite; }
+.balTortaIco::after{ content:""; position:absolute; inset:-1px; border-radius:50%; background:conic-gradient(from 0deg, transparent 0 49.4%, var(--panel) 49.4% 50.6%, transparent 50.6% 79.4%, var(--panel) 79.4% 80.6%, transparent 80.6% 99.4%, var(--panel) 99.4%); }
+@keyframes balGira{ to{ transform:rotate(360deg); } }
+.balPartes{ display:grid; gap:8px; margin-top:12px; }
+.balParte{ display:flex; align-items:center; gap:12px; width:100%; padding:12px 14px; border-radius:16px; border:1px solid var(--line); background:var(--panel); color:var(--white); font:inherit; text-align:left; cursor:pointer; transition:border-color .25s, transform .2s; }
+.balParte:active{ transform:scale(.98); }
+.balParte.on{ border-color:var(--c); box-shadow:0 0 0 3px color-mix(in srgb, var(--c) 22%, transparent); }
+.balParte > i{ flex:none; width:12px; height:34px; border-radius:6px; background:var(--c); }
+.balParte .n{ flex:1; min-width:0; }
+.balParte .n b, .balParte .p b{ display:block; font-size:.95rem; }
+.balParte .n small, .balParte .p small{ display:block; font-size:.74rem; color:var(--dim); }
+.balParte .p{ text-align:right; }
+.balParte .p b{ font-size:1.1rem; font-variant-numeric:tabular-nums; }
+.balParte em{ font-style:normal; font-weight:700; }
+.balParte em.ok{ color:#6fe0b5; }
+.balParte em.ojo{ color:#ffb066; }
+.balAviso{ margin:10px 4px 0; font-size:.8rem; color:#ffb066; }
+.balDetalle:empty{ display:none; }
+.balDetalle{ margin-top:10px; padding:14px; border-radius:18px; border:1px solid color-mix(in srgb, var(--c) 45%, transparent); background:color-mix(in srgb, var(--c) 8%, var(--panel)); }
+.balDetalle.abre{ animation:duSube .45s var(--ease-out); }
+.balDetCab b{ display:block; }
+.balDetCab small{ display:block; font-size:.76rem; color:var(--dim); margin-bottom:8px; }
+.balFila{ position:relative; display:flex; justify-content:space-between; gap:10px; padding:8px 0 10px; font-size:.86rem; animation:duSube .4s var(--ease-out) backwards; animation-delay:calc(var(--i) * 50ms); }
+.balFila em{ font-style:normal; font-weight:700; font-variant-numeric:tabular-nums; }
+.balFila i{ position:absolute; left:0; bottom:2px; height:4px; border-radius:4px; background:var(--c); opacity:.85; }
+.balEvoCab{ display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; margin-bottom:8px; }
+.balLey{ display:flex; gap:12px; font-size:.76rem; color:var(--ghost); }
+.balLey i, .balTip i{ display:inline-block; width:10px; height:10px; border-radius:50%; margin-right:5px; vertical-align:-1px; }
+.balVista{ display:flex; gap:6px; }
+.balGraf{ position:relative; padding:12px 6px 4px; border-radius:20px; border:1px solid var(--line); background:var(--panel); }
+.balGraf svg{ display:block; width:100%; height:auto; touch-action:pan-y; }
+.balGraf .gr{ stroke:rgba(var(--ink),.08); stroke-width:1; }
+.balGraf .cero{ stroke:rgba(var(--ink),.3); stroke-width:1; stroke-dasharray:4 4; }
+.balGraf .ey, .balGraf .ex{ fill:var(--dim); font-size:10px; font-family:inherit; }
+.balGraf .ey{ text-anchor:end; }
+.balGraf .ex{ text-anchor:middle; text-transform:capitalize; }
+.balGraf .ln{ fill:none; stroke-width:2.5; stroke-linecap:round; stroke-linejoin:round; stroke-dasharray:1400; stroke-dashoffset:1400; animation:balTraza 1.4s cubic-bezier(.3,.7,.2,1) forwards; }
+.balGraf .ln.gasto{ stroke:#e66767; }
+.balGraf .ln.quedo{ stroke:#199e70; animation-delay:.2s; }
+@keyframes balTraza{ to{ stroke-dashoffset:0; } }
+.balGraf .pt{ stroke:var(--panel-solid, #0b0d14); stroke-width:2; opacity:0; animation:wsFade .3s ease forwards; animation-delay:calc(1s + var(--i) * 40ms); transition:r .2s; }
+.balGraf .pt.gasto{ fill:#e66767; } .balGraf .pt.quedo{ fill:#199e70; }
+.balGraf .pt.on{ r:6; }
+.balGraf .cruz{ stroke:rgba(var(--ink),.25); stroke-width:1; }
+.balTip{ position:absolute; top:8px; z-index:2; display:flex; flex-direction:column; gap:2px; padding:8px 10px; border-radius:12px; background:var(--sheet-b, var(--panel)); border:1px solid var(--line); box-shadow:0 12px 30px -12px rgba(0,0,0,.8); font-size:.76rem; pointer-events:none; white-space:nowrap; }
+.balTip b{ text-transform:capitalize; }
+.balTabla{ margin:8px 6px 4px; font-size:.78rem; color:var(--ghost); }
+.balTabla summary{ cursor:pointer; color:var(--dim); }
+.balTabla table{ width:100%; margin-top:6px; border-collapse:collapse; font-variant-numeric:tabular-nums; }
+.balTabla td, .balTabla th{ padding:4px 2px; text-align:right; border-bottom:1px solid var(--line); }
+.balTabla td:first-child, .balTabla th:first-child{ text-align:left; text-transform:capitalize; }
+@media (prefers-reduced-motion:reduce){ .balTortaIco, .balGraf .ln, .balGraf .pt, .balFila{ animation:none !important; stroke-dashoffset:0; opacity:1; } }
 .emaAntes{ color:#ffb066 !important; }
 .pnTop{ text-align:center; padding-top:4px; }
 .pnEstrella{ display:inline-block; font-size:2.6rem; animation:seRebota .7s var(--ease-spring) backwards, mkFlota 2.6s ease-in-out .8s infinite; }
@@ -2493,13 +2560,17 @@ body[class*="mode-"] #masIngreso{ display:none; }
       <div class="navGrupo" id="navControl">
         <button type="button" id="navControlBtn" aria-expanded="false" aria-controls="navControlSub">
           <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l9 5-9 5-9-5z"/><path d="M3 12.5l9 5 9-5"/><path d="M3 17l9 5 9-5"/></svg></span>
-          <span class="txt"><b>Control</b><span>Tu mes y Recuerda</span></span>
+          <span class="txt"><b>Control</b><span>Tu mes, Balance y Recuerda</span></span>
           <span class="chev" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
         </button>
         <div class="navSub" id="navControlSub"><div class="navSubIn">
       <button type="button" id="navMes">
         <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.8 4.6L18.5 9l-4.7 1.4L12 15l-1.8-4.6L5.5 9l4.7-1.4z"/><path d="M19 15l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z"/></svg></span>
         <span class="txt"><b>Tu mes</b><span>El resumen del mes, estilo historia</span></span>
+      </button>
+      <button type="button" id="navBalance">
+        <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v9l7.8 4.5"/><circle cx="12" cy="12" r="9"/></svg></span>
+        <span class="txt"><b>Balance</b><span>La regla 50/30/20 y cómo vamos</span></span>
       </button>
       <button type="button" id="navRecuerda">
         <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/><path d="m9 15 2 2 4-4"/></svg></span>
@@ -2675,6 +2746,12 @@ body[class*="mode-"] #masIngreso{ display:none; }
         </div>
       </section>
 
+      <section id="balanceView" aria-label="Balance">
+        <div class="restIntro"><h2>Balance</h2></div>
+        <p class="tmSub">50% necesidades · 30% deseos · 20% ahorro</p>
+        <div id="balCuerpo"></div>
+      </section>
+
       <section id="mesView" aria-label="Tu mes">
         <div class="restIntro"><h2>Tu mes</h2></div>
         <p class="tmSub">Toca un mes para ver su historia</p>
@@ -2790,7 +2867,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-11.102";
+const APP_VERSION = "2026-10-11.103";
 (function autoActualizar(){
   const patron = new RegExp("const APP_" + "VERSION = \"([^\"]+)\"");
   async function revisar(){
@@ -6059,6 +6136,243 @@ const Privacidad = (function(){
   return { set, activo: () => on };
 })();
 
+/* ════════════════════════════════════════════════════════════
+   BALANCE: la regla 50/30/20 (50% necesidades, 30% deseos, 20% ahorro, sobre lo que entra)
+   en una torta 3D que solo se carga si la pides (y se apaga al salir para no gastar batería),
+   y la evolución por meses o por años: ¿se está guardando más o gastando más?
+   ════════════════════════════════════════════════════════════ */
+const Balance = (function(){
+  const view = document.getElementById("balanceView");
+  const esc = t => String(t == null ? "" : t).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const peso = n => "$" + Math.round(n).toLocaleString("es-CO");
+  const corto = n => { const a = Math.abs(n), s = n < 0 ? "-" : ""; return a >= 1e6 ? s + "$" + (a / 1e6).toFixed(1).replace(".0", "").replace(".", ",") + "M" : a >= 1e3 ? s + "$" + Math.round(a / 1e3) + "k" : s + "$" + Math.round(a); };
+  const mesNombre = m => new Date(+m.slice(0, 4), +m.slice(5, 7) - 1, 1).toLocaleDateString("es-CO", { month: "long" });
+  const mesHoy = () => { const d = new Date(); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0"); };
+  /* las tres partes de la regla: color fijo para cada una (paleta validada para daltonismo sobre fondo oscuro) */
+  const PARTES = [
+    { k: "nec", nombre: "Necesidades", ideal: 50, color: "#3987e5", cats: ["Hogar", "Alimentación", "Servicios", "Salud", "Carro", "Hijo", "Tarjetas"], nota: "Vivienda, comida, servicios, salud, transporte, Ema y deudas" },
+    { k: "des", nombre: "Deseos", ideal: 30, color: "#e66767", cats: ["Salidas", "Salidas Ema", "Otros"], nota: "Salidas, planes, antojos y lo demás" },
+    { k: "aho", nombre: "Ahorro", ideal: 20, color: "#199e70", cats: ["Ahorro"], nota: "Lo que se guarda y lo que quedó sin gastar" }
+  ];
+  let datos = null, mes = null, vista = "meses", tresListo = null, escena = null;
+
+  function lee(){ try{ datos = JSON.parse(localStorage.getItem("armoni.tumes.datos")); }catch{} }
+  async function cargar(){
+    try{
+      const r = await fetch(RESUMEN_URL, { cache: "no-store" });
+      if(!r.ok) return;
+      const d = await r.json();
+      if(d && Array.isArray(d.meses)){ datos = d; try{ localStorage.setItem("armoni.tumes.datos", JSON.stringify(d)); }catch{} pinta(); }
+    }catch{}
+  }
+  const meses = () => ((datos && datos.meses) || []).filter(m => m.gastos > 0 || m.ingresos > 0).slice().sort((a, b) => a.mes.localeCompare(b.mes));
+
+  /* reparte el mes en las tres partes de la regla */
+  function reparto(M){
+    const cats = M.categorias || [];
+    const suma = ks => cats.filter(c => ks.includes(c.nombre)).reduce((a, c) => a + c.total, 0);
+    const nec = suma(PARTES[0].cats), sinCat = Math.max(0, M.gastos - cats.reduce((a, c) => a + c.total, 0));
+    const des = suma(PARTES[1].cats) + sinCat, ahoCat = suma(PARTES[2].cats);
+    const quedo = Math.max(0, (M.ingresos || 0) - M.gastos);
+    const base = (M.ingresos || 0) > M.gastos ? M.ingresos : M.gastos;   // la regla se mide sobre lo que entra
+    const v = { nec, des, aho: ahoCat + quedo };
+    return { base, quedo, ahoCat, sinCat, v, pct: k => base ? v[k] / base * 100 : 0, gastaronMas: M.gastos > (M.ingresos || 0) };
+  }
+
+  function pinta(){
+    if(!view) return;
+    const ms = meses();
+    if(!ms.length){ view.querySelector("#balCuerpo").innerHTML = '<p class="gEmpty">Todavía no hay meses con movimientos.</p>'; return; }
+    if(!mes || !ms.find(m => m.mes === mes)){ const cerr = ms.filter(m => m.mes !== mesHoy()); mes = (cerr.length ? cerr[cerr.length - 1] : ms[ms.length - 1]).mes; }
+    const M = ms.find(m => m.mes === mes), R = reparto(M);
+    view.querySelector("#balCuerpo").innerHTML =
+      '<div class="balMeses" role="tablist">' + ms.slice(-8).map(m => '<button type="button" role="tab" data-m="' + m.mes + '" aria-selected="' + (m.mes === mes) + '">' + esc(mesNombre(m.mes).slice(0, 3)) + (m.mes === mesHoy() ? ' ·' : '') + '</button>').join("") + '</div>' +
+      '<div class="balTorta" id="balTorta">' +
+        '<div class="balLienzo" id="balLienzo"></div>' +
+        '<div class="balInvita" id="balInvita"><span class="balTortaIco" aria-hidden="true"><i></i><i></i><i></i></span><b>La regla 50/30/20</b><small>Mira cómo se repartió la plata de ' + esc(mesNombre(mes)) + ' frente a lo ideal</small>' +
+          '<button type="button" class="mkBtn pri" id="balGenerar">Generar torta</button></div>' +
+      '</div>' +
+      '<div class="balPartes">' + PARTES.map(p => { const real = R.pct(p.k), dif = real - p.ideal, bien = p.k === "aho" ? dif >= -2 : dif <= 2;
+        return '<button type="button" class="balParte" data-k="' + p.k + '" style="--c:' + p.color + '"><i></i><span class="n"><b>' + p.nombre + '</b><small>' + peso(R.v[p.k]) + '</small></span>' +
+          '<span class="p"><b>' + Math.round(real) + '%</b><small>ideal ' + p.ideal + '% · ' + (bien ? '<em class="ok">✓ bien</em>' : '<em class="ojo">' + (dif > 0 ? '+' : '') + Math.round(dif) + '%</em>') + '</small></span></button>'; }).join("") + '</div>' +
+      (R.gastaronMas ? '<p class="balAviso">⚠️ En ' + esc(mesNombre(mes)) + ' salió más de lo que entró: los porcentajes se miden sobre lo gastado.</p>' : '') +
+      '<div class="balDetalle" id="balDetalle"></div>' +
+      '<div class="mkSec">Evolución</div>' +
+      '<div class="balEvoCab"><div class="balLey"><span><i style="background:#199e70"></i>Lo que quedó</span><span><i style="background:#e66767"></i>Lo que se gastó</span></div>' +
+        '<div class="balVista" role="tablist"><button type="button" data-v="meses" aria-selected="' + (vista === "meses") + '">Meses</button><button type="button" data-v="anios" aria-selected="' + (vista === "anios") + '">Años</button></div></div>' +
+      '<div class="balGraf" id="balGraf"></div>';
+    grafica();
+  }
+
+  /* ── el detalle de una parte: en qué más se fue ── */
+  function detalle(k){
+    const M = meses().find(m => m.mes === mes); if(!M) return;
+    const R = reparto(M), p = PARTES.find(x => x.k === k), box = view.querySelector("#balDetalle");
+    view.querySelectorAll(".balParte").forEach(b => b.classList.toggle("on", b.dataset.k === k));
+    let filas = (M.categorias || []).filter(c => p.cats.includes(c.nombre)).map(c => ({ n: c.nombre, v: c.total }));
+    if(k === "des" && R.sinCat) filas.push({ n: "Sin categoría", v: R.sinCat });
+    if(k === "aho" && R.quedo) filas.push({ n: "Quedó sin gastar", v: R.quedo });
+    filas.sort((a, b) => b.v - a.v);
+    const mx = Math.max(1, ...filas.map(f => f.v));
+    box.style.setProperty("--c", p.color);
+    box.innerHTML = '<div class="balDetCab"><b>' + p.nombre + '</b><small>' + p.nota + '</small></div>' +
+      (filas.length ? filas.map((f, i) => '<div class="balFila" style="--i:' + i + '"><span>' + esc(f.n) + '</span><em>' + peso(f.v) + '</em><i style="width:' + Math.max(3, f.v / mx * 100).toFixed(1) + '%"></i></div>').join("") : '<p class="gEmpty">Nada en esta parte este mes.</p>');
+    box.classList.remove("abre"); void box.offsetWidth; box.classList.add("abre");
+    if(escena) escena.elige(k);
+  }
+
+  /* ── la gráfica de evolución (meses o años) ── */
+  function grafica(){
+    const g = view.querySelector("#balGraf"); if(!g) return;
+    let pts = meses().map(m => ({ et: mesNombre(m.mes).slice(0, 3), largo: mesNombre(m.mes) + " " + m.mes.slice(0, 4), gasto: m.gastos, quedo: (m.ingresos || 0) - m.gastos, curso: m.mes === mesHoy() }));
+    if(vista === "meses") pts = pts.slice(-12);
+    else {
+      const A = {}; meses().forEach(m => { const a = m.mes.slice(0, 4), x = A[a] || (A[a] = { et: a, largo: "Año " + a, gasto: 0, quedo: 0 }); x.gasto += m.gastos; x.quedo += (m.ingresos || 0) - m.gastos; });
+      pts = Object.values(A);
+    }
+    if(pts.length < 2){ g.innerHTML = '<p class="gEmpty">' + (vista === "anios" ? 'Cuando haya más de un año, aquí se comparan.' : 'Con dos meses o más aparece la evolución.') + '</p>'; return; }
+    const W = 360, H = 220, L = 46, Rr = 12, T = 14, B = 26;
+    const vals = pts.flatMap(p => [p.gasto, p.quedo]), lo = Math.min(0, ...vals), hi = Math.max(...vals);
+    const paso = (() => { const r = (hi - lo) / 4, e = Math.pow(10, Math.floor(Math.log10(r || 1))), f = r / e; return (f <= 1 ? 1 : f <= 2 ? 2 : f <= 5 ? 5 : 10) * e; })();
+    const y0 = Math.floor(lo / paso) * paso, y1 = Math.ceil(hi / paso) * paso;
+    const X = i => L + i * (W - L - Rr) / (pts.length - 1), Y = v => T + (y1 - v) / (y1 - y0 || 1) * (H - T - B);
+    const linea = k => pts.map((p, i) => (i ? "L" : "M") + X(i).toFixed(1) + " " + Y(p[k]).toFixed(1)).join(" ");
+    let ejes = "";
+    for(let v = y0; v <= y1 + 1; v += paso) ejes += '<line x1="' + L + '" x2="' + (W - Rr) + '" y1="' + Y(v).toFixed(1) + '" y2="' + Y(v).toFixed(1) + '" class="' + (v === 0 ? 'cero' : 'gr') + '"/><text x="' + (L - 8) + '" y="' + (Y(v) + 4).toFixed(1) + '" class="ey">' + corto(v) + '</text>';
+    const cada = Math.ceil(pts.length / 7);
+    const etiq = pts.map((p, i) => (i % cada === 0 || i === pts.length - 1) ? '<text x="' + X(i).toFixed(1) + '" y="' + (H - 6) + '" class="ex">' + esc(p.et) + '</text>' : '').join("");
+    const puntos = k => pts.map((p, i) => '<circle cx="' + X(i).toFixed(1) + '" cy="' + Y(p[k]).toFixed(1) + '" r="4" class="pt ' + k + '" style="--i:' + i + '"/>').join("");
+    g.innerHTML = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Evolución de lo gastado y lo que quedó">' + ejes + etiq +
+      '<path d="' + linea("gasto") + '" class="ln gasto"/><path d="' + linea("quedo") + '" class="ln quedo"/>' + puntos("gasto") + puntos("quedo") +
+      '<line class="cruz" y1="' + T + '" y2="' + (H - B) + '" x1="-9" x2="-9"/></svg><div class="balTip" hidden></div>' +
+      '<details class="balTabla"><summary>Ver los datos</summary><table><thead><tr><th></th><th>Gastado</th><th>Quedó</th></tr></thead><tbody>' + pts.map(p => '<tr><td>' + esc(p.largo) + '</td><td>' + peso(p.gasto) + '</td><td>' + peso(p.quedo) + '</td></tr>').join("") + '</tbody></table></details>';
+    const svg = g.querySelector("svg"), tip = g.querySelector(".balTip"), cruz = g.querySelector(".cruz");
+    const muestra = e => {
+      const r = svg.getBoundingClientRect(), x = (e.clientX - r.left) / r.width * W;
+      const i = Math.max(0, Math.min(pts.length - 1, Math.round((x - L) / ((W - L - Rr) / (pts.length - 1)))));
+      const p = pts[i];
+      cruz.setAttribute("x1", X(i)); cruz.setAttribute("x2", X(i));
+      g.querySelectorAll(".pt").forEach(c => c.classList.toggle("on", +c.style.getPropertyValue("--i") === i));
+      tip.hidden = false;
+      tip.innerHTML = '<b>' + esc(p.largo) + (p.curso ? ' · en curso' : '') + '</b><span><i style="background:#199e70"></i>Quedó ' + peso(p.quedo) + '</span><span><i style="background:#e66767"></i>Gastado ' + peso(p.gasto) + '</span>';
+      const px = X(i) / W * r.width;
+      tip.style.left = Math.max(4, Math.min(r.width - tip.offsetWidth - 4, px - tip.offsetWidth / 2)) + "px";
+    };
+    svg.addEventListener("pointermove", muestra); svg.addEventListener("pointerdown", muestra);
+    svg.addEventListener("pointerleave", () => { tip.hidden = true; cruz.setAttribute("x1", -9); cruz.setAttribute("x2", -9); g.querySelectorAll(".pt.on").forEach(c => c.classList.remove("on")); });
+  }
+
+  /* ── la torta 3D: three.js se descarga solo al tocar «Generar» ── */
+  function cargaTres(){
+    if(window.THREE) return Promise.resolve();
+    if(tresListo) return tresListo;
+    tresListo = new Promise((ok, mal) => {
+      const s = document.createElement("script");
+      s.src = "https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js";
+      s.onload = ok; s.onerror = () => { tresListo = null; mal(); };
+      document.head.appendChild(s);
+    });
+    return tresListo;
+  }
+  async function generar(){
+    const btn = view.querySelector("#balGenerar"); if(!btn) return;
+    btn.disabled = true; btn.textContent = "Preparando…";
+    /* el giroscopio del iPhone pide permiso, y solo se puede pedir dentro del toque */
+    try{ if(window.DeviceOrientationEvent && typeof DeviceOrientationEvent.requestPermission === "function") DeviceOrientationEvent.requestPermission().catch(() => {}); }catch{}
+    try{ await cargaTres(); }
+    catch{ btn.disabled = false; btn.textContent = "Generar torta"; view.querySelector("#balInvita small").textContent = "No se pudo cargar la torta. Revisa tu internet."; return; }
+    const M = meses().find(m => m.mes === mes); if(!M) return;
+    apaga();
+    escena = torta(view.querySelector("#balLienzo"), reparto(M));
+    view.querySelector("#balTorta").classList.add("lista");
+  }
+  function torta(cont, R){
+    const T = window.THREE;
+    const w = cont.clientWidth || 320, h = cont.clientHeight || 300;
+    const renderer = new T.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setPixelRatio(Math.min(2, devicePixelRatio || 1)); renderer.setSize(w, h);
+    cont.appendChild(renderer.domElement);
+    const scene = new T.Scene(), cam = new T.PerspectiveCamera(36, w / h, .1, 50);
+    cam.position.set(0, 4.6, 6.4); cam.lookAt(0, .25, 0);
+    scene.add(new T.HemisphereLight(0xffffff, 0x1a2233, .55));
+    const sol = new T.DirectionalLight(0xffffff, .75); sol.position.set(3, 6, 4); scene.add(sol);
+    const contra = new T.DirectionalLight(0x88aaff, .35); contra.position.set(-4, 2, -3); scene.add(contra);
+    const grupo = new T.Group(); scene.add(grupo);
+    const total = PARTES.reduce((a, p) => a + R.v[p.k], 0) || 1;
+    let a0 = Math.PI / 2;
+    const rebanadas = [];
+    PARTES.forEach((p, i) => {
+      const frac = R.v[p.k] / total; if(frac <= .001) return;
+      const a1 = a0 - frac * Math.PI * 2, rad = 1.45, alto = .3 + frac * 1;
+      const sh = new T.Shape(); sh.moveTo(0, 0); sh.absarc(0, 0, rad, a1, a0, false); sh.lineTo(0, 0);
+      const geo = new T.ExtrudeGeometry(sh, { depth: alto, bevelEnabled: true, bevelThickness: .03, bevelSize: .03, bevelSegments: 3, curveSegments: 48 });
+      geo.rotateX(-Math.PI / 2);
+      const mat = new T.MeshStandardMaterial({ color: new T.Color(p.color), roughness: .38, metalness: .08 });
+      const m = new T.Mesh(geo, mat);
+      const mid = (a0 + a1) / 2;
+      m.userData = { k: p.k, dir: new T.Vector3(Math.cos(mid), 0, -Math.sin(mid)), sale: 0, meta: .05, alto, t0: performance.now() + i * 160 };
+      m.position.copy(m.userData.dir).multiplyScalar(.05);
+      m.scale.set(1, .001, 1);
+      grupo.add(m); rebanadas.push(m);
+      a0 = a1;
+    });
+    /* giroscopio: inclinar el celular inclina la torta */
+    let tx = 0, tz = 0, gx = 0, gz = 0;
+    const gira = e => { if(e.beta == null) return; tx = Math.max(-.5, Math.min(.5, (e.beta - 45) / 90)); tz = Math.max(-.5, Math.min(.5, e.gamma / 90)); };
+    window.addEventListener("deviceorientation", gira);
+    /* arrastrar con el dedo la hace girar; un toque escoge una parte */
+    let arr = false, x0 = 0, rotY = 0, vel = .0035, mov = 0;
+    const ray = new T.Raycaster(), pt = new T.Vector2();
+    const cnv = renderer.domElement;
+    cnv.addEventListener("pointerdown", e => { arr = true; x0 = e.clientX; mov = 0; try{ cnv.setPointerCapture(e.pointerId); }catch{} });
+    cnv.addEventListener("pointermove", e => { if(!arr) return; const d = e.clientX - x0; x0 = e.clientX; mov += Math.abs(d); rotY += d * .012; vel = d * .0009; });
+    cnv.addEventListener("pointerup", e => {
+      arr = false; if(mov > 6) return;
+      const r = cnv.getBoundingClientRect(); pt.set((e.clientX - r.left) / r.width * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
+      ray.setFromCamera(pt, cam); const hit = ray.intersectObjects(rebanadas)[0];
+      if(hit) detalle(hit.object.userData.k);
+    });
+    let raf = 0, vivo = true;
+    const bucle = now => {
+      if(!vivo) return;
+      raf = requestAnimationFrame(bucle);
+      if(document.hidden) return;
+      if(!arr){ rotY += vel; vel += (.0035 - vel) * .02; }
+      gx += (tx - gx) * .08; gz += (tz - gz) * .08;
+      grupo.rotation.set(.12 + gx * .9, rotY, gz * .9);
+      rebanadas.forEach(m => {
+        const u = m.userData, p = Math.min(1, Math.max(0, (now - u.t0) / 900)), e = 1 - Math.pow(1 - p, 3);
+        m.scale.y = Math.max(.001, e * (1 + Math.sin(p * Math.PI) * .12));
+        u.sale += (u.meta - u.sale) * .12;
+        m.position.copy(u.dir).multiplyScalar(u.sale); m.position.y = u.meta > .1 ? .12 : 0;
+      });
+      renderer.render(scene, cam);
+    };
+    raf = requestAnimationFrame(bucle);
+    return {
+      elige(k){ rebanadas.forEach(m => { m.userData.meta = m.userData.k === k ? .38 : .05; }); },
+      apaga(){
+        vivo = false; cancelAnimationFrame(raf);
+        window.removeEventListener("deviceorientation", gira);
+        rebanadas.forEach(m => { m.geometry.dispose(); m.material.dispose(); });
+        renderer.dispose(); try{ renderer.forceContextLoss(); }catch{}
+        cnv.remove();
+      }
+    };
+  }
+  /* al salir de Balance la torta se destruye: nada sigue corriendo ni gastando batería */
+  function apaga(){ if(escena){ escena.apaga(); escena = null; } const t = view && view.querySelector("#balTorta"); if(t) t.classList.remove("lista"); }
+
+  view.addEventListener("click", e => {
+    const m = e.target.closest("[data-m]"); if(m){ apaga(); mes = m.dataset.m; pinta(); return; }
+    const v = e.target.closest("[data-v]"); if(v){ vista = v.dataset.v; view.querySelectorAll("[data-v]").forEach(x => x.setAttribute("aria-selected", String(x === v))); grafica(); return; }
+    if(e.target.closest("#balGenerar")){ generar(); return; }
+    const p = e.target.closest(".balParte"); if(p) detalle(p.dataset.k);
+  });
+  function refresh(){ if(!datos) lee(); pinta(); cargar(); }
+  return { refresh, apaga };
+})();
+
 const Drawer = (function(){
   const el = document.getElementById("drawer");
   const btn = document.getElementById("menuBtn");
@@ -6071,6 +6385,7 @@ const Drawer = (function(){
   const navRecuerda = document.getElementById("navRecuerda");
   const navMercar = document.getElementById("navMercar");
   const navMes = document.getElementById("navMes");
+  const navBalance = document.getElementById("navBalance");
   const navAjustes = document.getElementById("navAjustes");
   const navControl = document.getElementById("navControl");
   const navControlBtn = document.getElementById("navControlBtn");
@@ -6086,9 +6401,9 @@ const Drawer = (function(){
   const navDura = document.getElementById("navDura");
   const setMercarG = on => { navMercarG.classList.toggle("abierto", on); navMercarBtn.setAttribute("aria-expanded", String(on)); };
   navMercarBtn.addEventListener("click", () => setMercarG(!navMercarG.classList.contains("abierto")));
-  const NAV = { chat: navChat, rest: navRest, ema: navEma, credito: navCredito, gmail: navGmail, glim: navGlim, recuerda: navRecuerda, mercar: navMercar, dura: navDura, mes: navMes, ajustes: navAjustes };
-  const SUB = { chat: "Presupuesto de la casa", rest: "Restaurantes", ema: "Salidas Ema", credito: "Crédito Carro", gmail: "AT Gmail", glim: "Glim", recuerda: "Recuerda", mercar: "A mercar", dura: "Duración", mes: "Tu mes", ajustes: "Ajustes" };
-  const PLACEHOLDER = { chat: "Escribe aquí…", rest: "¿Qué se te antoja?", ema: "¿A dónde llevamos a Ema?", credito: "Pregúntale sobre el crédito…", gmail: "", glim: "", recuerda: "", mercar: "", dura: "", mes: "", ajustes: "" };
+  const NAV = { chat: navChat, rest: navRest, ema: navEma, credito: navCredito, gmail: navGmail, glim: navGlim, recuerda: navRecuerda, mercar: navMercar, dura: navDura, mes: navMes, balance: navBalance, ajustes: navAjustes };
+  const SUB = { chat: "Presupuesto de la casa", rest: "Restaurantes", ema: "Salidas Ema", credito: "Crédito Carro", gmail: "AT Gmail", glim: "Glim", recuerda: "Recuerda", mercar: "A mercar", dura: "Duración", mes: "Tu mes", balance: "Balance", ajustes: "Ajustes" };
+  const PLACEHOLDER = { chat: "Escribe aquí…", rest: "¿Qué se te antoja?", ema: "¿A dónde llevamos a Ema?", credito: "Pregúntale sobre el crédito…", gmail: "", glim: "", recuerda: "", mercar: "", dura: "", mes: "", balance: "", ajustes: "" };
 
   /* marca del menú */
   const m2 = document.getElementById("mark2");
@@ -6141,9 +6456,11 @@ const Drawer = (function(){
     document.body.classList.toggle("mode-mercar", mode === "mercar");
     document.body.classList.toggle("mode-dura", mode === "dura");
     document.body.classList.toggle("mode-mes", mode === "mes");
+    document.body.classList.toggle("mode-balance", mode === "balance");
+    if(MODE_PREV === "balance" && mode !== "balance") Balance.apaga();   // la torta 3D no sigue corriendo fuera de Balance
     document.body.classList.toggle("mode-ajustes", mode === "ajustes");
     Object.entries(NAV).forEach(([m, b]) => { if(m === mode) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current"); });
-    const enControl = mode === "mes" || mode === "recuerda";
+    const enControl = mode === "mes" || mode === "recuerda" || mode === "balance";
     navControl.classList.toggle("activo", enControl);
     if(enControl) setControl(true);
     const enSalidas = mode === "rest" || mode === "ema";
@@ -6168,6 +6485,7 @@ const Drawer = (function(){
       if(mode === "mercar") Mercar.refresh(true);
       if(mode === "dura") Mercar.dura(true);
       if(mode === "mes") TuMes.refresh();
+      if(mode === "balance") Balance.refresh();
     }
     close(0, 1, true);   // al navegar, el menú se cierra rápido: el contenido ya está listo, no hay que esperarlo
   }
@@ -6185,6 +6503,7 @@ const Drawer = (function(){
   navMercar.addEventListener("click", () => go("mercar"));
   navDura.addEventListener("click", () => go("dura"));
   navMes.addEventListener("click", () => go("mes"));
+  navBalance.addEventListener("click", () => go("balance"));
   navAjustes.addEventListener("click", () => go("ajustes"));
 
   /* deslizar el menú hacia la izquierda lo cierra: sigue el dedo 1:1 y suelta con su velocidad */
