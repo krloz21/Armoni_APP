@@ -117,6 +117,7 @@ body.ribbon #campo{ display:none; }
   transform:translateY(var(--app-top, 0px));
   display:grid;
   grid-template-rows:auto auto minmax(0,1fr) auto;   /* encabezado · aviso fijo · chat · escribir */
+  grid-template-columns:minmax(0,1fr);   /* la columna nunca se ensancha por el contenido: el subtítulo se recorta con … en vez de empujar los botones */
 }
 
 /* ───────── encabezado ───────── */
@@ -152,6 +153,7 @@ header{ padding:calc(var(--safe-top) + 10px) var(--sp) 4px; }
 
 /* Armoni / Presupuesto de la casa */
 .brandline{ display:flex; align-items:baseline; gap:7px; min-width:0; white-space:nowrap; }
+.brandline .sub{ min-width:0; overflow:hidden; text-overflow:ellipsis; }
 .title{ font-weight:600; letter-spacing:-.01em; font-size:1.05rem; }
 .sep{ color:rgba(var(--ink),.22); font-weight:300; font-size:.95rem; }
 .sub{ font-size:.8rem; color:var(--dim); overflow:hidden; text-overflow:ellipsis; min-width:0; }
@@ -666,6 +668,14 @@ body.no-gl .bar, body.no-gl .composer{ background:var(--drawer-solid); }
   display:grid; place-items:center;
   transition:color .2s, background .2s;
 }
+#ojoBtn{ flex:none; width:34px; height:34px; margin:-2px 0 -2px auto; padding:0 !important; background:none !important; border:0 !important; border-radius:50%; color:var(--ghost); cursor:pointer; display:grid; place-items:center; transition:color .2s, background .2s; }
+#ojoBtn + #reset{ margin-left:0; }
+#ojoBtn:hover{ color:var(--white); background:rgba(var(--ink),.06) !important; }
+#ojoBtn svg{ width:18px !important; height:18px !important; grid-area:1/1; transition:opacity .25s, transform .35s var(--ease-spring); }
+#ojoBtn .ojoCerrado{ opacity:0; transform:scale(.6) rotate(-20deg); }
+body.oculto #ojoBtn{ color:var(--cyan); }
+body.oculto #ojoBtn .ojoAbierto{ opacity:0; transform:scale(.6) rotate(20deg); }
+body.oculto #ojoBtn .ojoCerrado{ opacity:1; transform:none; }
 #menuBtn:hover{ color:var(--white); background:rgba(var(--ink),.06); }
 #menuBtn:focus-visible{ outline:2px solid var(--blue); outline-offset:2px; }
 #menuBtn svg{ width:18px; height:18px; }
@@ -1011,6 +1021,16 @@ body.mode-gmail footer, body.mode-glim footer{ display:none; }
 /* ── ajustes, abajo del menú ── */
 .dFoot{ margin-top:auto; padding:14px 4px 2px; border-top:1px solid var(--line); }
 .dFootLbl{ font-size:.7rem; text-transform:uppercase; letter-spacing:.08em; color:var(--dim); font-weight:600; margin:0 8px 10px; }
+.inSalida{ margin:10px 0 0; padding:9px 12px; border-radius:12px; background:rgba(255,138,80,.1); border:1px solid rgba(255,138,80,.3); font-size:.84rem; text-align:center; color:var(--ghost); }
+.inSalida b{ color:var(--white); }
+.inOtro{ width:100%; margin:10px 0 0; padding:12px 14px; border-radius:14px; border:1px dashed rgba(var(--cyan-rgb),.45); background:rgba(var(--cyan-rgb),.07); color:var(--white); font:inherit; font-size:.88rem; font-weight:600; cursor:pointer; transition:transform .15s var(--ease-out), background .3s; }
+.inOtro:active{ transform:scale(.98); }
+.inOtro:disabled{ opacity:.5; cursor:default; }
+.inOtro[hidden], .inSalida[hidden]{ display:none; }
+.swc{ flex:none; position:relative; width:50px; height:30px; padding:0; border-radius:999px; border:1px solid var(--line); background:rgba(var(--ink),.1); cursor:pointer; transition:background .3s, border-color .3s; }
+.swc i{ position:absolute; top:3px; left:3px; width:22px; height:22px; border-radius:50%; background:var(--white); box-shadow:0 2px 6px rgba(0,0,0,.4); transition:transform .35s var(--ease-spring); }
+.swc[aria-checked="true"]{ background:linear-gradient(140deg, var(--cyan), var(--blue)); border-color:transparent; }
+.swc[aria-checked="true"] i{ transform:translateX(20px); }
 .setRow{ display:flex; align-items:center; gap:12px; padding:8px 8px; border-radius:14px; }
 .setIco{
   width:34px; height:34px; flex:none; border-radius:11px; display:grid; place-items:center;
@@ -1572,7 +1592,7 @@ button{ transition:transform var(--t-tap) var(--ease-out); }
 @media (max-width:540px){
   header{ gap:10px; }
   #reset .lbl{ display:none; }                    /* en el celular, solo el ícono: así cabe el subtítulo */
-  #reset{ padding:7px; border-radius:50%; margin-left:auto; }
+  #reset{ padding:7px; border-radius:50%; margin-left:0; }
   #thread{ padding-top:22px; }
   .hint{ display:none; }
 }
@@ -1796,6 +1816,20 @@ button{ transition:transform var(--t-tap) var(--ease-out); }
 .emCol i{ width:100%; border-radius:8px; background:rgba(var(--ink),.28); }
 .emBar.act .emCol i{ background:linear-gradient(180deg, #ffb066, #ff7a4d); }
 .emBar small{ font-size:.68rem; color:var(--dim); text-transform:capitalize; }
+.emaLista{ display:flex; flex-direction:column; gap:6px; margin-top:12px; }
+.emaFila{ border-radius:14px; border:1px solid var(--line); background:rgba(var(--ink),.04); cursor:pointer; transition:background .3s, border-color .3s; -webkit-tap-highlight-color:transparent; }
+.emaFila.abierto{ background:rgba(255,138,80,.08); border-color:rgba(255,138,80,.3); }
+.emaFCab{ display:flex; align-items:center; gap:10px; padding:10px 12px; font-size:.86rem; }
+.emaFDia{ flex:1; font-weight:600; }
+.emaFDia::first-letter{ text-transform:uppercase; }
+.emaFN{ color:var(--dim); font-size:.76rem; }
+.emaFCab b{ font-size:.9rem; }
+.emaDet{ display:grid; grid-template-rows:0fr; transition:grid-template-rows .4s var(--ease-out); }
+.emaFila.abierto .emaDet{ grid-template-rows:1fr; }
+.emaDet > div{ overflow:hidden; min-height:0; padding:0 12px; }
+.emaFila.abierto .emaDet > div{ padding-bottom:10px; }
+.emaDet p{ display:flex; justify-content:space-between; gap:10px; margin:0; padding:5px 0; font-size:.82rem; color:var(--ghost); border-top:1px solid var(--line); }
+.emaDet p em{ font-style:normal; color:var(--white); }
 @keyframes emaSube{ from{ opacity:0; transform:translateY(14px); } to{ opacity:1; transform:none; } }
 .emaEntra{ animation:emaSube .6s var(--ease-out) backwards; }
 .duVacio{ text-align:center; padding:26px 0; }
@@ -2085,6 +2119,10 @@ body[class*="mode-"] #masIngreso{ display:none; }
       <div class="brandline">
         <span class="title">Armoni</span><span class="sep">/</span><span class="sub">Presupuesto de la casa</span>
       </div>
+      <button id="ojoBtn" type="button" aria-label="Ocultar valores" aria-pressed="false" title="Ocultar valores">
+        <svg class="ojoAbierto" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>
+        <svg class="ojoCerrado" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3l18 18"/><path d="M10.6 5.2A9.6 9.6 0 0 1 12 5c6.4 0 10 7 10 7a17 17 0 0 1-3.2 4.1M6.5 6.6A17 17 0 0 0 2 12s3.6 7 10 7a9.7 9.7 0 0 0 4.2-1"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>
+      </button>
       <button id="reset" type="button" aria-label="Empezar de nuevo">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>
         <span class="lbl">Empezar de nuevo</span>
@@ -2165,6 +2203,16 @@ body[class*="mode-"] #masIngreso{ display:none; }
           <button type="button" role="radio" data-t="dark" aria-checked="true" aria-label="Tema oscuro (Black)">B</button>
           <button type="button" role="radio" data-t="gray" aria-checked="false" aria-label="Tema P (carbón)">P</button>
         </div>
+      </div>
+        </div>
+        <div class="ajGrupo">Privacidad</div>
+        <div class="ajCard">
+      <div class="setRow">
+        <span class="setIco" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3l18 18"/><path d="M10.6 5.2A9.6 9.6 0 0 1 12 5c6.4 0 10 7 10 7a17 17 0 0 1-3.2 4.1M6.5 6.6A17 17 0 0 0 2 12s3.6 7 10 7a9.7 9.7 0 0 0 4.2-1"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>
+        </span>
+        <span class="setTxt"><b>Ocultar valores</b><span id="ocultoEstado">Los montos se ven normales</span></span>
+        <button type="button" id="ocultoSwitch" class="swc" role="switch" aria-checked="false" aria-label="Ocultar valores"><i></i></button>
       </div>
         </div>
         <div class="ajGrupo">Notificaciones</div>
@@ -2304,7 +2352,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-10.89";
+const APP_VERSION = "2026-10-11.90";
 (function autoActualizar(){
   const patron = new RegExp("const APP_" + "VERSION = \"([^\"]+)\"");
   async function revisar(){
@@ -4857,6 +4905,74 @@ const Spring = (function(){
   return { run, project, rubberband };
 })();
 
+/* ════════════════════════════════════════════════════════════
+   OCULTAR VALORES: cambia los montos por ••••• en toda la app (para cuando alguien mira la pantalla).
+   Solo toca lo que se ve; lo guardado no cambia. Al apagarlo vuelve todo como estaba.
+   ════════════════════════════════════════════════════════════ */
+const Privacidad = (function(){
+  const KEY = "armoni.oculto";
+  /* $12.000 · $ 1.250.000 · 1.120.000 · 2.565.684,50 · $50000 */
+  const RE = /\$\s?\d[\d.,]*|\b\d{1,3}(?:[.,]\d{3})+(?:[.,]\d+)?\b/g;
+  const MASCARA = "•••••";
+  const HAY = /\$\s?\d|\b\d{1,3}[.,]\d{3}\b/;
+  const orig = new Map();            // nodo de texto → texto real
+  let on = false, mo = null, hecho = false;
+  const lee = () => { try{ return localStorage.getItem(KEY) === "1"; }catch{ return false; } };
+  const tapa = t => t.replace(RE, m => (m.charAt(0) === "$" ? "$" : "") + MASCARA);
+  const IGNORA = new Set(["SCRIPT", "STYLE", "TEXTAREA", "INPUT", "NOSCRIPT", "SELECT", "OPTION"]);
+
+  function procesa(nodo){
+    if(nodo.nodeType === 3){
+      const p = nodo.parentNode;
+      if(!p || IGNORA.has(p.nodeName)) return;
+      const d = nodo.data;
+      if(!HAY.test(d)) return;                 // ya está tapado o no trae montos
+      orig.set(nodo, d);
+      hecho = true; nodo.data = tapa(d); hecho = false;
+      return;
+    }
+    if(nodo.nodeType !== 1 || IGNORA.has(nodo.nodeName)) return;
+    const w = document.createTreeWalker(nodo, NodeFilter.SHOW_TEXT);
+    let n; while((n = w.nextNode())) procesa(n);
+  }
+  function arranca(){
+    procesa(document.body);
+    mo = new MutationObserver(ms => {
+      for(const m of ms){
+        if(m.type === "characterData"){ if(!hecho) procesa(m.target); }
+        else m.addedNodes.forEach(procesa);
+      }
+    });
+    mo.observe(document.body, { childList: true, characterData: true, subtree: true });
+  }
+  function para(){
+    if(mo){ mo.disconnect(); mo = null; }
+    hecho = true;
+    orig.forEach((txt, nodo) => { if(nodo.isConnected) nodo.data = txt; });
+    hecho = false; orig.clear();
+  }
+  function pinta(){
+    document.body.classList.toggle("oculto", on);
+    const b = document.getElementById("ojoBtn"), sw = document.getElementById("ocultoSwitch"), st = document.getElementById("ocultoEstado");
+    if(b){ b.setAttribute("aria-pressed", String(on)); b.setAttribute("aria-label", on ? "Mostrar valores" : "Ocultar valores"); b.title = on ? "Mostrar valores" : "Ocultar valores"; }
+    if(sw) sw.setAttribute("aria-checked", String(on));
+    if(st) st.textContent = on ? "Los montos se ven como •••••" : "Los montos se ven normales";
+  }
+  function set(v){
+    if(v === on) return;
+    on = v; try{ localStorage.setItem(KEY, v ? "1" : "0"); }catch{}
+    if(on) arranca(); else para();
+    pinta();
+  }
+  on = lee();
+  if(on) arranca();
+  pinta();
+  const ojo = document.getElementById("ojoBtn"), sw = document.getElementById("ocultoSwitch");
+  if(ojo) ojo.addEventListener("click", () => set(!on));
+  if(sw) sw.addEventListener("click", () => set(!on));
+  return { set, activo: () => on };
+})();
+
 const Drawer = (function(){
   const el = document.getElementById("drawer");
   const btn = document.getElementById("menuBtn");
@@ -5329,6 +5445,8 @@ const GastoManual = (function(){
         '<textarea id="inNota" rows="1" placeholder="Algo que quieras recordar" maxlength="300"></textarea>' +
         '<button type="button" class="inIA" id="inIA" aria-pressed="false"><i class="inIAdot" aria-hidden="true"></i><b>Pasar por Armoni</b></button>' +
         '<p class="inErr" id="inErr" role="alert"></p>' +
+        '<div class="inSalida" id="inSalida" hidden></div>' +
+        '<button type="button" class="inOtro" id="inOtro" hidden>+ Guardar y agregar otro gasto de esta salida</button>' +
                 '</div>' +
         '<div class="pgRow"><button type="button" class="pgNo" id="inCancel">Cancelar</button><button type="button" class="pgSi" id="inGuardar" disabled>Guardar</button></div>' +
       '</div></div>';
@@ -5341,7 +5459,16 @@ const GastoManual = (function(){
     let categoria = "", fecha = hoy(), tipo = "Gasto", iaManual = false;
     const iaBtn = $("inIA"), ia = { checked: false };
     const valor = () => parseInt(monto.value.replace(/\D/g, ""), 10) || 0;
-    const listo = () => { guardar.disabled = !(concepto.value.trim() && categoria && valor() > 0); };
+    const listo = () => { guardar.disabled = !(concepto.value.trim() && categoria && valor() > 0); actualizaOtro(); };
+    /* una salida con Ema suele tener varios gastos (parqueadero, almuerzo…): se guardan uno tras otro sin cerrar y al final se ve el total */
+    const salida = { n: 0, total: 0 };
+    const otro = $("inOtro"), salidaEl = $("inSalida");
+    function actualizaOtro(){
+      const ema = tipo === "Gasto" && categoria === "Salidas Ema";
+      otro.hidden = !ema; otro.disabled = guardar.disabled;
+      salidaEl.hidden = !(ema && salida.n);
+      if(ema && salida.n) salidaEl.innerHTML = '🎈 Salida con Ema · <b>' + salida.n + (salida.n === 1 ? ' gasto' : ' gastos') + '</b> · <b>$' + salida.total.toLocaleString("es-CO") + '</b>';
+    }
 
     /* las categorías cambian con el tipo; si la elegida sigue existiendo, se conserva */
     function pintaCats(){
@@ -5456,15 +5583,33 @@ const GastoManual = (function(){
       }
       /* directo a Movimientos: no pasa por el agente, no gasta IA */
       const dato = { tipo, concepto: concepto.value.trim(), categoria, monto: valor(), fecha, nota: nota$ };
+      const alFinal = categoria === "Salidas Ema" && salida.n ? { n: salida.n + 1, total: salida.total + dato.monto } : null;
       guardar.disabled = true; guardar.textContent = "Guardando…"; err.textContent = "";
       fetch(MOVIMIENTO_URL, { method: "POST", body: JSON.stringify(Object.assign({ token: MERCADO_TOKEN }, dato)) })
         .then(r => r.json().catch(() => ({})).then(j => { if(!r.ok || j.ok === false) throw new Error(j.error || "No se pudo guardar"); }))
         .then(() => {
           Frecuentes.aprende(tipo, dato.concepto, categoria, dato.monto);
           cierra("guardado");
-          avisoOk((tipo === "Gasto" ? "Gasto guardado" : "Ingreso guardado"), dato.concepto + " · " + monto$);
+          if(alFinal) avisoOk("Salida con Ema guardada", alFinal.n + " gastos · $" + alFinal.total.toLocaleString("es-CO"));
+          else avisoOk((tipo === "Gasto" ? "Gasto guardado" : "Ingreso guardado"), dato.concepto + " · " + monto$);
         })
         .catch(e => { guardar.disabled = false; guardar.textContent = "Guardar"; err.textContent = (e && e.message && e.message !== "Failed to fetch") ? e.message : "No pude guardarlo. Revisa la conexión e inténtalo de nuevo."; });
+    });
+    otro.addEventListener("click", () => {
+      if(otro.disabled) return;
+      if(AUTOMATICOS.test(concepto.value)){ err.textContent = "Eso ya se registra solo desde su aviso (jardín, arriendo, cuota del carro). Aquí va lo demás."; return; }
+      const dato = { tipo, concepto: concepto.value.trim(), categoria, monto: valor(), fecha, nota: nota.value.trim() };
+      otro.disabled = true; guardar.disabled = true; otro.textContent = "Guardando…"; err.textContent = "";
+      fetch(MOVIMIENTO_URL, { method: "POST", body: JSON.stringify(Object.assign({ token: MERCADO_TOKEN }, dato)) })
+        .then(r => r.json().catch(() => ({})).then(j => { if(!r.ok || j.ok === false) throw new Error(j.error || "No se pudo guardar"); }))
+        .then(() => {
+          Frecuentes.aprende(tipo, dato.concepto, categoria, dato.monto);
+          salida.n++; salida.total += dato.monto;
+          concepto.value = ""; monto.value = ""; nota.value = "";
+          otro.textContent = "+ Guardar y agregar otro gasto de esta salida";
+          listo(); concepto.focus();
+        })
+        .catch(e => { otro.textContent = "+ Guardar y agregar otro gasto de esta salida"; listo(); err.textContent = (e && e.message && e.message !== "Failed to fetch") ? e.message : "No pude guardarlo. Revisa la conexión e inténtalo de nuevo."; });
     });
     sugiereIA();
     setTimeout(() => concepto.focus(), 350);
@@ -7329,7 +7474,7 @@ const TuMes = (function(){
 
   /* ── Salidas con Ema: cuántas veces en el mes (y los meses anteriores) ── */
   const emaEl = document.getElementById("tmEma"), EKEY = "armoni.tumes.ema";
-  let ema = null;
+  let ema = null, emaAbierta = null;
   function pintaEma(anim){
     const ms = (ema && ema.meses) || [];
     const hoyM = mesHoy(), act = ms.find(m => m.mes === hoyM) || { mes: hoyM, veces: 0, total: 0, dias: [] };
@@ -7346,9 +7491,22 @@ const TuMes = (function(){
         '<b><span class="emaN">' + act.veces + '</span> ' + (act.veces === 1 ? 'vez' : 'veces') + '</b></div>' +
         (act.total ? '<span class="emaTot">' + peso(act.total) + '</span>' : '') + '</div>' +
         '<div class="emaDias" aria-hidden="true">' + puntos + '</div>' +
+        ((act.salidas || []).length ? '<div class="emaLista">' + act.salidas.slice().reverse().map((q, i) => {
+          const f = new Date(q.fecha + "T12:00:00"), dia = f.toLocaleDateString("es-CO", { weekday: "short", day: "numeric", month: "short" }).replace(/\./g, "");
+          const abierto = emaAbierta === q.fecha;
+          return '<div class="emaFila' + (abierto ? ' abierto' : '') + '" data-f="' + esc(q.fecha) + '" role="button" tabindex="0" aria-expanded="' + abierto + '">' +
+            '<div class="emaFCab"><span class="emaFDia">' + esc(dia) + '</span><span class="emaFN">' + q.gastos.length + (q.gastos.length === 1 ? ' gasto' : ' gastos') + '</span><b>' + peso(q.total) + '</b></div>' +
+            '<div class="emaDet"><div>' + q.gastos.map(g => '<p><span>' + esc(g.c) + '</span><em>' + peso(g.m) + '</em></p>').join("") + '</div></div></div>';
+        }).join("") + '</div>' : '') +
         (ult.length ? '<div class="emaBarras">' + barras + '</div>' : '') +
       '</div>';
   }
+  emaEl.addEventListener("click", e => {
+    const f = e.target.closest(".emaFila"); if(!f) return;
+    const abrir = emaAbierta !== f.dataset.f; emaAbierta = abrir ? f.dataset.f : null;
+    emaEl.querySelectorAll(".emaFila").forEach(x => { const on = x === f && abrir; x.classList.toggle("abierto", on); x.setAttribute("aria-expanded", String(on)); });
+  });
+  emaEl.addEventListener("keydown", e => { if((e.key === "Enter" || e.key === " ") && e.target.classList && e.target.classList.contains("emaFila")){ e.preventDefault(); e.target.click(); } });
   async function cargarEma(){
     try{ if(!ema) ema = JSON.parse(localStorage.getItem(EKEY)); }catch{}
     if(ema) pintaEma(false);
