@@ -2097,6 +2097,10 @@ button{ transition:transform var(--t-tap) var(--ease-out); }
 .prCard textarea{ width:100%; resize:none; }
 .prMsg{ margin:6px 0 0; font-size:.92rem; color:var(--white); }
 .prMsg:empty{ display:none; }
+#colaPill{ position:fixed; left:50%; top:calc(var(--safe-top, 0px) + 74px); z-index:60; transform:translateX(-50%); display:inline-flex; align-items:center; gap:8px; padding:8px 14px; border-radius:999px; border:1px solid rgba(255,176,102,.4); background:rgba(30,20,10,.92); color:#ffcf99; font:inherit; font-size:.78rem; font-weight:700; box-shadow:0 10px 26px -12px rgba(0,0,0,.8); cursor:pointer; white-space:nowrap; }
+#colaPill i{ width:8px; height:8px; border-radius:50%; background:#ffb066; animation:colaLate 1.6s ease-in-out infinite; }
+#colaPill.girando i{ animation-duration:.5s; }
+@keyframes colaLate{ 50%{ opacity:.3; transform:scale(.7); } }
 .rsPie{ display:block; margin-top:6px; font-size:.76rem; color:var(--dim); }
 /* la regla: cada parte se despliega */
 .balRegla{ margin:20px 4px 8px; }
@@ -3042,7 +3046,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-11.131";
+const APP_VERSION = "2026-10-11.132";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -6052,6 +6056,7 @@ const SalidaEmaForm = (function(){
       vista.innerHTML = '<div class="seGuardando"><svg class="seAro" viewBox="0 0 80 80" aria-hidden="true"><circle cx="40" cy="40" r="34" class="seAroBg"/><circle cx="40" cy="40" r="34" class="seAroFg" id="seAroFg" stroke-dasharray="213.6" stroke-dashoffset="213.6"/><path class="seCheck" d="M27 41 L36 50 L54 31"/></svg><b id="seGuardTxt">Guardando…</b><small id="seGuardSub">' + n + (n === 1 ? ' gasto' : ' gastos') + ' · ' + peso(total()) + '</small></div>';
       botones.innerHTML = "";
       const aro = $("seAroFg");
+      let sinConexion = false;
       try{
         for(const { p, g } of lista){
           $("seGuardTxt").textContent = "Guardando " + (k + 1) + " de " + n + "…";
@@ -6061,16 +6066,17 @@ const SalidaEmaForm = (function(){
           if(g.fp && g.fp !== fecha) dato.fechaSalida = fecha;   // pagado antes: el gasto queda en el día en que se pagó, pero hace parte de esta salida
           const l = p.lugar.trim();
           if(l){ const c = conocido(l); if(c) dato.lugar = c; else { dato.lugar = l; if(!p.nuevoEnviado){ dato.puntuacion = p.puntuacion || null; dato.comentario = p.comentario.trim(); } } }
-          const r = await fetch(MOVIMIENTO_URL, { method: "POST", body: JSON.stringify(Object.assign({ token: MERCADO_TOKEN }, dato)) });
+          const r = await Cola.post(MOVIMIENTO_URL, { method: "POST", body: JSON.stringify(Object.assign({ token: MERCADO_TOKEN }, dato)) });
           const j = await r.json().catch(() => ({}));
           if(!r.ok || j.ok === false) throw new Error(j.error || "No se pudo guardar");
+          if(j.enCola) sinConexion = true;
           if(l && !conocido(l)) p.nuevoEnviado = true;
           g.hecho = true; k++;
           aro.style.strokeDashoffset = String(213.6 * (1 - k / n));
         }
         scrim.querySelector(".seGuardando").classList.add("listo");
         $("seGuardTxt").textContent = "¡Salida guardada!";
-        $("seGuardSub").textContent = paradas.length + (paradas.length === 1 ? " lugar" : " lugares") + " · " + peso(total());
+        $("seGuardSub").textContent = sinConexion ? "Quedó en el celular · se envía cuando el PC esté prendido" : paradas.length + (paradas.length === 1 ? " lugar" : " lugares") + " · " + peso(total());
         if(document.body.classList.contains("mode-ema")) setTimeout(() => SalidasEma.refresh(), 300); else SalidasEma.precarga();
         setTimeout(cierra, REDUCED ? 600 : 1500);
       }catch(e){
@@ -6794,6 +6800,60 @@ function ajustaMonto(inp){
   while(w > cabe && fs > 16){ fs -= 1.5; w = mide(); }
   inp.style.fontSize = fs + "px"; inp.style.width = Math.ceil(w) + "px"; inp.scrollLeft = 0;
 }
+/* ═════════ SIN CONEXIÓN: los registros esperan en el celular ═════════
+   Si el PC está apagado o no hay internet, el gasto/ingreso/salida/ahorro se guarda aquí y se envía solo
+   cuando el servidor vuelve (al abrir la app, al volver a ella o cada minuto). Cada registro lleva un código
+   único: si el servidor ya lo había recibido, no se duplica. */
+const Cola = (function(){
+  const K = "armoni.cola";
+  const lee = () => { try{ return JSON.parse(localStorage.getItem(K)) || []; }catch{ return []; } };
+  const escribe = c => { try{ localStorage.setItem(K, JSON.stringify(c)); }catch{} pinta(); };
+  const nuevoId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+  let enviando = false;
+  /* como fetch: si no hay conexión guarda el registro y responde «ok, en cola» para que la app siga normal */
+  async function post(url, opts){
+    let cuerpo = {}; try{ cuerpo = JSON.parse(opts.body || "{}"); }catch{}
+    if(!cuerpo.colaId) cuerpo.colaId = nuevoId();
+    const body = JSON.stringify(cuerpo);
+    try{
+      return await fetch(url, Object.assign({}, opts, { body, signal: AbortSignal.timeout ? AbortSignal.timeout(15000) : undefined }));
+    }catch(e){
+      const c = lee(); c.push({ url, body, t: Date.now(), resumen: (cuerpo.concepto || "Registro") + (cuerpo.monto ? " · $" + Math.round(cuerpo.monto).toLocaleString("es-CO") : "") }); escribe(c);
+      return new Response(JSON.stringify({ ok: true, enCola: true }), { status: 200, headers: { "Content-Type": "application/json" } });
+    }
+  }
+  async function vacia(){
+    if(enviando) return; const c = lee(); if(!c.length) return;
+    enviando = true; let enviados = 0, fallidos = 0;
+    try{
+      while(lee().length){
+        const x = lee()[0];
+        let r;
+        try{ r = await fetch(x.url, { method: "POST", body: x.body, signal: AbortSignal.timeout ? AbortSignal.timeout(15000) : undefined }); }catch{ break; }   // sigue sin conexión: se intenta después
+        const j = await r.json().catch(() => ({}));
+        const resto = lee().slice(1);
+        if((r.ok && j.ok !== false) || j.error === "repetido") enviados++;   // «repetido»: ya había llegado, no se duplica
+        else if(r.status >= 500) break;   // el servidor tuvo un problema: se intenta después
+        else { fallidos++; try{ const f = JSON.parse(localStorage.getItem(K + ".fallidos")) || []; f.push(Object.assign({}, x, { error: j.error || r.status })); localStorage.setItem(K + ".fallidos", JSON.stringify(f.slice(-30))); }catch{} }
+        escribe(resto);
+      }
+    } finally { enviando = false; }
+    if(enviados) avisoOk("Ya se enviaron", enviados + (enviados === 1 ? " registro que esperaba conexión" : " registros que esperaban conexión"));
+    if(fallidos) avisoOk("Ojo", fallidos + (fallidos === 1 ? " registro no se pudo guardar" : " registros no se pudieron guardar") + ". Revísalos en Notion.");
+    if(enviados){ try{ SalidasEma.precarga(); }catch{} }
+  }
+  function pinta(){
+    const n = lee().length; let el = document.getElementById("colaPill");
+    if(!n){ if(el) el.remove(); return; }
+    if(!el){ el = document.createElement("button"); el.type = "button"; el.id = "colaPill"; el.addEventListener("click", () => { el.classList.add("girando"); vacia().finally(() => el && el.classList.remove("girando")); }); document.body.appendChild(el); }
+    el.innerHTML = '<i aria-hidden="true"></i>' + n + (n === 1 ? ' registro espera conexión' : ' registros esperan conexión');
+  }
+  addEventListener("online", () => setTimeout(vacia, 1500));
+  document.addEventListener("visibilitychange", () => { if(document.visibilityState === "visible") setTimeout(vacia, 1200); });
+  setInterval(() => { if(lee().length && !document.hidden) vacia(); }, 60000);
+  TrasIntro.hacer(() => { pinta(); vacia(); });
+  return { post, vacia, cuantos: () => lee().length };
+})();
 /* lo último que se supo del ahorro (lo guarda la pantalla Ahorro); lo usan Balance y Tu mes */
 const ahorroGuardado = () => { try{ const d = JSON.parse(localStorage.getItem("armoni.ahorro")); return d && Array.isArray(d.cajas) ? d : null; }catch{ return null; } };
 /* ═════════ AHORRO DE LA CASA, POR CAJITAS ═════════
@@ -6931,12 +6991,13 @@ const Ahorro = (function(){
           if(modo === "sacar" && monto > c.saldo && !confirm("En «" + c.nombre + "» hay " + peso(c.saldo) + ". ¿Igual lo anoto?")) return;
           ocupa(true); si.disabled = true; si.textContent = "Guardando…"; $("ahErr").textContent = "";
           try{
-            const r = await fetch(MOVIMIENTO_URL, { method: "POST", body: JSON.stringify({ token: MERCADO_TOKEN, tipo: modo === "guardar" ? "Gasto" : "Ingreso", categoria: "Ahorro", concepto: (modo === "guardar" ? "Ahorro · " : "Retiro · ") + c.nombre, monto, fecha: hoyISO(), nota: ($("ahNota").value || "").trim() }) });
+            const r = await Cola.post(MOVIMIENTO_URL, { method: "POST", body: JSON.stringify({ token: MERCADO_TOKEN, tipo: modo === "guardar" ? "Gasto" : "Ingreso", categoria: "Ahorro", concepto: (modo === "guardar" ? "Ahorro · " : "Retiro · ") + c.nombre, monto, fecha: hoyISO(), nota: ($("ahNota").value || "").trim() }) });
             const j = await r.json().catch(() => ({}));
             if(!r.ok || j.ok === false) throw new Error(j.error === "categoria" ? "Falta actualizar el flujo «movimiento-nuevo» en n8n para poder sacar del ahorro." : "");
             await pide().catch(() => {});
             cierra(); pinta();
-            avisoOk(modo === "guardar" ? "Guardado en " + c.nombre : "Sacado de " + c.nombre, peso(monto));
+            if(j.enCola) avisoOk("Guardado en el celular", peso(monto) + " · se envía cuando el PC esté prendido");
+            else avisoOk(modo === "guardar" ? "Guardado en " + c.nombre : "Sacado de " + c.nombre, peso(monto));
           }catch(e){ ocupa(false); si.disabled = false; si.textContent = modo === "guardar" ? "Guardar" : "Sacar"; $("ahErr").textContent = errorDe(e); }
         });
       });
@@ -7822,12 +7883,13 @@ const GastoManual = (function(){
       const dato = { tipo, concepto: nombre, categoria, monto, fecha, nota: nota$ };
       if(pareja) dato.salida = "Pareja";
       guardando = true; btn.disabled = true; btn.textContent = "Guardando…"; err.textContent = "";
-      fetch(MOVIMIENTO_URL, { method: "POST", body: JSON.stringify(Object.assign({ token: MERCADO_TOKEN }, dato)) })
-        .then(r => r.json().catch(() => ({})).then(j => { if(!r.ok || j.ok === false) throw new Error(j.error || "No se pudo guardar"); }))
-        .then(() => {
+      Cola.post(MOVIMIENTO_URL, { method: "POST", body: JSON.stringify(Object.assign({ token: MERCADO_TOKEN }, dato)) })
+        .then(r => r.json().catch(() => ({})).then(j => { if(!r.ok || j.ok === false) throw new Error(j.error || "No se pudo guardar"); return j; }))
+        .then(j => {
           Frecuentes.aprende(tipo, concepto.trim(), categoria, monto);
           cierra("guardado");
-          avisoOk((tipo === "Gasto" ? "Gasto guardado" : "Ingreso guardado"), nombre + " · " + monto$);
+          if(j && j.enCola) avisoOk("Guardado en el celular", nombre + " · " + monto$ + " · se envía cuando el PC esté prendido");
+          else avisoOk((tipo === "Gasto" ? "Gasto guardado" : "Ingreso guardado"), nombre + " · " + monto$);
         })
         .catch(e => { guardando = false; btn.disabled = false; btn.textContent = "Guardar"; err.textContent = (e && e.message && e.message !== "Failed to fetch") ? e.message : "No pude guardarlo. Revisa la conexión e inténtalo de nuevo."; });
     }
