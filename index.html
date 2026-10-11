@@ -1418,8 +1418,10 @@ body.mode-gmail footer, body.mode-glim footer{ display:none; }
 .wsTicket .tot strong{ font-size:1.6rem; }
 .wsTicket .rcMarca{ text-align:center; margin-bottom:10px; }
 .wsTicket .rcMarca b{ display:block; margin:0; font-size:1.15rem; letter-spacing:.3em; }
+.wsTicket .rcIco{ display:block; font-size:1.6rem; margin-bottom:4px; }
+.wsTicket .rcMarca small{ text-transform:uppercase; letter-spacing:.12em; }
 .wsTicket .rcMeta{ display:flex; justify-content:space-between; gap:10px; font-size:.66rem; color:#6b6b74; }
-.wsTicket .rcItem{ display:grid; grid-template-columns:auto 1fr auto; gap:10px; align-items:baseline; font-size:.95rem; font-weight:700; }
+.wsTicket .rcItem{ font-size:1.05rem; font-weight:700; margin:2px 0 10px; }
 .wsTicket .rcItem i{ font-style:normal; }
 .wsTicket .rcItem em{ font-style:normal; overflow-wrap:anywhere; }
 .wsTicket .rcSub{ display:flex; justify-content:space-between; font-size:.8rem; color:#55555e; margin-bottom:4px; }
@@ -2926,7 +2928,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-11.109";
+const APP_VERSION = "2026-10-11.110";
 (function autoActualizar(){
   const patron = new RegExp("const APP_" + "VERSION = \"([^\"]+)\"");
   async function revisar(){
@@ -8869,6 +8871,20 @@ const TuMes = (function(){
   const semillaDe = t => [...String(t)].reduce((a, c) => (Math.imul(a, 31) + c.charCodeAt(0)) >>> 0, 7);
   const azar = n => () => { n = (n + 0x6D2B79F5) >>> 0; let t = Math.imul(n ^ (n >>> 15), 1 | n); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
   const emoCosa = c => /cine|pel[ií]cula/i.test(c) ? "🎬" : /comer|comida|almuerzo|cena|desayuno|restaur|pizza|hamburg/i.test(c) ? "🍽️" : /helad|postre/i.test(c) ? "🍦" : /caf[eé]/i.test(c) ? "☕" : /bar|trago|cerveza|vino/i.test(c) ? "🍷" : /hotel|glamping|viaje/i.test(c) ? "🏨" : "✨";
+  const TIQUETES = {
+    "Hogar":        { ico: "🏠", titulo: "CUENTA DE COBRO", linea: "Para la casa", pie: "Un techo bien pagado" },
+    "Alimentación": { ico: "🛒", titulo: "TIQUETE DE COMPRA", linea: "Para la mesa", pie: "La nevera lo agradece" },
+    "Servicios":    { ico: "💡", titulo: "FACTURA DE SERVICIO", linea: "Luz, agua y más", pie: "Todo sigue encendido" },
+    "Salud":        { ico: "🩺", titulo: "ORDEN DE PAGO", linea: "Para la salud", pie: "Lo primero es estar bien" },
+    "Carro":        { ico: "🚗", titulo: "COMPROBANTE", linea: "Para el carro", pie: "Kilómetros por delante" },
+    "Hijo":         { ico: "🧸", titulo: "RECIBO", linea: "Para Ema", pie: "Lo mejor para ella" },
+    "Tarjetas":     { ico: "💳", titulo: "EXTRACTO", linea: "Pago de tarjeta", pie: "Una cuota menos" },
+    "Salidas":      { ico: "🎟️", titulo: "BOLETA", linea: "Para salir", pie: "Buenos momentos" },
+    "Salidas Ema":  { ico: "🎈", titulo: "BOLETA", linea: "Salida con Ema", pie: "Recuerdos con Ema" },
+    "Ahorro":       { ico: "🐷", titulo: "CONSIGNACIÓN", linea: "Al ahorro", pie: "Plata que se queda" },
+    "Otros":        { ico: "🧾", titulo: "COMPROBANTE", linea: "Gasto del mes", pie: "Anotado en Armoni" }
+  };
+  const catDe = c => /arriendo|administraci|hogar|casa|mueble/i.test(c) ? "Hogar" : /mercado|super|éxito|exito|d1|ara\b|carulla|olimpica|olímpica/i.test(c) ? "Alimentación" : /energ|luz|agua|gas\b|internet|celular|plan/i.test(c) ? "Servicios" : /m[eé]dic|droguer|psic|salud|eps/i.test(c) ? "Salud" : /gasolina|carro|cuota|seguro|soat|taller|peaje|parqueadero/i.test(c) ? "Carro" : /pañal|jard[ií]n|ema|colegio/i.test(c) ? "Hijo" : /tarjeta/i.test(c) ? "Tarjetas" : "Otros";
   const DUR = 5600;
   const esc = t => String(t).replace(/[&<>]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
   const peso = n => "$" + Math.round(n).toLocaleString("es-CO");
@@ -9074,18 +9090,21 @@ const TuMes = (function(){
       }
     }
     if(M.mayor){
+      /* el comprobante cambia según la categoría del gasto: no es una cuenta de restaurante si fue el arriendo */
+      const cat = M.mayor.categoria || catDe(M.mayor.concepto);
+      const tk = TIQUETES[cat] || TIQUETES.Otros;
+      const pctMes = Math.max(1, Math.round(M.mayor.monto / Math.max(1, M.gastos) * 100));
       s.push({ fondo: 5, html:
         '<div class="wsK" style="--d:0">Tu gasto más grande</div>' +
         '<div class="wsTicket" style="--d:.2"><div class="tk">' +
-          '<div class="rcMarca"><b>ARMONI</b><small>Cuenta de la casa</small></div>' +
-          '<div class="rcMeta"><span>Mesa 1</span><span>' + esc(fechaLarga(M.mayor.fecha)) + '</span></div>' +
+          '<div class="rcMarca"><span class="rcIco" aria-hidden="true">' + tk.ico + '</span><b>' + esc(tk.titulo) + '</b><small>' + esc(cat) + '</small></div>' +
+          '<div class="rcMeta"><span>N.º ' + String(M.mayor.monto).slice(-4).padStart(4, "0") + '</span><span>' + esc(fechaLarga(M.mayor.fecha)) + '</span></div>' +
           '<div class="lin"></div>' +
-          '<div class="rcItem"><span>1</span><em>' + esc(M.mayor.concepto) + '</em><i>' + peso(M.mayor.monto) + '</i></div>' +
-          '<div class="lin"></div>' +
-          '<div class="rcSub"><span>Subtotal</span><span>' + peso(M.mayor.monto) + '</span></div>' +
-          '<div class="rcSub"><span>Propina</span><span>$0</span></div>' +
-          '<div class="tot"><span>TOTAL</span><strong>' + peso(M.mayor.monto) + '</strong></div>' +
-          '<p class="rcGracias">¡Gracias por su visita!</p><div class="cod" aria-hidden="true"></div>' +
+          '<div class="rcItem"><em>' + esc(M.mayor.concepto) + '</em></div>' +
+          '<div class="rcSub"><span>Categoría</span><span>' + esc(cat) + '</span></div>' +
+          '<div class="rcSub"><span>' + esc(tk.linea) + '</span><span>' + pctMes + '% del mes</span></div>' +
+          '<div class="tot"><span>TOTAL</span><strong data-monto="' + M.mayor.monto + '">$0</strong></div>' +
+          '<p class="rcGracias">' + esc(tk.pie) + '</p><div class="cod" aria-hidden="true"></div>' +
         '</div></div>' });
     }
     if(M.repetido) s.push({ fondo: 3, html:
@@ -9353,7 +9372,12 @@ const TuMes = (function(){
       cuerpo.classList.remove("sale", "wsCentro"); cuerpo.classList.toggle("primera", !hayContenido);
       cuerpo.dataset.dir = String(dir); cuerpo.style.setProperty("--dir", dir);
       cuerpo.innerHTML = s.html;
-      cuerpo.querySelectorAll("[data-monto]").forEach(x => { x.textContent = peso(+x.dataset.monto); });   // los valores aparecen quietos, sin contar
+      /* los valores cuentan desde 0 como en Glim, justo cuando aparece cada uno */
+      cuerpo.querySelectorAll("[data-monto]").forEach(x => {
+        const v = +x.dataset.monto, d = parseFloat(x.style.getPropertyValue("--d") || (x.closest("[style*='--d']") || x).style.getPropertyValue("--d")) || 0;
+        x.textContent = peso(0);
+        toques.push(setTimeout(() => animaMonto(x, 0, v, 1100), d * 1000 + 120));
+      });
       t0 = performance.now(); pausa = false;
       toques.push(setTimeout(() => cuerpo.querySelectorAll("[data-w]").forEach(x => { x.style.width = x.dataset.w + "%"; }), 700));
     };
