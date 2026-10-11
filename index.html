@@ -542,7 +542,7 @@ footer{ padding:10px var(--sp) calc(var(--safe-bot) + 14px); }
   line-height:1.5; max-height:34vh; padding:6px 0;
 }
 #field:focus{ outline:none; }
-#field::placeholder{ color:var(--dim); }
+#field::placeholder{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis; } #field::placeholder{ color:var(--dim); }
 
 #send{
   flex:none; width:38px; height:38px; border:0; border-radius:50%;
@@ -1521,9 +1521,6 @@ body.mode-gmail footer, body.mode-glim footer{ display:none; }
 .mkTiles.uno{ grid-template-columns:1fr; }
 .mkCanastaV .inLbl{ text-align:center; }
 .mkCanastaV .recDia{ justify-content:center; }
-@media (max-width:360px){
-  .mkTiles.cuatro .mkTile{ flex-direction:column; justify-content:center; text-align:center; gap:8px; }
-  .mkTiles.cuatro .mkTile > span:last-child, .mkTiles.cuatro .mkTile b{ min-width:0; overflow-wrap:anywhere; }
 }
 /* tocar con el dedo: zonas mínimas de 44px sin cambiar cómo se ven */
 .emaEq .x, .svBanner .x, .seQuitar, .sheetClose, .rgBusca .x, .cfAnX, .fmVolver{ position:relative; }
@@ -1531,6 +1528,9 @@ body.mode-gmail footer, body.mode-glim footer{ display:none; }
 @media (prefers-reduced-motion:reduce){ .frame::before, .pnEstrella, #inGuardar::after, .mkCuenta .anillo, #pending .state{ animation:none !important; } }
 .mkTiles.cuatro{ grid-template-columns:repeat(2, 1fr); }
 .mkTiles.cuatro .mkTile{ flex-direction:row; justify-content:flex-start; gap:12px; padding:12px 14px; text-align:left; }
+@media (max-width:360px){
+  .mkTiles.cuatro .mkTile{ flex-direction:column; justify-content:center; text-align:center; gap:8px; }
+  .mkTiles.cuatro .mkTile > span:last-child, .mkTiles.cuatro .mkTile b{ min-width:0; overflow-wrap:normal; hyphens:auto; }
 .mkTile{ display:flex; flex-direction:column; align-items:center; justify-content:center; gap:9px; padding:16px 6px 14px; border-radius:20px; border:1px solid var(--line); background:var(--panel); color:var(--white); font:inherit; font-size:.8rem; font-weight:600; line-height:1.15; text-align:center; cursor:pointer; transition:transform .2s var(--ease-out), border-color .3s, background .3s; -webkit-tap-highlight-color:transparent; }
 .mkTile:active{ transform:scale(.95); }
 .mkTile .ti{ width:42px; height:42px; border-radius:14px; display:grid; place-items:center; color:var(--cyan); background:rgba(var(--cyan-rgb),.1); border:1px solid rgba(var(--cyan-rgb),.2); }
@@ -1982,7 +1982,7 @@ button{ transition:transform var(--t-tap) var(--ease-out); }
 .duBig{ font-size:1.18rem; font-weight:700; line-height:1.2; color:var(--white); }
 .duCuenta{ font-size:1.9rem; background:linear-gradient(140deg, #ffb066, #ff7a4d); -webkit-background-clip:text; background-clip:text; color:transparent; }
 .duHeroTx p{ margin:6px 0 0; font-size:.82rem; color:var(--dim); }
-.duChips{ display:flex; gap:8px; margin:16px 0 12px; overflow-x:auto; scrollbar-width:none; }
+.duChips{ display:flex; flex-wrap:wrap; gap:8px; margin:16px 0 12px; }
 .duChips::-webkit-scrollbar{ display:none; }
 .duChip{ flex:none; display:flex; align-items:center; gap:8px; padding:9px 14px; border-radius:999px; border:1px solid var(--line); background:rgba(var(--ink),.04); color:var(--ghost); font:inherit; font-size:.86rem; font-weight:600; cursor:pointer; transition:background .3s, border-color .3s, color .3s, transform .3s var(--ease-spring); }
 .duChip:active{ transform:scale(.95); }
@@ -2131,6 +2131,7 @@ button{ transition:transform var(--t-tap) var(--ease-out); }
 .ahBtn:active{ transform:scale(.96); }
 .ahReparto{ display:flex; gap:3px; height:10px; margin:0 0 14px; border-radius:10px; overflow:hidden; }
 .ahReparto i{ min-width:4px; border-radius:3px; }
+.ahCajas, .ahLista{ grid-template-columns:minmax(0,1fr); }
 .ahCajas{ display:grid; gap:2px; padding:6px; border-radius:22px; border:1px solid var(--line); background:var(--panel); }
 .ahCaja{ display:flex; align-items:center; gap:14px; width:100%; padding:10px; border:0; border-radius:16px; background:none; color:var(--white); font:inherit; text-align:left; cursor:pointer; transition:background .2s ease, transform .2s var(--ease-spring); }
 .ahCaja + .ahCaja{ box-shadow:0 -1px 0 var(--line); }
@@ -2149,12 +2150,12 @@ button{ transition:transform var(--t-tap) var(--ease-out); }
 .ahCaja.nueva .ahTile{ border:1.5px dashed color-mix(in srgb, var(--c) 60%, transparent); background:none; }
 .ahCaja.nueva b{ font-size:.95rem; }
 .ahChips{ display:flex; flex-wrap:wrap; gap:6px; margin-bottom:14px; }
-.ahChips button{ display:inline-flex; align-items:center; gap:7px; padding:8px 13px; border-radius:999px; border:1px solid var(--line); background:rgba(var(--ink),.04); color:var(--ghost); font:inherit; font-size:.84rem; font-weight:600; cursor:pointer; }
+.ahChips button{ max-width:100%; text-align:left; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; display:inline-flex; align-items:center; gap:7px; padding:8px 13px; border-radius:999px; border:1px solid var(--line); background:rgba(var(--ink),.04); color:var(--ghost); font:inherit; font-size:.84rem; font-weight:600; cursor:pointer; }
 .ahChips button i{ width:9px; height:9px; border-radius:50%; background:var(--c); }
 .ahChips button[aria-pressed="true"]{ color:var(--white); border-color:var(--c); background:color-mix(in srgb, var(--c) 18%, transparent); }
 .ahMovTx small i{ display:inline-block; width:7px; height:7px; margin-right:5px; border-radius:50%; vertical-align:1px; }
 .ahDet .ahSaldo{ margin-top:2px; }
-.ahDet h3{ margin:2px 0 0; text-align:left; font-size:1.2rem; }
+.inCard .ahDet h3, .ahDet h3{ margin:2px 0 0; text-align:left; font-size:1.2rem; }
 .ahDetLista{ max-height:38vh; overflow:auto; margin-top:12px; }
 .ahMetaBtn{ display:block; margin-top:8px; padding:0; border:0; background:none; font:inherit; font-size:.82rem; font-weight:700; color:var(--c, #6fe0b5); cursor:pointer; }
 .ahMetaBtn.grande{ width:100%; margin-top:10px; padding:11px; border-radius:14px; border:1.5px dashed color-mix(in srgb, var(--c) 55%, transparent); text-align:center; }
@@ -2552,7 +2553,7 @@ body[class*="mode-"] #masIngreso{ display:none; }
 .fmMontoLbl{ display:block; font-size:.68rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--dim); }
 .fmMontoIn{ display:flex; align-items:center; justify-content:center; gap:2px; margin-top:2px; }
 .fmMontoIn b{ font-size:1.5rem; font-weight:600; color:var(--dim); }
-.inCard .fmMontoIn input[type="text"]{ width:2.2ch; max-width:85%; padding:0 !important; border:0 !important; background:none !important; box-shadow:none !important; font-size:2.5rem; font-weight:700; letter-spacing:-.02em; text-align:center; font-variant-numeric:tabular-nums; color:var(--white); caret-color:var(--fa1); transition:width .15s ease-out; }
+.inCard .fmMontoIn input[type="text"]{ width:2.2ch; max-width:85%; padding:0 !important; border:0 !important; background:none !important; box-shadow:none !important; font-size:2.5rem; font-weight:700; letter-spacing:-.02em; text-align:center; font-variant-numeric:tabular-nums; color:var(--white); caret-color:var(--fa1); }
 .inCard .fmMontoIn input::placeholder{ color:rgba(var(--ink),.25); }
 .inCard .fmMontoIn input:focus::placeholder{ color:transparent; }   /* al tocar, el 0 se va y queda solo el cursor */
 .fmLinea{ display:block; height:2px; width:70px; margin:6px auto 0; border-radius:2px; background:linear-gradient(90deg, transparent, var(--fa1), var(--fa2), transparent); opacity:.45; transition:width .45s var(--ease-out), opacity .3s; }
@@ -6855,7 +6856,7 @@ const Ahorro = (function(){
     const mide = () => { medidor.font = cs.fontWeight + " " + fs + "px " + cs.fontFamily; return medidor.measureText(inp.value || "0").width + fs * .25; };
     w = mide();
     while(w > cabe && fs > 18){ fs -= 2; w = mide(); }
-    inp.style.fontSize = fs + "px"; inp.style.width = Math.ceil(w) + "px";
+    inp.style.fontSize = fs + "px"; inp.style.width = Math.ceil(w) + "px"; inp.scrollLeft = 0;
   };   // el campo crece con el número (y achica la letra si es muy largo): nunca se corta
   const leeMonto = inp => { const v = +inp.value.replace(/\D/g, "").slice(0, 12) || 0; inp.value = v ? v.toLocaleString("es-CO") : ""; ancho(inp); return v; };
   const errorDe = e => (e && e.message) || "No se pudo guardar. Revisa tu internet y que el flujo «Ahorro» esté activo en n8n.";
@@ -8540,6 +8541,7 @@ const Mercar = (function(){
       if(idx === 0 || confirm("¿Descartar esta revisión? Lo que ya marcaste se borra y no se guarda.")){ borraPartida(); inicio(); }
     });
     puntosPor = (part && part.puntosPor) ? part.puntosPor.slice() : []; combo = 0; tUlt = 0;
+    try{ pintaHud(); }catch{}
     if(REDUCED){ pintaCartas(); return; }
     /* 3, 2, 1, ¡ya!: como al empezar un nivel */
     bloqueado = true;
@@ -8738,14 +8740,15 @@ const Mercar = (function(){
     if(!resultado) return "";
     const r = resultado; resultado = null;
     const nSi = Math.max(1, decision.filter(d => d === "si").length);   // las estrellas se miden sobre lo que sí había
-    const estrellas = r.total >= nSi * 25 ? 3 : r.total >= nSi * 15 ? 2 : 1;
+    let maximo = 0; for(let i = 0; i < nSi; i++) maximo += 10 * Math.min(4, 1 + Math.floor(i / 3));   // lo más que se podía hacer con combo
+    const estrellas = r.total >= maximo * .8 ? 3 : r.total >= maximo * .5 ? 2 : 1;
     return '<div class="mkPuntaje"><div class="estrellas">' + [1, 2, 3].map(k => '<i class="' + (k <= estrellas ? 'on' : '') + '" style="--k:' + k + '">★</i>').join("") + '</div>' +
       '<b>' + r.total + ' puntos</b><small>' + (r.nuevo ? '🏆 ¡Nuevo récord!' : 'Récord: ' + r.record) + '</small></div>';
   };
 
   /* ── la lista final ── */
   function final(items, celebrar, desde){
-    estado = "lista"; fechaCompra = hoyISO();
+    estado = "lista"; if(desde !== "reintento") fechaCompra = hoyISO();   // si falló guardar, se conserva el día que elegiste
     lista = items.map(p => ({ p, comprar: true }));
     if(!items.length){
       stage.innerHTML = '<div class="mkHecho">' + (celebrar && !REDUCED ? confeti() : '') + iconoCheck() + marcador() + '<h3>¡No falta nada!</h3><p class="gEmpty">Todo está en la casa.</p><button type="button" class="mkBtn sec full" id="mkVolver">Volver</button></div>';
@@ -8755,8 +8758,8 @@ const Mercar = (function(){
     stage.innerHTML =
       '<div class="mkFin">' + (celebrar && !REDUCED ? confeti() : '') +
         (celebrar ? marcador() : '') +
-        '<h3>' + (celebrar ? '¡Revisión lista!' : desde === "canasta" ? '🧺 En tu canasta' : 'Lista pendiente') + '</h3>' +
-        '<p>' + items.length + (items.length === 1 ? ' cosa' : ' cosas') + (desde === "canasta" ? ' · toca para quitar lo que no compres' : ' por comprar · toca para quitar lo que no compres') + '</p>' +
+        '<h3>' + (celebrar ? '¡Revisión lista!' : desde === "canasta" ? '🧺 En tu canasta' : desde === "reintento" ? 'No se pudo guardar tu compra' : 'Lista pendiente') + '</h3>' +
+        '<p>' + items.length + (items.length === 1 ? ' cosa' : ' cosas') + (desde === "canasta" ? ' · toca para quitar lo que no compres' : desde === "reintento" ? ' · toca «Ya hice el mercado» para intentar otra vez' : ' por comprar · toca para quitar lo que no compres') + '</p>' +
         (celebrar && copiado ? '<div class="mkCopiado">✓ Lista copiada, ya la puedes pegar</div>' : '') +
       '</div>' +
       '<div class="gList mkLista" id="mkLista">' + lista.map((x, i) =>
@@ -8916,7 +8919,7 @@ const Mercar = (function(){
         (comprados.length === 1 ? ' cosa' : ' cosas') + ' ' + (hoy === hoyISO() ? 'con la fecha de hoy' : 'con fecha del ' + new Date(+hoy.slice(0, 4), +hoy.slice(5, 7) - 1, +hoy.slice(8, 10)).toLocaleDateString('es-CO', { day: 'numeric', month: 'long' })) + '. Así aprendo cuánto te dura cada una.</p><button type="button" class="mkBtn pri full" id="mkListo">Listo</button></div>';
       document.getElementById("mkListo").addEventListener("click", () => { inicio(); cargar(); });
     }catch{
-      final(comprados, false);   // vuelve a la lista tal como estaba, sin perder lo marcado
+      final(comprados, false, "reintento");   // vuelve a lo que compraste, con la misma fecha, para intentar otra vez
       statusEl.innerHTML = "No se pudo guardar. Revisa tu internet y que Tailscale esté encendido.";
     }
   }
@@ -9136,7 +9139,8 @@ const Mercar = (function(){
           '<div class="duMas"><div class="duMasIn"><div class="duDatos">' +
             '<div><small>Última compra</small><b>' + fechaCorta(p.ultimaCompra) + '</b></div>' +
             '<div><small>Compras</small><b>' + x.veces + '</b></div>' +
-            (ac ? '<div><small>Se acabó</small><b>' + fechaCorta(ac) + '</b></div><div><small>Duró</small><b>' + plD(real) + '</b></div>'
+            (ac && ac > hoyISO() ? '<div><small>Se acaba</small><b>' + fechaCorta(ac) + '</b></div><div><small>Te dura</small><b>~' + plD(x.dur) + '</b></div>'
+              : ac ? '<div><small>Se acabó</small><b>' + fechaCorta(ac) + '</b></div><div><small>Duró</small><b>' + plD(real) + '</b></div>'
                 : '<div><small>Te dura</small><b>~' + plD(x.dur) + '</b></div><div><small>Próxima</small><b>' + fechaCorta(x.proxima) + '</b></div>') +
           '</div>' + accionCanasta(p) + '</div></div></div>';
       }
