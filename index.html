@@ -2949,7 +2949,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-11.113";
+const APP_VERSION = "2026-10-11.114";
 (function autoActualizar(){
   const patron = new RegExp("const APP_" + "VERSION = \"([^\"]+)\"");
   let ultima = 0;
@@ -7059,7 +7059,7 @@ const GastoManual = (function(){
     let paso = "que", guardando = false, editando = false, preguntoPareja = false;
     const historia = [];
     const scrim = document.createElement("div");
-    scrim.className = "pgScrim";
+    scrim.className = "pgScrim seScrim";
     scrim.innerHTML =
       '<div class="inWrap" id="inWrap"><div class="pgCard inCard fmCard ' + (esIngreso ? 'fm-ingreso' : 'fm-gasto') + '" role="dialog" aria-modal="true" aria-labelledby="inT">' +
         FormArmoni.cabeza(esIngreso ? "ingreso" : "gasto", "inT", esIngreso ? "Nuevo ingreso" : "Nuevo gasto", '<span id="inSubT">' + (esIngreso ? "Plata que entró a la casa" : "Algo que pagaste") + '</span>', '<div class="sePuntos" id="inPuntos" aria-hidden="true">' + PASOS_G.map(() => '<i></i>').join("") + '</div>') +
