@@ -1199,6 +1199,7 @@ body.mode-gmail footer, body.mode-glim footer{ display:none; }
 .ajCard .setRow + .setRow{ border-top:1px solid var(--line); border-radius:0; }
 
 /* ventana al tocar «Ya se pagó» del jardín */
+.pgScrim.seScrim{ -webkit-backdrop-filter:blur(12px); backdrop-filter:blur(12px); }
 .pgScrim{ position:fixed; inset:0; z-index:95; overscroll-behavior:contain; display:flex; align-items:center; justify-content:center; padding:20px; background:var(--scrim); opacity:0; transition:opacity .3s ease; }
 .pgScrim.on{ opacity:1; }
 .pgCard{
@@ -1357,6 +1358,9 @@ body.mode-gmail footer, body.mode-glim footer{ display:none; }
 @keyframes wsFlota{ 50%{ transform:translateY(-7px); } }
 /* ── al salir: el contenido se apaga primero (nada se ve cortado) ── */
 .ws.saliendo .wsCuerpo, .ws.saliendo .wsSegs, .ws.saliendo .wsTop, .ws.saliendoAbajo .wsCuerpo, .ws.saliendoAbajo .wsSegs, .ws.saliendoAbajo .wsTop{ opacity:0; transition:opacity .18s ease; }
+.ws.volviendo .wsCuerpo, .ws.volviendo .wsSegs, .ws.volviendo .wsTop{ opacity:0; transition:opacity .16s ease; }
+.ws.volviendo{ animation:wsVuelve .6s cubic-bezier(.45,0,.2,1) .1s forwards; }
+@keyframes wsVuelve{ 0%{ clip-path:inset(0 0 0 0 round 0px); opacity:1; } 60%{ opacity:1; } 100%{ clip-path:inset(var(--oy) var(--or) var(--ob) var(--ol) round 26px); opacity:0; } }
 .ws.saliendo, .ws.desdeTarjeta.saliendo{ animation:wsSale .3s ease .08s forwards; }
 @keyframes wsSale{ to{ opacity:0; } }
 @keyframes wsCierra{ 0%{ clip-path:inset(0 0 0 0 round 0px); opacity:1; } 80%{ opacity:1; } 100%{ clip-path:inset(var(--oy) var(--or) var(--ob) var(--ol) round 26px); opacity:0; } }
@@ -1483,7 +1487,7 @@ body.mode-gmail footer, body.mode-glim footer{ display:none; }
 @keyframes wsSaleItem{ from{ opacity:1; transform:none; filter:blur(0); } to{ opacity:0; transform:translateY(calc(var(--dir, 1) * -18px)) scale(.985); filter:blur(3px); } }
 .wsCuerpo[data-dir="-1"] > *{ animation-name:wsSubeAtras; }
 @keyframes wsSubeAtras{ from{ opacity:0; transform:translateY(-22px) scale(.985); filter:blur(4px); } to{ opacity:1; transform:none; filter:blur(0); } }
-@media (prefers-reduced-motion:reduce){ .ws.desdeTarjeta, .ws.desdeTarjeta.saliendo{ animation:none; } .wsCuerpo.sale > *{ animation:none !important; opacity:0; } }
+@media (prefers-reduced-motion:reduce){ .ws.desdeTarjeta, .ws.desdeTarjeta.saliendo, .ws.volviendo{ animation:none; } .wsCuerpo.sale > *{ animation:none !important; opacity:0; } }
 
 /* aviso «ya está tu resumen» */
 .tmAvScrim{ position:fixed; inset:0; z-index:300; display:flex; align-items:flex-end; justify-content:center; padding:18px 14px calc(18px + env(safe-area-inset-bottom, 0px)); background:rgba(var(--shade), .55); -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px); opacity:0; transition:opacity .45s ease; }
@@ -1567,10 +1571,10 @@ body.mode-gmail footer, body.mode-glim footer{ display:none; }
 @keyframes mkAnillo{ from{ transform:scale(.7); opacity:1; } to{ transform:scale(1.25); opacity:0; } }
 .mkDeck.reparte .mkCard:not(.atras){ animation:mkReparte .6s cubic-bezier(.2,1.2,.4,1); }
 @keyframes mkReparte{ from{ transform:translateY(-120px) rotate(-14deg) scale(.7); opacity:0; } }
-.mkFlota{ position:absolute; z-index:6; left:50%; top:38%; transform:translateX(-50%); font-size:1.6rem; font-weight:800; color:#fde047; text-shadow:0 2px 12px rgba(0,0,0,.6); pointer-events:none; text-align:center; animation:mkFlota .95s cubic-bezier(.2,.8,.3,1) forwards; }
+.mkFlota{ position:absolute; z-index:6; left:50%; top:38%; transform:translateX(-50%); font-size:1.6rem; font-weight:800; color:#fde047; text-shadow:0 2px 12px rgba(0,0,0,.6); pointer-events:none; text-align:center; animation:mkPuntoSube .95s cubic-bezier(.2,.8,.3,1) forwards; }
 .mkFlota small{ display:block; font-size:.7rem; letter-spacing:.12em; color:#ffb066; }
 .mkFlota.combo{ font-size:2rem; color:#fff; text-shadow:0 0 18px rgba(255,160,60,.9); }
-@keyframes mkFlota{ 0%{ opacity:0; transform:translate(-50%, 10px) scale(.6); } 25%{ opacity:1; transform:translate(-50%, -10px) scale(1.15); } 100%{ opacity:0; transform:translate(-50%, -90px) scale(1); } }
+@keyframes mkPuntoSube{ 0%{ opacity:0; transform:translate(-50%, 10px) scale(.6); } 25%{ opacity:1; transform:translate(-50%, -10px) scale(1.15); } 100%{ opacity:0; transform:translate(-50%, -90px) scale(1); } }
 .mkPuntaje{ position:relative; z-index:2; display:flex; flex-direction:column; align-items:center; gap:2px; margin:6px auto 10px; }
 .mkPuntaje .estrellas{ display:flex; gap:6px; font-size:2.2rem; }
 .mkPuntaje .estrellas i{ font-style:normal; color:rgba(var(--ink),.18); transform:scale(0); animation:mkEstrella .55s cubic-bezier(.34,1.56,.64,1) forwards; animation-delay:calc(.3s + var(--k) * .22s); }
@@ -2928,7 +2932,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-11.110";
+const APP_VERSION = "2026-10-11.111";
 (function autoActualizar(){
   const patron = new RegExp("const APP_" + "VERSION = \"([^\"]+)\"");
   async function revisar(){
@@ -8351,12 +8355,14 @@ const Mercar = (function(){
     if(bloqueado || idx >= cola.length) return;
     bloqueado = true;
     decision[idx] = cual;
-    /* puntos: rápido seguido = combo */
-    const ahora = performance.now();
-    combo = tUlt && ahora - tUlt < 2600 ? combo + 1 : 1; tUlt = ahora;
-    const mult = Math.min(4, 1 + Math.floor((combo - 1) / 3));
-    puntosPor[idx] = 10 * mult;
-    sumaPuntos(10 * mult, mult);
+    /* puntos: solo suma lo que SÍ hay en la casa (rápido seguido = combo); lo que falta no da puntos y corta el combo */
+    if(cual === "si"){
+      const ahora = performance.now();
+      combo = tUlt && ahora - tUlt < 2600 ? combo + 1 : 1; tUlt = ahora;
+      const mult = Math.min(4, 1 + Math.floor((combo - 1) / 3));
+      puntosPor[idx] = 10 * mult;
+      sumaPuntos(10 * mult, mult);
+    } else { puntosPor[idx] = 0; combo = 0; tUlt = 0; }
     if(idx === cola.length - 1){                     // la última carta: copiar aquí, dentro del toque (el iPhone solo deja copiar así)
       const faltan = cola.filter((p, i) => decision[i] === "no");
       copiado = faltan.length ? !!copiarReferencia(textoLista(faltan)) : false;
@@ -8410,7 +8416,8 @@ const Mercar = (function(){
   const marcador = () => {
     if(!resultado) return "";
     const r = resultado; resultado = null;
-    const estrellas = r.total >= cola.length * 25 ? 3 : r.total >= cola.length * 15 ? 2 : 1;
+    const nSi = Math.max(1, decision.filter(d => d === "si").length);   // las estrellas se miden sobre lo que sí había
+    const estrellas = r.total >= nSi * 25 ? 3 : r.total >= nSi * 15 ? 2 : 1;
     return '<div class="mkPuntaje"><div class="estrellas">' + [1, 2, 3].map(k => '<i class="' + (k <= estrellas ? 'on' : '') + '" style="--k:' + k + '">★</i>').join("") + '</div>' +
       '<b>' + r.total + ' puntos</b><small>' + (r.nuevo ? '🏆 ¡Nuevo récord!' : 'Récord: ' + r.record) + '</small></div>';
   };
@@ -9422,14 +9429,27 @@ const TuMes = (function(){
     if(!el) return;
     const viejo = el; el = null;
     cancelAnimationFrame(raf); toques.forEach(clearTimeout);
-    if(modo === "abajo" && !REDUCED){
+    /* la misma animación de la entrada pero al revés y más suave: se apagan los textos y la pantalla vuelve a encogerse hacia su tarjeta */
+    let r = null;
+    if(origenTarjeta && document.contains(origenTarjeta) && !REDUCED){
+      const b = origenTarjeta.getBoundingClientRect();
+      if(b.bottom > 0 && b.top < innerHeight) r = b;
+    }
+    viejo.classList.remove("desdeTarjeta");
+    if(modo === "abajo" && !REDUCED){   // siguió el dedo: termina de bajar y se desvanece
       viejo.classList.add("saliendoAbajo");
       viejo.style.transition = "transform .36s ease, opacity .3s ease .06s";
-      requestAnimationFrame(() => { viejo.style.transform = "translateY(28px)"; viejo.style.opacity = "0"; });
+      requestAnimationFrame(() => { viejo.style.transform += " translateY(40px)"; viejo.style.opacity = "0"; });
       setTimeout(() => viejo.remove(), 420);
       return;
     }
-    viejo.classList.remove("desdeTarjeta");
+    if(r){
+      viejo.style.setProperty("--oy", Math.max(0, r.top) + "px"); viejo.style.setProperty("--ol", Math.max(0, r.left) + "px");
+      viejo.style.setProperty("--or", Math.max(0, innerWidth - r.right) + "px"); viejo.style.setProperty("--ob", Math.max(0, innerHeight - r.bottom) + "px");
+      viejo.classList.add("volviendo");
+      setTimeout(() => viejo.remove(), 720);
+      return;
+    }
     viejo.classList.add("saliendo");
     setTimeout(() => viejo.remove(), 420);
   }
