@@ -20,7 +20,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// Valida lo que manda Armoni y lo deja listo para Notion\nconst TOKEN = 'mercado-7d41c2a9e05b';\nconst CAT_GASTO = ['Alimentación', 'Salidas', 'Salidas Ema', 'Hogar', 'Carro', 'Hijo', 'Salud', 'Tarjetas', 'Ahorro', 'Otros'];   // Servicios se registra solo\nconst CAT_INGRESO = ['Hogar', 'Alimentación', 'Salidas', 'Otros'];\nconst AUTOMATICOS = /arriendo|jard[ií]n|cuota\\s+(del\\s+)?(carro|cr[eé]dito)/i;\n\nlet b = $input.first().json.body;\nif (typeof b === 'string') { try { b = JSON.parse(b); } catch (e) { b = {}; } }\nb = b || {};\n\nconst falla = (error) => [{ json: { ok: false, error } }];\n\nif (b.token !== TOKEN) return falla('token');\nconst tipo = String(b.tipo || '');\nif (tipo !== 'Gasto' && tipo !== 'Ingreso') return falla('tipo');\nconst concepto = String(b.concepto || '').trim().slice(0, 80);\nconst categoria = String(b.categoria || '');\nconst fecha = String(b.fecha || '');\nconst monto = Math.round(Number(b.monto));\nconst notas = String(b.nota || b.notas || '').trim().slice(0, 300);\n\nif (!concepto) return falla('concepto');\nif (!(tipo === 'Gasto' ? CAT_GASTO : CAT_INGRESO).includes(categoria)) return falla('categoria');\nif (tipo === 'Gasto' && AUTOMATICOS.test(concepto)) return falla('Eso ya se registra solo desde su aviso');\nif (!/^\\d{4}-\\d{2}-\\d{2}$/.test(fecha)) return falla('fecha');\nif (!(monto > 0) || monto > 1000000000) return falla('monto');\n\nreturn [{ json: { ok: true, tipo, concepto, categoria, fecha, monto, notas } }];\n"
+        "jsCode": "// Valida lo que manda Armoni y lo deja listo para Notion\nconst TOKEN = 'mercado-7d41c2a9e05b';\nconst CAT_GASTO = ['Alimentación', 'Salidas', 'Salidas Ema', 'Hogar', 'Carro', 'Hijo', 'Salud', 'Tarjetas', 'Ahorro', 'Otros'];   // Servicios se registra solo\nconst CAT_INGRESO = ['Hogar', 'Alimentación', 'Salidas', 'Otros'];\nconst AUTOMATICOS = /arriendo|jard[ií]n|cuota\\s+(del\\s+)?(carro|cr[eé]dito)/i;\n\nlet b = $input.first().json.body;\nif (typeof b === 'string') { try { b = JSON.parse(b); } catch (e) { b = {}; } }\nb = b || {};\n\nconst falla = (error) => [{ json: { ok: false, error } }];\n\nif (b.token !== TOKEN) return falla('token');\nconst tipo = String(b.tipo || '');\nif (tipo !== 'Gasto' && tipo !== 'Ingreso') return falla('tipo');\nconst concepto = String(b.concepto || '').trim().slice(0, 80);\nconst categoria = String(b.categoria || '');\nconst fecha = String(b.fecha || '');\nconst monto = Math.round(Number(b.monto));\nconst notas = String(b.nota || b.notas || '').trim().slice(0, 300);\nconst lugar = String(b.lugar || '').trim().slice(0, 80);\nconst punt = Number(b.puntuacion);\nconst puntuacion = punt >= 1 && punt <= 5 ? Math.round(punt * 2) / 2 : null;\nconst comentario = String(b.comentario || '').trim().slice(0, 200);\n\nif (!concepto) return falla('concepto');\nif (!(tipo === 'Gasto' ? CAT_GASTO : CAT_INGRESO).includes(categoria)) return falla('categoria');\nif (tipo === 'Gasto' && AUTOMATICOS.test(concepto)) return falla('Eso ya se registra solo desde su aviso');\nif (!/^\\d{4}-\\d{2}-\\d{2}$/.test(fecha)) return falla('fecha');\nif (!(monto > 0) || monto > 1000000000) return falla('monto');\n\nreturn [{ json: { ok: true, tipo, concepto, categoria, fecha, monto, notas, lugar, puntuacion, comentario } }];\n"
       },
       "id": "a1000000-0000-4000-8000-000000000002",
       "name": "Validar movimiento",
@@ -67,69 +67,6 @@
     },
     {
       "parameters": {
-        "resource": "databasePage",
-        "dataSourceId": {
-          "__rl": true,
-          "value": "6c565ad1-789f-41c7-8ca2-8bcfb9098a68",
-          "mode": "list",
-          "cachedResultName": "Movimientos",
-          "cachedResultUrl": "https://app.notion.com/p/922bb9e4e3d648feab56d6b2d75be29d"
-        },
-        "title": "={{ $json.concepto }}",
-        "propertiesUi": {
-          "propertyValues": [
-            {
-              "key": "Concepto|title",
-              "title": "={{ $json.concepto }}"
-            },
-            {
-              "key": "Monto|number",
-              "numberValue": "={{ $json.monto }}"
-            },
-            {
-              "key": "Tipo|select",
-              "selectValue": "={{ $json.tipo }}"
-            },
-            {
-              "key": "Categoría|select",
-              "selectValue": "={{ $json.categoria }}"
-            },
-            {
-              "key": "Fecha|date",
-              "includeTime": false,
-              "date": "={{ $json.fecha }}"
-            },
-            {
-              "key": "Notas|rich_text",
-              "textContent": "={{ $json.notas }}"
-            },
-            {
-              "key": "Resumen financiero|relation",
-              "relationValue": [
-                "39b39f80-d3a5-80fb-9a19-f3198aa16cc7"
-              ]
-            }
-          ]
-        },
-        "options": {}
-      },
-      "id": "a1000000-0000-4000-8000-000000000004",
-      "name": "Crear movimiento en Movimientos",
-      "type": "n8n-nodes-base.notion",
-      "typeVersion": 3,
-      "position": [
-        720,
-        -80
-      ],
-      "credentials": {
-        "notionApi": {
-          "id": "pgk4uKXwaEEnuyRO",
-          "name": "Notion account"
-        }
-      }
-    },
-    {
-      "parameters": {
         "respondWith": "json",
         "responseBody": "={{ { ok: true } }}",
         "options": {
@@ -141,7 +78,7 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
       "position": [
-        960,
+        2640,
         -80
       ]
     },
@@ -161,6 +98,218 @@
         720,
         100
       ]
+    },
+    {
+      "parameters": {
+        "jsCode": "return [{ json: { hayLugar: !!$('Validar movimiento').first().json.lugar } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        720,
+        -80
+      ],
+      "id": "a1000000-0000-4000-8000-000000000011",
+      "name": "Hay lugar"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c2",
+              "leftValue": "={{ $json.hayLugar }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        960,
+        -80
+      ],
+      "id": "a1000000-0000-4000-8000-000000000012",
+      "name": "¿Trae lugar?"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.notion.com/v1/databases/4912f5c4e91d41598e49bb8e97d02f31/query",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "notionApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Notion-Version",
+              "value": "2022-06-28"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ page_size: 100 }) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        1200,
+        -180
+      ],
+      "id": "a1000000-0000-4000-8000-000000000013",
+      "name": "Lugares existentes",
+      "credentials": {
+        "notionApi": {
+          "id": "pgk4uKXwaEEnuyRO",
+          "name": "Notion account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const v = $('Validar movimiento').first().json;\nconst lugs = $input.first().json.results || [];\nconst norm = (t) => String(t || '').toLowerCase().normalize('NFD').replace(/[\\u0300-\\u036f]/g, '').replace(/[^a-z0-9 ]/g, ' ').replace(/\\s+/g, ' ').trim().split(' ').map(w => w.replace(/s$/, '')).join(' ');\nconst buscado = norm(v.lugar);\nlet lugarId = null;\nfor (const l of lugs) {\n  const nombre = ((l.properties && l.properties['Nombre'] && l.properties['Nombre'].title) || []).map(t => t.plain_text).join('');\n  const n = norm(nombre);\n  if (n && (n === buscado || (buscado.length > 3 && (n.includes(buscado) || buscado.includes(n))))) { lugarId = l.id; break; }\n}\nlet cuerpoLugar = null;\nif (!lugarId) {\n  const props = {\n    'Nombre': { title: [{ text: { content: v.lugar } }] },\n    'Clase': { select: { name: 'Plan Ema' } }\n  };\n  if (v.puntuacion != null) props['Puntuación'] = { number: v.puntuacion };\n  if (v.comentario) props['Notas'] = { rich_text: [{ text: { content: v.comentario } }] };\n  cuerpoLugar = JSON.stringify({ parent: { database_id: '4912f5c4e91d41598e49bb8e97d02f31' }, properties: props });\n}\nreturn [{ json: { lugarId, crear: !lugarId, cuerpoLugar } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1440,
+        -180
+      ],
+      "id": "a1000000-0000-4000-8000-000000000014",
+      "name": "Decidir lugar"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c3",
+              "leftValue": "={{ $json.crear }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1680,
+        -180
+      ],
+      "id": "a1000000-0000-4000-8000-000000000015",
+      "name": "¿Crear lugar?"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.notion.com/v1/pages",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "notionApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Notion-Version",
+              "value": "2022-06-28"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.cuerpoLugar }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        1920,
+        -280
+      ],
+      "id": "a1000000-0000-4000-8000-000000000016",
+      "name": "Crear lugar",
+      "credentials": {
+        "notionApi": {
+          "id": "pgk4uKXwaEEnuyRO",
+          "name": "Notion account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const v = $('Validar movimiento').first().json;\nlet lugarId = null;\ntry { const c = $('Crear lugar').first(); if (c && c.json && c.json.id) lugarId = c.json.id; } catch (e) {}\nif (!lugarId) { try { const d = $('Decidir lugar').first(); if (d && d.json && d.json.lugarId) lugarId = d.json.lugarId; } catch (e) {} }\nconst props = {\n  'Concepto': { title: [{ text: { content: v.concepto } }] },\n  'Monto': { number: v.monto },\n  'Tipo': { select: { name: v.tipo } },\n  'Categoría': { select: { name: v.categoria } },\n  'Fecha': { date: { start: v.fecha } },\n  'Notas': { rich_text: v.notas ? [{ text: { content: v.notas } }] : [] },\n  'Resumen financiero': { relation: [{ id: '39b39f80-d3a5-80fb-9a19-f3198aa16cc7' }] }\n};\nif (lugarId) props['Restaurante'] = { relation: [{ id: lugarId }] };\nif (v.categoria === 'Salidas Ema') props['Personas'] = { number: 0 };\nreturn [{ json: { cuerpo: JSON.stringify({ parent: { database_id: '922bb9e4e3d648feab56d6b2d75be29d' }, properties: props }) } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2160,
+        -80
+      ],
+      "id": "a1000000-0000-4000-8000-000000000017",
+      "name": "Armar movimiento"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.notion.com/v1/pages",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "notionApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Notion-Version",
+              "value": "2022-06-28"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.cuerpo }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        2400,
+        -80
+      ],
+      "id": "a1000000-0000-4000-8000-000000000004",
+      "name": "Crear movimiento en Movimientos",
+      "credentials": {
+        "notionApi": {
+          "id": "pgk4uKXwaEEnuyRO",
+          "name": "Notion account"
+        }
+      }
     }
   ],
   "connections": {
@@ -190,7 +339,7 @@
       "main": [
         [
           {
-            "node": "Crear movimiento en Movimientos",
+            "node": "Hay lugar",
             "type": "main",
             "index": 0
           }
@@ -198,6 +347,97 @@
         [
           {
             "node": "Responder error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Hay lugar": {
+      "main": [
+        [
+          {
+            "node": "¿Trae lugar?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Trae lugar?": {
+      "main": [
+        [
+          {
+            "node": "Lugares existentes",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Armar movimiento",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lugares existentes": {
+      "main": [
+        [
+          {
+            "node": "Decidir lugar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Decidir lugar": {
+      "main": [
+        [
+          {
+            "node": "¿Crear lugar?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Crear lugar?": {
+      "main": [
+        [
+          {
+            "node": "Crear lugar",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Armar movimiento",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Crear lugar": {
+      "main": [
+        [
+          {
+            "node": "Armar movimiento",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Armar movimiento": {
+      "main": [
+        [
+          {
+            "node": "Crear movimiento en Movimientos",
             "type": "main",
             "index": 0
           }

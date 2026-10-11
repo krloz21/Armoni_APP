@@ -788,8 +788,11 @@ body.no-gl #drawer{ background:var(--drawer-solid); }
 }
 
 /* ───────── vista de restaurantes (ocupa el lugar del chat) ───────── */
-#restView, #creditoView, #gmailView, #glimView, #recuerdaView, #mercarView, #duraView, #mesView, #ajustesView{ display:none; padding-bottom:10px; }
+#restView, #emaView, #creditoView, #gmailView, #glimView, #recuerdaView, #mercarView, #duraView, #mesView, #ajustesView{ display:none; padding-bottom:10px; }
 body.mode-rest #restView{ display:block; }
+body.mode-ema #emaView{ display:block; }
+body.mode-ema #welcome, body.mode-ema #messages, body.mode-ema #pending, body.mode-ema #servicioBanner, body.mode-ema #glimBanner{ display:none !important; }
+body.mode-ema #reset{ visibility:hidden; }
 body.mode-credito #creditoView{ display:block; }
 body.mode-gmail #gmailView{ display:block; }
 body.mode-glim #glimView{ display:block; }
@@ -844,8 +847,7 @@ body.mode-gmail footer, body.mode-glim footer{ display:none; }
 .gmDrop b{ font-weight:600; font-size:1rem; }
 .gmDrop span{ font-size:.8rem; color:var(--dim); }
 .gmDrop.busy{ pointer-events:none; opacity:.55; }
-/* el selector de fotos cubre todo el recuadro: el toque cae directo en él y abre al instante (sin pasar por la etiqueta) */
-.gmFile{ position:absolute; inset:0; width:100%; height:100%; opacity:0; cursor:pointer; font-size:0; }
+.gmDrop{ width:100%; font:inherit; }
 .gmDrop[hidden], .gmBtn[hidden], .gmRow[hidden]{ display:none; }
 
 /* ventana de confirmación, centrada en cualquier pantalla */
@@ -1021,12 +1023,15 @@ body.mode-gmail footer, body.mode-glim footer{ display:none; }
 /* ── ajustes, abajo del menú ── */
 .dFoot{ margin-top:auto; padding:14px 4px 2px; border-top:1px solid var(--line); }
 .dFootLbl{ font-size:.7rem; text-transform:uppercase; letter-spacing:.08em; color:var(--dim); font-weight:600; margin:0 8px 10px; }
-.inSalida{ margin:10px 0 0; padding:9px 12px; border-radius:12px; background:rgba(255,138,80,.1); border:1px solid rgba(255,138,80,.3); font-size:.84rem; text-align:center; color:var(--ghost); }
-.inSalida b{ color:var(--white); }
-.inOtro{ width:100%; margin:10px 0 0; padding:12px 14px; border-radius:14px; border:1px dashed rgba(var(--cyan-rgb),.45); background:rgba(var(--cyan-rgb),.07); color:var(--white); font:inherit; font-size:.88rem; font-weight:600; cursor:pointer; transition:transform .15s var(--ease-out), background .3s; }
-.inOtro:active{ transform:scale(.98); }
-.inOtro:disabled{ opacity:.5; cursor:default; }
-.inOtro[hidden], .inSalida[hidden]{ display:none; }
+.inEma{ margin:14px 0 0; padding:12px 12px 14px; border-radius:16px; border:1px solid rgba(255,138,80,.32); background:rgba(255,138,80,.07); animation:duSube .45s var(--ease-out) backwards; }
+.inEma[hidden], #inLugarNuevo[hidden]{ display:none; }
+.inEmaT{ font-size:.9rem; font-weight:700; margin-bottom:2px; }
+.inEma .inLbl{ margin-top:12px; }
+.inEmaNota{ margin:12px 0 0; font-size:.8rem; color:var(--ghost); }
+.inStars{ display:flex; gap:6px; }
+.inStars button{ flex:1; padding:9px 0; border-radius:12px; border:1px solid var(--line); background:rgba(var(--ink),.05); color:var(--dim); font-size:1.15rem; line-height:1; cursor:pointer; transition:color .2s, background .2s, transform .15s var(--ease-spring); }
+.inStars button.on{ color:#ffb066; background:rgba(255,138,80,.16); border-color:rgba(255,138,80,.4); }
+.inStars button:active{ transform:scale(.9); }
 .swc{ flex:none; position:relative; width:50px; height:30px; padding:0; border-radius:999px; border:1px solid var(--line); background:rgba(var(--ink),.1); cursor:pointer; transition:background .3s, border-color .3s; }
 .swc i{ position:absolute; top:3px; left:3px; width:22px; height:22px; border-radius:50%; background:var(--white); box-shadow:0 2px 6px rgba(0,0,0,.4); transition:transform .35s var(--ease-spring); }
 .swc[aria-checked="true"]{ background:linear-gradient(140deg, var(--cyan), var(--blue)); border-color:transparent; }
@@ -1797,6 +1802,17 @@ button{ transition:transform var(--t-tap) var(--ease-out); }
 .caProd span{ font-size:2.2rem; }
 .caNota{ margin:6px 0 0; font-size:.88rem; color:var(--ghost); text-align:center; }
 /* Salidas con Ema */
+.emaTot{ flex:none; display:flex; flex-direction:column; align-items:flex-end; font-size:.9rem; font-weight:700; color:var(--white); }
+.emaTot small{ font-size:.7rem; font-weight:500; color:var(--dim); margin-top:2px; }
+.emaVacio{ margin:14px 0 0; font-size:.86rem; color:var(--dim); text-align:center; }
+.emaDet p small{ color:var(--dim); }
+.emaLugares{ display:flex; flex-direction:column; gap:10px; }
+.emaLugar{ padding:14px 15px; border-radius:18px; border:1px solid var(--line); background:var(--panel); text-align:left; }
+.elTop{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
+.elTop b{ font-size:1rem; }
+.elNota{ flex:none; padding:3px 10px; border-radius:999px; font-size:.78rem; font-weight:700; color:#ffb066; background:rgba(255,138,80,.14); }
+.emaLugar small{ display:block; margin-top:5px; font-size:.78rem; color:var(--dim); }
+.emaLugar p{ margin:8px 0 0; font-size:.84rem; color:var(--ghost); }
 .emaCard{ margin:0 0 16px; padding:16px; border-radius:22px; border:1px solid var(--line); background:linear-gradient(150deg, rgba(255,138,80,.1), rgba(var(--blue-rgb),.05) 70%, rgba(var(--ink),.03)); box-shadow:inset 0 1px 0 rgba(var(--hi),.1); text-align:left; }
 .emaTop{ display:flex; align-items:center; gap:12px; }
 .emaEmo{ flex:none; width:46px; height:46px; border-radius:15px; display:grid; place-items:center; font-size:1.6rem; background:rgba(255,138,80,.14); }
@@ -1804,7 +1820,6 @@ button{ transition:transform var(--t-tap) var(--ease-out); }
 .emaTx small{ font-size:.74rem; color:var(--dim); letter-spacing:.02em; }
 .emaTx b{ font-size:1.25rem; font-weight:700; margin-top:2px; }
 .emaN{ font-size:1.7rem; background:linear-gradient(140deg, #ffb066, #ff7a4d); -webkit-background-clip:text; background-clip:text; color:transparent; }
-.emaTot{ flex:none; font-size:.84rem; font-weight:600; color:var(--ghost); }
 .emaDias{ display:flex; gap:3px; margin:14px 0 2px; }
 .emaDias i{ flex:1; height:7px; border-radius:4px; background:rgba(var(--ink),.1); }
 .emaDias i.on{ background:linear-gradient(180deg, #ffb066, #ff7a4d); box-shadow:0 0 8px rgba(255,138,80,.55); }
@@ -2049,10 +2064,23 @@ body[class*="mode-"] #masIngreso{ display:none; }
         <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg></span>
         <span class="txt"><b>Presupuesto</b><span>Gastos, metas y movimientos</span></span>
       </button>
+      <div class="navGrupo" id="navSalidasG">
+        <button type="button" id="navSalidasBtn" aria-expanded="false" aria-controls="navSalidasSub">
+          <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="9" r="5.5"/><path d="M12 14.5c0 2-1.2 3-1.2 5.5"/><path d="M9.8 7.2a3 3 0 0 1 2-1"/></svg></span>
+          <span class="txt"><b>Salidas</b><span>Restaurantes y salidas con Ema</span></span>
+          <span class="chev" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
+        </button>
+        <div class="navSub" id="navSalidasSub"><div class="navSubIn">
       <button type="button" id="navRest">
         <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3v8M4 3v5a3 3 0 0 0 6 0V3M7 11v10M17 21V3c-2.2 0-4 2.7-4 6v4h4"/></svg></span>
         <span class="txt"><b>Restaurantes</b><span>Dónde hemos comido y qué tal</span></span>
       </button>
+      <button type="button" id="navEma">
+        <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg></span>
+        <span class="txt"><b>Salidas Ema</b><span>Planes, gastos y a dónde ir</span></span>
+      </button>
+        </div></div>
+      </div>
       <button type="button" id="navCredito">
         <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 13l1.6-4.5A2 2 0 0 1 7.5 7h9a2 2 0 0 1 1.9 1.5L20 13M4 13h16v3.5a1 1 0 0 1-1 1h-1a1 1 0 0 1-1-1V16H7v.5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z"/><circle cx="7.5" cy="14.5" r="0.4" fill="currentColor"/><circle cx="16.5" cy="14.5" r="0.4" fill="currentColor"/></svg></span>
         <span class="txt"><b>Crédito Carro</b><span>Saldo, cuotas y proyección</span></span>
@@ -2154,6 +2182,16 @@ body[class*="mode-"] #masIngreso{ display:none; }
         <div id="restAsk" aria-live="polite"></div>
       </section>
 
+      <section id="emaView" aria-label="Salidas Ema">
+        <div class="restIntro"><h2>Salidas con Ema</h2></div>
+        <div class="restStatus" id="emaStatus"></div>
+        <div id="emaStage"></div>
+        <div class="restAskHead" id="emaAskHead">
+          <span class="line" aria-hidden="true"></span>Pregúntale al guía de salidas<span class="line" aria-hidden="true"></span>
+        </div>
+        <div id="emaAsk" aria-live="polite"></div>
+      </section>
+
       <section id="creditoView" aria-label="Crédito del carro">
         <div class="restIntro"><h2>Crédito del carro</h2></div>
         <div class="restStatus" id="credStatus"></div>
@@ -2242,18 +2280,16 @@ body[class*="mode-"] #masIngreso{ display:none; }
         <div class="restIntro"><h2>Tu mes</h2></div>
         <p class="tmSub">Toca un mes para ver su historia</p>
         <div class="restStatus" id="tmStatus"></div>
-        <div id="tmEma"></div>
         <div id="tmGrid" class="tmGrid"></div>
       </section>
 
       <section id="gmailView" aria-label="AT Gmail">
         <div class="restIntro"><h2>Comprobante de pago</h2></div>
-        <label class="gmDrop" id="gmDrop">
+        <button type="button" class="gmDrop" id="gmDrop">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></svg>
           <b>Subir el comprobante</b>
           <span>Antes de enviarlo te vamos a pedir confirmar</span>
-          <input class="gmFile" type="file" id="gmFile" accept="image/*" aria-label="Subir el comprobante">
-        </label>
+        </button>
         <div class="restStatus" id="gmStatus" aria-live="polite"></div>
         <button type="button" class="gmBtn" id="gmAgain" hidden>Enviar otro comprobante</button>
       </section>
@@ -2322,7 +2358,8 @@ const MERCADO_EDITAR_URL = N8N + "/webhook/mercado-editar";
 const MOVIMIENTO_URL = N8N + "/webhook/movimiento-nuevo";   // guarda un gasto/ingreso directo en Notion, sin IA
 const MERCADO_TOKEN = "mercado-7d41c2a9e05b";
 const RESUMEN_URL = N8N + "/webhook/resumen-mes";
-const EMA_URL = N8N + "/webhook/salidas-ema";   // cuántas veces se salió con Ema cada mes
+const EMA_URL = N8N + "/webhook/salidas-ema";   // salidas con Ema: veces por mes, gastos de cada salida y lugares
+const EMA_CHAT_URL = N8N + "/webhook/salidas-ema-chat";   // el guía de salidas
 const JARDIN_PAGADO_URL = N8N + "/webhook/jardin-pagado";   // pagos de una fecha: ?fecha=AAAA-MM-DD
 const JARDIN_BASE = 1120000;   // lo que normalmente se paga de jardín
 const SERVICIOS_DIA_LIMITE = 7;   // hasta qué día del mes avisa si falta pagar
@@ -2352,7 +2389,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-11.90";
+const APP_VERSION = "2026-10-11.92";
 (function autoActualizar(){
   const patron = new RegExp("const APP_" + "VERSION = \"([^\"]+)\"");
   async function revisar(){
@@ -3747,7 +3784,7 @@ thread.addEventListener("scroll", activity, { passive:true });
 
 document.addEventListener("visibilitychange", () => {
   if(document.hidden){ clearTimeout(sleepTimer); goToSleep(true); }   // pantalla bloqueada u otra app: se apaga todo, aunque esté respondiendo
-  else { activity(); if(MODE === "rest") Restaurantes.refresh(); if(MODE === "credito") CreditoCarro.refresh(); if(MODE === "glim") Glim.refresh(); if(MODE === "recuerda") Recuerda.refresh(true); if(MODE === "mercar") Mercar.refresh(); if(MODE === "dura") Mercar.dura(); if(MODE === "mes") TuMes.refresh(); }
+  else { activity(); if(MODE === "rest") Restaurantes.refresh(); if(MODE === "ema") SalidasEma.refresh(); if(MODE === "credito") CreditoCarro.refresh(); if(MODE === "glim") Glim.refresh(); if(MODE === "recuerda") Recuerda.refresh(true); if(MODE === "mercar") Mercar.refresh(); if(MODE === "dura") Mercar.dura(); if(MODE === "mes") TuMes.refresh(); }
 });
 
 addEventListener("pagehide", () => { clearTimeout(sleepTimer); goToSleep(true); });
@@ -4025,6 +4062,12 @@ async function ask(text, mostrar){
     if(TOUCH) field.blur();
     return CreditoCarro.preguntar(text);
   }
+  if(MODE === "ema"){
+    if(!text.trim()) return;
+    field.value = ""; grow(); lock();
+    if(TOUCH) field.blur();
+    return SalidasEma.preguntar(text);
+  }
   const t = text.trim();
   /* "quiero pagar la energía/el carro": abre el portal ahí mismo, sin gastar un mensaje con el agente.
      Solo cuando de verdad quieres IR a pagar: si trae un monto o dice "pagué" (pasado), es un
@@ -4107,8 +4150,8 @@ function lock(){ send.disabled = busy || !field.value.trim(); }
 field.addEventListener("input", () => { grow(); lock(); });
 keptScrolled = () => {
   if(!document.body.classList.contains("typing")) return;
-  if(MODE === "rest" || MODE === "credito"){
-    const a = document.getElementById(MODE === "credito" ? "credAsk" : "restAsk");
+  if(MODE === "rest" || MODE === "credito" || MODE === "ema"){
+    const a = document.getElementById(MODE === "credito" ? "credAsk" : MODE === "ema" ? "emaAsk" : "restAsk");
     if(a && a.lastElementChild) a.lastElementChild.scrollIntoView({ block:"end", behavior: REDUCED ? "auto" : "smooth" });
     else thread.scrollTop = 0;
   } else if(list.children.length) toBottom();
@@ -4124,8 +4167,8 @@ field.addEventListener("blur", () => setTimeout(() => {
     document.body.classList.remove("typing");
     /* si cierras el teclado sin haber preguntado nada todavía, vuelve a mostrar la lista;
        si ya hay una respuesta en pantalla, la dejamos ahí — no tiene sentido ocultarla de golpe */
-    const a = document.getElementById(MODE === "credito" ? "credAsk" : "restAsk");
-    if((MODE === "rest" || MODE === "credito") && !field.value.trim() && a && !a.children.length) thread.scrollTo({ top: 0, behavior: REDUCED ? "auto" : "smooth" });
+    const a = document.getElementById(MODE === "credito" ? "credAsk" : MODE === "ema" ? "emaAsk" : "restAsk");
+    if((MODE === "rest" || MODE === "credito" || MODE === "ema") && !field.value.trim() && a && !a.children.length) thread.scrollTo({ top: 0, behavior: REDUCED ? "auto" : "smooth" });
   }
 }, 120));
 field.addEventListener("keydown", e => {
@@ -4466,7 +4509,7 @@ const Restaurantes = (function(){
 
   const readCache = () => { try{ return JSON.parse(localStorage.getItem(KEY)); }catch{ return null; } };
   const writeCache = raw => { try{ localStorage.setItem(KEY, JSON.stringify({ items: raw, at: Date.now() })); }catch{} };
-  const cargar = raw => { items = (raw || []).map(leer); statusEl.innerHTML = ""; paint(); };
+  const cargar = raw => { items = (raw || []).filter(r => String(r.property_clase || "") !== "Plan Ema").map(leer); statusEl.innerHTML = ""; paint(); };
 
   async function fetchLive(anterior){
     const res = await fetch(RESTAURANTES_URL, { cache: "no-store" });
@@ -4568,6 +4611,136 @@ const Restaurantes = (function(){
   function nueva(){ charla = null; askEl.innerHTML = ""; }
 
   return { refresh, preguntar, nueva };
+})();
+
+/* ════════════════════════════════════════════════════════════
+   SALIDAS CON EMA: cuántas veces en el mes, cuánto costó cada salida, los lugares y un guía para decidir a dónde ir
+   ════════════════════════════════════════════════════════════ */
+const SalidasEma = (function(){
+  const stage = document.getElementById("emaStage");
+  const statusEl = document.getElementById("emaStatus");
+  const askEl = document.getElementById("emaAsk");
+  const KEY = "armoni.ema.datos";
+  let datos = null, abierta = null, charla = null, asking = false;
+  const esc = t => String(t == null ? "" : t).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const peso = n => "$" + Math.round(n).toLocaleString("es-CO");
+  const mesNombre = m => new Date(+m.slice(0, 4), +m.slice(5, 7) - 1, 1).toLocaleDateString("es-CO", { month: "long" });
+  const mesHoy = () => { const d = new Date(); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0"); };
+  const hoyISO = () => { const d = new Date(); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); };
+  const diasDesde = f => Math.max(0, Math.round((new Date(hoyISO() + "T12:00:00") - new Date(f + "T12:00:00")) / 86400000));
+  const hace = d => d === 0 ? "hoy" : d === 1 ? "ayer" : "hace " + d + " días";
+  const lugares = () => ((datos && datos.lugares) || []).slice();
+
+  function pinta(anim){
+    const ms = (datos && datos.meses) || [];
+    if(!datos){ stage.innerHTML = ""; return; }
+    const hoyM = mesHoy(), act = ms.find(m => m.mes === hoyM) || { mes: hoyM, veces: 0, total: 0, dias: [], salidas: [] };
+    const ult = ms.filter(m => m.mes !== hoyM).slice(-5);
+    const diasMes = new Date(+hoyM.slice(0, 4), +hoyM.slice(5, 7), 0).getDate(), hoyDia = new Date().getDate();
+    const marcados = new Set((act.dias || []).map(f => +String(f).slice(8, 10)));
+    const puntos = Array.from({ length: diasMes }, (_, i) => '<i class="' + (marcados.has(i + 1) ? 'on' : '') + (i + 1 === hoyDia ? ' hoy' : '') + '"></i>').join("");
+    const max = Math.max(1, act.veces, ...ult.map(m => m.veces));
+    const barras = ult.concat([act]).map(m => '<div class="emBar' + (m.mes === hoyM ? ' act' : '') + '"><b>' + m.veces + '</b><span class="emCol"><i style="height:' + Math.max(6, Math.round(m.veces / max * 100)) + '%"></i></span><small>' + esc(mesNombre(m.mes).slice(0, 3)) + '</small></div>').join("");
+    const salidas = (act.salidas || []).slice().reverse().map(q => {
+      const f = new Date(q.fecha + "T12:00:00"), dia = f.toLocaleDateString("es-CO", { weekday: "short", day: "numeric", month: "short" }).replace(/\./g, "");
+      const ab = abierta === q.fecha;
+      return '<div class="emaFila' + (ab ? ' abierto' : '') + '" data-f="' + esc(q.fecha) + '" role="button" tabindex="0" aria-expanded="' + ab + '">' +
+        '<div class="emaFCab"><span class="emaFDia">' + esc(dia) + '</span><span class="emaFN">' + q.gastos.length + (q.gastos.length === 1 ? ' gasto' : ' gastos') + '</span><b>' + peso(q.total) + '</b></div>' +
+        '<div class="emaDet"><div>' + q.gastos.map(g => '<p><span>' + esc(g.c) + (g.l ? ' <small>· ' + esc(g.l) + '</small>' : '') + '</span><em>' + peso(g.m) + '</em></p>').join("") + '</div></div></div>';
+    }).join("");
+    const promSalida = act.veces ? act.total / act.veces : 0;
+    const lug = lugares().sort((a, b) => (a.ultima ? diasDesde(a.ultima) : 9999) - (b.ultima ? diasDesde(b.ultima) : 9999));
+    stage.innerHTML =
+      '<div class="emaCard' + (anim ? ' emaEntra' : '') + '">' +
+        '<div class="emaTop"><span class="emaEmo" aria-hidden="true">🎈</span><div class="emaTx"><small>Salidas con Ema · ' + esc(mesNombre(hoyM)) + '</small>' +
+        '<b><span class="emaN">' + act.veces + '</span> ' + (act.veces === 1 ? 'vez' : 'veces') + '</b></div>' +
+        (act.total ? '<span class="emaTot">' + peso(act.total) + '<small>' + (act.veces ? peso(promSalida) + ' por salida' : '') + '</small></span>' : '') + '</div>' +
+        '<div class="emaDias" aria-hidden="true">' + puntos + '</div>' +
+        (salidas ? '<div class="emaLista">' + salidas + '</div>' : '<p class="emaVacio">Todavía no hay salidas este mes.</p>') +
+        (ult.length ? '<div class="emaBarras">' + barras + '</div>' : '') +
+      '</div>' +
+      (lug.length
+        ? '<div class="mkSec">Lugares con Ema</div><div class="emaLugares">' + lug.map(l =>
+            '<div class="emaLugar"><div class="elTop"><b>' + esc(l.nombre) + '</b>' + (l.puntuacion ? '<span class="elNota">★ ' + String(l.puntuacion).replace(".", ",") + '</span>' : '') + '</div>' +
+            '<small>' + (l.visitas || 0) + (l.visitas === 1 ? ' visita' : ' visitas') + (l.promedio ? ' · ~' + peso(l.promedio) + ' por salida' : '') + (l.ultima ? ' · ' + hace(diasDesde(l.ultima)) : '') + '</small>' +
+            (l.notas ? '<p>' + esc(l.notas) + '</p>' : '') + '</div>').join("") + '</div>'
+        : '<p class="gEmpty" style="margin-top:18px">Cuando registres una salida con su lugar (por ejemplo Pance), aparece aquí con cuánto gastan y qué tal les fue.</p>');
+  }
+  stage.addEventListener("click", e => {
+    const f = e.target.closest(".emaFila"); if(!f) return;
+    const abrir = abierta !== f.dataset.f; abierta = abrir ? f.dataset.f : null;
+    stage.querySelectorAll(".emaFila").forEach(x => { const on = x === f && abrir; x.classList.toggle("abierto", on); x.setAttribute("aria-expanded", String(on)); });
+  });
+  stage.addEventListener("keydown", e => { if((e.key === "Enter" || e.key === " ") && e.target.classList && e.target.classList.contains("emaFila")){ e.preventDefault(); e.target.click(); } });
+
+  async function cargar(){
+    try{
+      const res = await fetch(EMA_URL + "?token=" + encodeURIComponent(MERCADO_TOKEN), { cache: "no-store" });
+      if(!res.ok) throw new Error("http " + res.status);
+      const d = await res.json();
+      if(!d || !Array.isArray(d.meses)) throw new Error("formato");
+      const cambio = JSON.stringify(d) !== JSON.stringify(datos);
+      datos = d; try{ localStorage.setItem(KEY, JSON.stringify(d)); }catch{}
+      statusEl.innerHTML = "";
+      if(cambio) pinta(!stage.firstChild);
+    }catch{
+      if(!datos) statusEl.innerHTML = "No se pudo cargar. Revisa tu internet, que Tailscale esté encendido y que el flujo salidas-ema esté activo en n8n.";
+    }
+  }
+  function refresh(){
+    if(!datos){ try{ datos = JSON.parse(localStorage.getItem(KEY)); }catch{} }
+    if(datos){ pinta(false); } else statusEl.innerHTML = '<span class="dot" aria-hidden="true"></span>Cargando las salidas…';
+    cargar();
+  }
+  function nueva(){ charla = null; askEl.innerHTML = ""; abierta = null; }
+
+  /* ── el guía: recibe la lista de lugares y el costo de cada salida, y recomienda según lo que pidas ── */
+  function contexto(){
+    const hoy = new Date().toLocaleDateString("es-CO", { weekday: "long", day: "numeric", month: "long" });
+    const ms = (datos && datos.meses) || [];
+    const lug = lugares().map(l => "- " + l.nombre + " | puntuación: " + (l.puntuacion ? l.puntuacion + "/5" : "sin puntuación") + " | visitas: " + (l.visitas || 0) +
+      " | gasto promedio por salida: " + (l.promedio ? peso(l.promedio) : "sin dato") + " | última vez: " + (l.ultima ? hace(diasDesde(l.ultima)) : "sin registro") + (l.notas ? " | comentario: " + l.notas : ""));
+    const sal = [];
+    ms.slice(-3).forEach(m => (m.salidas || []).forEach(q => sal.push("- " + q.fecha + " | total " + peso(q.total) + " | " + q.gastos.map(g => g.c + (g.l ? " (" + g.l + ")" : "") + " " + peso(g.m)).join(", "))));
+    return "[Hoy es " + hoy + ". Lugares a los que han llevado a Ema:\n" + (lug.join("\n") || "(todavía no hay lugares registrados)") + "\n\nÚltimas salidas con Ema (cada una es un día, con todos sus gastos):\n" + (sal.join("\n") || "(sin salidas)") + "]\n\n";
+  }
+  const burbuja = (who, html) => { const w = document.createElement("div"); w.className = "msg " + who; w.innerHTML = '<div class="body">' + html + "</div>"; return w; };
+  async function preguntar(q){
+    q = String(q || "").trim();
+    if(!q || asking) return;
+    asking = true;
+    send.classList.add("busy"); frame.classList.add("sending"); send.disabled = true;
+    Rain.send();
+    if(!charla) charla = "ema-" + newId();
+    askEl.appendChild(burbuja("you", "<p>" + esc(q) + "</p>"));
+    const wait = document.createElement("div");
+    wait.className = "msg";
+    wait.innerHTML = '<span class="state">Pensando a dónde ir</span>';
+    askEl.appendChild(wait);
+    wait.scrollIntoView({ block: "center", behavior: REDUCED ? "auto" : "smooth" });
+    if(!datos){ try{ await cargar(); }catch{} }
+    let respuesta = null, falla = null;
+    try{
+      const res = await fetch(EMA_CHAT_URL, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ sessionId: charla, chatInput: contexto() + q }) });
+      const txt = await res.text();
+      if(!res.ok) falla = ["El guía respondió con un error (" + res.status + ")", res.status === 404 ? "n8n no encuentra el webhook salidas-ema-chat. Importa y activa el flujo del guía de salidas." : "El flujo se cayó adentro. Abre Executions en n8n y mira qué nodo quedó en rojo."];
+      else {
+        let reply = "";
+        try{ let d = JSON.parse(txt); if(Array.isArray(d)) d = d[0] || {}; reply = d.output || d.text || d.message || d.response || ""; }catch{ reply = txt; }
+        if(String(reply).trim()) respuesta = String(reply);
+        else falla = ["El guía respondió vacío", "El flujo corrió pero no devolvió texto en \"output\"."];
+      }
+    }catch{
+      falla = ["No se pudo hablar con el guía", "La petición no llegó a n8n. Revisa tu internet y que Tailscale esté encendido."];
+    }
+    if(respuesta) wait.replaceWith(burbuja("bot", render(respuesta)));
+    else { const w = document.createElement("div"); w.className = "msg"; w.innerHTML = '<div class="alert"><b>' + esc(falla[0]) + "</b>" + esc(falla[1]) + "</div>"; wait.replaceWith(w); }
+    asking = false;
+    send.classList.remove("busy"); frame.classList.remove("sending");
+    Rain.settle();
+    lock();
+  }
+  return { refresh, nueva, preguntar, lugares };
 })();
 
 /* ════════════════════════════════════════════════════════════
@@ -4732,7 +4905,6 @@ const CreditoCarro = (function(){
    ════════════════════════════════════════════════════════════ */
 const AtGmail = (function(){
   const drop = document.getElementById("gmDrop");
-  const input = document.getElementById("gmFile");
   const status = document.getElementById("gmStatus");
   const again = document.getElementById("gmAgain");
   const root = document.getElementById("restModalRoot");
@@ -4771,7 +4943,7 @@ const AtGmail = (function(){
     cerrarVentana();
     if(objUrl){ URL.revokeObjectURL(objUrl); objUrl = null; }
     elegido = null; sending = false;
-    input.value = "";
+    quitaSelector();
     drop.hidden = false; drop.classList.remove("busy");
     again.hidden = true;
     say("");
@@ -4855,7 +5027,7 @@ const AtGmail = (function(){
       sending = false;
       cerrarVentana();
       if(objUrl){ URL.revokeObjectURL(objUrl); objUrl = null; }
-      elegido = null; input.value = "";
+      elegido = null; quitaSelector();
       say("Comprobante enviado a la inmobiliaria.", "ok");
       again.hidden = false;
     }catch(e){
@@ -4869,8 +5041,23 @@ const AtGmail = (function(){
     }
   }
 
-  input.addEventListener("change", () => elegir(input.files && input.files[0]));
-  again.addEventListener("click", () => { reset(); input.click(); });
+  /* Cada toque crea un selector de fotos NUEVO. En el iPhone, uno que ya se abrió y se cerró sin elegir (tocando afuera)
+     queda "pegado" y no vuelve a abrir; con uno nuevo cada vez eso no pasa. */
+  let selector = null;
+  function quitaSelector(){ if(selector){ selector.remove(); selector = null; } }
+  function abrirSelector(){
+    if(sending) return;
+    quitaSelector();
+    const inp = document.createElement("input");
+    inp.type = "file"; inp.accept = "image/*"; inp.tabIndex = -1; inp.setAttribute("aria-hidden", "true");
+    inp.style.cssText = "position:fixed;left:-9999px;top:0;width:1px;height:1px;opacity:0";
+    inp.addEventListener("change", () => { const f = inp.files && inp.files[0]; if(f) elegir(f); });
+    document.body.appendChild(inp);
+    selector = inp;
+    inp.click();
+  }
+  drop.addEventListener("click", abrirSelector);
+  again.addEventListener("click", () => { reset(); abrirSelector(); });
 
   return { nueva: reset };
 })();
@@ -4990,14 +5177,19 @@ const Drawer = (function(){
   const navControlBtn = document.getElementById("navControlBtn");
   const setControl = on => { navControl.classList.toggle("abierto", on); navControlBtn.setAttribute("aria-expanded", String(on)); };
   navControlBtn.addEventListener("click", () => setControl(!navControl.classList.contains("abierto")));
+  const navSalidasG = document.getElementById("navSalidasG");
+  const navSalidasBtn = document.getElementById("navSalidasBtn");
+  const navEma = document.getElementById("navEma");
+  const setSalidasG = on => { navSalidasG.classList.toggle("abierto", on); navSalidasBtn.setAttribute("aria-expanded", String(on)); };
+  navSalidasBtn.addEventListener("click", () => setSalidasG(!navSalidasG.classList.contains("abierto")));
   const navMercarG = document.getElementById("navMercarG");
   const navMercarBtn = document.getElementById("navMercarBtn");
   const navDura = document.getElementById("navDura");
   const setMercarG = on => { navMercarG.classList.toggle("abierto", on); navMercarBtn.setAttribute("aria-expanded", String(on)); };
   navMercarBtn.addEventListener("click", () => setMercarG(!navMercarG.classList.contains("abierto")));
-  const NAV = { chat: navChat, rest: navRest, credito: navCredito, gmail: navGmail, glim: navGlim, recuerda: navRecuerda, mercar: navMercar, dura: navDura, mes: navMes, ajustes: navAjustes };
-  const SUB = { chat: "Presupuesto de la casa", rest: "Restaurantes", credito: "Crédito Carro", gmail: "AT Gmail", glim: "Glim", recuerda: "Recuerda", mercar: "A mercar", dura: "Duración", mes: "Tu mes", ajustes: "Ajustes" };
-  const PLACEHOLDER = { chat: "Escribe aquí…", rest: "¿Qué se te antoja?", credito: "Pregúntale sobre el crédito…", gmail: "", glim: "", recuerda: "", mercar: "", dura: "", mes: "", ajustes: "" };
+  const NAV = { chat: navChat, rest: navRest, ema: navEma, credito: navCredito, gmail: navGmail, glim: navGlim, recuerda: navRecuerda, mercar: navMercar, dura: navDura, mes: navMes, ajustes: navAjustes };
+  const SUB = { chat: "Presupuesto de la casa", rest: "Restaurantes", ema: "Salidas Ema", credito: "Crédito Carro", gmail: "AT Gmail", glim: "Glim", recuerda: "Recuerda", mercar: "A mercar", dura: "Duración", mes: "Tu mes", ajustes: "Ajustes" };
+  const PLACEHOLDER = { chat: "Escribe aquí…", rest: "¿Qué se te antoja?", ema: "¿A dónde llevamos a Ema?", credito: "Pregúntale sobre el crédito…", gmail: "", glim: "", recuerda: "", mercar: "", dura: "", mes: "", ajustes: "" };
 
   /* marca del menú */
   const m2 = document.getElementById("mark2");
@@ -5042,6 +5234,7 @@ const Drawer = (function(){
     const MODE_PREV = MODE;
     MODE = mode;
     document.body.classList.toggle("mode-rest", mode === "rest");
+    document.body.classList.toggle("mode-ema", mode === "ema");
     document.body.classList.toggle("mode-credito", mode === "credito");
     document.body.classList.toggle("mode-gmail", mode === "gmail");
     document.body.classList.toggle("mode-glim", mode === "glim");
@@ -5054,6 +5247,9 @@ const Drawer = (function(){
     const enControl = mode === "mes" || mode === "recuerda";
     navControl.classList.toggle("activo", enControl);
     if(enControl) setControl(true);
+    const enSalidas = mode === "rest" || mode === "ema";
+    navSalidasG.classList.toggle("activo", enSalidas);
+    if(enSalidas) setSalidasG(true);
     const enMercar = mode === "mercar" || mode === "dura";
     navMercarG.classList.toggle("activo", enMercar);
     if(enMercar) setMercarG(true);
@@ -5065,6 +5261,7 @@ const Drawer = (function(){
       Typer.stop();
       Rain.reading(true);
       if(mode === "rest"){ if(MODE_PREV !== "rest") Restaurantes.nueva(); Restaurantes.refresh(); }
+      if(mode === "ema"){ if(MODE_PREV !== "ema") SalidasEma.nueva(); SalidasEma.refresh(); }
       if(mode === "credito"){ if(MODE_PREV !== "credito") CreditoCarro.nueva(); CreditoCarro.refresh(); }
       if(mode === "gmail" && MODE_PREV !== "gmail") AtGmail.nueva();
       if(mode === "glim") Glim.refresh(true);
@@ -5081,6 +5278,7 @@ const Drawer = (function(){
   document.getElementById("scrim").addEventListener("click", close);
   navChat.addEventListener("click", () => go("chat"));
   navRest.addEventListener("click", () => go("rest"));
+  navEma.addEventListener("click", () => go("ema"));
   navCredito.addEventListener("click", () => go("credito"));
   navGmail.addEventListener("click", () => go("gmail"));
   navGlim.addEventListener("click", () => go("glim"));
@@ -5441,12 +5639,20 @@ const GastoManual = (function(){
           '<button type="button" class="recChip" data-dia="ayer" aria-pressed="false">Ayer</button>' +
           '<label class="recChip inFechaBtn" id="inFechaBtn" aria-pressed="false"><svg viewBox="0 0 24 24" ' + P + '><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg><span id="inFechaTxt">Otra fecha</span><input type="date" id="inFecha" aria-label="Elegir otra fecha"></label>' +
         '</div>' +
+        '<div class="inEma" id="inEma" hidden>' +
+          '<div class="inEmaT"><span aria-hidden="true">🎈</span> Salida con Ema</div>' +
+          '<label class="inLbl" for="inLugar">¿Dónde fue?</label>' +
+          '<input id="inLugar" type="text" list="inLugares" placeholder="Ej: Pance, parque, cine, heladería…" autocomplete="off" maxlength="60">' +
+          '<datalist id="inLugares"></datalist>' +
+          '<div id="inLugarNuevo" hidden><p class="inEmaNota">Es un lugar nuevo: cuéntame cómo les pareció.</p>' +
+            '<span class="inLbl">Puntuación</span><div class="inStars" id="inStars" role="group" aria-label="Puntuación">' + [1,2,3,4,5].map(n => '<button type="button" data-n="' + n + '" aria-label="' + n + ' de 5">★</button>').join("") + '</div>' +
+            '<label class="inLbl" for="inComent">Comentario <span style="font-weight:400;letter-spacing:0;text-transform:none">(opcional)</span></label>' +
+            '<input id="inComent" type="text" placeholder="Algo corto sobre el lugar" maxlength="200" autocomplete="off"></div>' +
+        '</div>' +
         '<label class="inLbl" for="inNota">Nota <span style="font-weight:400;letter-spacing:0;text-transform:none">(opcional)</span></label>' +
         '<textarea id="inNota" rows="1" placeholder="Algo que quieras recordar" maxlength="300"></textarea>' +
         '<button type="button" class="inIA" id="inIA" aria-pressed="false"><i class="inIAdot" aria-hidden="true"></i><b>Pasar por Armoni</b></button>' +
         '<p class="inErr" id="inErr" role="alert"></p>' +
-        '<div class="inSalida" id="inSalida" hidden></div>' +
-        '<button type="button" class="inOtro" id="inOtro" hidden>+ Guardar y agregar otro gasto de esta salida</button>' +
                 '</div>' +
         '<div class="pgRow"><button type="button" class="pgNo" id="inCancel">Cancelar</button><button type="button" class="pgSi" id="inGuardar" disabled>Guardar</button></div>' +
       '</div></div>';
@@ -5459,17 +5665,31 @@ const GastoManual = (function(){
     let categoria = "", fecha = hoy(), tipo = "Gasto", iaManual = false;
     const iaBtn = $("inIA"), ia = { checked: false };
     const valor = () => parseInt(monto.value.replace(/\D/g, ""), 10) || 0;
-    const listo = () => { guardar.disabled = !(concepto.value.trim() && categoria && valor() > 0); actualizaOtro(); };
-    /* una salida con Ema suele tener varios gastos (parqueadero, almuerzo…): se guardan uno tras otro sin cerrar y al final se ve el total */
-    const salida = { n: 0, total: 0 };
-    const otro = $("inOtro"), salidaEl = $("inSalida");
-    function actualizaOtro(){
+    const listo = () => { guardar.disabled = !(concepto.value.trim() && categoria && valor() > 0); if(typeof actualizaEma === "function") actualizaEma(); };
+    /* con la categoría «Salidas Ema» aparece el apartado del lugar (y, si es nuevo, su puntuación y comentario) */
+    const emaBox = $("inEma"), lugarIn = $("inLugar"), lugarNuevo = $("inLugarNuevo"), comentIn = $("inComent");
+    let estrellas = 0;
+    const normL = t => String(t || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9 ]/g, " ").replace(/\s+/g, " ").trim().replace(/s\b/g, "");
+    const conocido = () => { const n = normL(lugarIn.value); if(!n) return null; return SalidasEma.lugares().find(l => { const m = normL(l.nombre); return m === n || (n.length > 3 && (m.includes(n) || n.includes(m))); }) || null; };
+    function actualizaEma(){
       const ema = tipo === "Gasto" && categoria === "Salidas Ema";
-      otro.hidden = !ema; otro.disabled = guardar.disabled;
-      salidaEl.hidden = !(ema && salida.n);
-      if(ema && salida.n) salidaEl.innerHTML = '🎈 Salida con Ema · <b>' + salida.n + (salida.n === 1 ? ' gasto' : ' gastos') + '</b> · <b>$' + salida.total.toLocaleString("es-CO") + '</b>';
+      emaBox.hidden = !ema;
+      if(!ema) return;
+      const dl = $("inLugares"); if(!dl.childElementCount) SalidasEma.lugares().forEach(l => { const o = document.createElement("option"); o.value = l.nombre; dl.appendChild(o); });
+      lugarNuevo.hidden = !(lugarIn.value.trim() && !conocido());
     }
-
+    lugarIn.addEventListener("input", actualizaEma);
+    $("inStars").addEventListener("click", e => {
+      const b = e.target.closest("button[data-n]"); if(!b) return;
+      estrellas = estrellas === +b.dataset.n ? 0 : +b.dataset.n;
+      $("inStars").querySelectorAll("button").forEach(x => x.classList.toggle("on", +x.dataset.n <= estrellas));
+    });
+    const datosLugar = () => {
+      const l = lugarIn.value.trim();
+      if(!(tipo === "Gasto" && categoria === "Salidas Ema" && l)) return {};
+      const k = conocido();
+      return k ? { lugar: k.nombre } : { lugar: l, puntuacion: estrellas || null, comentario: comentIn.value.trim() };
+    };
     /* las categorías cambian con el tipo; si la elegida sigue existiendo, se conserva */
     function pintaCats(){
       const lista = tipo === "Gasto" ? CATS_GASTO : CATS_INGRESO;
@@ -5571,6 +5791,7 @@ const GastoManual = (function(){
         "Registra este " + (tipo === "Gasto" ? "GASTO" : "INGRESO") + " en Movimientos (Tipo: " + tipo + "). Concepto: " + concepto.value.trim() +
         ". Categoría: " + categoria + ". Valor: " + valor() + ". Fecha: " + fecha + " (" + cuando + ")." +
         (nota$ ? " Nota: " + nota$ + "." : "") +
+        (datosLugar().lugar ? " Lugar: " + datosLugar().lugar + (datosLugar().puntuacion ? ", puntuación " + datosLugar().puntuacion + "/5" : "") + (datosLugar().comentario ? ", comentario: " + datosLugar().comentario : "") + "." : "") +
         (tipo === "Gasto"
           ? " Revisa si esto es una salida a comer o algo que necesite más datos (por ejemplo cuántas personas comieron, el restaurante o la puntuación): si falta algún dato, pregúntamelo antes de guardar; si no falta nada, guárdalo de una."
           : " Es plata que ENTRA (por ejemplo un salario, o alguien que me devuelve su parte al dividir una cuenta en un restaurante): guárdalo de una como ingreso. No me preguntes por personas, restaurante ni puntuación; solo pregunta si de verdad falta el concepto, el valor o la fecha.");
@@ -5582,34 +5803,16 @@ const GastoManual = (function(){
         return;
       }
       /* directo a Movimientos: no pasa por el agente, no gasta IA */
-      const dato = { tipo, concepto: concepto.value.trim(), categoria, monto: valor(), fecha, nota: nota$ };
-      const alFinal = categoria === "Salidas Ema" && salida.n ? { n: salida.n + 1, total: salida.total + dato.monto } : null;
+      const dato = Object.assign({ tipo, concepto: concepto.value.trim(), categoria, monto: valor(), fecha, nota: nota$ }, datosLugar());
       guardar.disabled = true; guardar.textContent = "Guardando…"; err.textContent = "";
       fetch(MOVIMIENTO_URL, { method: "POST", body: JSON.stringify(Object.assign({ token: MERCADO_TOKEN }, dato)) })
         .then(r => r.json().catch(() => ({})).then(j => { if(!r.ok || j.ok === false) throw new Error(j.error || "No se pudo guardar"); }))
         .then(() => {
           Frecuentes.aprende(tipo, dato.concepto, categoria, dato.monto);
           cierra("guardado");
-          if(alFinal) avisoOk("Salida con Ema guardada", alFinal.n + " gastos · $" + alFinal.total.toLocaleString("es-CO"));
-          else avisoOk((tipo === "Gasto" ? "Gasto guardado" : "Ingreso guardado"), dato.concepto + " · " + monto$);
+          avisoOk((tipo === "Gasto" ? "Gasto guardado" : "Ingreso guardado"), dato.concepto + (dato.lugar ? " · " + dato.lugar : "") + " · " + monto$);
         })
         .catch(e => { guardar.disabled = false; guardar.textContent = "Guardar"; err.textContent = (e && e.message && e.message !== "Failed to fetch") ? e.message : "No pude guardarlo. Revisa la conexión e inténtalo de nuevo."; });
-    });
-    otro.addEventListener("click", () => {
-      if(otro.disabled) return;
-      if(AUTOMATICOS.test(concepto.value)){ err.textContent = "Eso ya se registra solo desde su aviso (jardín, arriendo, cuota del carro). Aquí va lo demás."; return; }
-      const dato = { tipo, concepto: concepto.value.trim(), categoria, monto: valor(), fecha, nota: nota.value.trim() };
-      otro.disabled = true; guardar.disabled = true; otro.textContent = "Guardando…"; err.textContent = "";
-      fetch(MOVIMIENTO_URL, { method: "POST", body: JSON.stringify(Object.assign({ token: MERCADO_TOKEN }, dato)) })
-        .then(r => r.json().catch(() => ({})).then(j => { if(!r.ok || j.ok === false) throw new Error(j.error || "No se pudo guardar"); }))
-        .then(() => {
-          Frecuentes.aprende(tipo, dato.concepto, categoria, dato.monto);
-          salida.n++; salida.total += dato.monto;
-          concepto.value = ""; monto.value = ""; nota.value = "";
-          otro.textContent = "+ Guardar y agregar otro gasto de esta salida";
-          listo(); concepto.focus();
-        })
-        .catch(e => { otro.textContent = "+ Guardar y agregar otro gasto de esta salida"; listo(); err.textContent = (e && e.message && e.message !== "Failed to fetch") ? e.message : "No pude guardarlo. Revisa la conexión e inténtalo de nuevo."; });
     });
     sugiereIA();
     setTimeout(() => concepto.focus(), 350);
@@ -7472,55 +7675,6 @@ const TuMes = (function(){
     else if(copiarReferencia(t)) btn.textContent = "¡Copiado!";
   }
 
-  /* ── Salidas con Ema: cuántas veces en el mes (y los meses anteriores) ── */
-  const emaEl = document.getElementById("tmEma"), EKEY = "armoni.tumes.ema";
-  let ema = null, emaAbierta = null;
-  function pintaEma(anim){
-    const ms = (ema && ema.meses) || [];
-    const hoyM = mesHoy(), act = ms.find(m => m.mes === hoyM) || { mes: hoyM, veces: 0, total: 0, dias: [] };
-    if(!ms.length){ emaEl.innerHTML = ""; return; }
-    const ult = ms.filter(m => m.mes !== hoyM).slice(-5);
-    const diasMes = new Date(+hoyM.slice(0, 4), +hoyM.slice(5, 7), 0).getDate(), hoyDia = new Date().getDate();
-    const marcados = new Set((act.dias || []).map(f => +String(f).slice(8, 10)));
-    const puntos = Array.from({ length: diasMes }, (_, i) => '<i class="' + (marcados.has(i + 1) ? 'on' : '') + (i + 1 === hoyDia ? ' hoy' : '') + '" style="--j:' + i + '"></i>').join("");
-    const max = Math.max(1, act.veces, ...ult.map(m => m.veces));
-    const barras = ult.concat([act]).map(m => '<div class="emBar' + (m.mes === hoyM ? ' act' : '') + '"><b>' + m.veces + '</b><span class="emCol"><i style="height:' + Math.max(6, Math.round(m.veces / max * 100)) + '%"></i></span><small>' + esc(mesNombre(m.mes).slice(0, 3)) + '</small></div>').join("");
-    emaEl.innerHTML =
-      '<div class="emaCard' + (anim ? ' emaEntra' : '') + '">' +
-        '<div class="emaTop"><span class="emaEmo" aria-hidden="true">🎈</span><div class="emaTx"><small>Salidas con Ema · ' + esc(mesNombre(hoyM)) + '</small>' +
-        '<b><span class="emaN">' + act.veces + '</span> ' + (act.veces === 1 ? 'vez' : 'veces') + '</b></div>' +
-        (act.total ? '<span class="emaTot">' + peso(act.total) + '</span>' : '') + '</div>' +
-        '<div class="emaDias" aria-hidden="true">' + puntos + '</div>' +
-        ((act.salidas || []).length ? '<div class="emaLista">' + act.salidas.slice().reverse().map((q, i) => {
-          const f = new Date(q.fecha + "T12:00:00"), dia = f.toLocaleDateString("es-CO", { weekday: "short", day: "numeric", month: "short" }).replace(/\./g, "");
-          const abierto = emaAbierta === q.fecha;
-          return '<div class="emaFila' + (abierto ? ' abierto' : '') + '" data-f="' + esc(q.fecha) + '" role="button" tabindex="0" aria-expanded="' + abierto + '">' +
-            '<div class="emaFCab"><span class="emaFDia">' + esc(dia) + '</span><span class="emaFN">' + q.gastos.length + (q.gastos.length === 1 ? ' gasto' : ' gastos') + '</span><b>' + peso(q.total) + '</b></div>' +
-            '<div class="emaDet"><div>' + q.gastos.map(g => '<p><span>' + esc(g.c) + '</span><em>' + peso(g.m) + '</em></p>').join("") + '</div></div></div>';
-        }).join("") + '</div>' : '') +
-        (ult.length ? '<div class="emaBarras">' + barras + '</div>' : '') +
-      '</div>';
-  }
-  emaEl.addEventListener("click", e => {
-    const f = e.target.closest(".emaFila"); if(!f) return;
-    const abrir = emaAbierta !== f.dataset.f; emaAbierta = abrir ? f.dataset.f : null;
-    emaEl.querySelectorAll(".emaFila").forEach(x => { const on = x === f && abrir; x.classList.toggle("abierto", on); x.setAttribute("aria-expanded", String(on)); });
-  });
-  emaEl.addEventListener("keydown", e => { if((e.key === "Enter" || e.key === " ") && e.target.classList && e.target.classList.contains("emaFila")){ e.preventDefault(); e.target.click(); } });
-  async function cargarEma(){
-    try{ if(!ema) ema = JSON.parse(localStorage.getItem(EKEY)); }catch{}
-    if(ema) pintaEma(false);
-    try{
-      const res = await fetch(EMA_URL + "?token=" + encodeURIComponent(MERCADO_TOKEN), { cache: "no-store" });
-      if(!res.ok) return;
-      const d = await res.json();
-      if(!d || !Array.isArray(d.meses)) return;
-      const cambio = JSON.stringify(d) !== JSON.stringify(ema);
-      ema = d; try{ localStorage.setItem(EKEY, JSON.stringify(d)); }catch{}
-      if(cambio) pintaEma(!emaEl.firstChild);
-    }catch{}
-  }
-
   /* ── datos: caché al instante + consulta a la torre ── */
   async function cargar(){
     try{
@@ -7538,7 +7692,7 @@ const TuMes = (function(){
   function refresh(){
     if(!datos){ try{ datos = JSON.parse(localStorage.getItem(KEY)); }catch{} }
     if(datos) pintaLista(); else statusEl.innerHTML = '<span class="dot" aria-hidden="true"></span>Armando tus resúmenes…';
-    cargar(); cargarEma();
+    cargar();
   }
 
   /* ── aviso al entrar: «ya está tu resumen del mes». Sale una sola vez por mes; si se cierra, no vuelve ── */
