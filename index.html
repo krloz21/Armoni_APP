@@ -1028,8 +1028,8 @@ body.mode-gmail footer, body.mode-glim footer{ display:none; }
 .inEmaT{ font-size:.9rem; font-weight:700; margin-bottom:2px; }
 .inEma .inLbl{ margin-top:12px; }
 .inEmaNota{ margin:12px 0 0; font-size:.8rem; color:var(--ghost); }
-.inStars{ display:flex; gap:6px; }
-.inStars button{ flex:1; padding:9px 0; border-radius:12px; border:1px solid var(--line); background:rgba(var(--ink),.05); color:var(--dim); font-size:1.15rem; line-height:1; cursor:pointer; transition:color .2s, background .2s, transform .15s var(--ease-spring); }
+.inStars{ display:grid; grid-template-columns:repeat(5, 1fr); gap:6px; }
+.inStars button{ flex:1; padding:10px 0; border-radius:12px; border:1px solid var(--line); background:rgba(var(--ink),.05); color:var(--ghost); font:inherit; font-size:.92rem; font-weight:600; line-height:1; cursor:pointer; transition:color .2s, background .2s, transform .15s var(--ease-spring); }
 .inStars button.on{ color:#ffb066; background:rgba(255,138,80,.16); border-color:rgba(255,138,80,.4); }
 .inStars button:active{ transform:scale(.9); }
 .swc{ flex:none; position:relative; width:50px; height:30px; padding:0; border-radius:999px; border:1px solid var(--line); background:rgba(var(--ink),.1); cursor:pointer; transition:background .3s, border-color .3s; }
@@ -1810,6 +1810,7 @@ button{ transition:transform var(--t-tap) var(--ease-out); }
 .emaLugar{ padding:14px 15px; border-radius:18px; border:1px solid var(--line); background:var(--panel); text-align:left; }
 .elTop{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
 .elTop b{ font-size:1rem; }
+.elNota small{ font-size:.66rem; font-weight:500; opacity:.8; margin-left:1px; }
 .elNota{ flex:none; padding:3px 10px; border-radius:999px; font-size:.78rem; font-weight:700; color:#ffb066; background:rgba(255,138,80,.14); }
 .emaLugar small{ display:block; margin-top:5px; font-size:.78rem; color:var(--dim); }
 .emaLugar p{ margin:8px 0 0; font-size:.84rem; color:var(--ghost); }
@@ -2389,7 +2390,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-11.92";
+const APP_VERSION = "2026-10-11.93";
 (function autoActualizar(){
   const patron = new RegExp("const APP_" + "VERSION = \"([^\"]+)\"");
   async function revisar(){
@@ -4661,7 +4662,7 @@ const SalidasEma = (function(){
       '</div>' +
       (lug.length
         ? '<div class="mkSec">Lugares con Ema</div><div class="emaLugares">' + lug.map(l =>
-            '<div class="emaLugar"><div class="elTop"><b>' + esc(l.nombre) + '</b>' + (l.puntuacion ? '<span class="elNota">★ ' + String(l.puntuacion).replace(".", ",") + '</span>' : '') + '</div>' +
+            '<div class="emaLugar"><div class="elTop"><b>' + esc(l.nombre) + '</b>' + (l.puntuacion ? '<span class="elNota">' + String(l.puntuacion).replace(".", ",") + '<small>/10</small></span>' : '') + '</div>' +
             '<small>' + (l.visitas || 0) + (l.visitas === 1 ? ' visita' : ' visitas') + (l.promedio ? ' · ~' + peso(l.promedio) + ' por salida' : '') + (l.ultima ? ' · ' + hace(diasDesde(l.ultima)) : '') + '</small>' +
             (l.notas ? '<p>' + esc(l.notas) + '</p>' : '') + '</div>').join("") + '</div>'
         : '<p class="gEmpty" style="margin-top:18px">Cuando registres una salida con su lugar (por ejemplo Pance), aparece aquí con cuánto gastan y qué tal les fue.</p>');
@@ -4698,7 +4699,7 @@ const SalidasEma = (function(){
   function contexto(){
     const hoy = new Date().toLocaleDateString("es-CO", { weekday: "long", day: "numeric", month: "long" });
     const ms = (datos && datos.meses) || [];
-    const lug = lugares().map(l => "- " + l.nombre + " | puntuación: " + (l.puntuacion ? l.puntuacion + "/5" : "sin puntuación") + " | visitas: " + (l.visitas || 0) +
+    const lug = lugares().map(l => "- " + l.nombre + " | puntuación: " + (l.puntuacion ? l.puntuacion + "/10" : "sin puntuación") + " | visitas: " + (l.visitas || 0) +
       " | gasto promedio por salida: " + (l.promedio ? peso(l.promedio) : "sin dato") + " | última vez: " + (l.ultima ? hace(diasDesde(l.ultima)) : "sin registro") + (l.notas ? " | comentario: " + l.notas : ""));
     const sal = [];
     ms.slice(-3).forEach(m => (m.salidas || []).forEach(q => sal.push("- " + q.fecha + " | total " + peso(q.total) + " | " + q.gastos.map(g => g.c + (g.l ? " (" + g.l + ")" : "") + " " + peso(g.m)).join(", "))));
@@ -5645,7 +5646,7 @@ const GastoManual = (function(){
           '<input id="inLugar" type="text" list="inLugares" placeholder="Ej: Pance, parque, cine, heladería…" autocomplete="off" maxlength="60">' +
           '<datalist id="inLugares"></datalist>' +
           '<div id="inLugarNuevo" hidden><p class="inEmaNota">Es un lugar nuevo: cuéntame cómo les pareció.</p>' +
-            '<span class="inLbl">Puntuación</span><div class="inStars" id="inStars" role="group" aria-label="Puntuación">' + [1,2,3,4,5].map(n => '<button type="button" data-n="' + n + '" aria-label="' + n + ' de 5">★</button>').join("") + '</div>' +
+            '<span class="inLbl">Puntuación <span style="font-weight:400;letter-spacing:0;text-transform:none">(de 1 a 10)</span></span><div class="inStars" id="inStars" role="group" aria-label="Puntuación">' + [1,2,3,4,5,6,7,8,9,10].map(n => '<button type="button" data-n="' + n + '" aria-label="' + n + ' de 10">' + n + '</button>').join("") + '</div>' +
             '<label class="inLbl" for="inComent">Comentario <span style="font-weight:400;letter-spacing:0;text-transform:none">(opcional)</span></label>' +
             '<input id="inComent" type="text" placeholder="Algo corto sobre el lugar" maxlength="200" autocomplete="off"></div>' +
         '</div>' +
@@ -5682,7 +5683,7 @@ const GastoManual = (function(){
     $("inStars").addEventListener("click", e => {
       const b = e.target.closest("button[data-n]"); if(!b) return;
       estrellas = estrellas === +b.dataset.n ? 0 : +b.dataset.n;
-      $("inStars").querySelectorAll("button").forEach(x => x.classList.toggle("on", +x.dataset.n <= estrellas));
+      $("inStars").querySelectorAll("button").forEach(x => x.classList.toggle("on", +x.dataset.n === estrellas));
     });
     const datosLugar = () => {
       const l = lugarIn.value.trim();
@@ -5791,7 +5792,7 @@ const GastoManual = (function(){
         "Registra este " + (tipo === "Gasto" ? "GASTO" : "INGRESO") + " en Movimientos (Tipo: " + tipo + "). Concepto: " + concepto.value.trim() +
         ". Categoría: " + categoria + ". Valor: " + valor() + ". Fecha: " + fecha + " (" + cuando + ")." +
         (nota$ ? " Nota: " + nota$ + "." : "") +
-        (datosLugar().lugar ? " Lugar: " + datosLugar().lugar + (datosLugar().puntuacion ? ", puntuación " + datosLugar().puntuacion + "/5" : "") + (datosLugar().comentario ? ", comentario: " + datosLugar().comentario : "") + "." : "") +
+        (datosLugar().lugar ? " Lugar: " + datosLugar().lugar + (datosLugar().puntuacion ? ", puntuación " + datosLugar().puntuacion + "/10" : "") + (datosLugar().comentario ? ", comentario: " + datosLugar().comentario : "") + "." : "") +
         (tipo === "Gasto"
           ? " Revisa si esto es una salida a comer o algo que necesite más datos (por ejemplo cuántas personas comieron, el restaurante o la puntuación): si falta algún dato, pregúntamelo antes de guardar; si no falta nada, guárdalo de una."
           : " Es plata que ENTRA (por ejemplo un salario, o alguien que me devuelve su parte al dividir una cuenta en un restaurante): guárdalo de una como ingreso. No me preguntes por personas, restaurante ni puntuación; solo pregunta si de verdad falta el concepto, el valor o la fecha.");
