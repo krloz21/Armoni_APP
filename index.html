@@ -1552,7 +1552,7 @@ body.mode-gmail footer, body.mode-glim footer{ display:none; }
 /* tocar con el dedo: zonas mínimas de 44px sin cambiar cómo se ven */
 .emaEq .x, .svBanner .x, .seQuitar, .sheetClose, .rgBusca .x, .cfAnX, .fmVolver{ position:relative; }
 .emaEq .x::before, .svBanner .x::before, .seQuitar::before, .sheetClose::before, .rgBusca .x::before, .cfAnX::before, .fmVolver::before{ content:""; position:absolute; inset:-9px; }
-@media (prefers-reduced-motion:reduce){ .frame::before, .pnEstrella, .wsEmoji.icoFoto .fotoEma, #inGuardar::after, .mkCuenta .anillo, #pending .state{ animation:none !important; } }
+@media (prefers-reduced-motion:reduce){ .frame::before, .pnEstrella, #inGuardar::after, .mkCuenta .anillo, #pending .state{ animation:none !important; } }
 .mkTiles.cuatro{ grid-template-columns:repeat(2, 1fr); }
 .mkTiles.cuatro .mkTile{ flex-direction:row; justify-content:flex-start; gap:12px; padding:12px 14px; text-align:left; }
 .mkTile{ display:flex; flex-direction:column; align-items:center; justify-content:center; gap:9px; padding:16px 6px 14px; border-radius:20px; border:1px solid var(--line); background:var(--panel); color:var(--white); font:inherit; font-size:.8rem; font-weight:600; line-height:1.15; text-align:center; cursor:pointer; transition:transform .2s var(--ease-out), border-color .3s, background .3s; -webkit-tap-highlight-color:transparent; }
@@ -2076,85 +2076,97 @@ button{ transition:transform var(--t-tap) var(--ease-out); }
 .emaVacio{ margin:14px 0 0; font-size:.86rem; color:var(--dim); text-align:center; }
 .emaLugares{ display:flex; flex-direction:column; gap:10px; }
 /* ── Balance ── */
-.balMeses{ display:flex; gap:6px; overflow-x:auto; margin:4px -16px 14px; padding:2px 16px 4px; scrollbar-width:none; }
+.balPest{ display:grid; grid-template-columns:1fr 1fr; gap:4px; padding:4px; margin:0 0 14px; border-radius:16px; border:1px solid var(--line); background:var(--panel); }
+.balPest button{ padding:10px 0; border:0; border-radius:12px; background:none; color:var(--ghost); font:inherit; font-size:.9rem; font-weight:700; cursor:pointer; transition:background .25s ease, color .25s ease; }
+.balPest button[aria-selected="true"]{ color:var(--on-accent); background:linear-gradient(140deg, var(--cyan), var(--num-a)); box-shadow:0 8px 20px -10px rgba(var(--cyan-rgb), .8); }
+.balMeses{ display:flex; gap:6px; overflow-x:auto; margin:0 -16px 14px; padding:2px 16px 4px; scrollbar-width:none; }
 .balMeses::-webkit-scrollbar{ display:none; }
-.balMeses button, .balVista button{ flex:none; padding:8px 14px; border-radius:999px; border:1px solid var(--line); background:var(--panel); color:var(--ghost); font:inherit; font-size:.82rem; font-weight:600; text-transform:capitalize; cursor:pointer; transition:background .25s, color .25s, border-color .25s; }
-.balMeses button[aria-selected="true"], .balVista button[aria-selected="true"]{ color:var(--on-accent); border-color:transparent; background:linear-gradient(140deg, var(--cyan), var(--blue)); }
-.balTorta{ position:relative; height:auto; min-height:300px; border-radius:24px; border:1px solid var(--line); background:radial-gradient(120% 90% at 50% 10%, rgba(var(--cyan-rgb),.08), transparent 60%), var(--panel); overflow:hidden; }
-.balLienzo{ position:absolute; inset:0; }
-.balLienzo canvas{ display:block; width:100% !important; height:100% !important; touch-action:pan-y; }
-.balInvita{ position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; padding:14px; text-align:center; transition:opacity .5s ease, transform .5s ease; }
-.balTorta.lista .balInvita{ opacity:0; transform:scale(.92); pointer-events:none; }
-.balPreview{ position:relative; flex-shrink:0; width:150px; height:84px; margin-bottom:2px; perspective:500px; }
-.balPreview .disco{ position:absolute; left:50%; top:-6px; width:108px; height:108px; margin-left:-54px; border-radius:50%; background:conic-gradient(from -90deg, #3987e5 0 calc(var(--a) * 1%), #e66767 0 calc(var(--b) * 1%), #199e70 0); transform:rotateX(62deg); box-shadow:0 1px 0 #2a6fc9, 0 2px 0 #2565c4, 0 3px 0 #23609f, 0 4px 0 #1f5694, 0 5px 0 #1c4e88, 0 6px 0 #19467b, 0 7px 0 #163f6f, 0 8px 0 #143862, 0 22px 30px -6px rgba(0,0,0,.6); animation:balFlota 3.4s ease-in-out infinite; }
-.balPreview .disco::after{ content:""; position:absolute; inset:0; border-radius:50%; background:radial-gradient(circle at 35% 30%, rgba(255,255,255,.35), transparent 55%); }
-.balPreview .sombra{ position:absolute; left:50%; bottom:-6px; width:120px; height:16px; margin-left:-60px; border-radius:50%; background:radial-gradient(rgba(0,0,0,.55), transparent 70%); animation:balSombra 3.4s ease-in-out infinite; }
-@keyframes balFlota{ 0%, 100%{ transform:rotateX(62deg) translateY(0) rotateZ(0deg); } 50%{ transform:rotateX(62deg) translateY(-6px) rotateZ(12deg); } }
-@keyframes balSombra{ 50%{ transform:scale(.85); opacity:.7; } }
-.balInvTx{ position:relative; z-index:1; flex-shrink:0; }
-.balInvTx small{ display:block; font-size:.7rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--dim); }
-.balInvTx b{ display:block; margin:3px 0 8px; font-size:1.08rem; }
-.balReglas{ display:flex; flex-wrap:wrap; justify-content:center; gap:6px; }
-.balReglas span{ display:inline-flex; align-items:center; gap:6px; padding:4px 10px; border-radius:999px; font-size:.74rem; font-weight:600; color:var(--ghost); background:rgba(var(--ink),.05); border:1px solid var(--line); }
-.balReglas i{ width:8px; height:8px; border-radius:50%; background:var(--c); }
-.balBtnGen{ display:inline-flex; align-items:center; gap:9px; padding:13px 22px; border:0; border-radius:999px; font:inherit; font-size:.95rem; font-weight:700; color:#fff; background:linear-gradient(140deg, #3987e5, #5a3fe0); box-shadow:0 14px 30px -12px rgba(57,135,229,.9), inset 0 1px 0 rgba(255,255,255,.25); cursor:pointer; transition:transform .2s var(--ease-spring); }
-.balBtnGen svg{ width:18px; height:18px; }
-.balBtnGen:active{ transform:scale(.95); }
-.balBtnGen:disabled{ opacity:.7; }
-.balEtqs{ position:absolute; inset:0; pointer-events:none; }
-.balEtq{ position:absolute; left:0; top:0; display:flex; flex-direction:column; align-items:center; padding:3px 7px; border-radius:9px; background:rgba(8,10,16,.78); border:1px solid rgba(255,255,255,.14); color:#fff; line-height:1.1; white-space:nowrap; opacity:0; transition:opacity .4s ease; }
-.balEtq b{ font-size:.86rem; }
-.balEtq small{ font-size:.62rem; color:rgba(255,255,255,.8); }
-.balPartes{ display:grid; gap:8px; margin-top:12px; }
-.balParte{ display:flex; align-items:center; gap:12px; width:100%; padding:12px 14px; border-radius:16px; border:1px solid var(--line); background:var(--panel); color:var(--white); font:inherit; text-align:left; cursor:pointer; transition:border-color .25s, transform .2s; }
-.balParte:active{ transform:scale(.98); }
-.balParte.on{ border-color:var(--c); box-shadow:0 0 0 3px color-mix(in srgb, var(--c) 22%, transparent); }
-.balParte > i{ flex:none; width:12px; height:34px; border-radius:6px; background:var(--c); }
-.balParte .n{ flex:1; min-width:0; }
-.balParte .n b, .balParte .p b{ display:block; font-size:.95rem; }
-.balParte .n small, .balParte .p small{ display:block; font-size:.74rem; color:var(--dim); }
-.balParte .p{ text-align:right; }
-.balParte .p b{ font-size:1.1rem; font-variant-numeric:tabular-nums; }
-.balParte em{ font-style:normal; font-weight:700; }
-.balParte em.ok{ color:#6fe0b5; }
-.balParte em.ojo{ color:#ffb066; }
+.balMeses button, .balVista button{ flex:none; padding:8px 14px; border-radius:999px; border:1px solid var(--line); background:var(--panel); color:var(--ghost); font:inherit; font-size:.82rem; font-weight:600; text-transform:capitalize; cursor:pointer; }
+.balMeses button[aria-selected="true"], .balVista button[aria-selected="true"]{ color:var(--on-accent); border-color:transparent; background:linear-gradient(140deg, var(--cyan), var(--num-a)); }
+.balSec{ animation:duSube .45s var(--ease-out) backwards; }
+.balSec.quieto{ animation:none; }
+/* resumen general */
+.balResumen{ position:relative; overflow:hidden; padding:18px 16px 14px; border-radius:24px; border:1px solid var(--line); background:radial-gradient(120% 90% at 100% 0%, rgba(25,158,112,.14), transparent 55%), radial-gradient(100% 90% at 0% 100%, rgba(230,103,103,.10), transparent 55%), var(--panel); }
+.rsTit small{ display:block; font-size:.7rem; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--dim); }
+.rsTit b{ display:block; margin-top:2px; font-size:1.05rem; }
+.rsBal{ margin:14px 0 12px; }
+.rsBal span{ font-size:.8rem; color:var(--ghost); font-weight:600; }
+.rsBal strong{ display:block; font-size:clamp(2rem, 10.5vw, 2.8rem); font-weight:700; letter-spacing:-.04em; line-height:1.1; font-variant-numeric:tabular-nums; }
+.rsBal.pos strong{ color:#6fe0b5; } .rsBal.neg strong{ color:#ff8f8f; }
+.rsBal small{ display:block; font-size:.78rem; color:var(--dim); }
+.rsDos{ display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.rsDos > div{ position:relative; padding:12px 12px 12px 14px; border-radius:16px; background:rgba(var(--ink), .05); border:1px solid var(--line); }
+.rsDos i{ display:inline-grid; place-items:center; width:22px; height:22px; margin-bottom:6px; border-radius:8px; font-style:normal; font-weight:800; font-size:.8rem; color:#0b0d14; }
+.rsIng i{ background:#6fe0b5; } .rsGas i{ background:#ff8f8f; }
+.rsDos span{ display:block; font-size:.74rem; color:var(--ghost); font-weight:600; }
+.rsDos b{ display:block; font-size:1.02rem; font-variant-numeric:tabular-nums; white-space:nowrap; }
+.rsBarra{ height:8px; margin-top:14px; border-radius:8px; background:rgba(25,158,112,.35); overflow:hidden; }
+.rsBarra i{ display:block; height:100%; border-radius:8px; background:linear-gradient(90deg, #e66767, #ff9d73); transform-origin:left; animation:balCrece .9s cubic-bezier(.2,.8,.2,1) backwards; }
+@keyframes balCrece{ from{ transform:scaleX(0); } }
+.rsPie{ display:block; margin-top:6px; font-size:.76rem; color:var(--dim); }
+/* la regla: cada parte se despliega */
+.balRegla{ margin:20px 4px 8px; }
+.balRegla b{ display:block; font-size:.95rem; }
+.balRegla small{ font-size:.76rem; color:var(--dim); }
+.balPartes{ display:grid; gap:8px; }
+.balParte{ border-radius:18px; border:1px solid var(--line); background:var(--panel); transition:border-color .25s ease, box-shadow .25s ease; }
+.balParte.on{ border-color:color-mix(in srgb, var(--c) 55%, transparent); box-shadow:0 0 0 3px color-mix(in srgb, var(--c) 14%, transparent); }
+.bpCab{ display:flex; align-items:center; gap:12px; width:100%; padding:13px 14px; border:0; background:none; color:var(--white); font:inherit; text-align:left; cursor:pointer; }
+.bpCab > i{ flex:none; width:10px; height:34px; border-radius:6px; background:var(--c); }
+.bpCab .n{ flex:1; min-width:0; }
+.bpCab .n b, .bpCab .p b{ display:block; font-size:.95rem; }
+.bpCab .n small, .bpCab .p small{ display:block; font-size:.74rem; color:var(--dim); }
+.bpCab .p{ text-align:right; }
+.bpCab .p b{ font-size:1.1rem; font-variant-numeric:tabular-nums; }
+.bpCab em{ font-style:normal; font-weight:700; }
+.bpCab em.ok{ color:#6fe0b5; } .bpCab em.ojo{ color:#ffb066; }
+.bpCab .fl{ flex:none; width:18px; height:18px; color:var(--dim); transition:transform .3s var(--ease-out); }
+.balParte.on .fl{ transform:rotate(180deg); }
+.bpCuerpo{ display:grid; grid-template-rows:0fr; transition:grid-template-rows .35s var(--ease-out); }
+.balParte.on .bpCuerpo{ grid-template-rows:1fr; }
+.bpIn{ overflow:hidden; padding:0 14px; }
+.balParte.on .bpIn{ padding-bottom:12px; }
+.bpNota{ margin:0 0 6px; font-size:.76rem; color:var(--dim); }
 .balAviso{ margin:10px 4px 0; font-size:.8rem; color:#ffb066; }
-.balDetalle:empty{ display:none; }
-.balDetalle{ margin-top:10px; padding:14px; border-radius:18px; border:1px solid color-mix(in srgb, var(--c) 45%, transparent); background:color-mix(in srgb, var(--c) 8%, var(--panel)); }
-.balDetalle.abre{ animation:duSube .45s var(--ease-out); }
-.balDetCab b{ display:block; }
-.balDetCab small{ display:block; font-size:.76rem; color:var(--dim); margin-bottom:8px; }
 .balFila u{ display:inline-block; width:9px; height:9px; margin-right:7px; border-radius:3px; background:var(--c); }
-.balFila{ position:relative; display:flex; justify-content:space-between; gap:10px; padding:8px 0 10px; font-size:.86rem; animation:duSube .4s var(--ease-out) backwards; animation-delay:calc(var(--i) * 50ms); }
+.balFila{ position:relative; display:flex; justify-content:space-between; gap:10px; padding:8px 0 12px; font-size:.86rem; }
 .balFila em{ font-style:normal; font-weight:700; font-variant-numeric:tabular-nums; }
-.balFila i{ position:absolute; left:0; bottom:2px; height:4px; border-radius:4px; background:var(--c); opacity:.85; }
-.balEvoCab{ display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; margin-bottom:8px; }
-.balLey{ display:flex; gap:12px; font-size:.76rem; color:var(--ghost); }
-.balLey i, .balTip i{ display:inline-block; width:10px; height:10px; border-radius:50%; margin-right:5px; vertical-align:-1px; }
+.balFila i{ position:absolute; left:0; bottom:3px; height:4px; border-radius:4px; background:var(--c); opacity:.85; }
+/* gráfica */
+.balEvoCab{ display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; margin-bottom:10px; }
 .balVista{ display:flex; gap:6px; }
-.balGraf{ position:relative; padding:12px 6px 4px; border-radius:20px; border:1px solid var(--line); background:var(--panel); }
+.balVista button{ padding:7px 13px; }
+.balLey{ display:flex; flex-wrap:wrap; gap:6px 14px; margin:0 2px 8px; font-size:.76rem; color:var(--ghost); }
+.balLey i, .selTres i{ display:inline-block; width:10px; height:10px; border-radius:50%; margin-right:5px; vertical-align:-1px; }
+.balGraf{ position:relative; padding:12px 6px 4px; border-radius:22px; border:1px solid var(--line); background:var(--panel); }
 .balGraf svg{ display:block; width:100%; height:auto; touch-action:pan-y; }
 .balGraf .gr{ stroke:rgba(var(--ink),.08); stroke-width:1; }
 .balGraf .cero{ stroke:rgba(var(--ink),.3); stroke-width:1; stroke-dasharray:4 4; }
 .balGraf .ey, .balGraf .ex{ fill:var(--dim); font-size:10px; font-family:inherit; }
 .balGraf .ey{ text-anchor:end; }
 .balGraf .ex{ text-anchor:middle; text-transform:capitalize; }
-.balGraf .ln{ fill:none; stroke-width:2.5; stroke-linecap:round; stroke-linejoin:round; stroke-dasharray:1400; stroke-dashoffset:1400; animation:balTraza 1.4s cubic-bezier(.3,.7,.2,1) forwards; }
-.balGraf .ln.gasto{ stroke:#e66767; }
-.balGraf .ln.quedo{ stroke:#199e70; animation-delay:.2s; }
+.balGraf .area{ fill:url(#balArea); opacity:0; animation:wsFade .8s ease .6s forwards; }
+.balGraf .ln{ fill:none; stroke-width:2.5; stroke-linecap:round; stroke-linejoin:round; stroke-dasharray:1600; stroke-dashoffset:1600; animation:balTraza 1.4s cubic-bezier(.3,.7,.2,1) forwards; }
+.balGraf .ln.ing{ stroke:#3987e5; }
+.balGraf .ln.gasto{ stroke:#e66767; animation-delay:.12s; }
+.balGraf .ln.quedo{ stroke:#199e70; animation-delay:.24s; }
 @keyframes balTraza{ to{ stroke-dashoffset:0; } }
-.balGraf .pt{ stroke:var(--panel-solid, #0b0d14); stroke-width:2; opacity:0; animation:wsFade .3s ease forwards; animation-delay:calc(1s + var(--i) * 40ms); transition:r .2s; }
-.balGraf .pt.gasto{ fill:#e66767; } .balGraf .pt.quedo{ fill:#199e70; }
+.balGraf .pt{ stroke:var(--panel-solid, #0b0d14); stroke-width:2; opacity:0; animation:wsFade .3s ease forwards; animation-delay:calc(1s + var(--i) * 40ms); transition:r .15s ease; }
+.balGraf .pt.ing{ fill:#3987e5; } .balGraf .pt.gasto{ fill:#e66767; } .balGraf .pt.quedo{ fill:#199e70; }
 .balGraf .pt.on{ r:6; }
-.balGraf .cruz{ stroke:rgba(var(--ink),.25); stroke-width:1; }
-.balTip{ position:absolute; top:8px; z-index:2; display:flex; flex-direction:column; gap:2px; padding:8px 10px; border-radius:12px; background:var(--sheet-b, var(--panel)); border:1px solid var(--line); box-shadow:0 12px 30px -12px rgba(0,0,0,.8); font-size:.76rem; pointer-events:none; white-space:nowrap; }
-.balTip b{ text-transform:capitalize; }
-.balTabla{ margin:8px 6px 4px; font-size:.78rem; color:var(--ghost); }
-.balTabla summary{ cursor:pointer; color:var(--dim); }
-.balTabla table{ width:100%; margin-top:6px; border-collapse:collapse; font-variant-numeric:tabular-nums; }
-.balTabla td, .balTabla th{ padding:4px 2px; text-align:right; border-bottom:1px solid var(--line); }
-.balTabla td:first-child, .balTabla th:first-child{ text-align:left; text-transform:capitalize; }
-@media (prefers-reduced-motion:reduce){ .balPreview .disco, .balPreview .sombra, .balGraf .ln, .balGraf .pt, .balFila{ animation:none !important; stroke-dashoffset:0; opacity:1; } }
+.balGraf .cruz{ stroke:rgba(var(--ink),.28); stroke-width:1; transition:all .2s ease; }
+.balSel{ margin-top:10px; padding:14px; border-radius:18px; border:1px solid var(--line); background:var(--panel); }
+.selCab{ display:flex; align-items:baseline; gap:8px; margin-bottom:10px; }
+.selCab b{ font-size:.98rem; text-transform:capitalize; }
+.selCab small{ font-size:.74rem; color:var(--dim); }
+.selTres{ display:grid; grid-template-columns:repeat(3, 1fr); gap:8px; }
+.selTres > div{ min-width:0; padding:10px 8px; border-radius:14px; background:rgba(var(--ink), .05); border-top:3px solid var(--c); }
+.selTres .i{ --c:#3987e5; } .selTres .g{ --c:#e66767; } .selTres .q{ --c:#199e70; }
+.selTres span{ display:block; font-size:.7rem; color:var(--ghost); font-weight:600; }
+.selTres b{ display:block; font-size:.8rem; font-variant-numeric:tabular-nums; white-space:nowrap; }
+.selTres .q.neg b{ color:#ff8f8f; }
+@media (max-width:360px){ .selTres b{ font-size:.78rem; } }
+@media (prefers-reduced-motion:reduce){ .balGraf .ln, .balGraf .pt, .balGraf .area, .rsBarra i, .balSec{ animation:none !important; stroke-dashoffset:0; opacity:1; } .bpCuerpo{ transition:none; } }
 .restCiudades{ display:flex; align-items:center; gap:6px; margin:0 0 10px; font-size:.9rem; }
 .restCiudades button{ padding:6px 12px; border-radius:999px; border:1px solid var(--line); background:var(--panel); color:var(--ghost); font:inherit; font-size:.8rem; font-weight:600; cursor:pointer; }
 .restCiudades button small{ opacity:.7; }
@@ -2247,11 +2259,6 @@ button{ transition:transform var(--t-tap) var(--ease-out); }
 .emaCard{ margin:0 0 16px; padding:16px; border-radius:22px; border:1px solid var(--line); background:linear-gradient(150deg, rgba(255,138,80,.1), rgba(var(--blue-rgb),.05) 70%, rgba(var(--ink),.03)); box-shadow:inset 0 1px 0 rgba(var(--hi),.1); text-align:left; }
 .emaTop{ display:flex; align-items:center; gap:12px; }
 /* la foto de Ema como ícono: sobresale un poco de su cajita, como un sticker */
-.icoFoto{ overflow:visible !important; }
-.fotoEma{ display:block; width:132%; height:132%; margin:-16%; object-fit:contain; filter:drop-shadow(0 3px 6px rgba(0,0,0,.35)); pointer-events:none; user-select:none; -webkit-user-drag:none; }
-.fmOrb.icoFoto .fmEmo{ width:100%; height:100%; display:grid; place-items:center; }
-.wsEmoji.icoFoto .fotoEma{ width:118%; height:118%; margin:-9%; animation:fotoSaluda 3.2s ease-in-out 1.2s infinite; transform-origin:50% 90%; }
-@keyframes fotoSaluda{ 0%, 100%{ transform:rotate(0); } 20%{ transform:rotate(-7deg); } 40%{ transform:rotate(6deg); } 60%{ transform:rotate(0); } }
 .emaEmo{ flex:none; width:46px; height:46px; border-radius:15px; display:grid; place-items:center; font-size:1.6rem; background:rgba(255,138,80,.14); }
 .emaTx{ flex:1; min-width:0; display:flex; flex-direction:column; }
 .emaTx small{ font-size:.74rem; color:var(--dim); letter-spacing:.02em; }
@@ -2823,7 +2830,7 @@ body[class*="mode-"] #masIngreso{ display:none; }
 
       <section id="balanceView" aria-label="Balance">
         <div class="restIntro"><h2>Balance</h2></div>
-        <p class="tmSub">50% gastos fijos · 30% entretenimiento · 20% ahorro</p>
+        <p class="tmSub">Lo que entró, lo que se gastó y cómo se repartió</p>
         <div id="balCuerpo"></div>
       </section>
 
@@ -2942,7 +2949,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-11.112";
+const APP_VERSION = "2026-10-11.113";
 (function autoActualizar(){
   const patron = new RegExp("const APP_" + "VERSION = \"([^\"]+)\"");
   let ultima = 0;
@@ -5360,7 +5367,7 @@ const SalidasEma = (function(){
     const lug = lugares().sort((a, b) => (a.ultima ? diasDesde(a.ultima) : 9999) - (b.ultima ? diasDesde(b.ultima) : 9999));
     stage.innerHTML =
       '<div class="emaCard' + (anim ? ' emaEntra' : '') + '">' +
-        '<div class="emaTop"><span class="emaEmo icoFoto" aria-hidden="true">' + FOTO_EMA + '</span><div class="emaTx"><small>Salidas con Ema · ' + esc(mesNombre(hoyM)) + '</small>' +
+        '<div class="emaTop"><span class="emaEmo" aria-hidden="true">' + FOTO_EMA + '</span><div class="emaTx"><small>Salidas con Ema · ' + esc(mesNombre(hoyM)) + '</small>' +
         '<span class="emaFrase">Este mes han salido</span><b class="emaCuenta"><span class="emaN">' + act.veces + '</span> ' + (act.veces === 1 ? 'vez' : 'veces') + '</b></div>' +
         '<button type="button" class="emaMas" aria-label="Registrar salida"><span class="mas" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span><small>Registra salida</small></button></div>' +
         (sal.length
@@ -5677,7 +5684,6 @@ const SalidaEmaForm = (function(){
     const $ = id => scrim.querySelector("#" + id);
     const vista = $("sePaso"), botones = $("seBotones"), atras = scrim.querySelector(".fmVolver");
     scrim.querySelector(".fmOrb").innerHTML = '<span class="fmEmo">' + FOTO_EMA + '</span>';
-    scrim.querySelector(".fmOrb").classList.add("icoFoto");
     const P = () => paradas[idx];
     const validos = p => p.gastos.filter(g => g.c.trim() && g.m > 0);
     const subtotal = p => validos(p).reduce((a, g) => a + g.m, 0);
@@ -5913,8 +5919,8 @@ const SalidaEmaForm = (function(){
 /* ════════════════════════════════════════════════════════════
    EL «+»: un menú con tres opciones (gasto, ingreso o salida con Ema)
    ════════════════════════════════════════════════════════════ */
-/* la foto de Ema (ema.webp, 4 KB) vive solo en el computador de la casa; si no está, sale el globo */
-const FOTO_EMA = '<img class="fotoEma" src="ema.webp" alt="" decoding="async" onerror="this.outerHTML=&quot;🎈&quot;">';
+/* Ema es una carita: solo emoji, sin imágenes */
+const FOTO_EMA = '😊';
 
 /* cabecera compartida de los tres formularios del «+» */
 const FormArmoni = (function(){
@@ -6393,36 +6399,25 @@ const Privacidad = (function(){
 const Balance = (function(){
   const view = document.getElementById("balanceView");
   const esc = t => String(t == null ? "" : t).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
-  const peso = n => "$" + Math.round(n).toLocaleString("es-CO");
-  const corto = n => { const a = Math.abs(n), s = n < 0 ? "-" : ""; return a >= 1e6 ? s + "$" + (a / 1e6).toFixed(1).replace(".0", "").replace(".", ",") + "M" : a >= 1e3 ? s + "$" + Math.round(a / 1e3) + "k" : s + "$" + Math.round(a); };
+  const peso = n => (n < 0 ? "-" : "") + "$" + Math.round(Math.abs(n)).toLocaleString("es-CO");
   const mesNombre = m => new Date(+m.slice(0, 4), +m.slice(5, 7) - 1, 1).toLocaleDateString("es-CO", { month: "long" });
   const mesHoy = () => { const d = new Date(); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0"); };
-  /* las tres partes de la regla: color fijo para cada una (paleta validada para daltonismo sobre fondo oscuro) */
+  const cap = t => t.charAt(0).toUpperCase() + t.slice(1);
+  /* las tres partes de la regla 50/30/20: color fijo para cada una (paleta validada para daltonismo sobre fondo oscuro) */
   const PARTES = [
     { k: "nec", nombre: "Gastos fijos", ideal: 50, color: "#3987e5", tonos: ["#3987e5", "#7ab3f5", "#2565c4", "#a9cdf8", "#1b4f9e", "#5b9be8", "#cfe3fb"], cats: ["Hogar", "Alimentación", "Servicios", "Salud", "Carro", "Hijo", "Tarjetas"], nota: "Casa, comida, servicios, salud, carro, Ema y tarjetas" },
     { k: "des", nombre: "Entretenimiento", ideal: 30, color: "#e66767", tonos: ["#e66767", "#f5a3a3", "#c44747", "#fbc9c9"], cats: ["Salidas", "Salidas Ema", "Otros"], nota: "Salidas, planes, antojos y lo demás" },
     { k: "aho", nombre: "Ahorro", ideal: 20, color: "#199e70", tonos: ["#199e70", "#5fcfa4", "#0f7a55"], cats: ["Ahorro"], nota: "Lo que se guarda y lo que quedó sin gastar" }
   ];
-  /* cada parte se abre en sus categorías (cada una con su tono y su porcentaje de lo que entró) */
-  function porciones(M, R){
-    const out = [];
-    PARTES.forEach(p => {
-      let filas = (M.categorias || []).filter(c => p.cats.includes(c.nombre) && c.total > 0).map(c => ({ nombre: c.nombre, v: c.total }));
-      if(p.k === "des" && R.sinCat) filas.push({ nombre: "Sin categoría", v: R.sinCat });
-      if(p.k === "aho" && R.quedo) filas.push({ nombre: "Quedó sin gastar", v: R.quedo });
-      filas.sort((a, b) => b.v - a.v).forEach((f, i) => out.push({ k: p.k, nombre: f.nombre, v: f.v, color: p.tonos[i % p.tonos.length], pct: R.base ? f.v / R.base * 100 : 0 }));
-    });
-    return out;
-  }
-  let datos = null, mes = null, vista = "meses", tresListo = null, escena = null;
+  let datos = null, mes = null, pestana = "valores", vista = "meses", rango = 12, abiertas = {}, sel = null;
 
   function lee(){ try{ datos = JSON.parse(localStorage.getItem("armoni.tumes.datos")); }catch{} }
   async function cargar(){
     try{
-      const r = await fetch(RESUMEN_URL, { cache: "no-store" });
+      const r = await fetch(RESUMEN_URL, { cache: "no-store", signal: AbortSignal.timeout ? AbortSignal.timeout(10000) : undefined });
       if(!r.ok) return;
       const d = await r.json();
-      if(d && Array.isArray(d.meses)){ datos = d; try{ localStorage.setItem("armoni.tumes.datos", JSON.stringify(d)); }catch{} pinta(); }
+      if(d && Array.isArray(d.meses) && JSON.stringify(d) !== JSON.stringify(datos)){ datos = d; try{ localStorage.setItem("armoni.tumes.datos", JSON.stringify(d)); }catch{} pinta(false); }
     }catch{}
   }
   const meses = () => ((datos && datos.meses) || []).filter(m => m.gastos > 0 || m.ingresos > 0).slice().sort((a, b) => a.mes.localeCompare(b.mes));
@@ -6438,228 +6433,120 @@ const Balance = (function(){
     const v = { nec, des, aho: ahoCat + quedo };
     return { base, quedo, ahoCat, sinCat, v, pct: k => base ? v[k] / base * 100 : 0, gastaronMas: M.gastos > (M.ingresos || 0) };
   }
+  /* cada parte se abre en sus categorías, con su tono y su porcentaje de lo que entró */
+  function filasDe(p, M, R){
+    const f = (M.categorias || []).filter(c => p.cats.includes(c.nombre) && c.total > 0).map(c => ({ n: c.nombre, v: c.total }));
+    if(p.k === "des" && R.sinCat) f.push({ n: "Sin categoría", v: R.sinCat });
+    if(p.k === "aho" && R.quedo) f.push({ n: "Quedó sin gastar", v: R.quedo });
+    return f.sort((a, b) => b.v - a.v).map((x, i) => ({ n: x.n, v: x.v, pct: R.base ? x.v / R.base * 100 : 0, color: p.tonos[i % p.tonos.length] }));
+  }
 
-  function pinta(){
-    if(!view) return;
-    apaga();
-    const ms = meses();
-    if(!ms.length){ view.querySelector("#balCuerpo").innerHTML = '<p class="gEmpty">Todavía no hay meses con movimientos.</p>'; return; }
-    if(!mes || !ms.find(m => m.mes === mes)){ const cerr = ms.filter(m => m.mes !== mesHoy()); mes = (cerr.length ? cerr[cerr.length - 1] : ms[ms.length - 1]).mes; }
-    const M = ms.find(m => m.mes === mes), R = reparto(M);
-    view.querySelector("#balCuerpo").innerHTML =
-      '<div class="balMeses" role="tablist">' + ms.slice(-8).map(m => '<button type="button" role="tab" data-m="' + m.mes + '" aria-selected="' + (m.mes === mes) + '">' + esc(mesNombre(m.mes).slice(0, 3)) + (m.mes === mesHoy() ? ' ·' : '') + '</button>').join("") + '</div>' +
-      '<div class="balTorta" id="balTorta">' +
-        '<div class="balLienzo" id="balLienzo"></div>' +
-        '<div class="balInvita" id="balInvita">' +
-          '<div class="balPreview" aria-hidden="true"><div class="disco" style="--a:' + Math.round(R.pct("nec")) + ';--b:' + Math.round(R.pct("nec") + R.pct("des")) + '"></div><div class="sombra"></div></div>' +
-          '<div class="balInvTx"><small>' + esc(mesNombre(mes).charAt(0).toUpperCase() + mesNombre(mes).slice(1)) + ' en 3D</small><b>¿Cómo se repartió la plata?</b>' +
-          '<div class="balReglas">' + PARTES.map(p => '<span style="--c:' + p.color + '"><i></i>' + p.ideal + '% ' + p.nombre.toLowerCase() + '</span>').join("") + '</div></div>' +
-          '<button type="button" class="balBtnGen" id="balGenerar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v9l7.8 4.5"/><circle cx="12" cy="12" r="9"/></svg><span>Generar torta</span></button></div>' +
+  /* ── el resumen general del mes ── */
+  function resumen(M){
+    const ing = M.ingresos || 0, gas = M.gastos || 0, bal = ing - gas, uso = ing ? Math.min(100, gas / ing * 100) : 100;
+    return '<div class="balResumen">' +
+      '<div class="rsTit"><small>Resumen general</small><b>' + esc(cap(mesNombre(M.mes))) + (M.mes === mesHoy() ? ' · en curso' : '') + '</b></div>' +
+      '<div class="rsBal ' + (bal >= 0 ? 'pos' : 'neg') + '"><span>Balance</span><strong>' + peso(bal) + '</strong><small>' + (bal >= 0 ? 'Lo que quedó este mes' : 'Salió más de lo que entró') + '</small></div>' +
+      '<div class="rsDos">' +
+        '<div class="rsIng"><i aria-hidden="true">↑</i><span>Ingresos</span><b>' + peso(ing) + '</b></div>' +
+        '<div class="rsGas"><i aria-hidden="true">↓</i><span>Gastos</span><b>' + peso(gas) + '</b></div>' +
       '</div>' +
-      '<div class="balPartes">' + PARTES.map(p => { const real = R.pct(p.k), dif = real - p.ideal, bien = p.k === "aho" ? dif >= -2 : dif <= 2;
-        return '<button type="button" class="balParte" data-k="' + p.k + '" style="--c:' + p.color + '"><i></i><span class="n"><b>' + p.nombre + '</b><small>' + peso(R.v[p.k]) + '</small></span>' +
-          '<span class="p"><b>' + Math.round(real) + '%</b><small>ideal ' + p.ideal + '% · ' + (bien ? '<em class="ok">✓ bien</em>' : '<em class="ojo">' + (dif > 0 ? '+' : '') + Math.round(dif) + '%</em>') + '</small></span></button>'; }).join("") + '</div>' +
-      (R.gastaronMas ? '<p class="balAviso">⚠️ En ' + esc(mesNombre(mes)) + ' salió más de lo que entró: los porcentajes se miden sobre lo gastado.</p>' : '') +
-      '<div class="balDetalle" id="balDetalle"></div>' +
-      '<div class="mkSec">Evolución</div>' +
-      '<div class="balEvoCab"><div class="balLey"><span><i style="background:#199e70"></i>Lo que quedó</span><span><i style="background:#e66767"></i>Lo que se gastó</span></div>' +
-        '<div class="balVista" role="tablist"><button type="button" data-v="meses" aria-selected="' + (vista === "meses") + '">Meses</button><button type="button" data-v="anios" aria-selected="' + (vista === "anios") + '">Años</button></div></div>' +
-      '<div class="balGraf" id="balGraf"></div>';
-    grafica();
+      '<div class="rsBarra" role="img" aria-label="Gastaste el ' + Math.round(uso) + '% de lo que entró"><i style="width:' + uso.toFixed(1) + '%"></i></div>' +
+      '<small class="rsPie">' + (ing ? 'Gastaste el ' + Math.round(gas / ing * 100) + '% de lo que entró' : 'Este mes no hay ingresos registrados') + '</small>' +
+    '</div>';
+  }
+  /* ── las tres partes de la regla, cada una se despliega ── */
+  function partes(M){
+    const R = reparto(M);
+    return '<div class="balRegla"><b>La regla 50 · 30 · 20</b><small>Se mide sobre lo que entró</small></div><div class="balPartes">' +
+      PARTES.map(p => {
+        const real = R.pct(p.k), dif = real - p.ideal, bien = p.k === "aho" ? dif >= -2 : dif <= 2, filas = filasDe(p, M, R), mx = Math.max(1, ...filas.map(f => f.v)), abierta = !!abiertas[p.k];
+        return '<div class="balParte' + (abierta ? ' on' : '') + '" style="--c:' + p.color + '">' +
+          '<button type="button" class="bpCab" data-k="' + p.k + '" aria-expanded="' + abierta + '"><i></i>' +
+            '<span class="n"><b>' + p.nombre + '</b><small>' + peso(R.v[p.k]) + '</small></span>' +
+            '<span class="p"><b>' + Math.round(real) + '%</b><small>ideal ' + p.ideal + '% · ' + (bien ? '<em class="ok">✓ bien</em>' : '<em class="ojo">' + (dif > 0 ? '+' : '') + Math.round(dif) + '%</em>') + '</small></span>' +
+            '<svg class="fl" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>' +
+          '<div class="bpCuerpo"><div class="bpIn"><p class="bpNota">' + p.nota + '</p>' +
+            (filas.length ? filas.map((f, i) => '<div class="balFila" style="--i:' + i + ';--c:' + f.color + '"><span><u></u>' + esc(f.n) + '</span><em>' + peso(f.v) + ' · ' + Math.round(f.pct) + '%</em><i style="width:' + Math.max(3, f.v / mx * 100).toFixed(1) + '%"></i></div>').join("") : '<p class="gEmpty" style="margin:6px 0 0">Nada en esta parte este mes.</p>') +
+          '</div></div></div>';
+      }).join("") + '</div>' +
+      (R.gastaronMas ? '<p class="balAviso">⚠️ En ' + esc(mesNombre(M.mes)) + ' salió más de lo que entró: los porcentajes se miden sobre lo gastado.</p>' : '');
   }
 
-  /* ── el detalle de una parte: en qué más se fue ── */
-  function detalle(k){
-    const M = meses().find(m => m.mes === mes); if(!M) return;
-    const R = reparto(M), p = PARTES.find(x => x.k === k), box = view.querySelector("#balDetalle");
-    view.querySelectorAll(".balParte").forEach(b => b.classList.toggle("on", b.dataset.k === k));
-    const filas = porciones(M, R).filter(x => x.k === k).map(x => ({ n: x.nombre, v: x.v, pct: x.pct, color: x.color }));
-    const mx = Math.max(1, ...filas.map(f => f.v));
-    box.style.setProperty("--c", p.color);
-    box.innerHTML = '<div class="balDetCab"><b>' + p.nombre + '</b><small>' + p.nota + '</small></div>' +
-      (filas.length ? filas.map((f, i) => '<div class="balFila" style="--i:' + i + ';--c:' + f.color + '"><span><u></u>' + esc(f.n) + '</span><em>' + peso(f.v) + ' · ' + Math.round(f.pct) + '%</em><i style="width:' + Math.max(3, f.v / mx * 100).toFixed(1) + '%"></i></div>').join("") : '<p class="gEmpty">Nada en esta parte este mes.</p>');
-    box.classList.remove("abre"); void box.offsetWidth; box.classList.add("abre");
-    if(escena) escena.elige(k);
+  function pinta(animar){
+    if(!view) return;
+    const cuerpo = view.querySelector("#balCuerpo"), ms = meses();
+    if(!ms.length){ cuerpo.innerHTML = '<p class="gEmpty">Todavía no hay meses con movimientos.</p>'; return; }
+    if(!mes || !ms.find(m => m.mes === mes)){ const cerr = ms.filter(m => m.mes !== mesHoy()); mes = (cerr.length ? cerr[cerr.length - 1] : ms[ms.length - 1]).mes; }
+    const M = ms.find(m => m.mes === mes);
+    const chips = ms.slice(-12).map(m => '<button type="button" role="tab" data-m="' + m.mes + '" aria-selected="' + (m.mes === mes) + '">' + esc(mesNombre(m.mes).slice(0, 3)) + (m.mes === mesHoy() ? ' ·' : '') + '</button>').join("");
+    cuerpo.innerHTML =
+      '<div class="balPest" role="tablist"><button type="button" role="tab" data-p="valores" aria-selected="' + (pestana === "valores") + '">Valores</button><button type="button" role="tab" data-p="grafica" aria-selected="' + (pestana === "grafica") + '">Gráfica</button></div>' +
+      (pestana === "valores"
+        ? '<div class="balMeses" role="tablist" aria-label="Mes">' + chips + '</div><div class="balSec' + (animar === false ? ' quieto' : '') + '">' + resumen(M) + partes(M) + '</div>'
+        : '<div class="balSec' + (animar === false ? ' quieto' : '') + '"><div class="balEvoCab"><div class="balVista" role="tablist"><button type="button" data-v="meses" aria-selected="' + (vista === "meses") + '">Meses</button><button type="button" data-v="anios" aria-selected="' + (vista === "anios") + '">Años</button></div>' +
+          (vista === "meses" ? '<div class="balVista" role="tablist" aria-label="Cuántos meses"><button type="button" data-r="6" aria-selected="' + (rango === 6) + '">6</button><button type="button" data-r="12" aria-selected="' + (rango === 12) + '">12</button><button type="button" data-r="99" aria-selected="' + (rango === 99) + '">Todo</button></div>' : '') + '</div>' +
+          '<div class="balLey"><span><i style="background:#3987e5"></i>Entró</span><span><i style="background:#e66767"></i>Gastado</span><span><i style="background:#199e70"></i>Quedó</span></div>' +
+          '<div class="balGraf" id="balGraf"></div><div class="balSel" id="balSel"></div></div>');
+    if(pestana === "grafica") grafica();
   }
 
-  /* ── la gráfica de evolución (meses o años) ── */
+  /* ── la gráfica de evolución: tres líneas, se toca un punto y abajo salen sus valores ── */
+  function puntos(){
+    let pts = meses().map(m => ({ k: m.mes, et: mesNombre(m.mes).slice(0, 3), largo: cap(mesNombre(m.mes)) + " " + m.mes.slice(0, 4), ing: m.ingresos || 0, gasto: m.gastos, quedo: (m.ingresos || 0) - m.gastos, curso: m.mes === mesHoy() }));
+    if(vista === "meses") return pts.slice(-rango);
+    const A = {};
+    meses().forEach(m => { const a = m.mes.slice(0, 4), x = A[a] || (A[a] = { k: a, et: a, largo: "Año " + a, ing: 0, gasto: 0, quedo: 0 }); x.ing += m.ingresos || 0; x.gasto += m.gastos; x.quedo += (m.ingresos || 0) - m.gastos; });
+    return Object.values(A);
+  }
   function grafica(){
     const g = view.querySelector("#balGraf"); if(!g) return;
-    let pts = meses().map(m => ({ et: mesNombre(m.mes).slice(0, 3), largo: mesNombre(m.mes) + " " + m.mes.slice(0, 4), gasto: m.gastos, quedo: (m.ingresos || 0) - m.gastos, curso: m.mes === mesHoy() }));
-    if(vista === "meses") pts = pts.slice(-12);
-    else {
-      const A = {}; meses().forEach(m => { const a = m.mes.slice(0, 4), x = A[a] || (A[a] = { et: a, largo: "Año " + a, gasto: 0, quedo: 0 }); x.gasto += m.gastos; x.quedo += (m.ingresos || 0) - m.gastos; });
-      pts = Object.values(A);
-    }
-    if(pts.length < 2){ g.innerHTML = '<p class="gEmpty">' + (vista === "anios" ? 'Cuando haya más de un año, aquí se comparan.' : 'Con dos meses o más aparece la evolución.') + '</p>'; return; }
-    const W = 360, H = 220, L = 46, Rr = 12, T = 14, B = 26;
-    const vals = pts.flatMap(p => [p.gasto, p.quedo]), lo = Math.min(0, ...vals), hi = Math.max(...vals);
+    const pts = puntos();
+    if(pts.length < 2){ g.innerHTML = '<p class="gEmpty" style="padding:14px">' + (vista === "anios" ? 'Cuando haya más de un año, aquí se comparan.' : 'Con dos meses o más aparece la evolución.') + '</p>'; view.querySelector("#balSel").innerHTML = ""; return; }
+    if(sel == null || !pts.find(p => p.k === sel)) sel = pts[pts.length - 1].k;
+    const W = 360, H = 230, L = 50, Rr = 14, T = 16, B = 28;
+    const vals = pts.flatMap(p => [p.gasto, p.quedo, p.ing]), lo = Math.min(0, ...vals), hi = Math.max(...vals);
     const paso = (() => { const r = (hi - lo) / 4, e = Math.pow(10, Math.floor(Math.log10(r || 1))), f = r / e; return (f <= 1 ? 1 : f <= 2 ? 2 : f <= 5 ? 5 : 10) * e; })();
     const y0 = Math.floor(lo / paso) * paso, y1 = Math.ceil(hi / paso) * paso;
     const X = i => L + i * (W - L - Rr) / (pts.length - 1), Y = v => T + (y1 - v) / (y1 - y0 || 1) * (H - T - B);
     const linea = k => pts.map((p, i) => (i ? "L" : "M") + X(i).toFixed(1) + " " + Y(p[k]).toFixed(1)).join(" ");
+    const kc = v => Math.abs(v) >= 1e6 ? (v / 1e6).toFixed(1).replace(".0", "").replace(".", ",") + "M" : Math.abs(v) >= 1e3 ? Math.round(v / 1e3) + "k" : String(Math.round(v));
     let ejes = "";
-    for(let v = y0; v <= y1 + 1; v += paso) ejes += '<line x1="' + L + '" x2="' + (W - Rr) + '" y1="' + Y(v).toFixed(1) + '" y2="' + Y(v).toFixed(1) + '" class="' + (v === 0 ? 'cero' : 'gr') + '"/><text x="' + (L - 8) + '" y="' + (Y(v) + 4).toFixed(1) + '" class="ey">' + corto(v) + '</text>';
+    for(let v = y0; v <= y1 + 1; v += paso) ejes += '<line x1="' + L + '" x2="' + (W - Rr) + '" y1="' + Y(v).toFixed(1) + '" y2="' + Y(v).toFixed(1) + '" class="' + (v === 0 ? 'cero' : 'gr') + '"/><text x="' + (L - 8) + '" y="' + (Y(v) + 4).toFixed(1) + '" class="ey">' + kc(v) + '</text>';
     const cada = Math.ceil(pts.length / 7);
-    const etiq = pts.map((p, i) => (i % cada === 0 || i === pts.length - 1) ? '<text x="' + X(i).toFixed(1) + '" y="' + (H - 6) + '" class="ex">' + esc(p.et) + '</text>' : '').join("");
-    const puntos = k => pts.map((p, i) => '<circle cx="' + X(i).toFixed(1) + '" cy="' + Y(p[k]).toFixed(1) + '" r="4" class="pt ' + k + '" style="--i:' + i + '"/>').join("");
-    g.innerHTML = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Evolución de lo gastado y lo que quedó">' + ejes + etiq +
-      '<path d="' + linea("gasto") + '" class="ln gasto"/><path d="' + linea("quedo") + '" class="ln quedo"/>' + puntos("gasto") + puntos("quedo") +
-      '<line class="cruz" y1="' + T + '" y2="' + (H - B) + '" x1="-9" x2="-9"/></svg><div class="balTip" hidden></div>' +
-      '<details class="balTabla"><summary>Ver los datos</summary><table><thead><tr><th></th><th>Gastado</th><th>Quedó</th></tr></thead><tbody>' + pts.map(p => '<tr><td>' + esc(p.largo) + '</td><td>' + peso(p.gasto) + '</td><td>' + peso(p.quedo) + '</td></tr>').join("") + '</tbody></table></details>';
-    const svg = g.querySelector("svg"), tip = g.querySelector(".balTip"), cruz = g.querySelector(".cruz");
-    const muestra = e => {
+    const etiq = pts.map((p, i) => (i % cada === 0 || i === pts.length - 1) ? '<text x="' + X(i).toFixed(1) + '" y="' + (H - 7) + '" class="ex">' + esc(p.et) + '</text>' : '').join("");
+    const dots = k => pts.map((p, i) => '<circle cx="' + X(i).toFixed(1) + '" cy="' + Y(p[k]).toFixed(1) + '" r="3.6" class="pt ' + k + '" data-k="' + esc(p.k) + '" style="--i:' + i + '"/>').join("");
+    const area = '<path d="' + linea("gasto") + ' L' + X(pts.length - 1).toFixed(1) + ' ' + Y(Math.max(0, y0)).toFixed(1) + ' L' + X(0).toFixed(1) + ' ' + Y(Math.max(0, y0)).toFixed(1) + ' Z" class="area"/>';
+    g.innerHTML = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Evolución de lo que entró, lo gastado y lo que quedó">' +
+      '<defs><linearGradient id="balArea" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e66767" stop-opacity=".28"/><stop offset="1" stop-color="#e66767" stop-opacity="0"/></linearGradient></defs>' +
+      ejes + etiq + area + '<path d="' + linea("ing") + '" class="ln ing"/><path d="' + linea("gasto") + '" class="ln gasto"/><path d="' + linea("quedo") + '" class="ln quedo"/>' +
+      dots("ing") + dots("gasto") + dots("quedo") + '<line class="cruz" y1="' + T + '" y2="' + (H - B) + '" x1="-9" x2="-9"/></svg>';
+    const svg = g.querySelector("svg"), cruz = g.querySelector(".cruz");
+    const marca = () => {
+      const i = Math.max(0, pts.findIndex(p => p.k === sel)), p = pts[i];
+      cruz.setAttribute("x1", X(i).toFixed(1)); cruz.setAttribute("x2", X(i).toFixed(1));
+      g.querySelectorAll(".pt").forEach(c => c.classList.toggle("on", c.dataset.k === sel));
+      view.querySelector("#balSel").innerHTML = '<div class="selCab"><b>' + esc(p.largo) + '</b>' + (p.curso ? '<small>en curso</small>' : '') + '</div>' +
+        '<div class="selTres"><div class="i"><span>Entró</span><b>' + peso(p.ing) + '</b></div><div class="g"><span>Gastado</span><b>' + peso(p.gasto) + '</b></div><div class="q ' + (p.quedo >= 0 ? 'pos' : 'neg') + '"><span>Quedó</span><b>' + peso(p.quedo) + '</b></div></div>';
+    };
+    const elige = e => {
       const r = svg.getBoundingClientRect(), x = (e.clientX - r.left) / r.width * W;
       const i = Math.max(0, Math.min(pts.length - 1, Math.round((x - L) / ((W - L - Rr) / (pts.length - 1)))));
-      const p = pts[i];
-      cruz.setAttribute("x1", X(i)); cruz.setAttribute("x2", X(i));
-      g.querySelectorAll(".pt").forEach(c => c.classList.toggle("on", +c.style.getPropertyValue("--i") === i));
-      tip.hidden = false;
-      tip.innerHTML = '<b>' + esc(p.largo) + (p.curso ? ' · en curso' : '') + '</b><span><i style="background:#199e70"></i>Quedó ' + peso(p.quedo) + '</span><span><i style="background:#e66767"></i>Gastado ' + peso(p.gasto) + '</span>';
-      const px = X(i) / W * r.width;
-      tip.style.left = Math.max(4, Math.min(r.width - tip.offsetWidth - 4, px - tip.offsetWidth / 2)) + "px";
+      if(pts[i].k !== sel){ sel = pts[i].k; marca(); }
     };
-    svg.addEventListener("pointermove", muestra); svg.addEventListener("pointerdown", muestra);
-    svg.addEventListener("pointerleave", () => { tip.hidden = true; cruz.setAttribute("x1", -9); cruz.setAttribute("x2", -9); g.querySelectorAll(".pt.on").forEach(c => c.classList.remove("on")); });
+    svg.addEventListener("pointerdown", elige); svg.addEventListener("pointermove", e => { if(e.buttons || e.pointerType === "mouse") elige(e); });
+    marca();
   }
-
-  /* ── la torta 3D: three.js se descarga solo al tocar «Generar» ── */
-  function cargaTres(){
-    if(window.THREE) return Promise.resolve();
-    if(tresListo) return tresListo;
-    tresListo = new Promise((ok, mal) => {
-      const s = document.createElement("script");
-      s.src = "https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js";
-      s.onload = ok; s.onerror = () => { tresListo = null; mal(); };
-      document.head.appendChild(s);
-    });
-    return tresListo;
-  }
-  async function generar(){
-    const btn = view.querySelector("#balGenerar"); if(!btn) return;
-    btn.disabled = true; btn.textContent = "Preparando…";
-    /* el giroscopio del iPhone pide permiso, y solo se puede pedir dentro del toque */
-    try{ if(window.DeviceOrientationEvent && typeof DeviceOrientationEvent.requestPermission === "function") DeviceOrientationEvent.requestPermission().catch(() => {}); }catch{}
-    try{ await cargaTres(); }
-    catch{ btn.disabled = false; btn.textContent = "Generar torta"; view.querySelector("#balInvita small").textContent = "No se pudo cargar la torta. Revisa tu internet."; return; }
-    if(!view || !document.body.classList.contains("mode-balance")) return;   // se salió mientras cargaba
-    const M = meses().find(m => m.mes === mes); if(!M) return;
-    apaga();
-    const R = reparto(M);
-    escena = torta(view.querySelector("#balLienzo"), R, porciones(M, R));
-    view.querySelector("#balTorta").classList.add("lista");
-  }
-  function torta(cont, R, P){
-    const T = window.THREE;
-    const w = cont.clientWidth || 320, h = cont.clientHeight || 300;
-    const renderer = new T.WebGLRenderer({ antialias: true, alpha: true });
-    renderer.setPixelRatio(Math.min(2, devicePixelRatio || 1)); renderer.setSize(w, h);
-    cont.appendChild(renderer.domElement);
-    const etqs = document.createElement("div"); etqs.className = "balEtqs"; cont.appendChild(etqs);
-    const scene = new T.Scene(), cam = new T.PerspectiveCamera(36, w / h, .1, 50);
-    cam.position.set(0, 4.6, 6.4); cam.lookAt(0, .25, 0);
-    scene.add(new T.HemisphereLight(0xffffff, 0x1a2233, .55));
-    const sol = new T.DirectionalLight(0xffffff, .75); sol.position.set(3, 6, 4); scene.add(sol);
-    const contra = new T.DirectionalLight(0x88aaff, .35); contra.position.set(-4, 2, -3); scene.add(contra);
-    const grupo = new T.Group(); scene.add(grupo);
-    const total = P.reduce((a, x) => a + x.v, 0) || 1;
-    const altoParte = {}; PARTES.forEach(p => { altoParte[p.k] = .28 + (P.filter(x => x.k === p.k).reduce((a, x) => a + x.v, 0) / total) * 1.05; });
-    let a0 = Math.PI / 2;
-    const rebanadas = [];
-    P.forEach((x, i) => {
-      const frac = x.v / total; if(frac <= .002) return;
-      const a1 = a0 - frac * Math.PI * 2, rad = 1.45, alto = altoParte[x.k];
-      const sh = new T.Shape(); sh.moveTo(0, 0); sh.absarc(0, 0, rad, a1, a0, false); sh.lineTo(0, 0);
-      const geo = new T.ExtrudeGeometry(sh, { depth: alto, bevelEnabled: true, bevelThickness: .025, bevelSize: .025, bevelSegments: 3, curveSegments: Math.max(8, Math.round(frac * 120)) });
-      geo.rotateX(-Math.PI / 2);
-      const mat = new T.MeshStandardMaterial({ color: new T.Color(x.color), roughness: .4, metalness: .06 });
-      const m = new T.Mesh(geo, mat);
-      const mid = (a0 + a1) / 2, nuevaParte = !i || P[i - 1].k !== x.k;
-      const dir = new T.Vector3(Math.cos(mid), 0, -Math.sin(mid));
-      m.userData = { k: x.k, nombre: x.nombre, dir, sale: 0, base: nuevaParte ? .07 : .04, meta: .05, t0: performance.now() + i * 90 };
-      m.userData.meta = m.userData.base;
-      m.scale.set(1, .001, 1);
-      grupo.add(m); rebanadas.push(m);
-      /* etiqueta con el porcentaje (las porciones muy pequeñas van solo en la lista) */
-      if(x.pct >= 4){
-        const e = document.createElement("span"); e.className = "balEtq"; e.innerHTML = "<b>" + Math.round(x.pct) + "%</b><small>" + esc(x.nombre) + "</small>";
-        etqs.appendChild(e);
-        m.userData.etq = e; m.userData.pct = x.pct; m.userData.ancla = new T.Vector3(Math.cos(mid) * rad * .66, alto + .06, -Math.sin(mid) * rad * .66);
-      }
-      a0 = a1;
-    });
-    let tx = 0, tz = 0, gx = 0, gz = 0;
-    const gira = e => { if(e.beta == null) return; tx = Math.max(-.5, Math.min(.5, (e.beta - 45) / 90)); tz = Math.max(-.5, Math.min(.5, e.gamma / 90)); };
-    window.addEventListener("deviceorientation", gira);
-    let arr = false, x0 = 0, rotY = 0, vel = .003, mov = 0;
-    const ray = new T.Raycaster(), pt = new T.Vector2(), v3 = new T.Vector3(), pos = [];
-    const cnv = renderer.domElement;
-    cnv.addEventListener("pointerdown", e => { arr = true; x0 = e.clientX; mov = 0; try{ cnv.setPointerCapture(e.pointerId); }catch{} });
-    cnv.addEventListener("pointermove", e => { if(!arr) return; const d = e.clientX - x0; x0 = e.clientX; mov += Math.abs(d); rotY += d * .012; vel = d * .0009; });
-    cnv.addEventListener("pointerup", e => {
-      arr = false; if(mov > 6) return;
-      const r = cnv.getBoundingClientRect(); pt.set((e.clientX - r.left) / r.width * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
-      ray.setFromCamera(pt, cam); const hit = ray.intersectObjects(rebanadas)[0];
-      if(hit){ detalle(hit.object.userData.k); elige(hit.object.userData.k, hit.object.userData.nombre); }
-    });
-    function elige(k, nombre){ rebanadas.forEach(m => { const u = m.userData, si = u.k === k && (!nombre || u.nombre === nombre); u.meta = si ? (nombre ? .42 : .3) : u.base; }); }
-    let raf = 0, vivo = true;
-    const bucle = now => {
-      if(!vivo) return;
-      raf = requestAnimationFrame(bucle);
-      if(document.hidden) return;
-      if(!arr){ rotY += vel; vel += (.003 - vel) * .02; }
-      gx += (tx - gx) * .08; gz += (tz - gz) * .08;
-      grupo.rotation.set(.12 + gx * .9, rotY, gz * .9);
-      grupo.updateMatrixWorld();
-      rebanadas.forEach(m => {
-        const u = m.userData, p = Math.min(1, Math.max(0, (now - u.t0) / 900)), e = 1 - Math.pow(1 - p, 3);
-        m.scale.y = Math.max(.001, e * (1 + Math.sin(p * Math.PI) * .12));
-        u.sale += (u.meta - u.sale) * .12;
-        m.position.copy(u.dir).multiplyScalar(u.sale); m.position.y = u.meta > u.base + .01 ? .1 : 0;
-        if(u.etq){
-          v3.copy(u.ancla); v3.y *= m.scale.y; v3.add(m.position); v3.applyMatrix4(grupo.matrixWorld); v3.project(cam);
-          const px = (v3.x + 1) / 2 * w, py = (1 - v3.y) / 2 * h;
-          u.etq.style.transform = "translate(" + px.toFixed(1) + "px," + py.toFixed(1) + "px) translate(-50%,-50%)";
-          pos.push({ u, px, py, listo: p > .7, prio: (u.meta > u.base + .01 ? 1000 : 0) + u.pct });
-        }
-      });
-      // Etiquetas sin encimarse: primero la tajada elegida y las más grandes; las que chocan se esconden
-      pos.sort((a, b) => b.prio - a.prio);
-      const puestas = [];
-      pos.forEach(o => {
-        // Si choca, se corre arriba o abajo un poco; solo se esconde si no cabe en ningún lado
-        const corre = [0, 34, -34, 68, -68].find(d => !puestas.some(q => Math.abs(q.px - o.px) < 72 && Math.abs(q.py - (o.py + d)) < 34));
-        const ver = o.listo && corre !== undefined;
-        if(ver){ o.py += corre; puestas.push(o); o.u.etq.style.transform = "translate(" + o.px.toFixed(1) + "px," + o.py.toFixed(1) + "px) translate(-50%,-50%)"; }
-        o.u.etq.style.opacity = ver ? "1" : "0";
-      });
-      pos.length = 0;
-      renderer.render(scene, cam);
-    };
-    raf = requestAnimationFrame(bucle);
-    return {
-      elige(k){ elige(k); },
-      apaga(){
-        vivo = false; cancelAnimationFrame(raf);
-        window.removeEventListener("deviceorientation", gira);
-        rebanadas.forEach(m => { m.geometry.dispose(); m.material.dispose(); });
-        renderer.dispose(); try{ renderer.forceContextLoss(); }catch{}
-        cnv.remove(); etqs.remove();
-      }
-    };
-  }
-  /* al salir de Balance la torta se destruye: nada sigue corriendo ni gastando batería */
-  function apaga(){ if(escena){ escena.apaga(); escena = null; } const t = view && view.querySelector("#balTorta"); if(t) t.classList.remove("lista"); }
 
   view.addEventListener("click", e => {
-    const m = e.target.closest("[data-m]"); if(m){ apaga(); mes = m.dataset.m; pinta(); return; }
-    const v = e.target.closest("[data-v]"); if(v){ vista = v.dataset.v; view.querySelectorAll("[data-v]").forEach(x => x.setAttribute("aria-selected", String(x === v))); grafica(); return; }
-    if(e.target.closest("#balGenerar")){ generar(); return; }
-    const p = e.target.closest(".balParte"); if(p) detalle(p.dataset.k);
+    const p = e.target.closest("[data-p]"); if(p){ pestana = p.dataset.p; pinta(); return; }
+    const m = e.target.closest("[data-m]"); if(m){ mes = m.dataset.m; pinta(false); return; }
+    const v = e.target.closest("[data-v]"); if(v){ vista = v.dataset.v; sel = null; pinta(false); return; }
+    const r = e.target.closest("[data-r]"); if(r){ rango = +r.dataset.r; sel = null; pinta(false); return; }
+    const c = e.target.closest(".bpCab"); if(c){ const k = c.dataset.k; abiertas[k] = !abiertas[k]; const caja = c.closest(".balParte"); caja.classList.toggle("on", abiertas[k]); c.setAttribute("aria-expanded", String(abiertas[k])); }
   });
   function refresh(){ if(!datos) lee(); pinta(); cargar(); }
-  return { refresh, apaga };
+  return { refresh, apaga(){} };
 })();
 
 const Drawer = (function(){
@@ -6748,7 +6635,7 @@ const Drawer = (function(){
     document.body.classList.toggle("mode-dura", mode === "dura");
     document.body.classList.toggle("mode-mes", mode === "mes");
     document.body.classList.toggle("mode-balance", mode === "balance");
-    if(MODE_PREV === "balance" && mode !== "balance") Balance.apaga();   // la torta 3D no sigue corriendo fuera de Balance
+    if(MODE_PREV === "balance" && mode !== "balance") Balance.apaga();   
     document.body.classList.toggle("mode-ajustes", mode === "ajustes");
     Object.entries(NAV).forEach(([m, b]) => { if(m === mode) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current"); });
     const enControl = mode === "mes" || mode === "recuerda" || mode === "balance";
