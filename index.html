@@ -2912,7 +2912,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-11.117";
+const APP_VERSION = "2026-10-11.118";
 (function autoActualizar(){
   const patron = new RegExp("const APP_" + "VERSION = \"([^\"]+)\"");
   let ultima = 0;
@@ -6414,7 +6414,7 @@ const Balance = (function(){
     { k: "des", nombre: "Entretenimiento", ideal: 30, color: "#e66767", tonos: ["#e66767", "#f5a3a3", "#c44747", "#fbc9c9"], cats: ["Salidas", "Salidas Ema", "Otros"], nota: "Salidas, planes, antojos y lo demás" },
     { k: "aho", nombre: "Ahorro", ideal: 20, color: "#199e70", tonos: ["#199e70", "#5fcfa4", "#0f7a55"], cats: ["Ahorro"], nota: "Lo que se guarda y lo que quedó sin gastar" }
   ];
-  let datos = null, mes = null, pestana = "valores", vista = "meses", rango = 12, abiertas = {}, sel = null;
+  let datos = null, mes = null, pestana = "valores", vista = "meses", rango = "anio", abiertas = {}, sel = null;
 
   function lee(){ try{ datos = JSON.parse(localStorage.getItem("armoni.tumes.datos")); }catch{} }
   async function cargar(){
@@ -6500,7 +6500,7 @@ const Balance = (function(){
       (pestana === "valores"
         ? '<div class="balMeses" role="tablist" aria-label="Mes">' + chips + '</div><div class="balSec' + (animar === false ? ' quieto' : '') + '">' + resumen(M) + partes(M) + '</div>'
         : '<div class="balSec' + (animar === false ? ' quieto' : '') + '"><div class="balEvoCab"><div class="balVista" role="tablist"><button type="button" data-v="meses" aria-selected="' + (vista === "meses") + '">Meses</button><button type="button" data-v="anios" aria-selected="' + (vista === "anios") + '">Años</button></div>' +
-          (vista === "meses" ? '<div class="balVista" role="tablist" aria-label="Cuántos meses"><button type="button" data-r="6" aria-selected="' + (rango === 6) + '">6</button><button type="button" data-r="12" aria-selected="' + (rango === 12) + '">12</button><button type="button" data-r="99" aria-selected="' + (rango === 99) + '">Todo</button></div>' : '') + '</div>' +
+          (vista === "meses" ? '<div class="balVista" role="tablist" aria-label="Cuántos meses"><button type="button" data-r="6" aria-selected="' + (rango === 6) + '">6 meses</button><button type="button" data-r="anio" aria-selected="' + (rango === "anio") + '">Año</button><button type="button" data-r="todo" aria-selected="' + (rango === "todo") + '">Todo</button></div>' : '') + '</div>' +
           '<div class="balLey"><span><i style="background:#3987e5"></i>Entró</span><span><i style="background:#e66767"></i>Gastado</span><span><i style="background:#199e70"></i>Quedó</span></div>' +
           '<div class="balGraf" id="balGraf"></div><div class="balSel" id="balSel"></div></div>');
     if(pestana === "grafica") grafica();
@@ -6509,7 +6509,10 @@ const Balance = (function(){
   /* ── la gráfica de evolución: tres líneas, se toca un punto y abajo salen sus valores ── */
   function puntos(){
     let pts = meses().map(m => ({ k: m.mes, et: mesNombre(m.mes).slice(0, 3), largo: cap(mesNombre(m.mes)) + " " + m.mes.slice(0, 4), ing: m.ingresos || 0, gasto: m.gastos, quedo: (m.ingresos || 0) - m.gastos, curso: m.mes === mesHoy() }));
-    if(vista === "meses") return pts.slice(-rango);
+    if(vista === "meses"){
+      if(rango === "anio"){ const a = pts.length ? pts[pts.length - 1].k.slice(0, 4) : ""; return pts.filter(q => q.k.startsWith(a)); }   // el año del último mes cerrado
+      return rango === "todo" ? pts : pts.slice(-6);
+    }
     const A = {};
     meses().forEach(m => { const a = m.mes.slice(0, 4), x = A[a] || (A[a] = { k: a, et: a, largo: "Año " + a, ing: 0, gasto: 0, quedo: 0 }); x.ing += m.ingresos || 0; x.gasto += m.gastos; x.quedo += (m.ingresos || 0) - m.gastos; });
     return Object.values(A);
@@ -6517,7 +6520,7 @@ const Balance = (function(){
   function grafica(){
     const g = view.querySelector("#balGraf"); if(!g) return;
     const pts = puntos();
-    if(pts.length < 2){ g.innerHTML = '<p class="gEmpty" style="padding:14px">' + (vista === "anios" ? 'Cuando haya más de un año, aquí se comparan.' : 'Con dos meses o más aparece la evolución.') + '</p>'; view.querySelector("#balSel").innerHTML = ""; return; }
+    if(pts.length < 2){ g.innerHTML = '<p class="gEmpty" style="padding:14px">' + (vista === "anios" ? 'Cuando haya más de un año, aquí se comparan.' : (vista === "meses" && rango === "anio" ? 'Este año todavía tiene un solo mes cerrado. Prueba con «Todo» o «6 meses».' : 'Con dos meses o más aparece la evolución.')) + '</p>'; view.querySelector("#balSel").innerHTML = ""; return; }
     if(sel == null || (sel !== "general" && !pts.find(p => p.k === sel))) sel = pts[pts.length - 1].k;
     const W = 360, H = 230, L = 50, Rr = 14, T = 16, B = 28;
     const vals = pts.flatMap(p => [p.gasto, p.quedo, p.ing]), lo = Math.min(0, ...vals), hi = Math.max(...vals);
@@ -6543,7 +6546,7 @@ const Balance = (function(){
       const x = gen ? -9 : X(i).toFixed(1);
       cruz.setAttribute("x1", x); cruz.setAttribute("x2", x);
       g.querySelectorAll(".pt").forEach(c => c.classList.toggle("on", !gen && c.dataset.k === sel));
-      const cintas = '<button type="button" data-s="general" class="gen" aria-pressed="' + gen + '">General</button>' + pts.map(q => '<button type="button" data-s="' + esc(q.k) + '" aria-pressed="' + (q.k === sel) + '">' + esc(vista === "anios" ? q.et : q.et + (rango > 12 || pts.length > 12 ? " " + q.k.slice(2, 4) : "")) + '</button>').join("");
+      const cintas = '<button type="button" data-s="general" class="gen" aria-pressed="' + gen + '">General</button>' + pts.map(q => '<button type="button" data-s="' + esc(q.k) + '" aria-pressed="' + (q.k === sel) + '">' + esc(vista === "anios" ? q.et : q.et + (pts.length > 12 || (rango === "todo" && pts[0].k.slice(0, 4) !== pts[pts.length - 1].k.slice(0, 4)) ? " " + q.k.slice(2, 4) : "")) + '</button>').join("");
       view.querySelector("#balSel").innerHTML = '<div class="selChips" role="group" aria-label="Elegir mes">' + cintas + '</div>' +
         '<div class="selCab"><b>' + esc(p.largo) + '</b>' + (p.curso ? '<small>en curso</small>' : '') + '</div>' +
         '<div class="selTres"><div class="i"><span>Entró</span><b>' + peso(p.ing) + '</b></div><div class="g"><span>Gastado</span><b>' + peso(p.gasto) + '</b></div><div class="q ' + (p.quedo >= 0 ? 'pos' : 'neg') + '"><span>Quedó</span><b>' + peso(p.quedo) + '</b></div></div>';
@@ -6563,7 +6566,7 @@ const Balance = (function(){
     const p = e.target.closest("[data-p]"); if(p){ pestana = p.dataset.p; pinta(); return; }
     const m = e.target.closest("[data-m]"); if(m){ mes = m.dataset.m; pinta(false); return; }
     const v = e.target.closest("[data-v]"); if(v){ vista = v.dataset.v; sel = null; pinta(false); return; }
-    const r = e.target.closest("[data-r]"); if(r){ rango = +r.dataset.r; sel = null; pinta(false); return; }
+    const r = e.target.closest("[data-r]"); if(r){ rango = r.dataset.r === "6" ? 6 : r.dataset.r; sel = null; pinta(false); return; }
     const c = e.target.closest(".bpCab"); if(c){ const k = c.dataset.k; abiertas[k] = !abiertas[k]; const caja = c.closest(".balParte"); caja.classList.toggle("on", abiertas[k]); c.setAttribute("aria-expanded", String(abiertas[k])); }
   });
   function refresh(){ if(!datos) lee(); pinta(); cargar(); }
@@ -7946,7 +7949,7 @@ const Mercar = (function(){
         ? '<button type="button" class="mkBtn pri full" id="mkSeguir">Seguir revisión · ' + parcial.idx + '/' + parcial.cola.length + '</button>' +
           '<button type="button" class="mkBtn sec full" id="mkDescartarParcial" style="margin-top:10px">Descartar y empezar de nuevo</button>'
         : '<button type="button" class="mkBtn pri full" id="mkEmpezar"' + (ps.length ? '' : ' disabled') + '>Empezar revisión</button>') +
-      (canasta.length ? '<div class="mkMama mkCanasta" id="mkCanastaCaja" role="button" tabindex="0" style="cursor:pointer"><b>🧺 En tu canasta · toca comprarlo:</b><div class="mkChips">' + canasta.map(p => '<span>' + emojiMercado(baseDe(p), p.grupo) + ' ' + esc(baseDe(p)) + (acaboDe(p) && diasDesde(acaboDe(p)) > 0 ? ' <em>hace ' + diasDesde(acaboDe(p)) + ' d</em>' : '') + '</span>').join("") + '</div></div>' : '') +
+      (canasta.length ? '<div class="mkMama mkCanasta" id="mkCanastaCaja" role="button" tabindex="0" style="cursor:pointer"><b>🧺 En tu canasta · toca comprarlo:</b><div class="mkChips">' + canasta.map(p => '<span>' + emojiMercado(baseDe(p), p.grupo) + ' ' + esc(baseDe(p)) + (haceCanasta(p) ? ' <em>' + haceCanasta(p) + '</em>' : '') + '</span>').join("") + '</div></div>' : '') +
       (mama.length ? '<div class="mkMama" id="mkMamaCaja" role="button" tabindex="0" style="cursor:pointer"><b>Tu mamá dice que se acabó:</b><div class="mkChips">' + mama.map(p => '<span>' + emojiMercado(baseDe(p), p.grupo) + ' ' + esc(baseDe(p)) + '</span>').join("") + '</div></div>' : '') +
       '</div>';
     const ICO = {
@@ -8576,6 +8579,9 @@ const Mercar = (function(){
   const AKEY = "armoni.mercar.acabo";
   const leeAcabo = () => { try{ return JSON.parse(localStorage.getItem(AKEY)) || {}; }catch{ return {}; } };
   const guardaAcabo = m => { try{ localStorage.setItem(AKEY, JSON.stringify(m)); }catch{} };
+  /* hace cuánto se dejó en la canasta: desde el día en que se marcó (si no, desde que se acabó) */
+  const enCanastaDesde = p => p.falta ? (p.marcadoEl ? String(p.marcadoEl).slice(0, 10) : (p.acaboEl && p.acaboEl <= hoyISO() ? p.acaboEl : null)) : null;
+  const haceCanasta = p => { const f = enCanastaDesde(p); if(!f) return ""; const d = diasDesde(f); return d === 0 ? "hoy" : d === 1 ? "ayer" : d < 14 ? "hace " + d + " días" : d < 60 ? "hace " + Math.round(d / 7) + " semanas" : "hace " + Math.round(d / 30) + " meses"; };
   const acaboDe = p => p.falta ? (p.acaboEl || (p.marcadoEl ? String(p.marcadoEl).slice(0, 10) : null)) : null;
   /* puede ser un día que ya pasó («se acabó») o uno que viene («se acaba mañana»: lo dejas listo antes) */
   const mananaISO = () => { const d = new Date(); d.setDate(d.getDate() + 1); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); };
@@ -8597,7 +8603,7 @@ const Mercar = (function(){
         '<h3 id="mkCaT">' + (dentro ? 'En tu canasta' : 'Dejar en la canasta') + '</h3>' +
         '<div class="inBody"><div class="caProd"><span aria-hidden="true">' + emojiMercado(nom, p.grupo) + '</span><b>' + esc(nom) + '</b></div>' +
         (dentro
-          ? '<p class="caNota">Ya está en tu lista de compras' + (acabo ? ' · ' + (acabo > hoy ? textoAcabo(acabo) : 'se acabó ' + (acabo === hoy ? 'hoy' : 'el ' + fechaCorta(acabo))) : '') + '.</p>'
+          ? '<p class="caNota">Ya está en tu lista de compras' + (haceCanasta(p) ? ' · la dejaste ' + haceCanasta(p) : '') + (acabo ? ' · ' + (acabo > hoy ? textoAcabo(acabo) : 'se acabó ' + (acabo === hoy ? 'hoy' : 'el ' + fechaCorta(acabo))) : '') + '.</p>'
           : '<p class="caNota">' + (p.ultimaCompra ? 'Lo compraste hace ' + plD(diasDesde(p.ultimaCompra)) + '. ' : '') + 'Lo dejo en la canasta para que no se te olvide comprarlo. Si sabes que se va a acabar, elige el día que viene.</p>' +
             '<span class="inLbl" style="margin:12px 0 8px">¿Cuándo se acaba?</span><div class="recDia" id="caDia">' +
             '<button type="button" class="recChip" data-d="0" aria-pressed="true">Hoy</button>' +
@@ -8708,7 +8714,7 @@ const Mercar = (function(){
         return '<div class="duCard ' + x.nivel + (p.falta ? ' canasta' : '') + abre + (entrando ? ' duEntra' : '') + '" data-id="' + esc(p.id) + '" ' + dly + ' role="button" tabindex="0" aria-expanded="' + !!abre + '">' +
           '<div class="duCab">' + cab + '<span class="duBadge">' + (p.falta ? '🧺 En la canasta' : '~' + plD(x.dur)) + '</span></div>' +
           '<div class="duPista"><i style="width:' + (entrando ? 0 : w) + '%" data-w="' + w + '"></i></div>' +
-          '<div class="duPie"><span>' + (p.falta ? 'Toca comprarlo' : TXT_NIVEL[x.nivel]) + '</span><span>' + (p.falta ? (ac ? textoAcabo(ac) : 'ya se acabó') : x.quedan > 0 ? 'quedan ~' + plD(x.quedan) : x.quedan === 0 ? 'se acaba hoy' : 'hace ' + plD(-x.quedan) + ' que debió acabarse') + '</span></div>' +
+          '<div class="duPie"><span>' + (p.falta ? '🧺 En la canasta' + (haceCanasta(p) ? ' · ' + haceCanasta(p) : '') : TXT_NIVEL[x.nivel]) + '</span><span>' + (p.falta ? (ac ? textoAcabo(ac) : 'ya se acabó') : x.quedan > 0 ? 'quedan ~' + plD(x.quedan) : x.quedan === 0 ? 'se acaba hoy' : 'hace ' + plD(-x.quedan) + ' que debió acabarse') + '</span></div>' +
           '<div class="duMas"><div class="duMasIn"><div class="duDatos">' +
             '<div><small>Última compra</small><b>' + fechaCorta(p.ultimaCompra) + '</b></div>' +
             '<div><small>Compras</small><b>' + x.veces + '</b></div>' +
@@ -8719,7 +8725,7 @@ const Mercar = (function(){
       if(x.tipo === "aprende"){
         return '<div class="duCard aprende' + abre + (entrando ? ' duEntra' : '') + '" data-id="' + esc(p.id) + '" ' + dly + ' role="button" tabindex="0" aria-expanded="' + !!abre + '">' +
           '<div class="duCab">' + cab + '<span class="duPuntos" aria-label="' + x.veces + ' de 2 compras"><i class="on"></i><i></i></span></div>' +
-          '<div class="duPie"><span>' + (p.falta ? '🧺 En la canasta · toca comprarlo' : 'Aprendiendo · falta 1 compra más') + '</span><span>' + (p.falta && acaboDe(p) ? textoAcabo(acaboDe(p)) : x.dias != null ? 'comprado hace ' + plD(x.dias) : '') + '</span></div>' +
+          '<div class="duPie"><span>' + (p.falta ? '🧺 En la canasta' + (haceCanasta(p) ? ' · ' + haceCanasta(p) : '') + ' · toca comprarlo' : 'Aprendiendo · falta 1 compra más') + '</span><span>' + (p.falta && acaboDe(p) ? textoAcabo(acaboDe(p)) : x.dias != null ? 'comprado hace ' + plD(x.dias) : '') + '</span></div>' +
           '<div class="duMas"><div class="duMasIn"><p class="duNota">Cuando la compres de nuevo con otra fecha, calculo cada cuánto se acaba y te aviso cuándo toca.</p>' + accionCanasta(p) + '</div></div></div>';
       }
       return '<div class="duCard sin' + (entrando ? ' duEntra' : '') + '" ' + dly + '><div class="duCab">' + cab + '<span class="duBadge mudo">Sin compras</span></div></div>';
