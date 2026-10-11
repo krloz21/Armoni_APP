@@ -2110,6 +2110,25 @@ button{ transition:transform var(--t-tap) var(--ease-out); }
 .balTabla td, .balTabla th{ padding:4px 2px; text-align:right; border-bottom:1px solid var(--line); }
 .balTabla td:first-child, .balTabla th:first-child{ text-align:left; text-transform:capitalize; }
 @media (prefers-reduced-motion:reduce){ .balTortaIco, .balGraf .ln, .balGraf .pt, .balFila{ animation:none !important; stroke-dashoffset:0; opacity:1; } }
+.restCiudades{ display:flex; align-items:center; gap:6px; margin:0 0 10px; font-size:.9rem; }
+.restCiudades button{ padding:6px 12px; border-radius:999px; border:1px solid var(--line); background:var(--panel); color:var(--ghost); font:inherit; font-size:.8rem; font-weight:600; cursor:pointer; }
+.restCiudades button small{ opacity:.7; }
+.restCiudades button[aria-selected="true"]{ color:var(--on-accent); border-color:transparent; background:linear-gradient(140deg, var(--cyan), var(--blue)); }
+.emaEq{ display:flex; gap:12px; align-items:flex-start; margin:0 0 14px; padding:14px 14px 14px 16px; border-radius:20px; border:1px solid rgba(255,140,180,.28); background:linear-gradient(130deg, rgba(255,120,170,.10), rgba(255,176,102,.06)); animation:duSube .5s var(--ease-out) backwards; transition:opacity .3s, transform .3s; }
+.emaEq.sale{ opacity:0; transform:translateY(-8px); }
+.emaEq .emo{ display:block; flex:none; font-size:1.5rem; line-height:1; margin-top:2px; }
+.emaEq .tx{ flex:1; min-width:0; }
+.emaEq b{ display:block; font-size:.92rem; }
+.emaEq p{ margin:3px 0 8px; font-size:.82rem; line-height:1.4; color:var(--ghost); }
+.emaEq .ir{ padding:0; border:0; background:none; color:#ff9cc0; font:inherit; font-size:.82rem; font-weight:700; cursor:pointer; }
+.emaEq .x{ flex:none; width:26px; height:26px; border:0; border-radius:50%; background:rgba(var(--ink),.08); color:var(--dim); font-size:1rem; line-height:1; cursor:pointer; }
+.quitaZoom{ position:fixed; left:0; top:0; z-index:9999; transform-origin:0 0; padding:10px 18px; border-radius:999px; border:0; font:inherit; font-size:14px; font-weight:700; color:#fff; background:linear-gradient(140deg, var(--cyan), var(--blue)); box-shadow:0 10px 30px -8px rgba(0,0,0,.7); cursor:pointer; }
+.quitaZoom[hidden]{ display:none; }
+.usoLista{ padding:8px 6px 4px; }
+.usoFila{ position:relative; display:flex; justify-content:space-between; gap:10px; padding:7px 2px 11px; font-size:.84rem; animation:duSube .4s var(--ease-out) backwards; animation-delay:calc(var(--i) * 35ms); }
+.usoFila .v{ color:var(--dim); font-variant-numeric:tabular-nums; }
+.usoFila i{ position:absolute; left:0; bottom:3px; height:4px; border-radius:4px; background:linear-gradient(90deg, var(--cyan), var(--blue)); }
+.usoAcc{ margin:0 8px 4px; font-size:.76rem; color:var(--dim); }
 .emaAntes{ color:#ffb066 !important; }
 .pnTop{ text-align:center; padding-top:4px; }
 .pnEstrella{ display:inline-block; font-size:2.6rem; animation:seRebota .7s var(--ease-spring) backwards, mkFlota 2.6s ease-in-out .8s infinite; }
@@ -2526,37 +2545,25 @@ body[class*="mode-"] #masIngreso{ display:none; }
     <nav class="dNav">
       <button type="button" id="navChat" aria-current="page">
         <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg></span>
-        <span class="txt"><b>Presupuesto</b><span>Gastos, metas y movimientos</span></span>
+        <span class="txt"><b>Arm</b><span>Presupuesto: gastos, metas y movimientos</span></span>
       </button>
-      <div class="navGrupo" id="navSalidasG">
-        <button type="button" id="navSalidasBtn" aria-expanded="false" aria-controls="navSalidasSub">
-          <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="9" r="5.5"/><path d="M12 14.5c0 2-1.2 3-1.2 5.5"/><path d="M9.8 7.2a3 3 0 0 1 2-1"/></svg></span>
-          <span class="txt"><b>Salidas</b><span>Restaurantes y salidas con Ema</span></span>
+      <div class="navGrupo" id="navMercarG">
+        <button type="button" id="navMercarBtn" aria-expanded="false" aria-controls="navMercarSub">
+          <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h2l2.3 10.5h10.4L20 8H6.4"/><circle cx="9" cy="19" r="1.4"/><circle cx="17" cy="19" r="1.4"/></svg></span>
+          <span class="txt"><b>A mercar</b><span>Check y duración</span></span>
           <span class="chev" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
         </button>
-        <div class="navSub" id="navSalidasSub"><div class="navSubIn">
-      <button type="button" id="navRest">
-        <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3v8M4 3v5a3 3 0 0 0 6 0V3M7 11v10M17 21V3c-2.2 0-4 2.7-4 6v4h4"/></svg></span>
-        <span class="txt"><b>Restaurantes</b><span>Dónde hemos comido y qué tal</span></span>
+        <div class="navSub" id="navMercarSub"><div class="navSubIn">
+      <button type="button" id="navMercar">
+        <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m8.5 12.5 2.5 2.5 4.5-5"/></svg></span>
+        <span class="txt"><b>Check</b><span>Revisa la casa y arma la lista</span></span>
       </button>
-      <button type="button" id="navEma">
-        <span class="ico icoFoto"><img class="fotoEma" src="ema.webp" alt="" decoding="async" onerror="this.outerHTML=&quot;🎈&quot;"></span>
-        <span class="txt"><b>Salidas Ema</b><span>Planes, gastos y a dónde ir</span></span>
+      <button type="button" id="navDura">
+        <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 20V10M12 20V4M19 20v-7"/></svg></span>
+        <span class="txt"><b>Duración</b><span>Cuánto te dura cada cosa</span></span>
       </button>
         </div></div>
       </div>
-      <button type="button" id="navCredito">
-        <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 13l1.6-4.5A2 2 0 0 1 7.5 7h9a2 2 0 0 1 1.9 1.5L20 13M4 13h16v3.5a1 1 0 0 1-1 1h-1a1 1 0 0 1-1-1V16H7v.5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z"/><circle cx="7.5" cy="14.5" r="0.4" fill="currentColor"/><circle cx="16.5" cy="14.5" r="0.4" fill="currentColor"/></svg></span>
-        <span class="txt"><b>Crédito Carro</b><span>Saldo, cuotas y proyección</span></span>
-      </button>
-      <button type="button" id="navGmail">
-        <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3.5 7l8.5 6.5L20.5 7"/></svg></span>
-        <span class="txt"><b>AT Gmail</b><span>Enviar el comprobante a la inmobiliaria</span></span>
-      </button>
-      <button type="button" id="navGlim">
-        <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="12" rx="2.3"/><path d="M3 10h18"/><path d="M7 14h4"/></svg></span>
-        <span class="txt"><b>Glim</b><span>El saldo que te queda</span></span>
-      </button>
       <div class="navGrupo" id="navControl">
         <button type="button" id="navControlBtn" aria-expanded="false" aria-controls="navControlSub">
           <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l9 5-9 5-9-5z"/><path d="M3 12.5l9 5 9-5"/><path d="M3 17l9 5 9-5"/></svg></span>
@@ -2578,23 +2585,35 @@ body[class*="mode-"] #masIngreso{ display:none; }
       </button>
         </div></div>
       </div>
-      <div class="navGrupo" id="navMercarG">
-        <button type="button" id="navMercarBtn" aria-expanded="false" aria-controls="navMercarSub">
-          <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h2l2.3 10.5h10.4L20 8H6.4"/><circle cx="9" cy="19" r="1.4"/><circle cx="17" cy="19" r="1.4"/></svg></span>
-          <span class="txt"><b>A mercar</b><span>Check y duración</span></span>
+      <button type="button" id="navCredito">
+        <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 13l1.6-4.5A2 2 0 0 1 7.5 7h9a2 2 0 0 1 1.9 1.5L20 13M4 13h16v3.5a1 1 0 0 1-1 1h-1a1 1 0 0 1-1-1V16H7v.5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z"/><circle cx="7.5" cy="14.5" r="0.4" fill="currentColor"/><circle cx="16.5" cy="14.5" r="0.4" fill="currentColor"/></svg></span>
+        <span class="txt"><b>Crédito Carro</b><span>Saldo, cuotas y proyección</span></span>
+      </button>
+      <button type="button" id="navGlim">
+        <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="12" rx="2.3"/><path d="M3 10h18"/><path d="M7 14h4"/></svg></span>
+        <span class="txt"><b>Glim</b><span>El saldo que te queda</span></span>
+      </button>
+      <div class="navGrupo" id="navSalidasG">
+        <button type="button" id="navSalidasBtn" aria-expanded="false" aria-controls="navSalidasSub">
+          <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="9" r="5.5"/><path d="M12 14.5c0 2-1.2 3-1.2 5.5"/><path d="M9.8 7.2a3 3 0 0 1 2-1"/></svg></span>
+          <span class="txt"><b>Salidas</b><span>Restaurantes y salidas con Ema</span></span>
           <span class="chev" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
         </button>
-        <div class="navSub" id="navMercarSub"><div class="navSubIn">
-      <button type="button" id="navMercar">
-        <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m8.5 12.5 2.5 2.5 4.5-5"/></svg></span>
-        <span class="txt"><b>Check</b><span>Revisa la casa y arma la lista</span></span>
+        <div class="navSub" id="navSalidasSub"><div class="navSubIn">
+      <button type="button" id="navRest">
+        <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3v8M4 3v5a3 3 0 0 0 6 0V3M7 11v10M17 21V3c-2.2 0-4 2.7-4 6v4h4"/></svg></span>
+        <span class="txt"><b>Restaurantes</b><span>Dónde hemos comido y qué tal</span></span>
       </button>
-      <button type="button" id="navDura">
-        <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 20V10M12 20V4M19 20v-7"/></svg></span>
-        <span class="txt"><b>Duración</b><span>Cuánto te dura cada cosa</span></span>
+      <button type="button" id="navEma">
+        <span class="ico icoFoto"><img class="fotoEma" src="ema.webp" alt="" decoding="async" onerror="this.outerHTML=&quot;🎈&quot;"></span>
+        <span class="txt"><b>Salidas Ema</b><span>Planes, gastos y a dónde ir</span></span>
       </button>
         </div></div>
       </div>
+      <button type="button" id="navGmail">
+        <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3.5 7l8.5 6.5L20.5 7"/></svg></span>
+        <span class="txt"><b>AT Gmail</b><span>Enviar el comprobante a la inmobiliaria</span></span>
+      </button>
       <button type="button" id="navAjustes">
         <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></svg></span>
         <span class="txt"><b>Ajustes</b><span>Apariencia y notificaciones</span></span>
@@ -2654,6 +2673,7 @@ body[class*="mode-"] #masIngreso{ display:none; }
         <div class="restIntro"><h2>Salidas con Ema</h2></div>
         <button type="button" class="mkBtn pri full emaNuevaBtn" id="emaNueva"><span aria-hidden="true">🎈</span> Registrar una salida</button>
         <div class="restStatus" id="emaStatus"></div>
+        <div id="emaEquilibrio"></div>
         <div id="emaStage"></div>
         <div id="emaPlanes"></div>
         <div class="restAskHead" id="emaAskHead">
@@ -2744,6 +2764,8 @@ body[class*="mode-"] #masIngreso{ display:none; }
         <div class="ajCard">
           <div class="setRow"><span class="setTxt"><b>Versión</b><span id="ajVersion"></span></span></div>
         </div>
+        <div class="ajGrupo">Uso de Armoni · últimos 30 días</div>
+        <div class="ajCard usoCard" id="usoCard"></div>
       </section>
 
       <section id="balanceView" aria-label="Balance">
@@ -2867,7 +2889,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-11.103";
+const APP_VERSION = "2026-10-11.104";
 (function autoActualizar(){
   const patron = new RegExp("const APP_" + "VERSION = \"([^\"]+)\"");
   async function revisar(){
@@ -4288,6 +4310,56 @@ function inline(s){
 }
 
 /* contador animado para los saldos grandes (Glim, Recuerda): cuenta de un valor al otro, nunca de 0 cada vez */
+/* sin zoom: el iPhone ignora «user-scalable=no» para el pellizco, así que también se frenan los gestos.
+   Si aun así la pantalla queda ampliada (por accesibilidad o un gesto raro), aparece «Quitar zoom». */
+(function(){
+  const no = e => { if(e.cancelable) e.preventDefault(); };
+  document.addEventListener("gesturestart", no, { passive: false });
+  document.addEventListener("gesturechange", no, { passive: false });
+  document.addEventListener("touchmove", e => { if(e.touches && e.touches.length > 1) no(e); }, { passive: false });
+  /* el doble toque ya no hace zoom gracias a «touch-action: manipulation» en html */
+  const vv = window.visualViewport; if(!vv) return;
+  const meta = document.querySelector('meta[name="viewport"]'), BASE = meta ? meta.content : "";
+  let btn = null;
+  const quita = () => { if(!meta) return; meta.content = BASE.replace("maximum-scale=1", "maximum-scale=1.01"); requestAnimationFrame(() => { meta.content = BASE; window.scrollTo(window.scrollX, window.scrollY); }); };
+  const revisa = () => {
+    const z = vv.scale > 1.04;
+    if(z && !btn){ btn = document.createElement("button"); btn.type = "button"; btn.className = "quitaZoom"; btn.textContent = "Quitar zoom"; btn.addEventListener("click", quita); document.body.appendChild(btn); }
+    if(btn){
+      btn.hidden = !z;
+      if(z){ btn.style.transform = "translate(" + (vv.offsetLeft + vv.width / 2) + "px," + (vv.offsetTop + 14) + "px) translateX(-50%) scale(" + (1 / vv.scale).toFixed(3) + ")"; }
+    }
+  };
+  vv.addEventListener("resize", revisa); vv.addEventListener("scroll", revisa);
+})();
+
+/* ¿en qué ciudad está el celular? Se pregunta al GPS solo al pedir una recomendación y se recuerda 3 horas.
+   Sin servicios externos: se compara con el centro de las ciudades conocidas. Si no hay permiso, Cali. */
+const Ubicacion = (function(){
+  const K = "armoni.ciudad";
+  const CIUDADES = [["Cali", 3.4516, -76.532], ["Jamundí", 3.2617, -76.5395], ["Palmira", 3.5394, -76.3036], ["Yumbo", 3.585, -76.495], ["Neiva", 2.9273, -75.2819],
+    ["Bogotá", 4.711, -74.0721], ["Medellín", 6.2442, -75.5812], ["Pereira", 4.8133, -75.6961], ["Armenia", 4.5339, -75.6811], ["Manizales", 5.0703, -75.5138],
+    ["Popayán", 2.4448, -76.6147], ["Buga", 3.9009, -76.2978], ["Tuluá", 4.0847, -76.1954], ["Cartago", 4.7464, -75.9117], ["Buenaventura", 3.8801, -77.0312]];
+  const lejos = (a, b, c, d) => { const r = Math.PI / 180, x = (d - b) * r * Math.cos((a + c) / 2 * r), y = (c - a) * r; return Math.sqrt(x * x + y * y) * 6371; };
+  /* Jamundí, Yumbo y Palmira están pegados a Cali: para los restaurantes cuentan como Cali */
+  const AREA_CALI = ["Jamundí", "Yumbo", "Palmira"];
+  function ciudad(){
+    try{ const g = JSON.parse(localStorage.getItem(K)); if(g && Date.now() - g.at < 3 * 3600e3) return Promise.resolve(g.c); }catch{}
+    if(!navigator.geolocation) return Promise.resolve("Cali");
+    return new Promise(ok => {
+      let listo = false;
+      const fin = c => { if(listo) return; listo = true; try{ localStorage.setItem(K, JSON.stringify({ c, at: Date.now() })); }catch{} ok(c); };
+      setTimeout(() => { if(!listo){ listo = true; ok("Cali"); } }, 5000);
+      navigator.geolocation.getCurrentPosition(pos => {
+        const la = pos.coords.latitude, lo = pos.coords.longitude;
+        const [nom, , , km] = CIUDADES.map(([n, a, b]) => [n, a, b, lejos(la, lo, a, b)]).sort((x, y) => x[3] - y[3])[0];
+        fin(km > 45 || AREA_CALI.includes(nom) ? "Cali" : nom);
+      }, () => fin("Cali"), { enableHighAccuracy: false, timeout: 4500, maximumAge: 30 * 60e3 });
+    });
+  }
+  return { ciudad };
+})();
+
 /* calendario nativo: en el iPhone el cambio llega mientras todavía giras la rueda; si la app reacciona ahí, el
    calendario se cierra solo. Por eso se espera a que lo cierres tú (blur). En Android y computador llega al tocar OK. */
 const ES_IOS = /iP(ad|hone|od)/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
@@ -4674,12 +4746,68 @@ $("#reset").addEventListener("click", newConversation);
    ════════════════════════════════════════════════════════════ */
 let MODE = "chat";
 
+/* MÉTRICAS DE USO (solo en este teléfono, nada sale de aquí): qué apartados se abren y cuánto tiempo se quedan.
+   Para revisarlas desde la consola: ArmoniUso.reporte(30) · ArmoniUso.json() · ArmoniUso.borrar().
+   También se ven en Ajustes → «Uso de Armoni». Sirve para decidir qué mejorar según la tendencia. */
+const Uso = (function(){
+  const K = "armoni.uso", DIAS = 90;
+  const NOMBRES = { chat: "Arm", mercar: "Check", dura: "Duración", mes: "Tu mes", balance: "Balance", recuerda: "Recuerda", credito: "Crédito carro", glim: "Glim", rest: "Restaurantes", ema: "Salidas Ema", gmail: "AT Gmail", ajustes: "Ajustes" };
+  const hoy = () => { const d = new Date(); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); };
+  const lee = () => { try{ return JSON.parse(localStorage.getItem(K)) || { dias: {} }; }catch{ return { dias: {} }; } };
+  const guarda = d => {
+    const corte = (() => { const x = new Date(); x.setDate(x.getDate() - DIAS); return x.toISOString().slice(0, 10); })();
+    Object.keys(d.dias).forEach(k => { if(k < corte) delete d.dias[k]; });
+    try{ localStorage.setItem(K, JSON.stringify(d)); }catch{}
+  };
+  let actual = null, desde = 0;
+  function cierra(){
+    if(!actual || !desde) return;
+    const seg = Math.min(3600, Math.round((Date.now() - desde) / 1000));   // tope de 1 h por si quedó abierta
+    desde = 0;
+    if(seg < 1) return;
+    const d = lee(), dia = d.dias[hoy()] || (d.dias[hoy()] = {}), m = dia[actual] || (dia[actual] = { v: 0, s: 0 });
+    m.s += seg; guarda(d);
+  }
+  function entra(mode){
+    cierra();
+    actual = mode; desde = Date.now();
+    const d = lee(), dia = d.dias[hoy()] || (d.dias[hoy()] = {}), m = dia[mode] || (dia[mode] = { v: 0, s: 0 });
+    m.v++; guarda(d);
+  }
+  function accion(nombre){ const d = lee(), dia = d.dias[hoy()] || (d.dias[hoy()] = {}), a = dia["·" + nombre] || (dia["·" + nombre] = { v: 0, s: 0 }); a.v++; guarda(d); }
+  document.addEventListener("visibilitychange", () => { if(document.visibilityState === "hidden") cierra(); else if(actual) desde = Date.now(); });
+  window.addEventListener("pagehide", cierra);
+  function reporte(n = 30){
+    cierra(); if(actual) desde = Date.now();
+    const d = lee(), corte = (() => { const x = new Date(); x.setDate(x.getDate() - n); return x.toISOString().slice(0, 10); })(), t = {};
+    Object.entries(d.dias).forEach(([dia, ms]) => { if(dia < corte) return; Object.entries(ms).forEach(([k, m]) => { const x = t[k] || (t[k] = { apartado: k.startsWith("·") ? "acción: " + k.slice(1) : (NOMBRES[k] || k), visitas: 0, minutos: 0 }); x.visitas += m.v; x.minutos += m.s / 60; }); });
+    return Object.values(t).map(x => ({ ...x, minutos: Math.round(x.minutos * 10) / 10 })).sort((a, b) => b.minutos - a.minutos || b.visitas - a.visitas);
+  }
+  return { entra, accion, reporte, json: () => JSON.stringify(lee()), borrar: () => { try{ localStorage.removeItem(K); }catch{} } };
+})();
+window.ArmoniUso = Uso;
+/* el panel de Ajustes: barras con el tiempo de cada apartado */
+function pintaUso(){
+  const box = document.getElementById("usoCard"); if(!box) return;
+  const r = Uso.reporte(30).filter(x => !x.apartado.startsWith("acción"));
+  const acc = Uso.reporte(30).filter(x => x.apartado.startsWith("acción"));
+  if(!r.length){ box.innerHTML = '<div class="setRow"><span class="setTxt"><span>Todavía no hay datos. Se van guardando mientras usas la app.</span></span></div>'; return; }
+  const mx = Math.max(...r.map(x => x.minutos), .1);
+  const t = m => m < 1 ? Math.round(m * 60) + " s" : m < 60 ? Math.round(m) + " min" : (m / 60).toFixed(1).replace(".", ",") + " h";
+  box.innerHTML = '<div class="usoLista">' + r.slice(0, 12).map((x, i) => '<div class="usoFila" style="--i:' + i + '"><span class="n">' + x.apartado + '</span><span class="v">' + t(x.minutos) + ' · ' + x.visitas + (x.visitas === 1 ? ' vez' : ' veces') + '</span><i style="width:' + Math.max(2, x.minutos / mx * 100).toFixed(1) + '%"></i></div>').join("") + '</div>' +
+    (acc.length ? '<p class="usoAcc">Desde el +: ' + acc.map(x => x.apartado.replace("acción: +", "") + ' ' + x.visitas).join(" · ") + '</p>' : '') +
+    '<button type="button" class="mkBtn sec full" id="usoCopiar" style="margin:8px 0 6px">Copiar datos (JSON)</button>';
+  document.getElementById("usoCopiar").onclick = e => { if(copiarReferencia(Uso.json())) e.currentTarget.textContent = "¡Copiados!"; };
+}
+
 const Restaurantes = (function(){
   const KEY = "armoni.restaurantes";
   const railEl = document.getElementById("restRail");
   const statusEl = document.getElementById("restStatus");
   const askEl = document.getElementById("restAsk");
   let items = [], cats = [], asking = false, charla = null;
+  /* por ciudades: se ve la ciudad donde estás (Cali si no se sabe); si hay lugares de otras, aparece un selector */
+  let todosItems = [], ciudadVista = "Cali";
 
   const esc = s => String(s ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
   const limpio = s => String(s || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
@@ -4783,7 +4911,9 @@ const Restaurantes = (function(){
       veces,
       precio: (v => Array.isArray(v) ? v[0] : v)(r.property_precio ?? r.property_rango_de_precio) || "",
       prom: numero(r.property_promedio_de_gasto ?? r.property_gasto_promedio),
-      dias
+      dias,
+      ciudad: String((v => Array.isArray(v) ? v[0] : v)(r.property_ciudad) || "Cali"),
+      momento: (v => (Array.isArray(v) ? v : v ? [v] : []).map(String))(r.property_momento)
     };
     out.comidas = detectar(out, tipos);
     return out;
@@ -4994,11 +5124,22 @@ const Restaurantes = (function(){
     return { openCategory, openDetail, close };
   })();
 
-  function paint(){ armarCats(); paintRail(); }
+  function paint(){
+    const ciudades = [...new Set(todosItems.map(r => r.ciudad))];
+    if(!ciudades.includes(ciudadVista)) ciudadVista = ciudades.includes("Cali") ? "Cali" : (ciudades[0] || "Cali");
+    items = todosItems.filter(r => r.ciudad === ciudadVista);
+    let sel = document.getElementById("restCiudades");
+    if(ciudades.length > 1){
+      if(!sel){ sel = document.createElement("div"); sel.id = "restCiudades"; sel.className = "restCiudades"; sel.setAttribute("role", "tablist"); railEl.parentNode.insertBefore(sel, railEl);
+        sel.addEventListener("click", e => { const b = e.target.closest("[data-c]"); if(!b || b.dataset.c === ciudadVista) return; ciudadVista = b.dataset.c; paint(); }); }
+      sel.innerHTML = '<span>📍</span>' + ciudades.sort((a, b) => (b === "Cali") - (a === "Cali") || a.localeCompare(b)).map(c => '<button type="button" role="tab" data-c="' + esc(c) + '" aria-selected="' + (c === ciudadVista) + '">' + esc(c) + ' <small>' + todosItems.filter(r => r.ciudad === c).length + '</small></button>').join("");
+    } else if(sel) sel.remove();
+    armarCats(); paintRail();
+  }
 
   const readCache = () => { try{ return JSON.parse(localStorage.getItem(KEY)); }catch{ return null; } };
   const writeCache = raw => { try{ localStorage.setItem(KEY, JSON.stringify({ items: raw, at: Date.now() })); }catch{} };
-  const cargar = raw => { items = (raw || []).filter(r => String(r.property_clase || "") !== "Plan Ema").map(leer); statusEl.innerHTML = ""; paint(); };
+  const cargar = raw => { todosItems = (raw || []).filter(r => String(r.property_clase || "") !== "Plan Ema").map(leer); statusEl.innerHTML = ""; paint(); };
 
   async function fetchLive(anterior){
     const res = await fetch(RESTAURANTES_URL, { cache: "no-store" });
@@ -5013,6 +5154,7 @@ const Restaurantes = (function(){
      si algo cambió (un restaurante, una nota, una categoría), la pantalla se actualiza sola */
   let pidiendo = false;
   function refresh(){
+    try{ const g = JSON.parse(localStorage.getItem("armoni.ciudad")); if(g && g.c && Date.now() - g.at < 6 * 3600e3) ciudadVista = g.c; }catch{}
     const cache = readCache();
     if(cache && cache.items) cargar(cache.items);
     else statusEl.innerHTML = '<span class="dot" aria-hidden="true"></span>Cargando tus restaurantes…';
@@ -5026,16 +5168,29 @@ const Restaurantes = (function(){
   }
 
   /* ── preguntarle al agente de comida: solo gasta cuando escribes abajo ── */
-  function contexto(){
+  /* qué comida tiene sentido a esta hora (no se recomienda un desayuno de noche) */
+  function franja(){
+    const h = new Date().getHours();
+    return h < 5 ? { nom: "madrugada", ok: ["Antojo"] } : h < 11 ? { nom: "mañana", ok: ["Desayuno", "Antojo"] } : h < 16 ? { nom: "mediodía", ok: ["Almuerzo", "Antojo"] } : h < 19 ? { nom: "tarde", ok: ["Antojo", "Cena"] } : { nom: "noche", ok: ["Cena", "Antojo"] };
+  }
+  function contexto(ciudad, pregunta){
     const hoy = new Date().toLocaleDateString("es-CO", { weekday:"long", day:"numeric", month:"long" });
-    const lineas = items.map(r =>
+    const hora = new Date().toLocaleTimeString("es-CO", { hour: "numeric", minute: "2-digit" });
+    const f = franja();
+    /* lo de otra ciudad ni se le muestra al agente, salvo que la pregunta nombre esa ciudad */
+    const sinTilde = t => String(t).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+    const lista = todosItems.filter(r => r.ciudad === ciudad || sinTilde(pregunta).includes(sinTilde(r.ciudad)));
+    const lineas = lista.map(r =>
       "- " + r.nombre + " | id: " + r.id + " | comida: " + (r.comidas.map(id => catDe(id).label).join(", ") || "sin definir") +
       " | puntuación: " + (r.score > 0 ? nota10(r.score) + "/10" : "sin puntuación") +
       " | última visita: " + (r.dias == null ? "sin registro" : hace(r.dias)) +
       " | visitas: " + (r.veces || 0) +
       (r.prom ? " | gasto promedio: " + plata(r.prom) : "") + (r.precio ? " | precio: " + r.precio : "") +
-      (r.nota ? " | comentario: " + r.nota : ""));
-    return "[Hoy es " + hoy + ". Lista actual de restaurantes:\n" + lineas.join("\n") + "]\n\n";
+      (r.nota ? " | comentario: " + r.nota : "") + " | ciudad: " + r.ciudad + (r.momento.length ? " | sirve para: " + r.momento.join(", ") : ""));
+    return "[Hoy es " + hoy + ", son las " + hora + " (" + f.nom + "). Estamos en " + ciudad + " (ubicación del celular). " +
+      "Reglas: recomienda SOLO lugares de " + ciudad + "; nunca uno de otra ciudad salvo que te lo pida. A esta hora tiene sentido: " + f.ok.join(" o ") +
+      "; no recomiendes desayunos de tarde ni de noche, ni cenas en la mañana (fíjate en «sirve para» y en el comentario). " +
+      "Lista de restaurantes de " + ciudad + ":\n" + (lineas.join("\n") || "(no hay lugares registrados en esta ciudad)") + "]\n\n";
   }
 
   function burbuja(who, html){
@@ -5059,13 +5214,14 @@ const Restaurantes = (function(){
     askEl.appendChild(wait);
     wait.scrollIntoView({ block: "center", behavior: REDUCED ? "auto" : "smooth" });
 
-    if(!items.length){ try{ await fetchLive(); }catch{} }
+    if(!todosItems.length){ try{ await fetchLive(); }catch{} }
     let respuesta = null, falla = null;
     try{
+      const ciudad = await Ubicacion.ciudad();
       const res = await fetch(RESTAURANTES_CHAT_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sessionId: charla, chatInput: contexto() + q })
+        body: JSON.stringify({ sessionId: charla, chatInput: contexto(ciudad, q) + q })
       });
       const txt = await res.text();
       if(!res.ok){
@@ -5182,6 +5338,7 @@ const SalidasEma = (function(){
       datos = d; try{ localStorage.setItem(KEY, JSON.stringify(d)); }catch{}
       statusEl.innerHTML = "";
       if(cambio) pinta(!stage.firstChild);
+      equilibrio();
       setTimeout(pidePuntaje, 400);
     }catch{
       if(!datos) statusEl.innerHTML = "No se pudo cargar. Revisa tu internet, que Tailscale esté encendido y que el flujo salidas-ema esté activo en n8n.";
@@ -5189,10 +5346,34 @@ const SalidasEma = (function(){
   }
   function refresh(){
     if(!datos){ try{ datos = JSON.parse(localStorage.getItem(KEY)); }catch{} }
-    if(datos){ pinta(false); setTimeout(pidePuntaje, 500); } else statusEl.innerHTML = '<span class="dot" aria-hidden="true"></span>Cargando las salidas…';
+    if(datos){ pinta(false); equilibrio(); setTimeout(pidePuntaje, 500); } else statusEl.innerHTML = '<span class="dot" aria-hidden="true"></span>Cargando las salidas…';
     cargar();
     PlanesComfandi.refresh();
   }
+  /* equilibrio: si en el último mes han salido mucho con Ema y nada solos (o al revés), lo dice con cariño.
+     Se puede cerrar y no vuelve en una semana. */
+  const K_EQ = "armoni.ema.equilibrio";
+  function equilibrio(){
+    const box = document.getElementById("emaEquilibrio"); if(!box) return;
+    const hace30 = (() => { const d = new Date(); d.setDate(d.getDate() - 30); return d.toISOString().slice(0, 10); })();
+    const diasEma = new Set(); ((datos && datos.meses) || []).forEach(m => (m.dias || []).forEach(f => { if(f >= hace30) diasEma.add(f); }));
+    const diasCita = new Set(); ((datos && datos.pareja) || []).forEach(m => (m.cosas || []).forEach(c => { if(c.f >= hace30) diasCita.add(c.f); }));
+    const ema = diasEma.size, citas = diasCita.size;
+    let msg = null;
+    if(ema >= 3 && citas === 0) msg = { emo: "💕", t: "Han salido " + ema + " veces con Ema este mes", p: "Ema la está pasando increíble. ¿Y si se regalan un ratico solos los dos? Una cita también le hace bien a la familia.", b: "Ver planes para ustedes dos" };
+    else if(ema >= 4 && citas === 1) msg = { emo: "🌙", t: "Mucho plan en familia últimamente", p: "Llevan " + ema + " salidas con Ema y una sola cita. Quizás es buen momento para otra noche de ustedes.", b: "Ver planes para ustedes dos" };
+    else if(citas >= 3 && ema === 0) msg = { emo: "🎈", t: "Ema también quiere pasear", p: "Este mes tuvieron " + citas + " citas. ¿Qué tal un plan con ella esta semana?", b: "Ver planes con Ema" };
+    let oculto = 0; try{ oculto = +localStorage.getItem(K_EQ) || 0; }catch{}
+    if(!msg || Date.now() - oculto < 7 * 864e5){ box.innerHTML = ""; return; }
+    box.innerHTML = '<div class="emaEq"><span class="emo" aria-hidden="true">' + msg.emo + '</span><div class="tx"><b>' + esc(msg.t) + '</b><p>' + esc(msg.p) + '</p><button type="button" class="ir">' + esc(msg.b) + ' →</button></div><button type="button" class="x" aria-label="Ocultar por una semana">×</button></div>';
+    box.querySelector(".x").onclick = () => { try{ localStorage.setItem(K_EQ, String(Date.now())); }catch{} box.firstChild.classList.add("sale"); setTimeout(() => { box.innerHTML = ""; }, 300); };
+    box.querySelector(".ir").onclick = () => {
+      const g = /Ema/.test(msg.b) ? "ema" : "dos", tab = document.querySelector('#emaPlanes [data-g="' + g + '"]');
+      if(tab) tab.click();
+      const pl = document.getElementById("emaPlanes"); if(pl) pl.scrollIntoView({ behavior: REDUCED ? "auto" : "smooth", block: "start" });
+    };
+  }
+
   /* un lugar al que ya fueron con Ema y no tiene nota: sale el aviso cada vez que entras, hasta que lo puntúes */
   function pidePuntaje(){
     if(!document.body.classList.contains("mode-ema") || document.querySelector(".pgScrim, .cfAn, .sePuntua")) return;
@@ -5379,6 +5560,9 @@ const PlanesComfandi = (function(){
       datos = d; try{ localStorage.setItem(KEY, JSON.stringify(d)); }catch{}
       pinta();
       setTimeout(anuncia, 650);
+      /* guarda las imágenes en el teléfono cuando no haya nada más que hacer (el service worker las conserva) */
+      const pre = () => (d.planes || []).slice(0, 40).forEach(p => { if(/^https:\/\//.test(p.img || "")){ const i = new Image(); i.referrerPolicy = "no-referrer"; i.decoding = "async"; i.src = p.img; } });
+      (window.requestIdleCallback || (f => setTimeout(f, 1500)))(pre);
     }catch{}
   }
   return { refresh };
@@ -5709,7 +5893,7 @@ const MenuMas = (function(){
     btn.classList.add("abierto"); btn.setAttribute("aria-expanded", "true");
     menu.addEventListener("click", e => {
       const b = e.target.closest("button[data-k]"); if(!b) return;
-      const k = b.dataset.k; cierra();
+      const k = b.dataset.k; cierra(); Uso.accion("+" + k);
       setTimeout(() => { if(k === "ema") SalidaEmaForm.abrir({ desdeMenu: true }); else GastoManual.abrir({ tipo: k === "ingreso" ? "Ingreso" : "Gasto", desdeMenu: true }); }, 120);
     });
     document.addEventListener("pointerdown", fuera, true); document.addEventListener("keydown", tecla);
@@ -6447,6 +6631,8 @@ const Drawer = (function(){
   function go(mode){
     const MODE_PREV = MODE;
     MODE = mode;
+    if(mode !== MODE_PREV) Uso.entra(mode);
+    if(mode === "ajustes") setTimeout(pintaUso, 50);
     document.body.classList.toggle("mode-rest", mode === "rest");
     document.body.classList.toggle("mode-ema", mode === "ema");
     document.body.classList.toggle("mode-credito", mode === "credito");
@@ -6550,6 +6736,8 @@ const Drawer = (function(){
 
   return { open, close, go };
 })();
+
+Uso.entra(MODE);   // empieza a medir el apartado con el que abre la app
 
 /* el aviso de un plan nuevo de Comfandi abre Armoni directo en Salidas Ema */
 try{
@@ -6764,7 +6952,16 @@ const Frecuentes = (function(){
     { tipo:"Gasto",   concepto:"Netflix",       categoria:"Hogar",    monto:29900,   n:1 }
   ];
   const k = (t, c) => t + "|" + c.trim().toLowerCase();
-  function lee(){ try{ return JSON.parse(localStorage.getItem(KEY)) || {}; }catch(e){ return {}; } }
+  /* nada de registros de prueba: se borran si quedaron guardados y nunca se muestran */
+  const ES_PRUEBA = /\b(prueba|test|testing)\b/i;
+  function lee(){
+    try{
+      const m = JSON.parse(localStorage.getItem(KEY)) || {};
+      const sucios = Object.keys(m).filter(x => ES_PRUEBA.test(x));
+      if(sucios.length){ sucios.forEach(x => delete m[x]); localStorage.setItem(KEY, JSON.stringify(m)); }
+      return m;
+    }catch(e){ return {}; }
+  }
   function todos(){
     const m = lee(), out = {};
     SEMILLA.forEach(f => { out[k(f.tipo, f.concepto)] = Object.assign({}, f); });
@@ -6777,9 +6974,9 @@ const Frecuentes = (function(){
     top(tipo){
       let srv = null;
       try{ srv = (JSON.parse(localStorage.getItem("armoni.ema.datos")) || {}).recurrentes; }catch(e){}
-      if(Array.isArray(srv) && srv.some(r => r.tipo === tipo)) return srv.filter(r => r.tipo === tipo).slice(0, 12);
+      if(Array.isArray(srv) && srv.some(r => r.tipo === tipo)) return srv.filter(r => r.tipo === tipo && !ES_PRUEBA.test(r.concepto)).slice(0, 12);
       const FUERA = ["Alimentación", "Servicios", "Salidas", "Salidas Ema"];
-      return todos().filter(f => f.tipo === tipo && f.concepto && !FUERA.includes(f.categoria)).sort((a, b) => (b.n || 0) - (a.n || 0)).slice(0, 8);
+      return todos().filter(f => f.tipo === tipo && f.concepto && !FUERA.includes(f.categoria) && !ES_PRUEBA.test(f.concepto)).sort((a, b) => (b.n || 0) - (a.n || 0)).slice(0, 8);
     },
     aprende(tipo, concepto, categoria, monto){
       try{

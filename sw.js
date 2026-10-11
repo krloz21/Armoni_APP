@@ -7,8 +7,23 @@ self.addEventListener("install", e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(ARCHIVOS.map(u => new Request(u, { cache: "reload" })))).catch(() => {}));
 });
 self.addEventListener("activate", e => e.waitUntil(self.clients.claim()));
+/* imágenes de Comfandi y la librería de la torta 3D: se muestran al instante desde el teléfono y se
+   actualizan por detrás (si la red falla o Comfandi cambia algo, la imagen guardada no desaparece) */
+const CACHE_EXT = "armoni-ext";
+const EXTERNOS = /(^|\.)comfandivirtual\.com\.co$|(^|\.)comfandi\.com\.co$|^cdnjs\.cloudflare\.com$/;
+async function recorta(cache, max){ const k = await cache.keys(); for(let i = 0; i < k.length - max; i++) await cache.delete(k[i]); }
 self.addEventListener("fetch", e => {
   const r = e.request, u = new URL(r.url);
+  if(r.method === "GET" && u.origin !== location.origin && EXTERNOS.test(u.hostname) && (r.destination === "image" || r.destination === "script")){
+    e.respondWith((async () => {
+      const cache = await caches.open(CACHE_EXT);
+      const guardada = await cache.match(r);
+      const red = fetch(r).then(async res => { if(res && (res.ok || res.type === "opaque")){ await cache.put(r, res.clone()); recorta(cache, 160); } return res; });
+      if(guardada){ e.waitUntil(red.catch(() => {})); return guardada; }   // al instante; la actualización va por detrás
+      return red;
+    })());
+    return;
+  }
   if(r.method !== "GET" || u.origin !== location.origin || u.pathname.includes("/webhook/")) return;
   e.respondWith((async () => {
     const cache = await caches.open(CACHE);
