@@ -2077,6 +2077,26 @@ button{ transition:transform var(--t-tap) var(--ease-out); }
 .rsAhorro small{ display:block; font-size:.74rem; color:var(--ghost); }
 .rsAhorro .tot{ text-align:right; }
 .rsAhorro .tot b{ color:#6fe0b5; font-variant-numeric:tabular-nums; white-space:nowrap; }
+.rsPreg{ display:flex; align-items:center; gap:12px; width:100%; margin-top:10px; padding:12px; border-radius:16px; border:1px solid rgba(var(--cyan-rgb),.35); background:rgba(var(--cyan-rgb),.08); color:var(--white); font:inherit; text-align:left; cursor:pointer; }
+.rsPreg .ic{ flex:none; display:grid; place-items:center; width:38px; height:38px; border-radius:12px; color:var(--cyan); background:rgba(var(--cyan-rgb),.16); }
+.rsPreg .ic svg{ width:21px; height:21px; }
+.rsPreg b{ display:block; font-size:.9rem; } .rsPreg small{ display:block; font-size:.74rem; color:var(--ghost); }
+.prCard .prTop{ display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+.prIco{ display:grid; place-items:center; width:36px; height:36px; border-radius:12px; color:var(--cyan); background:rgba(var(--cyan-rgb),.16); }
+.prIco svg{ width:20px; height:20px; }
+.prTop small{ font-size:.72rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--dim); }
+.inCard.prCard h3{ text-align:left; font-size:1.08rem; line-height:1.35; margin:0 0 10px; }
+.prMovs{ display:grid; gap:6px; margin-bottom:12px; }
+.prMovs > div{ display:flex; justify-content:space-between; align-items:center; gap:10px; padding:9px 12px; border-radius:12px; background:rgba(var(--ink),.05); font-size:.84rem; }
+.prMovs span{ min-width:0; } .prMovs small{ display:block; font-size:.7rem; color:var(--dim); }
+.prMovs b{ font-variant-numeric:tabular-nums; white-space:nowrap; } .prMovs b.mas{ color:#6fe0b5; } .prMovs b.menos{ color:#ff8f8f; }
+.prOps[hidden]{ display:none; }
+.prOps{ display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px; }
+.prOps button{ padding:8px 12px; border-radius:999px; border:1px solid var(--line); background:rgba(var(--ink),.04); color:var(--ghost); font:inherit; font-size:.82rem; font-weight:600; cursor:pointer; text-align:left; }
+.prOps button.on{ color:var(--white); border-color:var(--cyan); background:rgba(var(--cyan-rgb),.14); }
+.prCard textarea{ width:100%; resize:none; }
+.prMsg{ margin:6px 0 0; font-size:.92rem; color:var(--white); }
+.prMsg:empty{ display:none; }
 .rsPie{ display:block; margin-top:6px; font-size:.76rem; color:var(--dim); }
 /* la regla: cada parte se despliega */
 .balRegla{ margin:20px 4px 8px; }
@@ -2989,6 +3009,7 @@ const RESUMEN_URL = N8N + "/webhook/resumen-mes";
 const COMFANDI_URL = N8N + "/webhook/comfandi";   // planes nuevos de Comfandi (eventos y hoteles, sin pasadías)
 const EMA_URL = N8N + "/webhook/salidas-ema";
 const AHORRO_URL = N8N + "/webhook/ahorro";   // saldo del ahorro de la casa, meta y movimientos
+const PREGUNTAS_URL = N8N + "/webhook/armoni-preguntas";   // la IA que pregunta lo que no está claro y aprende
 const USO_URL = N8N + "/webhook/uso";   // junta el uso de cada celular (el tuyo y el de tu esposa) para verlo desde cualquiera
 const PUNTUAR_URL = N8N + "/webhook/lugar-puntuar";   // guarda la nota (1 a 10) de un lugar de las salidas   // salidas con Ema: veces por mes, gastos de cada salida y lugares
 const EMA_CHAT_URL = N8N + "/webhook/salidas-ema-chat";   // el guía de salidas
@@ -3021,7 +3042,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-11.130";
+const APP_VERSION = "2026-10-11.131";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -6572,7 +6593,7 @@ const Balance = (function(){
     }catch{}
   }
   /* todos los meses, sin omitir ninguno (el que va en curso aparece marcado) */
-  const meses = () => ((datos && datos.meses) || []).filter(m => m.gastos > 0 || m.ingresos > 0).slice().sort((a, b) => a.mes.localeCompare(b.mes));
+  const meses = () => Preguntas.aplica((datos && datos.meses) || []).meses.filter(m => m.gastos > 0 || m.ingresos > 0).slice().sort((a, b) => a.mes.localeCompare(b.mes));
 
   /* «General»: suma todos los meses cerrados (ingresos, gastos y cada categoría) */
   function agregado(ms){
@@ -6620,8 +6641,16 @@ const Balance = (function(){
       '</div>' +
       '<div class="rsBarra" role="img" aria-label="Gastaste el ' + Math.round(uso) + '% de lo que entró"><i style="width:' + uso.toFixed(1) + '%"></i></div>' +
       '<small class="rsPie">' + (ing ? 'Gastaste el ' + Math.round(gas / ing * 100) + '% de lo que entró' : 'Este mes no hay ingresos registrados') + '</small>' +
-      filaAhorro(M) +
+      filaAhorro(M) + filaPreguntas(M) +
     '</div>';
+  }
+  /* lo que Armoni ajustó y las preguntas que tiene */
+  function filaPreguntas(M){
+    const n = Preguntas.cuantas();
+    const aj = M.mes === "general" ? meses().reduce((a, m) => a + (m.ajustado || 0), 0) : (M.ajustado || 0);
+    if(!n && !aj) return '';
+    return '<button type="button" class="rsPreg" data-ir="preguntas"><span class="ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8.5 8.5 0 0 1-12.4 7.6L3 21l1.4-5.6A8.5 8.5 0 1 1 21 12z"/><path d="M9.6 9.4a2.5 2.5 0 0 1 4.8.8c0 1.7-2.4 2-2.4 3.4M12 16.4h.01"/></svg></span>' +
+      '<span class="tx"><b>' + (n ? 'Armoni tiene ' + n + (n === 1 ? ' pregunta' : ' preguntas') : 'Cuentas revisadas por Armoni') + '</b><small>' + (aj ? aj + (aj === 1 ? ' movimiento ajustado' : ' movimientos ajustados') + ' (favores, traslados, duplicados)' : 'Respóndele para que las cuentas cuadren') + '</small></span></button>';
   }
   /* el ahorro de la casa dentro del resumen: lo guardado en el periodo (categoría Ahorro) y lo que tienen en total en las cajitas */
   function filaAhorro(M){
@@ -6737,6 +6766,7 @@ const Balance = (function(){
 
   view.addEventListener("click", e => {
     if(e.target.closest("[data-ir=\"ahorro\"]")){ Drawer.go("ahorro"); return; }
+    if(e.target.closest("[data-ir=\"preguntas\"]")){ if(Preguntas.cuantas()) Preguntas.abre(); return; }
     const p = e.target.closest("[data-p]"); if(p){ pestana = p.dataset.p; pinta(); return; }
     const m = e.target.closest("[data-m]"); if(m){ mes = m.dataset.m; pinta(false); return; }
     const v = e.target.closest("[data-v]"); if(v){ vista = v.dataset.v; sel = null; pinta(false); return; }
@@ -6974,6 +7004,108 @@ const Ahorro = (function(){
   function refresh(){ pinta(); cargar(); }
   return { refresh };
 })();
+
+/* ═════════ ARMONI PREGUNTA ═════════
+   La IA (flujo «armoni-preguntas») revisa los movimientos una vez al día y pregunta solo lo que no está claro:
+   un reembolso, un favor, un traslado entre bolsillos, un posible duplicado… Se le contesta con palabras normales,
+   ella entiende, ajusta las cuentas y lo recuerda para la próxima. Los ajustes los usa Balance. */
+const Preguntas = (function(){
+  const KA = "armoni.ajustes", KP = "armoni.preguntas";
+  const esc = t => String(t == null ? "" : t).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const peso = n => "$" + Math.round(Math.abs(n)).toLocaleString("es-CO");
+  const fechaC = f => { try{ return new Date(f + "T12:00:00").toLocaleDateString("es-CO", { day: "numeric", month: "short" }).replace(".", ""); }catch{ return f; } };
+  let pendientes = (() => { try{ return JSON.parse(localStorage.getItem(KP)) || []; }catch{ return []; } })();
+  const ajustes = () => { try{ return JSON.parse(localStorage.getItem(KA)) || {}; }catch{ return {}; } };
+  function guarda(j){
+    if(!j || j.ok === false) return;
+    if(Array.isArray(j.preguntas)){ pendientes = j.preguntas; try{ localStorage.setItem(KP, JSON.stringify(pendientes)); }catch{} }
+    if(j.ajustes){ try{ localStorage.setItem(KA, JSON.stringify(j.ajustes)); }catch{} }
+    document.dispatchEvent(new CustomEvent("armoni:preguntas"));
+  }
+  async function pide(cuerpo){
+    const r = await fetch(PREGUNTAS_URL, { method: "POST", body: JSON.stringify(Object.assign({ token: MERCADO_TOKEN }, cuerpo)) });
+    const j = await r.json().catch(() => ({}));
+    if(!r.ok || j.ok === false) throw new Error(j.error || "http");
+    guarda(j); return j;
+  }
+  const hayVentana = () => document.querySelector(".pgScrim, .sheetScrim, .ws, .tmAvScrim, .cfAn, #splash");
+  /* al abrir la app: revisa (el flujo lo hace como mucho una vez al día) y si hay preguntas, muestra la primera */
+  async function revisar(){
+    try{ await pide({ accion: "revisar" }); }catch{ return; }
+    if(pendientes.length) setTimeout(() => { if(!hayVentana() && !document.hidden) abre(); }, 1500);
+  }
+  function abre(){
+    if(!pendientes.length || document.querySelector(".pgScrim.prScrim")) return;
+    const q = pendientes[0];
+    const scrim = document.createElement("div");
+    scrim.className = "pgScrim seScrim prScrim";
+    scrim.innerHTML = '<div class="inWrap"><div class="pgCard inCard prCard" role="dialog" aria-modal="true" aria-labelledby="prT">' +
+      '<div class="prTop"><span class="prIco" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8.5 8.5 0 0 1-12.4 7.6L3 21l1.4-5.6A8.5 8.5 0 1 1 21 12z"/><path d="M9.6 9.4a2.5 2.5 0 0 1 4.8.8c0 1.7-2.4 2-2.4 3.4M12 16.4h.01"/></svg></span><small>Armoni tiene una pregunta' + (pendientes.length > 1 ? ' · 1 de ' + pendientes.length : '') + '</small></div>' +
+      '<h3 id="prT">' + esc(q.pregunta) + '</h3>' +
+      ((q.movs || []).length ? '<div class="prMovs">' + q.movs.map(m => '<div><span>' + esc(m.concepto) + '<small>' + esc(fechaC(m.fecha)) + ' · ' + esc(m.cat) + '</small></span><b class="' + (m.tipo === "Ingreso" ? 'mas' : 'menos') + '">' + (m.tipo === "Ingreso" ? '+' : '−') + peso(m.monto) + '</b></div>').join("") + '</div>' : '') +
+      '<div class="inBody">' +
+      ((q.opciones || []).length ? '<div class="prOps">' + q.opciones.map(o => '<button type="button" data-op="' + esc(o) + '">' + esc(o) + '</button>').join("") + '</div>' : '') +
+      '<textarea id="prTx" rows="3" maxlength="600" placeholder="Escríbele a Armoni con tus palabras…"></textarea>' +
+      '<p class="prMsg" id="prMsg" role="status"></p><p class="inErr" id="prErr" role="alert"></p></div>' +
+      '<div class="pgRow"><button type="button" class="pgNo" id="prNo">Después</button><button type="button" class="pgSi" id="prSi" disabled>Responder</button></div></div></div>';
+    document.body.appendChild(scrim);
+    requestAnimationFrame(() => scrim.classList.add("on"));
+    const $ = id => scrim.querySelector("#" + id), tx = $("prTx"), si = $("prSi");
+    let ocupado = false, listo = false;
+    const cierra = () => { scrim.classList.remove("on"); setTimeout(() => scrim.remove(), 340); };
+    tx.addEventListener("input", () => { si.disabled = !tx.value.trim(); });
+    scrim.querySelectorAll("[data-op]").forEach(b => b.addEventListener("click", () => { tx.value = b.dataset.op; si.disabled = false; scrim.querySelectorAll("[data-op]").forEach(x => x.classList.toggle("on", x === b)); }));
+    $("prNo").addEventListener("click", () => {
+      if(ocupado) return;
+      if(!listo) pide({ accion: "saltar", id: q.id }).catch(() => {});   // vuelve a preguntar en unos días
+      cierra();
+    });
+    si.addEventListener("click", async () => {
+      if(listo){ cierra(); if(pendientes.length) setTimeout(abre, 420); return; }
+      const t = tx.value.trim(); if(!t || ocupado) return;
+      ocupado = true; si.disabled = true; si.textContent = "Pensando…"; $("prErr").textContent = "";
+      try{
+        const j = await pide({ accion: "responder", id: q.id, respuesta: t });
+        ocupado = false; listo = true;
+        $("prMsg").textContent = j.mensaje || "¡Listo, ya lo aprendí!";
+        tx.hidden = true; const ops = scrim.querySelector(".prOps"); if(ops) ops.hidden = true;
+        $("prNo").textContent = "Cerrar"; si.disabled = false;
+        si.textContent = pendientes.length ? (j.sigue ? "Ver su otra pregunta" : "Siguiente pregunta") : "Listo";
+        if(typeof Balance !== "undefined" && document.body.classList.contains("mode-balance")) Balance.refresh();
+      }catch{
+        ocupado = false; si.disabled = false; si.textContent = "Responder";
+        $("prErr").textContent = "No pude enviarla. Revisa tu internet y que el flujo «Preguntas» esté activo en n8n.";
+      }
+    });
+    setTimeout(() => { if(!ESCRITORIO) return; tx.focus(); }, 350);
+  }
+  /* ajusta los meses que trae el resumen con lo que Armoni aprendió (favores, traslados, duplicados, signos al revés) */
+  function aplica(meses){
+    const A = Object.values(ajustes());
+    if(!A.length || !Array.isArray(meses)) return { meses, n: 0, total: 0 };
+    let n = 0, total = 0;
+    const out = meses.map(m => {
+      const de = A.filter(a => (a.fecha || "").slice(0, 7) === m.mes);
+      if(!de.length) return m;
+      const M = Object.assign({}, m, { categorias: (m.categorias || []).map(c => Object.assign({}, c)) });
+      const cat = (nombre, d) => { let c = M.categorias.find(x => x.nombre === nombre); if(!c){ c = { nombre, total: 0 }; M.categorias.push(c); } c.total = Math.max(0, c.total + d); };
+      de.forEach(a => {
+        const v = +a.monto || 0; n++; total += v;
+        if(a.clas === "invertido"){
+          if(a.tipo === "Ingreso"){ M.ingresos = Math.max(0, (M.ingresos || 0) - v); M.gastos += v; cat(a.cat || "Otros", v); }
+          else { M.gastos = Math.max(0, M.gastos - v); cat(a.cat || "Otros", -v); M.ingresos = (M.ingresos || 0) + v; }
+        } else if(a.tipo === "Ingreso") M.ingresos = Math.max(0, (M.ingresos || 0) - v);
+        else { M.gastos = Math.max(0, M.gastos - v); cat(a.cat || "Otros", -v); }
+      });
+      M.categorias = M.categorias.filter(c => c.total > 0).sort((a, b) => b.total - a.total);
+      M.ajustado = (M.ajustado || 0) + de.length;
+      return M;
+    });
+    return { meses: out, n, total };
+  }
+  return { revisar, abre, aplica, cuantas: () => pendientes.length, ajustes };
+})();
+TrasIntro.hacer(() => setTimeout(() => Preguntas.revisar(), 2500));
 
 const Drawer = (function(){
   const el = document.getElementById("drawer");
