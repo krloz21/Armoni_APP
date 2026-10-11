@@ -20,7 +20,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const q = $input.first().json.query || {};\nif (q.token !== 'mercado-7d41c2a9e05b') return [{ json: { ok: false } }];\n// últimos 12 meses + el actual\nconst d = new Date(Date.now() - 5 * 3600 * 1000);   // hora de Colombia\nd.setUTCDate(1); d.setUTCMonth(d.getUTCMonth() - 11);\nconst desde = d.toISOString().slice(0, 10);\nconst consulta = {\n  page_size: 100,\n  filter: { and: [\n    { property: 'Categoría', select: { equals: 'Salidas Ema' } },\n    { property: 'Fecha', date: { on_or_after: desde } }\n  ] },\n  sorts: [{ property: 'Fecha', direction: 'ascending' }]\n};\nreturn [{ json: { ok: true, consulta: JSON.stringify(consulta) } }];\n"
+        "jsCode": "const q = $input.first().json.query || {};\nif (q.token !== 'mercado-7d41c2a9e05b') return [{ json: { ok: false } }];\n// desde hace 12 meses (hora de Colombia)\nconst d = new Date(Date.now() - 5 * 3600 * 1000);\nd.setUTCDate(1); d.setUTCMonth(d.getUTCMonth() - 11);\nreturn [{ json: { ok: true, desde: d.toISOString().slice(0, 10) } }];\n"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -37,7 +37,7 @@
           "options": {
             "caseSensitive": true,
             "leftValue": "",
-            "typeValidation": "strict",
+            "typeValidation": "loose",
             "version": 2
           },
           "conditions": [
@@ -67,32 +67,44 @@
     },
     {
       "parameters": {
-        "method": "POST",
-        "url": "https://api.notion.com/v1/data_sources/6c565ad1-789f-41c7-8ca2-8bcfb9098a68/query",
-        "authentication": "predefinedCredentialType",
-        "nodeCredentialType": "notionApi",
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
+        "resource": "databasePage",
+        "operation": "getAll",
+        "dataSourceId": {
+          "__rl": true,
+          "value": "6c565ad1-789f-41c7-8ca2-8bcfb9098a68",
+          "mode": "list",
+          "cachedResultName": "Movimientos",
+          "cachedResultUrl": "https://app.notion.com/p/922bb9e4e3d648feab56d6b2d75be29d"
+        },
+        "returnAll": true,
+        "simple": false,
+        "options": {},
+        "filterType": "manual",
+        "matchType": "allFilters",
+        "filters": {
+          "conditions": [
             {
-              "name": "Notion-Version",
-              "value": "2025-09-03"
+              "key": "Categoría|select",
+              "condition": "equals",
+              "selectValue": "Salidas Ema"
+            },
+            {
+              "key": "Fecha|date",
+              "condition": "on_or_after",
+              "dateValue": "={{ $('Validar y preparar').first().json.desde }}"
             }
           ]
-        },
-        "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={{ $json.consulta }}",
-        "options": {}
+        }
       },
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.5,
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 3,
       "position": [
         672,
         -96
       ],
       "id": "c1000000-0005-4ccc-8ccc-000000000005",
       "name": "Movimientos de Ema",
+      "alwaysOutputData": true,
       "credentials": {
         "notionApi": {
           "id": "pgk4uKXwaEEnuyRO",
@@ -102,32 +114,28 @@
     },
     {
       "parameters": {
-        "method": "POST",
-        "url": "https://api.notion.com/v1/data_sources/2449dcb1-f56e-4263-acea-f4b307273e86/query",
-        "authentication": "predefinedCredentialType",
-        "nodeCredentialType": "notionApi",
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "Notion-Version",
-              "value": "2025-09-03"
-            }
-          ]
+        "resource": "databasePage",
+        "operation": "getAll",
+        "dataSourceId": {
+          "__rl": true,
+          "value": "2449dcb1-f56e-4263-acea-f4b307273e86",
+          "mode": "list",
+          "cachedResultName": "Restaurantes",
+          "cachedResultUrl": "https://app.notion.com/p/4912f5c4e91d41598e49bb8e97d02f31"
         },
-        "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify({ page_size: 100 }) }}",
+        "returnAll": true,
+        "simple": false,
         "options": {}
       },
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.5,
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 3,
       "position": [
         896,
         -96
       ],
       "id": "c1000000-0009-4ccc-8ccc-000000000009",
       "name": "Lugares",
+      "alwaysOutputData": true,
       "credentials": {
         "notionApi": {
           "id": "pgk4uKXwaEEnuyRO",
@@ -137,7 +145,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const movs = $('Movimientos de Ema').first().json.results || [];\nconst lugs = $input.first().json.results || [];\nconst txt = (a) => ((a || []).map(t => t.plain_text).join('') || '').trim();\n\n// lugares (restaurantes y planes) por id\nconst info = {};\nfor (const l of lugs) {\n  const pr = l.properties || {};\n  info[l.id] = {\n    id: l.id,\n    nombre: txt(pr['Nombre'] && pr['Nombre'].title) || 'Lugar',\n    puntuacion: pr['Puntuación'] && pr['Puntuación'].number != null ? pr['Puntuación'].number : null,\n    notas: txt(pr['Notas'] && pr['Notas'].rich_text),\n    clase: pr['Clase'] && pr['Clase'].select ? pr['Clase'].select.name : 'Restaurante'\n  };\n}\n\n// salidas: una salida = un día con gastos de Salidas Ema\nconst por = {};            // mes → { mes, total, salidas: {fecha → {...}} }\nconst diaTotal = {};       // fecha → total de ese día\nconst lugarDias = {};      // lugarId → Set(fechas)\nfor (const p of movs) {\n  const pr = p.properties || {};\n  const f = pr['Fecha'] && pr['Fecha'].date && pr['Fecha'].date.start ? pr['Fecha'].date.start.slice(0, 10) : null;\n  if (!f) continue;\n  const monto = (pr['Monto'] && pr['Monto'].number) || 0;\n  const concepto = txt(pr['Concepto'] && pr['Concepto'].title) || 'Gasto';\n  const rel = pr['Restaurante'] && pr['Restaurante'].relation && pr['Restaurante'].relation[0] ? pr['Restaurante'].relation[0].id : null;\n  const nomLugar = rel && info[rel] ? info[rel].nombre : null;\n  const mes = f.slice(0, 7);\n  const m = por[mes] || (por[mes] = { mes, veces: 0, total: 0, dias: [], salidas: {} });\n  m.total += monto;\n  const s = m.salidas[f] || (m.salidas[f] = { fecha: f, total: 0, gastos: [] });\n  s.total += monto;\n  s.gastos.push(nomLugar ? { c: concepto, m: monto, l: nomLugar } : { c: concepto, m: monto });\n  diaTotal[f] = (diaTotal[f] || 0) + monto;\n  if (rel) (lugarDias[rel] || (lugarDias[rel] = new Set())).add(f);\n}\nfor (const m of Object.values(por)) {\n  m.salidas = Object.values(m.salidas).sort((a, b) => a.fecha.localeCompare(b.fecha));\n  m.dias = m.salidas.map(s => s.fecha);\n  m.veces = m.salidas.length;\n}\nconst meses = Object.values(por).sort((a, b) => a.mes.localeCompare(b.mes));\n\n// lugares con Ema: los que aparecen en alguna salida, con cuánto cuesta una salida cuando van ahí\nconst lugares = Object.keys(lugarDias).map(id => {\n  const dias = [...lugarDias[id]].sort();\n  const costos = dias.map(d => diaTotal[d] || 0);\n  const l = info[id] || { id, nombre: 'Lugar', puntuacion: null, notas: '', clase: 'Restaurante' };\n  return { id, nombre: l.nombre, clase: l.clase, puntuacion: l.puntuacion, notas: l.notas, visitas: dias.length,\n           promedio: Math.round(costos.reduce((a, b) => a + b, 0) / Math.max(1, costos.length)), ultima: dias[dias.length - 1] };\n}).sort((a, b) => b.ultima.localeCompare(a.ultima));\n\n// también los lugares de clase «Plan Ema» que aún no tienen salidas en estos 12 meses\nfor (const l of Object.values(info)) {\n  if (l.clase === 'Plan Ema' && !lugares.find(x => x.id === l.id)) lugares.push({ id: l.id, nombre: l.nombre, clase: l.clase, puntuacion: l.puntuacion, notas: l.notas, visitas: 0, promedio: 0, ultima: null });\n}\nreturn [{ json: { meses, lugares } }];\n"
+        "jsCode": "// Lee una propiedad venga como página completa de Notion (properties) o simplificada de n8n (property_xxx)\nconst clave = (n) => 'property_' + String(n).toLowerCase().replace(/\\s+/g, '_');\nconst txt = (a) => ((a || []).map(t => t.plain_text).join('') || '').trim();\nconst leer = (it, nombre, tipo) => {\n  const pr = it.properties && it.properties[nombre];\n  if (pr) {\n    if (tipo === 'titulo') return txt(pr.title);\n    if (tipo === 'texto') return txt(pr.rich_text);\n    if (tipo === 'numero') return pr.number != null ? pr.number : null;\n    if (tipo === 'fecha') return pr.date && pr.date.start ? pr.date.start.slice(0, 10) : null;\n    if (tipo === 'select') return pr.select ? pr.select.name : (pr.status ? pr.status.name : null);\n    if (tipo === 'relacion') return pr.relation && pr.relation[0] ? pr.relation[0].id : null;\n  }\n  let v = it[clave(nombre)];\n  if (v === undefined && tipo === 'titulo') v = it.name;\n  if (v === undefined || v === null || v === '') return null;\n  if (tipo === 'fecha') { const s = typeof v === 'object' ? (v.start || '') : String(v); return s ? s.slice(0, 10) : null; }\n  if (tipo === 'relacion') { const r = Array.isArray(v) ? v[0] : v; return r ? (typeof r === 'object' ? r.id : String(r)) : null; }\n  if (tipo === 'numero') return typeof v === 'number' ? v : (Number(v) || null);\n  return String(v);\n};\n\nconst movs = $('Movimientos de Ema').all().map(i => i.json).filter(x => x && x.id);\nconst lugs = $input.all().map(i => i.json).filter(x => x && x.id);\nconst info = {};\nfor (const l of lugs) {\n  info[l.id] = { id: l.id, nombre: leer(l, 'Nombre', 'titulo') || 'Lugar', puntuacion: leer(l, 'Puntuación', 'numero'),\n    notas: leer(l, 'Notas', 'texto') || '', clase: leer(l, 'Clase', 'select') || 'Restaurante' };\n}\nconst por = {}, diaTotal = {}, lugarDias = {};\nfor (const p of movs) {\n  const f = leer(p, 'Fecha', 'fecha'); if (!f) continue;\n  const monto = leer(p, 'Monto', 'numero') || 0;\n  const concepto = leer(p, 'Concepto', 'titulo') || 'Gasto';\n  const rel = leer(p, 'Restaurante', 'relacion');\n  const nomLugar = rel && info[rel] ? info[rel].nombre : null;\n  const mes = f.slice(0, 7);\n  const m = por[mes] || (por[mes] = { mes, veces: 0, total: 0, dias: [], salidas: {} });\n  m.total += monto;\n  const s = m.salidas[f] || (m.salidas[f] = { fecha: f, total: 0, gastos: [] });\n  s.total += monto;\n  s.gastos.push(nomLugar ? { c: concepto, m: monto, l: nomLugar } : { c: concepto, m: monto });\n  diaTotal[f] = (diaTotal[f] || 0) + monto;\n  if (rel) (lugarDias[rel] || (lugarDias[rel] = new Set())).add(f);\n}\nfor (const m of Object.values(por)) {\n  m.salidas = Object.values(m.salidas).sort((a, b) => a.fecha.localeCompare(b.fecha));\n  m.dias = m.salidas.map(s => s.fecha);\n  m.veces = m.salidas.length;\n}\nconst meses = Object.values(por).sort((a, b) => a.mes.localeCompare(b.mes));\nconst lugares = Object.keys(lugarDias).map(id => {\n  const dias = [...lugarDias[id]].sort();\n  const costos = dias.map(d => diaTotal[d] || 0);\n  const l = info[id] || { id, nombre: 'Lugar', puntuacion: null, notas: '', clase: 'Restaurante' };\n  return { id, nombre: l.nombre, clase: l.clase, puntuacion: l.puntuacion, notas: l.notas, visitas: dias.length,\n           promedio: Math.round(costos.reduce((a, b) => a + b, 0) / Math.max(1, costos.length)), ultima: dias[dias.length - 1] };\n}).sort((a, b) => b.ultima.localeCompare(a.ultima));\nfor (const l of Object.values(info)) {\n  if (l.clase === 'Plan Ema' && !lugares.find(x => x.id === l.id)) lugares.push({ id: l.id, nombre: l.nombre, clase: l.clase, puntuacion: l.puntuacion, notas: l.notas, visitas: 0, promedio: 0, ultima: null });\n}\nreturn [{ json: { meses, lugares } }];\n"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
