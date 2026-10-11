@@ -2628,7 +2628,7 @@ body[class*="mode-"] #masIngreso{ display:none; }
         <span class="txt"><b>Restaurantes</b><span>Dónde hemos comido y qué tal</span></span>
       </button>
       <button type="button" id="navEma">
-        <span class="ico icoFoto"><img class="fotoEma" src="ema.webp" alt="" decoding="async" onerror="this.outerHTML=&quot;🎈&quot;"></span>
+        <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8.5 14.2c.9 1.5 2.1 2.2 3.5 2.2s2.6-.7 3.5-2.2"/><path d="M9 9.6h.01M15 9.6h.01"/></svg></span>
         <span class="txt"><b>Salidas Ema</b><span>Planes, gastos y a dónde ir</span></span>
       </button>
         </div></div>
@@ -2912,7 +2912,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-11.105";
+const APP_VERSION = "2026-10-11.106";
 (function autoActualizar(){
   const patron = new RegExp("const APP_" + "VERSION = \"([^\"]+)\"");
   async function revisar(){
@@ -5398,9 +5398,10 @@ const SalidasEma = (function(){
   }
 
   /* un lugar al que ya fueron con Ema y no tiene nota: sale el aviso cada vez que entras, hasta que lo puntúes */
+  const puntuados = () => { try{ return JSON.parse(localStorage.getItem("armoni.ema.puntuados")) || []; }catch{ return []; } };
   function pidePuntaje(){
     if(!document.body.classList.contains("mode-ema") || document.querySelector(".pgScrim, .cfAn, .sePuntua")) return;
-    const l = lugares().find(x => x.clase === "Plan Ema" && x.visitas > 0 && !(x.puntuacion > 0) && x.id);
+    const ya = puntuados(); const l = lugares().find(x => x.clase === "Plan Ema" && x.visitas > 0 && !(x.puntuacion > 0) && x.id && !ya.includes(x.id));
     if(!l) return;
     let nota = 0;
     const scrim = document.createElement("div");
@@ -5429,6 +5430,7 @@ const SalidasEma = (function(){
         const r = await fetch(PUNTUAR_URL, { method: "POST", body: JSON.stringify({ token: MERCADO_TOKEN, id: l.id, puntuacion: nota, notas: com ? (l.notas ? l.notas + " · " : "") + com : "" }) });
         const j = await r.json().catch(() => ({}));
         if(!r.ok || j.ok === false) throw new Error();
+        try{ localStorage.setItem("armoni.ema.puntuados", JSON.stringify(puntuados().concat(l.id))); }catch{}
         l.puntuacion = nota; if(com) l.notas = (l.notas ? l.notas + " · " : "") + com;
         try{ localStorage.setItem(KEY, JSON.stringify(datos)); }catch{}
         cierra(); pinta(false);
@@ -5880,7 +5882,7 @@ const FormArmoni = (function(){
   const ICO = {
     gasto: '<path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/>',
     ingreso: '<circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/>',
-    ema: '<circle cx="12" cy="9" r="5.5"/><path d="M12 14.5c0 2-1.2 3-1.2 5.5"/><path d="M9.8 7.2a3 3 0 0 1 2-1"/>'
+    ema: '<circle cx="12" cy="12" r="9"/><path d="M8.5 14.2c.9 1.5 2.1 2.2 3.5 2.2s2.6-.7 3.5-2.2"/><path d="M9 9.6h.01M15 9.6h.01"/>'
   };
   const svg = k => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + ICO[k] + '</svg>';
   function cabeza(k, idT, titulo, sub, derecha){
@@ -5908,7 +5910,7 @@ const MenuMas = (function(){
     menu = document.createElement("div");
     menu.className = "masMenu"; menu.setAttribute("role", "menu");
     menu.innerHTML = ITEMS.map(([k, t, d], i) =>
-      '<button type="button" role="menuitem" data-k="' + k + '" style="--i:' + i + '"><span class="mi' + (k === "ema" ? ' icoFoto' : '') + '">' + (k === "ema" ? FOTO_EMA : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + ICO[k] + '</svg>') + '</span><span class="mt"><b>' + t + '</b><small>' + d + '</small></span></button>').join("");
+      '<button type="button" role="menuitem" data-k="' + k + '" style="--i:' + i + '"><span class="mi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + ICO[k] + '</svg></span><span class="mt"><b>' + t + '</b><small>' + d + '</small></span></button>').join("");
     document.body.appendChild(menu);
     const r = btn.getBoundingClientRect();
     menu.style.left = Math.max(12, Math.min(r.left - 6, innerWidth - menu.offsetWidth - 12)) + "px";
@@ -7249,7 +7251,7 @@ const GastoManual = (function(){
       }
       if(paso === "pareja"){
         vista.innerHTML = '<div class="seParqueo fmPareja"><div class="seParqEmo" aria-hidden="true">🍽️</div><div class="sePregunta">¿Con quién fue la salida?</div><p class="fmAyuda">Así queda bien contada: las citas en «Tu mes» y lo de Ema en su salida completa.</p>' +
-          '<div class="fmQuien"><button type="button" data-q="pareja"><span>💑</span><b>Solo los dos</b><small>Cita en pareja</small></button><button type="button" data-q="ema"><span>' + FOTO_EMA + '</span><b>Con Ema</b><small>Va a su salida</small></button><button type="button" data-q="otro"><span>👥</span><b>Otro</b><small>Amigos, trabajo…</small></button></div></div>';
+          '<div class="fmQuien"><button type="button" data-q="pareja"><span>💑</span><b>Solo los dos</b><small>Cita en pareja</small></button><button type="button" data-q="ema"><span>😊</span><b>Con Ema</b><small>Va a su salida</small></button><button type="button" data-q="otro"><span>👥</span><b>Otro</b><small>Amigos, trabajo…</small></button></div></div>';
         botones.innerHTML = '';
         vista.querySelector(".fmQuien").addEventListener("click", e => {
           const b = e.target.closest("[data-q]"); if(!b) return;
@@ -9106,7 +9108,7 @@ const TuMes = (function(){
       const lugs = {}; (em.salidas || []).forEach(q => q.gastos.forEach(g => { if(g.l) lugs[g.l] = (lugs[g.l] || 0) + 1; }));
       const fav = Object.entries(lugs).sort((a, b) => b[1] - a[1])[0];
       s.push({ fondo: 9, html:
-        '<div class="wsEmoji icoFoto" style="--d:0">' + FOTO_EMA + '</div>' +
+        '<div class="wsEmoji" style="--d:0">😊</div>' +
         '<div class="wsK" style="--d:.15">Con Ema</div>' +
         '<h2 class="wsT" style="--d:.3">Salieron con Ema ' + em.veces + (em.veces === 1 ? ' vez' : ' veces') + '</h2>' +
         '<div class="wsBig" style="--d:.55" data-monto="' + em.total + '">$0</div>' +
