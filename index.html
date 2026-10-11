@@ -2089,6 +2089,18 @@ button{ transition:transform var(--t-tap) var(--ease-out); }
 .bpIn{ overflow:hidden; padding:0 14px; }
 .balParte.on .bpIn{ padding-bottom:12px; }
 .bpNota{ margin:0 0 6px; font-size:.76rem; color:var(--dim); }
+.balTotal{ margin-top:12px; padding:6px 16px; border-radius:20px; border:1px solid var(--line); background:var(--panel); }
+.balTotal .bt{ display:flex; justify-content:space-between; align-items:baseline; gap:10px; padding:10px 0; font-size:.88rem; border-bottom:1px solid var(--line); }
+.balTotal .bt:last-child{ border-bottom:0; }
+.balTotal .bt span{ display:flex; align-items:center; gap:8px; color:var(--ghost); }
+.balTotal .bt i{ width:9px; height:9px; border-radius:3px; }
+.balTotal .bt b{ font-variant-numeric:tabular-nums; white-space:nowrap; }
+.balTotal .bt small{ font-size:.72rem; font-weight:600; color:var(--dim); margin-left:3px; }
+.balTotal .sub{ background:rgba(var(--ink),.04); margin:0 -16px; padding:10px 16px; }
+.balTotal .sub span, .balTotal .sub b{ color:var(--white); font-weight:700; }
+.balTotal .tot{ padding-top:14px; }
+.balTotal .tot span{ color:var(--white); font-weight:800; font-size:.95rem; }
+.balTotal .tot b{ font-size:1.25rem; background:linear-gradient(140deg, var(--cyan), var(--num-a)); -webkit-background-clip:text; background-clip:text; color:transparent; }
 .balAviso{ margin:10px 4px 0; font-size:.8rem; color:#ffb066; }
 .balFila u{ display:inline-block; width:9px; height:9px; margin-right:7px; border-radius:3px; background:var(--c); }
 .balFila{ position:relative; display:flex; justify-content:space-between; gap:10px; padding:8px 0 12px; font-size:.86rem; }
@@ -2912,7 +2924,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-11.119";
+const APP_VERSION = "2026-10-11.120";
 (function autoActualizar(){
   const patron = new RegExp("const APP_" + "VERSION = \"([^\"]+)\"");
   let ultima = 0;
@@ -6460,7 +6472,7 @@ const Balance = (function(){
   function resumen(M){
     const ing = M.ingresos || 0, gas = M.gastos || 0, bal = ing - gas, uso = ing ? Math.min(100, gas / ing * 100) : 100;
     return '<div class="balResumen">' +
-      '<div class="rsTit"><small>Resumen general</small><b>' + (M.mes === "general" ? 'Todo junto · ' + M.n + (M.n === 1 ? ' mes' : ' meses') + '</b><small style="margin-top:2px">' + esc(rango_(M.desde, M.hasta)) + '</small>' : esc(cap(mesNombre(M.mes))) + ' ' + M.mes.slice(0, 4) + '</b>') + '</div>' +
+      '<div class="rsTit"><small>Resumen general</small><b>' + (M.mes === "general" ? 'Todo junto · ' + M.n + (M.n === 1 ? ' mes' : ' meses') + '</b><small style="margin-top:2px">' + esc(rango_(M.desde, M.hasta)) + ' · sin ' + esc(mesNombre(mesHoy())) + ', que sigue en curso</small>' : esc(cap(mesNombre(M.mes))) + ' ' + M.mes.slice(0, 4) + '</b>') + '</div>' +
       '<div class="rsBal ' + (bal >= 0 ? 'pos' : 'neg') + '"><span>Balance</span><strong>' + peso(bal) + '</strong><small>' + (M.mes === "general" ? (bal >= 0 ? 'Lo que quedó en total' : 'En total salió más de lo que entró') : (bal >= 0 ? 'Lo que quedó este mes' : 'Salió más de lo que entró')) + '</small></div>' +
       '<div class="rsDos">' +
         '<div class="rsIng"><i aria-hidden="true">↑</i><span>Ingresos</span><b>' + peso(ing) + '</b></div>' +
@@ -6484,10 +6496,22 @@ const Balance = (function(){
           '<div class="bpCuerpo"><div class="bpIn"><p class="bpNota">' + p.nota + '</p>' +
             (filas.length ? filas.map((f, i) => '<div class="balFila" style="--i:' + i + ';--c:' + f.color + '"><span><u></u>' + esc(f.n) + '</span><em>' + peso(f.v) + ' · ' + Math.round(f.pct) + '%</em><i style="width:' + Math.max(3, f.v / mx * 100).toFixed(1) + '%"></i></div>').join("") : '<p class="gEmpty" style="margin:6px 0 0">Nada en esta parte este mes.</p>') +
           '</div></div></div>';
-      }).join("") + '</div>' +
+      }).join("") + '</div>' + totales(R) +
       (R.gastaronMas ? '<p class="balAviso">⚠️ ' + (M.mes === "general" ? 'En total' : 'En ' + esc(mesNombre(M.mes))) + ' salió más de lo que entró: los porcentajes se miden sobre lo gastado.</p>' : '');
   }
 
+  /* la suma de todo al final: fijos + entretenimiento = lo gastado; con el ahorro da el total */
+  function totales(R){
+    const f = k => peso(R.v[k]), pc = v => R.base ? Math.round(v / R.base * 100) + '%' : '0%';
+    const gastado = R.v.nec + R.v.des - 0, total = gastado + R.v.aho;
+    return '<div class="balTotal" aria-label="Suma de todo">' +
+      '<div class="bt"><span><i style="background:#3987e5"></i>Gastos fijos</span><b>' + f("nec") + '</b></div>' +
+      '<div class="bt"><span><i style="background:#e66767"></i>Entretenimiento</span><b>' + f("des") + '</b></div>' +
+      '<div class="bt sub"><span>Total gastado</span><b>' + peso(gastado) + ' <small>' + pc(gastado) + '</small></b></div>' +
+      '<div class="bt"><span><i style="background:#199e70"></i>Ahorro y lo que quedó</span><b>' + f("aho") + '</b></div>' +
+      '<div class="bt tot"><span>Total</span><b>' + peso(total) + ' <small>' + pc(total) + '</small></b></div>' +
+    '</div>';
+  }
   function pinta(animar){
     if(!view) return;
     const cuerpo = view.querySelector("#balCuerpo"), ms = meses();
