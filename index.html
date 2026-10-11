@@ -1061,7 +1061,7 @@ body.mode-gmail footer, body.mode-glim footer{ display:none; }
 .seCard .fmMonto{ cursor:default; }
 .seCard label.fmMonto{ cursor:text; }
 .seCard .fmMontoIn b{ margin-right:4px; }
-.seTotN{ font-size:2.5rem; font-weight:700; letter-spacing:-.02em; font-variant-numeric:tabular-nums; color:var(--white); line-height:1.15; transition:color .3s; }
+.seTotN{ font-size:clamp(1.6rem, 9vw, 2.5rem); font-weight:700; letter-spacing:-.02em; font-variant-numeric:tabular-nums; color:var(--white); line-height:1.15; transition:color .3s; }
 .seTotN.cero{ color:rgba(var(--ink),.25); }
 .seParqSi .fmMonto{ margin-top:4px; }
 .seParqChips{ justify-content:center; margin-top:8px !important; }
@@ -1521,16 +1521,16 @@ body.mode-gmail footer, body.mode-glim footer{ display:none; }
 .mkTiles.uno{ grid-template-columns:1fr; }
 .mkCanastaV .inLbl{ text-align:center; }
 .mkCanastaV .recDia{ justify-content:center; }
-}
 /* tocar con el dedo: zonas mínimas de 44px sin cambiar cómo se ven */
-.emaEq .x, .svBanner .x, .seQuitar, .sheetClose, .rgBusca .x, .cfAnX, .fmVolver{ position:relative; }
-.emaEq .x::before, .svBanner .x::before, .seQuitar::before, .sheetClose::before, .rgBusca .x::before, .cfAnX::before, .fmVolver::before{ content:""; position:absolute; inset:-9px; }
+.emaEq .x, .svBanner .x, .seQuitar, .sheetClose, .rgBusca .x, .cfAnX{ position:relative; }
+.emaEq .x::before, .svBanner .x::before, .seQuitar::before, .sheetClose::before, .rgBusca .x::before, .cfAnX::before{ content:""; position:absolute; inset:-9px; }
 @media (prefers-reduced-motion:reduce){ .frame::before, .pnEstrella, #inGuardar::after, .mkCuenta .anillo, #pending .state{ animation:none !important; } }
 .mkTiles.cuatro{ grid-template-columns:repeat(2, 1fr); }
 .mkTiles.cuatro .mkTile{ flex-direction:row; justify-content:flex-start; gap:12px; padding:12px 14px; text-align:left; }
 @media (max-width:360px){
   .mkTiles.cuatro .mkTile{ flex-direction:column; justify-content:center; text-align:center; gap:8px; }
   .mkTiles.cuatro .mkTile > span:last-child, .mkTiles.cuatro .mkTile b{ min-width:0; overflow-wrap:normal; hyphens:auto; }
+}
 .mkTile{ display:flex; flex-direction:column; align-items:center; justify-content:center; gap:9px; padding:16px 6px 14px; border-radius:20px; border:1px solid var(--line); background:var(--panel); color:var(--white); font:inherit; font-size:.8rem; font-weight:600; line-height:1.15; text-align:center; cursor:pointer; transition:transform .2s var(--ease-out), border-color .3s, background .3s; -webkit-tap-highlight-color:transparent; }
 .mkTile:active{ transform:scale(.95); }
 .mkTile .ti{ width:42px; height:42px; border-radius:14px; display:grid; place-items:center; color:var(--cyan); background:rgba(var(--cyan-rgb),.1); border:1px solid rgba(var(--cyan-rgb),.2); }
@@ -2060,12 +2060,12 @@ button{ transition:transform var(--t-tap) var(--ease-out); }
 .rsBal strong{ display:block; font-size:clamp(2rem, 10.5vw, 2.8rem); font-weight:700; letter-spacing:-.04em; line-height:1.1; font-variant-numeric:tabular-nums; }
 .rsBal.pos strong{ color:#6fe0b5; } .rsBal.neg strong{ color:#ff8f8f; }
 .rsBal small{ display:block; font-size:.78rem; color:var(--dim); }
-.rsDos{ display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.rsDos{ display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:8px; }
 .rsDos > div{ position:relative; padding:12px 12px 12px 14px; border-radius:16px; background:rgba(var(--ink), .05); border:1px solid var(--line); }
 .rsDos i{ display:inline-grid; place-items:center; width:22px; height:22px; margin-bottom:6px; border-radius:8px; font-style:normal; font-weight:800; font-size:.8rem; color:#0b0d14; }
 .rsIng i{ background:#6fe0b5; } .rsGas i{ background:#ff8f8f; }
 .rsDos span{ display:block; font-size:.74rem; color:var(--ghost); font-weight:600; }
-.rsDos b{ display:block; font-size:1.02rem; font-variant-numeric:tabular-nums; white-space:nowrap; }
+.rsDos b{ display:block; font-size:clamp(.82rem, 4.3vw, 1.02rem); font-variant-numeric:tabular-nums; white-space:nowrap; }
 .rsBarra{ height:8px; margin-top:14px; border-radius:8px; background:rgba(25,158,112,.35); overflow:hidden; }
 .rsBarra i{ display:block; height:100%; border-radius:8px; background:linear-gradient(90deg, #e66767, #ff9d73); transform-origin:left; animation:balCrece .9s cubic-bezier(.2,.8,.2,1) backwards; }
 @keyframes balCrece{ from{ transform:scaleX(0); } }
@@ -2089,6 +2089,7 @@ button{ transition:transform var(--t-tap) var(--ease-out); }
 .bpCab > i{ flex:none; width:10px; height:34px; border-radius:6px; background:var(--c); }
 .bpCab .n{ flex:1; min-width:0; }
 .bpCab .n b, .bpCab .p b{ display:block; font-size:.95rem; }
+.bpCab .n b{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .bpCab .n small, .bpCab .p small{ display:block; font-size:.74rem; color:var(--dim); }
 .bpCab .p{ text-align:right; }
 .bpCab .p b{ font-size:1.1rem; font-variant-numeric:tabular-nums; }
@@ -2131,6 +2132,9 @@ button{ transition:transform var(--t-tap) var(--ease-out); }
 .ahBtn:active{ transform:scale(.96); }
 .ahReparto{ display:flex; gap:3px; height:10px; margin:0 0 14px; border-radius:10px; overflow:hidden; }
 .ahReparto i{ min-width:4px; border-radius:3px; }
+@media (max-width:360px){ .fmCatGrid button{ flex-direction:column; gap:6px; text-align:center; } .fmCatGrid button span, .fmCatGrid button b{ white-space:normal; } }
+.seItemTx b, .fmRecTx b{ white-space:normal; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+.recChip{ max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .ahCajas, .ahLista{ grid-template-columns:minmax(0,1fr); }
 .ahCajas{ display:grid; gap:2px; padding:6px; border-radius:22px; border:1px solid var(--line); background:var(--panel); }
 .ahCaja{ display:flex; align-items:center; gap:14px; width:100%; padding:10px; border:0; border-radius:16px; background:none; color:var(--white); font:inherit; text-align:left; cursor:pointer; transition:background .2s ease, transform .2s var(--ease-spring); }
@@ -2222,9 +2226,9 @@ button{ transition:transform var(--t-tap) var(--ease-out); }
 .selTres > div{ min-width:0; padding:10px 8px; border-radius:14px; background:rgba(var(--ink), .05); border-top:3px solid var(--c); }
 .selTres .i{ --c:#3987e5; } .selTres .g{ --c:#e66767; } .selTres .q{ --c:#199e70; }
 .selTres span{ display:block; font-size:.7rem; color:var(--ghost); font-weight:600; }
-.selTres b{ display:block; font-size:.8rem; font-variant-numeric:tabular-nums; white-space:nowrap; }
+.selTres b{ display:block; font-size:clamp(.66rem, 3.3vw, .8rem); font-variant-numeric:tabular-nums; white-space:nowrap; }
 .selTres .q.neg b{ color:#ff8f8f; }
-@media (max-width:360px){ .selTres b{ font-size:.78rem; } }
+
 @media (prefers-reduced-motion:reduce){ .balGraf .ln, .balGraf .pt, .balGraf .area, .rsBarra i, .balSec{ animation:none !important; stroke-dashoffset:0; opacity:1; } .bpCuerpo{ transition:none; } }
 .restCiudades{ display:flex; align-items:center; gap:6px; margin:0 0 10px; font-size:.9rem; }
 .restCiudades button{ padding:6px 12px; border-radius:999px; border:1px solid var(--line); background:var(--panel); color:var(--ghost); font:inherit; font-size:.8rem; font-weight:600; cursor:pointer; }
@@ -2661,7 +2665,7 @@ body[class*="mode-"] #masIngreso{ display:none; }
     <nav class="dNav">
       <button type="button" id="navChat" aria-current="page">
         <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg></span>
-        <span class="txt"><b>Arm</b><span>Presupuesto: gastos, metas y movimientos</span></span>
+        <span class="txt"><b>Arm</b><span>Gastos, metas y movimientos</span></span>
       </button>
       <div class="navGrupo" id="navMercarG">
         <button type="button" id="navMercarBtn" aria-expanded="false" aria-controls="navMercarSub">
@@ -3017,7 +3021,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-11.128";
+const APP_VERSION = "2026-10-11.129";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -5917,7 +5921,7 @@ const SalidaEmaForm = (function(){
           '<div class="seLista" id="seLista"></div>';
         botones.innerHTML = '<button type="button" class="pgSi" id="seSig">Listo</button>';
         const mIn = $("seMontoIn"), qIn = $("seQue"), mas = $("seMas"), lista = $("seLista"), antes = $("seAntes"), pDia = $("sePagoDia"), pIn = $("sePagoIn");
-        const ancho = () => { mIn.style.width = Math.max(1.2, (mIn.value || "0").length * .62 + .6) + "em"; };
+        const ancho = () => ajustaMonto(mIn);
         const completo = () => nuevo.c.trim() && nuevo.m > 0;
         const pintaLista = (nuevoIdx) => {
           const v = validos(p);
@@ -5985,7 +5989,7 @@ const SalidaEmaForm = (function(){
         botones.innerHTML = '<button type="button" class="pgNo" id="seNo">No</button><button type="button" class="pgSi" id="seSi">Sí, pagamos</button>';
         const si = $("seParqSi"), inp = $("seParqIn"), bSi = $("seSi");
         const listoSi = () => { bSi.disabled = !(monto > 0); };
-        const ancho = () => { inp.style.width = Math.max(1.2, (inp.value || "0").length * .62 + .6) + "em"; };
+        const ancho = () => ajustaMonto(inp);
         const marca = () => vista.querySelectorAll("[data-v]").forEach(x => x.setAttribute("aria-pressed", String(+x.dataset.v === monto)));
         vista.addEventListener("click", e => { const v = e.target.closest("[data-v]"); if(v){ monto = +v.dataset.v; inp.value = monto.toLocaleString("es-CO"); ancho(); marca(); listoSi(); } });
         inp.addEventListener("input", () => { monto = valorDe(inp.value); inp.value = monto ? monto.toLocaleString("es-CO") : ""; ancho(); marca(); listoSi(); });
@@ -6583,7 +6587,8 @@ const Balance = (function(){
   function reparto(M){
     const cats = M.categorias || [];
     const suma = ks => cats.filter(c => ks.includes(c.nombre)).reduce((a, c) => a + c.total, 0);
-    const nec = suma(PARTES[0].cats), sinCat = Math.max(0, M.gastos - cats.reduce((a, c) => a + c.total, 0));
+    const conocidas = PARTES.flatMap(p => p.cats);
+    const nec = suma(PARTES[0].cats), sinCat = Math.max(0, M.gastos - cats.filter(c => conocidas.includes(c.nombre)).reduce((a, c) => a + c.total, 0));   // lo sin categoría y las categorías nuevas
     const des = suma(PARTES[1].cats) + sinCat, ahoCat = suma(PARTES[2].cats);
     const quedo = Math.max(0, (M.ingresos || 0) - M.gastos);
     const base = (M.ingresos || 0) > M.gastos ? M.ingresos : M.gastos;   // la regla se mide sobre lo que entra
@@ -6593,7 +6598,12 @@ const Balance = (function(){
   /* cada parte se abre en sus categorías, con su tono y su porcentaje de lo que entró */
   function filasDe(p, M, R){
     const f = (M.categorias || []).filter(c => p.cats.includes(c.nombre) && c.total > 0).map(c => ({ n: c.nombre, v: c.total }));
-    if(p.k === "des" && R.sinCat) f.push({ n: "Sin categoría", v: R.sinCat });
+    if(p.k === "des" && R.sinCat){
+      const conocidas = PARTES.flatMap(x => x.cats), otras = (M.categorias || []).filter(c => !conocidas.includes(c.nombre) && c.total > 0);
+      otras.forEach(c => f.push({ n: c.nombre, v: c.total }));
+      const resto = R.sinCat - otras.reduce((a, c) => a + c.total, 0);
+      if(resto > 0) f.push({ n: "Sin categoría", v: resto });
+    }
     if(p.k === "aho" && R.quedo) f.push({ n: "Quedó sin gastar", v: R.quedo });
     return f.sort((a, b) => b.v - a.v).map((x, i) => ({ n: x.n, v: x.v, pct: R.base ? x.v / R.base * 100 : 0, color: p.tonos[i % p.tonos.length] }));
   }
@@ -6646,7 +6656,7 @@ const Balance = (function(){
     return '<div class="balTotal" aria-label="Suma de todo">' +
       '<div class="bt"><span><i style="background:#3987e5"></i>Gastos fijos</span><b>' + f("nec") + '</b></div>' +
       '<div class="bt"><span><i style="background:#e66767"></i>Entretenimiento</span><b>' + f("des") + '</b></div>' +
-      '<div class="bt sub"><span>Total gastado</span><b>' + peso(gastado) + ' <small>' + pc(gastado) + '</small></b></div>' +
+      '<div class="bt sub"><span>Gastado sin contar el ahorro</span><b>' + peso(gastado) + ' <small>' + pc(gastado) + '</small></b></div>' +
       '<div class="bt"><span><i style="background:#199e70"></i>Ahorro y lo que quedó</span><b>' + f("aho") + '</b></div>' +
       '<div class="bt tot"><span>Total</span><b>' + peso(total) + ' <small>' + pc(total) + '</small></b></div>' +
     '</div>';
@@ -6737,6 +6747,19 @@ const Balance = (function(){
   return { refresh };
 })();
 
+/* el campo grande de valor ($): mide el número; si no cabe, achica la letra hasta que se vea completo */
+const _medidor = document.createElement("canvas").getContext("2d");
+function ajustaMonto(inp){
+  if(!inp) return;
+  inp.style.fontSize = "";
+  const cs = getComputedStyle(inp), caja = inp.closest(".fmMonto") || inp.parentElement;
+  const cabe = Math.max(120, (caja.getBoundingClientRect().width || caja.clientWidth || 280) - 56);
+  let fs = parseFloat(cs.fontSize) || 40, w;
+  const mide = () => { _medidor.font = cs.fontWeight + " " + fs + "px " + cs.fontFamily; return _medidor.measureText(inp.value || "0").width + fs * .25; };
+  w = mide();
+  while(w > cabe && fs > 18){ fs -= 2; w = mide(); }
+  inp.style.fontSize = fs + "px"; inp.style.width = Math.ceil(w) + "px"; inp.scrollLeft = 0;
+}
 /* lo último que se supo del ahorro (lo guarda la pantalla Ahorro); lo usan Balance y Tu mes */
 const ahorroGuardado = () => { try{ const d = JSON.parse(localStorage.getItem("armoni.ahorro")); return d && Array.isArray(d.cajas) ? d : null; }catch{ return null; } };
 /* ═════════ AHORRO DE LA CASA, POR CAJITAS ═════════
@@ -6848,16 +6871,7 @@ const Ahorro = (function(){
     return ctl;
   }
   const montoIn = (id, lbl) => '<label class="fmMonto" for="' + id + '"><span class="fmMontoLbl">' + lbl + '</span><span class="fmMontoIn"><b>$</b><input id="' + id + '" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" placeholder="0"></span></label>';
-  const medidor = document.createElement("canvas").getContext("2d");
-  const ancho = inp => {   // el campo mide lo que mide el número; si no cabe, achica la letra hasta que se vea completo
-    inp.style.fontSize = "";
-    const cs = getComputedStyle(inp), cabe = (inp.parentElement.clientWidth || 280) * .82;
-    let fs = parseFloat(cs.fontSize) || 40, w;
-    const mide = () => { medidor.font = cs.fontWeight + " " + fs + "px " + cs.fontFamily; return medidor.measureText(inp.value || "0").width + fs * .25; };
-    w = mide();
-    while(w > cabe && fs > 18){ fs -= 2; w = mide(); }
-    inp.style.fontSize = fs + "px"; inp.style.width = Math.ceil(w) + "px"; inp.scrollLeft = 0;
-  };   // el campo crece con el número (y achica la letra si es muy largo): nunca se corta
+  const ancho = inp => ajustaMonto(inp);   // el campo crece con el número (y achica la letra si es muy largo): nunca se corta
   const leeMonto = inp => { const v = +inp.value.replace(/\D/g, "").slice(0, 12) || 0; inp.value = v ? v.toLocaleString("es-CO") : ""; ancho(inp); return v; };
   const errorDe = e => (e && e.message) || "No se pudo guardar. Revisa tu internet y que el flujo «Ahorro» esté activo en n8n.";
 
@@ -7469,6 +7483,7 @@ const GastoManual = (function(){
     let concepto = "", monto = 0, categoria = "", fecha = hoy(), nota = "", pareja = false, iaManual = false, iaOn = false;
     let paso = "que", guardando = false, editando = false, preguntoPareja = false;
     const historia = [];
+    let histResumen = null;   // el camino hasta el resumen: al volver de editar se recupera tal cual
     const scrim = document.createElement("div");
     scrim.className = "pgScrim seScrim";
     scrim.innerHTML =
@@ -7511,6 +7526,7 @@ const GastoManual = (function(){
 
     function ir(nuevo, dir, atras){
       if(!atras && dir > 0) historia.push(paso);
+      if(nuevo === "nota" && editando && histResumen){ editando = false; historia.length = 0; historia.push(...histResumen); histResumen = null; }   // terminó de editar: Volver sigue el camino normal
       paso = nuevo;
       vista.className = "sePaso " + (dir < 0 ? "deIzq" : "deDer"); void vista.offsetWidth; vista.classList.add("entra");
       pinta();
@@ -7566,7 +7582,7 @@ const GastoManual = (function(){
           '<label class="fmMonto" for="inMonto"><span class="fmMontoLbl">¿Cuánto' + (esIngreso ? ' entró' : '') + '?</span><span class="fmMontoIn"><b>$</b><input id="inMonto" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="0" autocomplete="off" enterkeyhint="next" aria-label="Valor" value="' + (monto ? monto.toLocaleString("es-CO") : "") + '"></span><i class="fmLinea" aria-hidden="true"></i></label>';
         botones.innerHTML = '<button type="button" class="pgSi" id="inSig">Siguiente</button>';
         const inp = $("inMonto"), sig = $("inSig");
-        const ancho = () => { inp.style.width = Math.max(1.2, (inp.value || "0").length * .62 + .6) + "em"; };
+        const ancho = () => ajustaMonto(inp);
         const listo = () => { sig.disabled = !(monto > 0); };
         inp.addEventListener("input", () => { const d = inp.value.replace(/\D/g, ""); monto = d ? Number(d) : 0; inp.value = monto ? monto.toLocaleString("es-CO") : ""; ancho(); listo(); });
         inp.addEventListener("keydown", e => { if(e.key === "Enter"){ e.preventDefault(); sig.click(); } });
@@ -7636,7 +7652,7 @@ const GastoManual = (function(){
           '<p class="inErr" id="inErr" role="alert"></p>';
         botones.innerHTML = '<button type="button" class="pgSi" id="inGuardar">Guardar</button>';
         $("inNota").addEventListener("input", e => { nota = e.target.value; });
-        vista.querySelector(".fmResumen").addEventListener("click", e => { const b = e.target.closest("[data-ir]"); if(b){ editando = true; ir(b.dataset.ir, -1); } });
+        vista.querySelector(".fmResumen").addEventListener("click", e => { const b = e.target.closest("[data-ir]"); if(b){ editando = true; histResumen = historia.slice(); ir(b.dataset.ir, -1); } });
         $("inIA").addEventListener("click", () => { if(obligada()) return; iaManual = true; iaOn = !iaOn; pintaIA(); });
         $("inGuardar").addEventListener("click", guardar);
         pintaIA();
@@ -9214,6 +9230,8 @@ const Mercar = (function(){
    ════════════════════════════════════════════════════════════ */
 const TuMes = (function(){
   const grid = document.getElementById("tmGrid");
+  /* las historias comparan con el mes anterior: los meses van del más nuevo al más viejo, llegue como llegue */
+  const ordenaMeses = () => { if(datos && Array.isArray(datos.meses)) datos.meses.sort((a, b) => b.mes.localeCompare(a.mes)); };
   const statusEl = document.getElementById("tmStatus");
   const KEY = "armoni.tumes.datos";
   /* un par de tonos por pantalla (de la paleta validada y de la marca): el color sigue a la entidad, no al turno */
@@ -9844,7 +9862,7 @@ const TuMes = (function(){
       if(!res.ok) throw new Error("http " + res.status);
       const d = await res.json();
       const cambio = JSON.stringify(d) !== JSON.stringify(datos);
-      datos = d;
+      datos = d; ordenaMeses();
       try{ localStorage.setItem(KEY, JSON.stringify(d)); }catch{}
       if(cambio) pintaLista();
     }catch{
@@ -9853,6 +9871,7 @@ const TuMes = (function(){
   }
   function refresh(){
     if(!datos){ try{ datos = JSON.parse(localStorage.getItem(KEY)); }catch{} }
+    ordenaMeses();
     if(datos) pintaLista(); else statusEl.innerHTML = '<span class="dot" aria-hidden="true"></span>Armando tus resúmenes…';
     cargar();
     try{ SalidasEma.precarga(); }catch{}   // trae las salidas en pareja y con Ema para las historias
@@ -9869,7 +9888,7 @@ const TuMes = (function(){
       const res = await fetch(RESUMEN_URL, { cache: "no-store" });
       if(!res.ok) return;
       const d = await res.json();
-      datos = d;
+      datos = d; ordenaMeses();
       try{ localStorage.setItem(KEY, JSON.stringify(d)); }catch{}
       const meses = d.meses || [], k = meses.findIndex(m => m.mes === prev);
       if(k < 0 || !(meses[k].gastos > 0)) return;
