@@ -2557,7 +2557,7 @@ body[class*="mode-"] #masIngreso{ display:none; }
 .fmMontoLbl{ display:block; font-size:.68rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--dim); }
 .fmMontoIn{ display:flex; align-items:center; justify-content:center; gap:2px; margin-top:2px; }
 .fmMontoIn b{ font-size:1.5rem; font-weight:600; color:var(--dim); }
-.inCard .fmMontoIn input[type="text"]{ width:2.2ch; max-width:85%; padding:0 !important; border:0 !important; background:none !important; box-shadow:none !important; font-size:2.5rem; font-weight:700; letter-spacing:-.02em; text-align:center; font-variant-numeric:tabular-nums; color:var(--white); caret-color:var(--fa1); }
+.inCard .fmMontoIn input[type="text"]{ width:2.2ch; max-width:none; padding:0 !important; border:0 !important; background:none !important; box-shadow:none !important; font-size:2.5rem; font-weight:700; letter-spacing:-.02em; text-align:center; font-variant-numeric:tabular-nums; color:var(--white); caret-color:var(--fa1); }
 .inCard .fmMontoIn input::placeholder{ color:rgba(var(--ink),.25); }
 .inCard .fmMontoIn input:focus::placeholder{ color:transparent; }   /* al tocar, el 0 se va y queda solo el cursor */
 .fmLinea{ display:block; height:2px; width:70px; margin:6px auto 0; border-radius:2px; background:linear-gradient(90deg, transparent, var(--fa1), var(--fa2), transparent); opacity:.45; transition:width .45s var(--ease-out), opacity .3s; }
@@ -3021,7 +3021,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-11.129";
+const APP_VERSION = "2026-10-11.130";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -6747,17 +6747,21 @@ const Balance = (function(){
   return { refresh };
 })();
 
-/* el campo grande de valor ($): mide el número; si no cabe, achica la letra hasta que se vea completo */
-const _medidor = document.createElement("canvas").getContext("2d");
+/* el campo grande de valor ($): se mide el número con una copia invisible que tiene la MISMA letra del campo
+   (en el iPhone la letra del sistema es más ancha de lo que calcula un lienzo); si no cabe, se achica hasta que se vea completo */
+let _regla = null;
 function ajustaMonto(inp){
   if(!inp) return;
+  if(!_regla){ _regla = document.createElement("span"); _regla.setAttribute("aria-hidden", "true"); _regla.style.cssText = "position:absolute;left:-9999px;top:0;visibility:hidden;white-space:pre;padding:0;border:0"; document.body.appendChild(_regla); }
   inp.style.fontSize = "";
   const cs = getComputedStyle(inp), caja = inp.closest(".fmMonto") || inp.parentElement;
-  const cabe = Math.max(120, (caja.getBoundingClientRect().width || caja.clientWidth || 280) - 56);
+  const signo = inp.parentElement.querySelector("b");
+  const cabe = Math.max(110, (caja.getBoundingClientRect().width || 280) - (signo ? signo.getBoundingClientRect().width : 20) - 28);
+  ["fontFamily", "fontWeight", "letterSpacing", "fontVariantNumeric", "fontFeatureSettings"].forEach(k => { _regla.style[k] = cs[k]; });
   let fs = parseFloat(cs.fontSize) || 40, w;
-  const mide = () => { _medidor.font = cs.fontWeight + " " + fs + "px " + cs.fontFamily; return _medidor.measureText(inp.value || "0").width + fs * .25; };
+  const mide = () => { _regla.style.fontSize = fs + "px"; _regla.textContent = inp.value || "0"; return _regla.getBoundingClientRect().width + fs * .3; };
   w = mide();
-  while(w > cabe && fs > 18){ fs -= 2; w = mide(); }
+  while(w > cabe && fs > 16){ fs -= 1.5; w = mide(); }
   inp.style.fontSize = fs + "px"; inp.style.width = Math.ceil(w) + "px"; inp.scrollLeft = 0;
 }
 /* lo último que se supo del ahorro (lo guarda la pantalla Ahorro); lo usan Balance y Tu mes */
