@@ -2101,6 +2101,11 @@ button{ transition:transform var(--t-tap) var(--ease-out); }
 #colaPill i{ width:8px; height:8px; border-radius:50%; background:#ffb066; animation:colaLate 1.6s ease-in-out infinite; }
 #colaPill.girando i{ animation-duration:.5s; }
 @keyframes colaLate{ 50%{ opacity:.3; transform:scale(.7); } }
+.yaEsta{ margin:10px 0 4px; padding:14px; border-radius:16px; border:1px solid rgba(255,176,102,.45); background:rgba(255,138,80,.1); }
+.yaEsta b{ display:block; font-size:.92rem; color:#ffcf99; }
+.yaEsta span{ display:block; margin-top:4px; font-size:.82rem; color:var(--ghost); }
+.yaBtns{ display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:12px; }
+.yaBtns button{ font-size:.82rem; padding:10px 8px; }
 .rsPie{ display:block; margin-top:6px; font-size:.76rem; color:var(--dim); }
 /* la regla: cada parte se despliega */
 .balRegla{ margin:20px 4px 8px; }
@@ -3046,7 +3051,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-11.132";
+const APP_VERSION = "2026-10-11.133";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -6066,7 +6071,7 @@ const SalidaEmaForm = (function(){
           if(g.fp && g.fp !== fecha) dato.fechaSalida = fecha;   // pagado antes: el gasto queda en el día en que se pagó, pero hace parte de esta salida
           const l = p.lugar.trim();
           if(l){ const c = conocido(l); if(c) dato.lugar = c; else { dato.lugar = l; if(!p.nuevoEnviado){ dato.puntuacion = p.puntuacion || null; dato.comentario = p.comentario.trim(); } } }
-          const r = await Cola.post(MOVIMIENTO_URL, { method: "POST", body: JSON.stringify(Object.assign({ token: MERCADO_TOKEN }, dato)) });
+          const r = await Cola.post(MOVIMIENTO_URL, { method: "POST", body: JSON.stringify(Object.assign({ token: MERCADO_TOKEN, forzar: true }, dato)) });
           const j = await r.json().catch(() => ({}));
           if(!r.ok || j.ok === false) throw new Error(j.error || "No se pudo guardar");
           if(j.enCola) sinConexion = true;
@@ -6991,7 +6996,7 @@ const Ahorro = (function(){
           if(modo === "sacar" && monto > c.saldo && !confirm("En «" + c.nombre + "» hay " + peso(c.saldo) + ". ¿Igual lo anoto?")) return;
           ocupa(true); si.disabled = true; si.textContent = "Guardando…"; $("ahErr").textContent = "";
           try{
-            const r = await Cola.post(MOVIMIENTO_URL, { method: "POST", body: JSON.stringify({ token: MERCADO_TOKEN, tipo: modo === "guardar" ? "Gasto" : "Ingreso", categoria: "Ahorro", concepto: (modo === "guardar" ? "Ahorro · " : "Retiro · ") + c.nombre, monto, fecha: hoyISO(), nota: ($("ahNota").value || "").trim() }) });
+            const r = await Cola.post(MOVIMIENTO_URL, { method: "POST", body: JSON.stringify({ token: MERCADO_TOKEN, forzar: true, tipo: modo === "guardar" ? "Gasto" : "Ingreso", categoria: "Ahorro", concepto: (modo === "guardar" ? "Ahorro · " : "Retiro · ") + c.nombre, monto, fecha: hoyISO(), nota: ($("ahNota").value || "").trim() }) });
             const j = await r.json().catch(() => ({}));
             if(!r.ok || j.ok === false) throw new Error(j.error === "categoria" ? "Falta actualizar el flujo «movimiento-nuevo» en n8n para poder sacar del ahorro." : "");
             await pide().catch(() => {});
@@ -7883,9 +7888,26 @@ const GastoManual = (function(){
       const dato = { tipo, concepto: nombre, categoria, monto, fecha, nota: nota$ };
       if(pareja) dato.salida = "Pareja";
       guardando = true; btn.disabled = true; btn.textContent = "Guardando…"; err.textContent = "";
-      Cola.post(MOVIMIENTO_URL, { method: "POST", body: JSON.stringify(Object.assign({ token: MERCADO_TOKEN }, dato)) })
-        .then(r => r.json().catch(() => ({})).then(j => { if(!r.ok || j.ok === false) throw new Error(j.error || "No se pudo guardar"); return j; }))
+      const enviar = forzar => Cola.post(MOVIMIENTO_URL, { method: "POST", body: JSON.stringify(Object.assign({ token: MERCADO_TOKEN }, dato, forzar ? { forzar: true } : {})) })
+        .then(r => r.json().catch(() => ({})).then(j => {
+          /* ese pago ya estaba anotado (por ejemplo, llegó solo desde el correo de PSE): se pregunta antes de duplicarlo */
+          if(j && j.error === "parecido" && j.parecido) return yaEstaba(j.parecido);
+          if(!r.ok || j.ok === false) throw new Error(j.error || "No se pudo guardar"); return j;
+        }));
+      const yaEstaba = x => new Promise((ok, mal) => {
+        const f = (() => { try{ return new Date(x.fecha + "T12:00:00").toLocaleDateString("es-CO", { day: "numeric", month: "short" }).replace(".", ""); }catch{ return x.fecha; } })();
+        const caja = document.createElement("div");
+        caja.className = "yaEsta";
+        caja.innerHTML = '<b>' + (x.automatico ? 'Este pago ya se registró: llegó desde PSE' : 'Parece que este pago ya está anotado') + '</b>' +
+          '<span>«' + String(x.concepto).replace(/[<>&]/g, "") + '» · $' + Math.round(x.monto).toLocaleString("es-CO") + ' · ' + f + '</span>' +
+          '<div class="yaBtns"><button type="button" class="pgNo" data-y="no">Es otro, guardarlo</button><button type="button" class="pgSi" data-y="si">Ya estaba, no guardar</button></div>';
+        err.textContent = ""; err.after(caja);
+        caja.querySelector('[data-y="si"]').addEventListener("click", () => { caja.remove(); ok({ yaEstaba: true }); });
+        caja.querySelector('[data-y="no"]').addEventListener("click", () => { caja.remove(); enviar(true).then(ok, mal); });
+      });
+      enviar(false)
         .then(j => {
+          if(j && j.yaEstaba){ cierra(); avisoOk("No se duplicó", nombre + " · " + monto$ + " ya estaba registrado"); return; }
           Frecuentes.aprende(tipo, concepto.trim(), categoria, monto);
           cierra("guardado");
           if(j && j.enCola) avisoOk("Guardado en el celular", nombre + " · " + monto$ + " · se envía cuando el PC esté prendido");
