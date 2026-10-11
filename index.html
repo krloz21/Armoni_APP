@@ -2069,6 +2069,14 @@ button{ transition:transform var(--t-tap) var(--ease-out); }
 .rsBarra{ height:8px; margin-top:14px; border-radius:8px; background:rgba(25,158,112,.35); overflow:hidden; }
 .rsBarra i{ display:block; height:100%; border-radius:8px; background:linear-gradient(90deg, #e66767, #ff9d73); transform-origin:left; animation:balCrece .9s cubic-bezier(.2,.8,.2,1) backwards; }
 @keyframes balCrece{ from{ transform:scaleX(0); } }
+.rsAhorro{ display:flex; align-items:center; gap:12px; width:100%; margin-top:14px; padding:12px; border-radius:16px; border:1px solid rgba(25,158,112,.35); background:rgba(25,158,112,.1); color:var(--white); font:inherit; text-align:left; cursor:pointer; }
+.rsAhorro .ic{ flex:none; display:grid; place-items:center; width:38px; height:38px; border-radius:12px; color:#6fe0b5; background:rgba(25,158,112,.18); }
+.rsAhorro .ic svg{ width:21px; height:21px; }
+.rsAhorro .tx{ flex:1; min-width:0; }
+.rsAhorro b{ display:block; font-size:.9rem; }
+.rsAhorro small{ display:block; font-size:.74rem; color:var(--ghost); }
+.rsAhorro .tot{ text-align:right; }
+.rsAhorro .tot b{ color:#6fe0b5; font-variant-numeric:tabular-nums; white-space:nowrap; }
 .rsPie{ display:block; margin-top:6px; font-size:.76rem; color:var(--dim); }
 /* la regla: cada parte se despliega */
 .balRegla{ margin:20px 4px 8px; }
@@ -2148,6 +2156,9 @@ button{ transition:transform var(--t-tap) var(--ease-out); }
 .ahDet .ahSaldo{ margin-top:2px; }
 .ahDet h3{ margin:2px 0 0; text-align:left; font-size:1.2rem; }
 .ahDetLista{ max-height:38vh; overflow:auto; margin-top:12px; }
+.ahMetaBtn{ display:block; margin-top:8px; padding:0; border:0; background:none; font:inherit; font-size:.82rem; font-weight:700; color:var(--c, #6fe0b5); cursor:pointer; }
+.ahMetaBtn.grande{ width:100%; margin-top:10px; padding:11px; border-radius:14px; border:1.5px dashed color-mix(in srgb, var(--c) 55%, transparent); text-align:center; }
+.ahPonMeta{ align-self:flex-start; margin-top:5px; padding:3px 10px; border-radius:999px; font-size:.72rem; font-weight:700; color:var(--c); background:color-mix(in srgb, var(--c) 16%, transparent); }
 .ahAyuda{ margin:6px 0 12px; font-size:.76rem; color:var(--dim); }
 .ahScrim .pgRow .pgNo#ahQuitar{ color:#ff8f8f; }
 .ahVacio{ text-align:center; }
@@ -2543,6 +2554,7 @@ body[class*="mode-"] #masIngreso{ display:none; }
 .fmMontoIn b{ font-size:1.5rem; font-weight:600; color:var(--dim); }
 .inCard .fmMontoIn input[type="text"]{ width:2.2ch; max-width:85%; padding:0 !important; border:0 !important; background:none !important; box-shadow:none !important; font-size:2.5rem; font-weight:700; letter-spacing:-.02em; text-align:center; font-variant-numeric:tabular-nums; color:var(--white); caret-color:var(--fa1); transition:width .15s ease-out; }
 .inCard .fmMontoIn input::placeholder{ color:rgba(var(--ink),.25); }
+.inCard .fmMontoIn input:focus::placeholder{ color:transparent; }   /* al tocar, el 0 se va y queda solo el cursor */
 .fmLinea{ display:block; height:2px; width:70px; margin:6px auto 0; border-radius:2px; background:linear-gradient(90deg, transparent, var(--fa1), var(--fa2), transparent); opacity:.45; transition:width .45s var(--ease-out), opacity .3s; }
 .fmMonto:focus-within .fmLinea{ width:190px; opacity:1; }
 /* recurrentes: lista desplegable */
@@ -3004,7 +3016,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-11.127";
+const APP_VERSION = "2026-10-11.128";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -6597,7 +6609,16 @@ const Balance = (function(){
       '</div>' +
       '<div class="rsBarra" role="img" aria-label="Gastaste el ' + Math.round(uso) + '% de lo que entró"><i style="width:' + uso.toFixed(1) + '%"></i></div>' +
       '<small class="rsPie">' + (ing ? 'Gastaste el ' + Math.round(gas / ing * 100) + '% de lo que entró' : 'Este mes no hay ingresos registrados') + '</small>' +
+      filaAhorro(M) +
     '</div>';
+  }
+  /* el ahorro de la casa dentro del resumen: lo guardado en el periodo (categoría Ahorro) y lo que tienen en total en las cajitas */
+  function filaAhorro(M){
+    const guardado = ((M.categorias || []).find(c => c.nombre === "Ahorro") || {}).total || 0, A = ahorroGuardado();
+    if(!guardado && !A) return '';
+    return '<button type="button" class="rsAhorro" data-ir="ahorro"><span class="ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 10.5c0-3.6-3.1-6-7-6s-7 2.4-7 6c0 2 .9 3.6 2.4 4.7V19h3v-2h3.2v2h3v-3.8c1-.7 1.8-1.6 2.2-2.7H21v-3h-1.8"/><path d="M9.5 7.6h4"/></svg></span>' +
+      '<span class="tx"><b>Ahorro de la casa</b><small>' + (guardado ? 'Guardaron ' + peso(guardado) + (M.mes === "general" ? ' en total' : ' este mes') : 'Nada guardado en este periodo') + '</small></span>' +
+      (A ? '<span class="tot"><b>' + peso(A.total || 0) + '</b><small>en ' + A.cajas.length + (A.cajas.length === 1 ? ' cajita' : ' cajitas') + '</small></span>' : '') + '</button>';
   }
   /* ── las tres partes de la regla, cada una se despliega ── */
   function partes(M){
@@ -6704,6 +6725,7 @@ const Balance = (function(){
   }
 
   view.addEventListener("click", e => {
+    if(e.target.closest("[data-ir=\"ahorro\"]")){ Drawer.go("ahorro"); return; }
     const p = e.target.closest("[data-p]"); if(p){ pestana = p.dataset.p; pinta(); return; }
     const m = e.target.closest("[data-m]"); if(m){ mes = m.dataset.m; pinta(false); return; }
     const v = e.target.closest("[data-v]"); if(v){ vista = v.dataset.v; sel = null; pinta(false); return; }
@@ -6714,6 +6736,8 @@ const Balance = (function(){
   return { refresh };
 })();
 
+/* lo último que se supo del ahorro (lo guarda la pantalla Ahorro); lo usan Balance y Tu mes */
+const ahorroGuardado = () => { try{ const d = JSON.parse(localStorage.getItem("armoni.ahorro")); return d && Array.isArray(d.cajas) ? d : null; }catch{ return null; } };
 /* ═════════ AHORRO DE LA CASA, POR CAJITAS ═════════
    Cada cajita (Casita = fondo de emergencia, Vacaciones…) tiene con cuánto empezó, una meta opcional y sus movimientos.
    Guardar es un gasto con categoría Ahorro y concepto «Ahorro · Cajita» (sale del mes y Balance lo cuenta como ahorro);
@@ -6794,7 +6818,7 @@ const Ahorro = (function(){
           return '<button type="button" class="ahCaja" data-a="caja" data-id="' + esc(c.id) + '" style="--c:' + color(c) + '">' +
             '<span class="ahTile">' + iconoDe(c.nombre) + (pct != null ? '<em>' + pct + '%</em>' : '') + '</span>' +
             '<span class="ahCjTx"><span class="ahCjNom">' + esc(c.nombre) + '</span><b>' + peso(c.saldo) + '</b>' +
-            (delMes ? '<small class="ahCjMes ' + (delMes > 0 ? 'mas' : 'menos') + '">' + (delMes > 0 ? '↑ ' : '↓ ') + peso(Math.abs(delMes)) + ' este mes</small>' : '<small class="ahCjMes">' + (c.meta ? 'Meta ' + peso(c.meta) : 'Sin movimientos este mes') + '</small>') + '</span>' +
+            (delMes ? '<small class="ahCjMes ' + (delMes > 0 ? 'mas' : 'menos') + '">' + (delMes > 0 ? '↑ ' : '↓ ') + peso(Math.abs(delMes)) + ' este mes</small>' : '<small class="ahCjMes">' + (c.meta ? 'Meta ' + peso(c.meta) : 'Sin movimientos este mes') + '</small>') + (c.meta ? '' : '<span class="ahPonMeta" data-a="meta" data-id="' + esc(c.id) + '" role="button">+ Agregar meta</span>') + '</span>' +
             '<svg class="ahFl" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></button>';
         }).join("") +
         (datos.sinCaja ? '<div class="ahCaja suelta" style="--c:rgba(150,150,160,1)"><span class="ahTile">' + SV(ICO_CERDO) + '</span><span class="ahCjTx"><span class="ahCjNom">Sin cajita</span><b>' + peso(datos.sinCaja) + '</b><small class="ahCjMes">Movimientos sin cajita</small></span></div>' : '') +
@@ -6823,7 +6847,17 @@ const Ahorro = (function(){
     return ctl;
   }
   const montoIn = (id, lbl) => '<label class="fmMonto" for="' + id + '"><span class="fmMontoLbl">' + lbl + '</span><span class="fmMontoIn"><b>$</b><input id="' + id + '" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" placeholder="0"></span></label>';
-  const leeMonto = inp => { const v = +inp.value.replace(/\D/g, "").slice(0, 12) || 0; inp.value = v ? v.toLocaleString("es-CO") : ""; return v; };
+  const medidor = document.createElement("canvas").getContext("2d");
+  const ancho = inp => {   // el campo mide lo que mide el número; si no cabe, achica la letra hasta que se vea completo
+    inp.style.fontSize = "";
+    const cs = getComputedStyle(inp), cabe = (inp.parentElement.clientWidth || 280) * .82;
+    let fs = parseFloat(cs.fontSize) || 40, w;
+    const mide = () => { medidor.font = cs.fontWeight + " " + fs + "px " + cs.fontFamily; return medidor.measureText(inp.value || "0").width + fs * .25; };
+    w = mide();
+    while(w > cabe && fs > 18){ fs -= 2; w = mide(); }
+    inp.style.fontSize = fs + "px"; inp.style.width = Math.ceil(w) + "px";
+  };   // el campo crece con el número (y achica la letra si es muy largo): nunca se corta
+  const leeMonto = inp => { const v = +inp.value.replace(/\D/g, "").slice(0, 12) || 0; inp.value = v ? v.toLocaleString("es-CO") : ""; ancho(inp); return v; };
   const errorDe = e => (e && e.message) || "No se pudo guardar. Revisa tu internet y que el flujo «Ahorro» esté activo en n8n.";
 
   /* guardar o sacar: se elige la cajita */
@@ -6839,6 +6873,7 @@ const Ahorro = (function(){
       '<div class="pgRow"><button type="button" class="pgNo" data-cerrar>Cancelar</button><button type="button" class="pgSi" id="ahSi" disabled>' + (modo === "guardar" ? 'Guardar' : 'Sacar') + '</button></div>',
       ({ scrim, $, cierra, ocupa }) => {
         const inp = $("ahMonto"), si = $("ahSi");
+        ancho(inp);
         $("ahChips").addEventListener("click", e => { const b = e.target.closest("[data-id]"); if(!b) return; sel = b.dataset.id; $("ahChips").querySelectorAll("[data-id]").forEach(x => x.setAttribute("aria-pressed", String(x === b))); });
         inp.addEventListener("input", () => { monto = leeMonto(inp); si.disabled = !(monto > 0); });
         setTimeout(() => inp.focus(), 300);
@@ -6858,11 +6893,11 @@ const Ahorro = (function(){
       });
   }
   /* crear o editar una cajita */
-  function nueva(c, sug){
+  function nueva(c, sug, enfoque){
     const ed = !!c;
     let inicial = ed ? c.inicial : 0, meta = ed ? c.meta : 0;
     ventana(
-      '<h3 id="ahT">' + (ed ? 'Editar cajita' : 'Nueva cajita') + '</h3><div class="inBody">' +
+      '<h3 id="ahT">' + (enfoque === "meta" ? (c.meta ? 'Cambiar la meta' : 'Ponerle una meta') : ed ? 'Editar cajita' : 'Nueva cajita') + '</h3><div class="inBody">' +
       '<label class="inLbl" for="ahNom">Nombre</label><input id="ahNom" type="text" maxlength="40" autocomplete="off" placeholder="Casita, Vacaciones, Carro…" value="' + esc(ed ? c.nombre : (sug || "")) + '">' +
       (ed ? '' : '<p class="ahAyuda">Ej.: «Casita» para el fondo de emergencia.</p>') +
       montoIn("ahIni", ed ? "¿Cuánto tenía al empezar?" : "¿Cuánto tiene hoy?") +
@@ -6873,9 +6908,10 @@ const Ahorro = (function(){
         const ini = $("ahIni"), mt = $("ahMeta"), si = $("ahSi"), nom = $("ahNom");
         if(inicial) ini.value = inicial.toLocaleString("es-CO");
         if(meta) mt.value = meta.toLocaleString("es-CO");
+        ancho(ini); ancho(mt);
         ini.addEventListener("input", () => { inicial = leeMonto(ini); });
         mt.addEventListener("input", () => { meta = leeMonto(mt); });
-        setTimeout(() => (ed || sug ? ini : nom).focus(), 300);
+        setTimeout(() => (enfoque === "meta" ? mt : ed || sug ? ini : nom).focus(), 300);
         si.addEventListener("click", async () => {
           const n = nom.value.trim(); if(!n){ $("ahErr").textContent = "Ponle un nombre a la cajita."; return; }
           if(cajas().some(x => x.nombre.toLowerCase() === n.toLowerCase() && (!ed || x.id !== c.id))){ $("ahErr").textContent = "Ya hay una cajita con ese nombre."; return; }
@@ -6891,7 +6927,7 @@ const Ahorro = (function(){
     const col = color(c), movs = c.movimientos || [];
     ventana(
       '<div class="ahDet" style="--c:' + col + '"><small class="ahEt">Cajita</small><h3 id="ahT">' + esc(c.nombre) + '</h3><strong class="ahSaldo" style="color:' + col + '">' + peso(c.saldo) + '</strong>' +
-      (c.meta ? barra(c, col) + (c.saldo < c.meta ? '<small class="ahFalta">Faltan ' + peso(c.meta - c.saldo) + '</small>' : '<small class="ahFalta ok">¡Meta cumplida!</small>') : '') +
+      (c.meta ? barra(c, col) + (c.saldo < c.meta ? '<small class="ahFalta">Faltan ' + peso(c.meta - c.saldo) + '</small>' : '<small class="ahFalta ok">¡Meta cumplida!</small>') + '<button type="button" class="ahMetaBtn" id="ahMetaBtn">Cambiar meta</button>' : '<button type="button" class="ahMetaBtn grande" id="ahMetaBtn">+ Ponerle una meta</button>') +
       '<div class="ahBtns" style="margin-top:14px"><button type="button" class="ahBtn mas" data-m="guardar"><span aria-hidden="true">+</span>Guardar</button><button type="button" class="ahBtn menos" data-m="sacar"><span aria-hidden="true">−</span>Sacar</button></div>' +
       '<div class="ahDetLista">' + (movs.length ? movs.slice(0, 30).map(m => '<div class="ahMov"><span class="ahMovIco ' + (m.monto >= 0 ? 'mas' : 'menos') + '" aria-hidden="true">' + (m.monto >= 0 ? '↑' : '↓') + '</span><span class="ahMovTx"><b>' + esc(m.nota || (m.monto >= 0 ? 'Guardado' : 'Sacado')) + '</b><small>' + esc(fechaLinda(m.fecha)) + '</small></span><b class="' + (m.monto >= 0 ? 'mas' : 'menos') + '">' + (m.monto >= 0 ? '+' : '') + peso(m.monto) + '</b></div>').join("") : '<p class="gEmpty" style="margin:8px 0">Todavía sin movimientos.</p>') + '</div>' +
       '<p class="ahInicial">Empezó con ' + peso(c.inicial) + (c.inicialFecha ? ' el ' + esc(fechaLinda(c.inicialFecha)) : '') + '</p></div>' +
@@ -6899,6 +6935,7 @@ const Ahorro = (function(){
       ({ scrim, $, cierra, ocupa }) => {
         scrim.querySelectorAll("[data-m]").forEach(b => b.addEventListener("click", () => { cierra(); setTimeout(() => mover(b.dataset.m, c.id), 360); }));
         $("ahEditar").addEventListener("click", () => { cierra(); setTimeout(() => nueva(c), 360); });
+        $("ahMetaBtn").addEventListener("click", () => { cierra(); setTimeout(() => nueva(c, null, "meta"), 360); });
         $("ahQuitar").addEventListener("click", async e => {
           if(!confirm("¿Quitar la cajita «" + c.nombre + "»? Sus movimientos quedan guardados en Notion, pero dejan de verse dentro de una cajita.")) return;
           ocupa(true); e.currentTarget.disabled = true;
@@ -6913,6 +6950,7 @@ const Ahorro = (function(){
     if(a === "guardar" || a === "sacar") mover(a);
     else if(a === "nueva") nueva(null, b.dataset.sug);
     else if(a === "caja") detalle(b.dataset.id);
+    else if(a === "meta"){ const c = cajas().find(x => x.id === b.dataset.id); if(c) nueva(c, null, "meta"); }
   });
   function refresh(){ pinta(); cargar(); }
   return { refresh };
@@ -9429,6 +9467,14 @@ const TuMes = (function(){
           '<div class="tot"><span>TOTAL</span><strong data-monto="' + M.mayor.monto + '">$0</strong></div>' +
           '<p class="rcGracias">' + esc(tk.pie) + '</p><div class="cod" aria-hidden="true"></div>' +
         '</div></div>' });
+    }
+    { const guardado = ((M.categorias || []).find(c => c.nombre === "Ahorro") || {}).total || 0, A = ahorroGuardado();
+      if(guardado > 0) s.push({ fondo: 4, html:
+        '<div class="wsEmoji" style="--d:0">🐷</div>' +
+        '<div class="wsK" style="--d:.15">Ahorro</div>' +
+        '<h2 class="wsT" style="--d:.3">' + (enCurso ? 'Este mes llevan guardado' : 'En ' + nom + ' guardaron') + '</h2>' +
+        '<div class="wsBig" style="--d:.45" data-monto="' + guardado + '">$0</div>' +
+        (A && A.total ? '<p class="wsP" style="--d:.8">En total tienen ' + peso(A.total) + ' en ' + A.cajas.length + (A.cajas.length === 1 ? ' cajita' : ' cajitas') + '</p>' : '') });
     }
     if(M.repetido) s.push({ fondo: 3, html:
       '<div class="wsEmoji" style="--d:0">🔁</div>' +
