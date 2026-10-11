@@ -790,7 +790,7 @@ body.no-gl #drawer{ background:var(--drawer-solid); }
 }
 
 /* ───────── vista de restaurantes (ocupa el lugar del chat) ───────── */
-#restView, #emaView, #creditoView, #gmailView, #glimView, #recuerdaView, #mercarView, #duraView, #mesView, #balanceView, #ajustesView{ display:none; padding-bottom:10px; }
+#restView, #emaView, #creditoView, #gmailView, #glimView, #recuerdaView, #mercarView, #duraView, #mesView, #balanceView, #ahorroView, #ajustesView{ display:none; padding-bottom:10px; }
 body.mode-rest #restView{ display:block; }
 body.mode-ema #emaView{ display:block; }
 body.mode-ema #welcome, body.mode-ema #messages, body.mode-ema #pending, body.mode-ema #servicioBanner, body.mode-ema #glimBanner{ display:none !important; }
@@ -810,7 +810,10 @@ body.mode-dura #duraView{ display:block; }
 body.mode-dura #welcome, body.mode-dura #messages, body.mode-dura #pending, body.mode-dura #servicioBanner, body.mode-dura #glimBanner{ display:none !important; }
 body.mode-dura #reset{ visibility:hidden; }
 body.mode-dura footer{ display:none; }
-body.mode-mes #mesView, body.mode-balance #balanceView{ display:block; }
+body.mode-mes #mesView, body.mode-balance #balanceView, body.mode-ahorro #ahorroView{ display:block; }
+body.mode-ahorro #welcome, body.mode-ahorro #messages, body.mode-ahorro #pending, body.mode-ahorro #servicioBanner, body.mode-ahorro #glimBanner{ display:none !important; }
+body.mode-ahorro #reset{ visibility:hidden; }
+body.mode-ahorro footer{ display:none; }
 body.mode-balance #welcome, body.mode-balance #messages, body.mode-balance #pending, body.mode-balance #servicioBanner, body.mode-balance #glimBanner{ display:none !important; }
 body.mode-balance #reset{ visibility:hidden; }
 body.mode-balance footer{ display:none; }
@@ -2021,6 +2024,7 @@ button{ transition:transform var(--t-tap) var(--ease-out); }
 .duGrupoLista{ display:flex; flex-direction:column; gap:10px; padding:8px 0 6px; }
 /* canasta: lo que ya se acabó y hay que comprar */
 .mkCanasta{ background:rgba(var(--cyan-rgb),.07); border-color:rgba(var(--cyan-rgb),.3); }
+.mkHace{ font-style:normal; color:var(--cyan); font-weight:600; }
 .mkCanasta .mkChips em{ font-style:normal; font-size:.7rem; color:var(--dim); margin-left:3px; }
 .duCanasta{ display:flex; align-items:center; justify-content:center; gap:8px; width:100%; margin-top:14px; padding:12px 14px; border-radius:14px; border:1px solid rgba(var(--cyan-rgb),.3); background:rgba(var(--cyan-rgb),.08); color:var(--white); font:inherit; font-size:.88rem; font-weight:600; cursor:pointer; transition:transform .15s var(--ease-out), background .3s, border-color .3s; }
 .duCanasta:active{ transform:scale(.97); }
@@ -2101,6 +2105,44 @@ button{ transition:transform var(--t-tap) var(--ease-out); }
 .balTotal .tot{ padding-top:14px; }
 .balTotal .tot span{ color:var(--white); font-weight:800; font-size:.95rem; }
 .balTotal .tot b{ font-size:1.25rem; background:linear-gradient(140deg, var(--cyan), var(--num-a)); -webkit-background-clip:text; background-clip:text; color:transparent; }
+/* ── Ahorro ── */
+.ahCard{ position:relative; overflow:hidden; padding:20px 18px 16px; border-radius:24px; border:1px solid var(--line); background:radial-gradient(120% 100% at 100% 0%, rgba(25,158,112,.22), transparent 60%), var(--panel); }
+.ahEt{ display:block; font-size:.7rem; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--dim); }
+.ahSaldo{ display:block; margin:4px 0 2px; font-size:clamp(2.2rem, 11.5vw, 3rem); font-weight:700; letter-spacing:-.04em; line-height:1.1; font-variant-numeric:tabular-nums; color:#6fe0b5; }
+.ahSub{ margin:0 0 14px; font-size:.82rem; color:var(--ghost); }
+.ahMeta{ margin-bottom:14px; }
+.ahBarra{ height:10px; border-radius:10px; background:rgba(var(--ink),.08); overflow:hidden; }
+.ahBarra i{ display:block; height:100%; border-radius:10px; background:linear-gradient(90deg, #199e70, #6fe0b5); transform-origin:left; animation:balCrece 1s cubic-bezier(.2,.8,.2,1) backwards; }
+.ahMetaTx{ display:flex; justify-content:space-between; align-items:center; margin-top:7px; font-size:.78rem; color:var(--ghost); }
+.ahMetaTx button, .ahInicial button, .ahPonMeta{ border:0; background:none; padding:4px 0; font:inherit; font-weight:700; color:var(--cyan); cursor:pointer; }
+.ahPonMeta{ display:block; margin:-4px 0 12px; font-size:.84rem; }
+.ahFalta{ display:block; margin-top:2px; font-size:.76rem; color:var(--dim); }
+.ahFalta.ok{ color:#6fe0b5; font-weight:700; }
+.ahBtns{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.ahBtn{ display:flex; align-items:center; justify-content:center; gap:8px; min-height:50px; border-radius:16px; border:1px solid var(--line); font:inherit; font-size:.95rem; font-weight:700; cursor:pointer; transition:transform .2s var(--ease-spring); }
+.ahBtn span{ font-size:1.3rem; line-height:1; }
+.ahBtn.mas{ color:#06281c; border-color:transparent; background:linear-gradient(140deg, #6fe0b5, #199e70); box-shadow:0 12px 26px -12px rgba(25,158,112,.9); }
+.ahBtn.menos{ color:var(--white); background:rgba(var(--ink),.06); }
+.ahBtn:active{ transform:scale(.96); }
+.ahVacio{ text-align:center; }
+.ahVacio .ahIco{ display:inline-grid; place-items:center; width:56px; height:56px; margin-bottom:10px; border-radius:18px; color:#6fe0b5; background:rgba(25,158,112,.16); }
+.ahVacio .ahIco svg{ width:28px; height:28px; }
+.ahVacio b{ display:block; font-size:1.1rem; margin-bottom:6px; }
+.ahVacio p{ margin:0 0 16px; font-size:.86rem; color:var(--ghost); }
+.ahLista{ display:grid; gap:10px; }
+.ahMes{ padding:6px 14px; border-radius:18px; border:1px solid var(--line); background:var(--panel); }
+.ahMesCab{ display:flex; justify-content:space-between; padding:8px 0; font-size:.8rem; font-weight:700; color:var(--ghost); border-bottom:1px solid var(--line); }
+.ahMov{ display:flex; align-items:center; gap:12px; padding:10px 0; border-bottom:1px solid var(--line); }
+.ahMov:last-child{ border-bottom:0; }
+.ahMovIco{ flex:none; display:grid; place-items:center; width:32px; height:32px; border-radius:11px; font-weight:800; }
+.ahMovIco.mas{ color:#6fe0b5; background:rgba(25,158,112,.16); } .ahMovIco.menos{ color:#ff8f8f; background:rgba(230,103,103,.14); }
+.ahMovTx{ flex:1; min-width:0; }
+.ahMovTx b{ display:block; font-size:.9rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.ahMovTx small{ font-size:.74rem; color:var(--dim); }
+.ahMov > b, .ahMesCab b{ font-variant-numeric:tabular-nums; white-space:nowrap; }
+.ahMov > b.mas, .ahMesCab b.mas{ color:#6fe0b5; } .ahMov > b.menos, .ahMesCab b.menos{ color:#ff8f8f; }
+.ahInicial{ margin:14px 4px 0; font-size:.78rem; color:var(--dim); text-align:center; }
+@media (prefers-reduced-motion:reduce){ .ahBarra i{ animation:none; } }
 .balAviso{ margin:10px 4px 0; font-size:.8rem; color:#ffb066; }
 .balFila u{ display:inline-block; width:9px; height:9px; margin-right:7px; border-radius:3px; background:var(--c); }
 .balFila{ position:relative; display:flex; justify-content:space-between; gap:10px; padding:8px 0 12px; font-size:.86rem; }
@@ -2618,6 +2660,10 @@ body[class*="mode-"] #masIngreso{ display:none; }
         <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v9l7.8 4.5"/><circle cx="12" cy="12" r="9"/></svg></span>
         <span class="txt"><b>Balance</b><span>Gastos fijos, entretenimiento y ahorro</span></span>
       </button>
+      <button type="button" id="navAhorro">
+        <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 10.5c0-3.6-3.1-6-7-6s-7 2.4-7 6c0 2 .9 3.6 2.4 4.7V19h3v-2h3.2v2h3v-3.8c1-.7 1.8-1.6 2.2-2.7H21v-3h-1.8"/><path d="M9.5 7.6h4"/><circle cx="15.5" cy="10" r=".6" fill="currentColor"/></svg></span>
+        <span class="txt"><b>Ahorro</b><span>Lo que tenemos guardado</span></span>
+      </button>
         </div></div>
       </div>
       <button type="button" id="navCredito">
@@ -2802,6 +2848,12 @@ body[class*="mode-"] #masIngreso{ display:none; }
         <div class="ajCard usoCard" id="usoCard"></div>
       </section>
 
+      <section id="ahorroView" aria-label="Ahorro">
+        <div class="restIntro"><h2>Ahorro</h2></div>
+        <p class="tmSub">Lo que tenemos guardado y cómo va creciendo</p>
+        <div id="ahCuerpo"></div>
+      </section>
+
       <section id="balanceView" aria-label="Balance">
         <div class="restIntro"><h2>Balance</h2></div>
         <p class="tmSub">Lo que entró, lo que se gastó y cómo se repartió</p>
@@ -2892,6 +2944,7 @@ const MERCADO_TOKEN = "mercado-7d41c2a9e05b";
 const RESUMEN_URL = N8N + "/webhook/resumen-mes";
 const COMFANDI_URL = N8N + "/webhook/comfandi";   // planes nuevos de Comfandi (eventos y hoteles, sin pasadías)
 const EMA_URL = N8N + "/webhook/salidas-ema";
+const AHORRO_URL = N8N + "/webhook/ahorro";   // saldo del ahorro de la casa, meta y movimientos
 const USO_URL = N8N + "/webhook/uso";   // junta el uso de cada celular (el tuyo y el de tu esposa) para verlo desde cualquiera
 const PUNTUAR_URL = N8N + "/webhook/lugar-puntuar";   // guarda la nota (1 a 10) de un lugar de las salidas   // salidas con Ema: veces por mes, gastos de cada salida y lugares
 const EMA_CHAT_URL = N8N + "/webhook/salidas-ema-chat";   // el guía de salidas
@@ -2924,7 +2977,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-11.120";
+const APP_VERSION = "2026-10-11.121";
 (function autoActualizar(){
   const patron = new RegExp("const APP_" + "VERSION = \"([^\"]+)\"");
   let ultima = 0;
@@ -4800,7 +4853,7 @@ let MODE = "chat";
    También se ven en Ajustes → «Uso de Armoni». Sirve para decidir qué mejorar según la tendencia. */
 const Uso = (function(){
   const K = "armoni.uso", DIAS = 90;
-  const NOMBRES = { chat: "Arm", mercar: "Check", dura: "Duración", mes: "Tu mes", balance: "Balance", recuerda: "Recuerda", credito: "Crédito carro", glim: "Glim", rest: "Restaurantes", ema: "Salidas Ema", gmail: "AT Gmail", ajustes: "Ajustes" };
+  const NOMBRES = { chat: "Arm", mercar: "Check", dura: "Duración", mes: "Tu mes", balance: "Balance", ahorro: "Ahorro", recuerda: "Recuerda", credito: "Crédito carro", glim: "Glim", rest: "Restaurantes", ema: "Salidas Ema", gmail: "AT Gmail", ajustes: "Ajustes" };
   const hoy = () => { const d = new Date(); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); };
   const lee = () => { try{ return JSON.parse(localStorage.getItem(K)) || { dias: {} }; }catch{ return { dias: {} }; } };
   const guarda = d => {
@@ -6437,8 +6490,8 @@ const Balance = (function(){
       if(d && Array.isArray(d.meses) && JSON.stringify(d) !== JSON.stringify(datos)){ datos = d; try{ localStorage.setItem("armoni.tumes.datos", JSON.stringify(d)); }catch{} pinta(false); }
     }catch{}
   }
-  /* el mes en curso no se muestra: se abre el primer día del mes siguiente, para la gráfica y para todo */
-  const meses = () => ((datos && datos.meses) || []).filter(m => m.mes !== mesHoy() && (m.gastos > 0 || m.ingresos > 0)).slice().sort((a, b) => a.mes.localeCompare(b.mes));
+  /* todos los meses, sin omitir ninguno (el que va en curso aparece marcado) */
+  const meses = () => ((datos && datos.meses) || []).filter(m => m.gastos > 0 || m.ingresos > 0).slice().sort((a, b) => a.mes.localeCompare(b.mes));
 
   /* «General»: suma todos los meses cerrados (ingresos, gastos y cada categoría) */
   function agregado(ms){
@@ -6472,7 +6525,7 @@ const Balance = (function(){
   function resumen(M){
     const ing = M.ingresos || 0, gas = M.gastos || 0, bal = ing - gas, uso = ing ? Math.min(100, gas / ing * 100) : 100;
     return '<div class="balResumen">' +
-      '<div class="rsTit"><small>Resumen general</small><b>' + (M.mes === "general" ? 'Todo junto · ' + M.n + (M.n === 1 ? ' mes' : ' meses') + '</b><small style="margin-top:2px">' + esc(rango_(M.desde, M.hasta)) + ' · sin ' + esc(mesNombre(mesHoy())) + ', que sigue en curso</small>' : esc(cap(mesNombre(M.mes))) + ' ' + M.mes.slice(0, 4) + '</b>') + '</div>' +
+      '<div class="rsTit"><small>Resumen general</small><b>' + (M.mes === "general" ? 'Todo junto · ' + M.n + (M.n === 1 ? ' mes' : ' meses') + '</b><small style="margin-top:2px">' + esc(rango_(M.desde, M.hasta)) + '</small>' : esc(cap(mesNombre(M.mes))) + ' ' + M.mes.slice(0, 4) + (M.mes === mesHoy() ? ' · en curso' : '') + '</b>') + '</div>' +
       '<div class="rsBal ' + (bal >= 0 ? 'pos' : 'neg') + '"><span>Balance</span><strong>' + peso(bal) + '</strong><small>' + (M.mes === "general" ? (bal >= 0 ? 'Lo que quedó en total' : 'En total salió más de lo que entró') : (bal >= 0 ? 'Lo que quedó este mes' : 'Salió más de lo que entró')) + '</small></div>' +
       '<div class="rsDos">' +
         '<div class="rsIng"><i aria-hidden="true">↑</i><span>Ingresos</span><b>' + peso(ing) + '</b></div>' +
@@ -6515,10 +6568,10 @@ const Balance = (function(){
   function pinta(animar){
     if(!view) return;
     const cuerpo = view.querySelector("#balCuerpo"), ms = meses();
-    if(!ms.length){ cuerpo.innerHTML = '<p class="gEmpty">Todavía no hay meses cerrados. El mes en curso se abre el primer día del mes siguiente.</p>'; return; }
+    if(!ms.length){ cuerpo.innerHTML = '<p class="gEmpty">Todavía no hay meses con movimientos.</p>'; return; }
     if(!mes || (mes !== "general" && !ms.find(m => m.mes === mes))) mes = ms[ms.length - 1].mes;
     const M = mes === "general" ? agregado(ms) : ms.find(m => m.mes === mes);
-    const chips = '<button type="button" role="tab" data-m="general" class="gen" aria-selected="' + (mes === "general") + '">General</button>' + ms.slice(-12).map(m => '<button type="button" role="tab" data-m="' + m.mes + '" aria-selected="' + (m.mes === mes) + '">' + esc(mesNombre(m.mes).slice(0, 3)) + '</button>').join("");
+    const chips = '<button type="button" role="tab" data-m="general" class="gen" aria-selected="' + (mes === "general") + '">General</button>' + ms.slice(-12).map(m => '<button type="button" role="tab" data-m="' + m.mes + '" aria-selected="' + (m.mes === mes) + '">' + esc(mesNombre(m.mes).slice(0, 3)) + (m.mes === mesHoy() ? ' ·' : '') + '</button>').join("");
     cuerpo.innerHTML =
       '<div class="balPest" role="tablist"><button type="button" role="tab" data-p="valores" aria-selected="' + (pestana === "valores") + '">Valores</button><button type="button" role="tab" data-p="grafica" aria-selected="' + (pestana === "grafica") + '">Gráfica</button></div>' +
       (pestana === "valores"
@@ -6597,6 +6650,121 @@ const Balance = (function(){
   return { refresh };
 })();
 
+/* ═════════ AHORRO DE LA CASA ═════════
+   El saldo = con cuánto empezaron (se guarda una vez) + lo que se guarda − lo que se saca.
+   Guardar es un gasto con categoría Ahorro (sale del presupuesto del mes y Balance lo cuenta como ahorro);
+   sacar es un ingreso con categoría Ahorro. La meta y el saldo inicial viven en el flujo «ahorro» de n8n. */
+const Ahorro = (function(){
+  const view = document.getElementById("ahorroView");
+  const KEY = "armoni.ahorro";
+  const esc = t => String(t == null ? "" : t).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const peso = n => (n < 0 ? "-" : "") + "$" + Math.round(Math.abs(n)).toLocaleString("es-CO");
+  const hoyISO = () => { const d = new Date(); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); };
+  const fechaLinda = f => { try{ return new Date(f + "T12:00:00").toLocaleDateString("es-CO", { day: "numeric", month: "short", year: f.slice(0, 4) === hoyISO().slice(0, 4) ? undefined : "numeric" }).replace(".", ""); }catch{ return f; } };
+  const mesLargo = m => { const t = new Date(+m.slice(0, 4), +m.slice(5, 7) - 1, 1).toLocaleDateString("es-CO", { month: "long", year: "numeric" }); return t.charAt(0).toUpperCase() + t.slice(1); };
+  let datos = null, cargando = false;
+  try{ datos = JSON.parse(localStorage.getItem(KEY)); }catch{}
+
+  async function pide(cuerpo){
+    const r = await fetch(AHORRO_URL, { method: "POST", body: JSON.stringify(Object.assign({ token: MERCADO_TOKEN, accion: "ver" }, cuerpo || {})) });
+    const j = await r.json().catch(() => ({}));
+    if(!r.ok || !j || j.ok === false) throw new Error(j && j.error || "http " + r.status);
+    datos = j; try{ localStorage.setItem(KEY, JSON.stringify(j)); }catch{}
+    return j;
+  }
+  async function cargar(){
+    if(cargando) return; cargando = true;
+    try{ await pide(); pinta(); }
+    catch{ if(!datos) view.querySelector("#ahCuerpo").innerHTML = '<p class="gEmpty">No se pudo cargar el ahorro. Revisa tu internet y que el flujo «Ahorro» esté activo en n8n.</p>'; }
+    finally{ cargando = false; }
+  }
+
+  function pinta(){
+    const box = view.querySelector("#ahCuerpo");
+    if(!datos){ box.innerHTML = '<p class="gEmpty"><span class="dot" aria-hidden="true"></span>Cargando el ahorro…</p>'; return; }
+    const d = datos, movs = d.movimientos || [], meta = d.meta || 0, pct = meta ? Math.min(100, Math.max(0, d.saldo / meta * 100)) : 0;
+    const mesAct = hoyISO().slice(0, 7), esteMes = movs.filter(m => m.fecha.startsWith(mesAct)).reduce((a, m) => a + m.monto, 0);
+    if(!d.inicialFecha && !movs.length){
+      box.innerHTML = '<div class="ahCard ahVacio"><span class="ahIco" aria-hidden="true">' + ICO_AH + '</span><b>¿Cuánto tienen ahorrado hoy?</b><p>Empieza con lo que ya tienen guardado. Desde ahí, cada vez que guarden o saquen plata, Armoni lleva la cuenta.</p>' +
+        '<button type="button" class="mkBtn pri full" data-a="inicial">Poner lo que tenemos</button></div>';
+      return;
+    }
+    // agrupado por mes
+    const porMes = {};
+    movs.forEach(m => { (porMes[m.fecha.slice(0, 7)] = porMes[m.fecha.slice(0, 7)] || []).push(m); });
+    const lista = Object.keys(porMes).sort().reverse().map(k => {
+      const t = porMes[k].reduce((a, m) => a + m.monto, 0);
+      return '<div class="ahMes"><div class="ahMesCab"><span>' + esc(mesLargo(k)) + '</span><b class="' + (t >= 0 ? 'mas' : 'menos') + '">' + (t >= 0 ? '+' : '') + peso(t) + '</b></div>' +
+        porMes[k].map(m => '<div class="ahMov"><span class="ahMovIco ' + (m.monto >= 0 ? 'mas' : 'menos') + '" aria-hidden="true">' + (m.monto >= 0 ? '↑' : '↓') + '</span><span class="ahMovTx"><b>' + esc(m.monto >= 0 ? (m.nota || 'Guardado') : (m.nota || 'Sacado')) + '</b><small>' + esc(fechaLinda(m.fecha)) + '</small></span><b class="' + (m.monto >= 0 ? 'mas' : 'menos') + '">' + (m.monto >= 0 ? '+' : '') + peso(m.monto) + '</b></div>').join("") + '</div>';
+    }).join("");
+    box.innerHTML =
+      '<div class="ahCard">' +
+        '<small class="ahEt">Tenemos ahorrado</small>' +
+        '<strong class="ahSaldo">' + peso(d.saldo) + '</strong>' +
+        '<p class="ahSub">' + (esteMes ? (esteMes > 0 ? '+' : '') + peso(esteMes) + ' este mes' : 'Sin movimientos este mes') + '</p>' +
+        (meta
+          ? '<div class="ahMeta"><div class="ahBarra" role="img" aria-label="Van en el ' + Math.round(pct) + '% de la meta"><i style="width:' + pct.toFixed(1) + '%"></i></div><div class="ahMetaTx"><span>' + Math.round(pct) + '% de la meta</span><button type="button" data-a="meta">Meta ' + peso(meta) + '</button></div>' +
+            (d.saldo < meta ? '<small class="ahFalta">Faltan ' + peso(meta - d.saldo) + '</small>' : '<small class="ahFalta ok">¡Meta cumplida! 🎉</small>') + '</div>'
+          : '<button type="button" class="ahPonMeta" data-a="meta">+ Ponerle una meta</button>') +
+        '<div class="ahBtns"><button type="button" class="ahBtn mas" data-a="guardar"><span aria-hidden="true">+</span>Guardar</button><button type="button" class="ahBtn menos" data-a="sacar"><span aria-hidden="true">−</span>Sacar</button></div>' +
+      '</div>' +
+      (lista ? '<div class="mkSec">Movimientos</div><div class="ahLista">' + lista + '</div>' : '') +
+      '<p class="ahInicial">Empezamos con ' + peso(d.inicial || 0) + (d.inicialFecha ? ' el ' + esc(fechaLinda(d.inicialFecha)) : '') + ' · <button type="button" data-a="inicial">cambiar</button></p>';
+  }
+
+  /* ventana para guardar, sacar, poner la meta o el saldo inicial */
+  function ventana(modo){
+    if(document.querySelector(".pgScrim.ahScrim")) return;
+    const T = { guardar: ["Guardar en el ahorro", "¿Cuánto guardaron?", "Guardar"], sacar: ["Sacar del ahorro", "¿Cuánto sacaron?", "Sacar"], meta: ["Meta de ahorro", "¿Cuánto quieren juntar?", "Poner meta"], inicial: ["Lo que tenemos hoy", "¿Cuánto tienen ahorrado hoy?", "Guardar"] }[modo];
+    const conNota = modo === "guardar" || modo === "sacar";
+    const scrim = document.createElement("div");
+    scrim.className = "pgScrim seScrim ahScrim";
+    scrim.innerHTML = '<div class="inWrap"><div class="pgCard inCard" role="dialog" aria-modal="true" aria-labelledby="ahT">' +
+      '<h3 id="ahT">' + T[0] + '</h3><div class="inBody">' +
+      '<label class="fmMonto" for="ahMonto"><span class="fmMontoLbl">' + T[1] + '</span><span class="fmMontoIn"><b>$</b><input id="ahMonto" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" placeholder="0"></span></label>' +
+      (conNota ? '<label class="inLbl" for="ahNota">' + (modo === "guardar" ? '¿De dónde salió?' : '¿Para qué?') + ' <span style="font-weight:400;letter-spacing:0;text-transform:none">(opcional)</span></label><input id="ahNota" type="text" maxlength="80" autocomplete="off" placeholder="' + (modo === "guardar" ? 'Prima, sobrante del mes…' : 'Vacaciones, imprevisto…') + '">' : '') +
+      '<p class="inErr" id="ahErr" role="alert"></p></div>' +
+      '<div class="pgRow"><button type="button" class="pgNo" id="ahNo">Cancelar</button><button type="button" class="pgSi" id="ahSi" disabled>' + T[2] + '</button></div></div></div>';
+    document.body.appendChild(scrim);
+    requestAnimationFrame(() => scrim.classList.add("on"));
+    const $ = id => scrim.querySelector("#" + id), inp = $("ahMonto"), si = $("ahSi");
+    let monto = 0, guardando = false;
+    const cierra = () => { document.removeEventListener("keydown", tecla); scrim.classList.remove("on"); setTimeout(() => scrim.remove(), 340); };
+    const tecla = e => { if(e.key === "Escape" && !guardando) cierra(); };
+    document.addEventListener("keydown", tecla);
+    scrim.addEventListener("click", e => { if(e.target === scrim && !guardando && !monto) cierra(); });
+    $("ahNo").addEventListener("click", () => { if(!guardando) cierra(); });
+    inp.addEventListener("input", () => { monto = +inp.value.replace(/\D/g, "").slice(0, 12) || 0; inp.value = monto ? monto.toLocaleString("es-CO") : ""; si.disabled = !(monto > 0); });
+    if(modo === "meta" && datos && datos.meta){ monto = datos.meta; inp.value = monto.toLocaleString("es-CO"); si.disabled = false; }
+    setTimeout(() => inp.focus(), 300);
+    si.addEventListener("click", async () => {
+      if(guardando || !(monto > 0)) return;
+      if(modo === "sacar" && datos && monto > datos.saldo && !confirm("Eso es más de lo que hay ahorrado (" + peso(datos.saldo) + "). ¿Igual lo anoto?")) return;
+      guardando = true; si.disabled = true; si.textContent = "Guardando…"; $("ahErr").textContent = "";
+      try{
+        if(modo === "guardar" || modo === "sacar"){
+          const nota = ($("ahNota").value || "").trim();
+          const r = await fetch(MOVIMIENTO_URL, { method: "POST", body: JSON.stringify({ token: MERCADO_TOKEN, tipo: modo === "guardar" ? "Gasto" : "Ingreso", categoria: "Ahorro", concepto: modo === "guardar" ? "Ahorro" : "Retiro del ahorro", monto, fecha: hoyISO(), nota }) });
+          const j = await r.json().catch(() => ({}));
+          if(!r.ok || j.ok === false) throw new Error(j.error === "categoria" ? "Falta actualizar el flujo «movimiento-nuevo» en n8n para poder sacar del ahorro." : "");
+          await pide().catch(() => {});
+        } else {
+          await pide({ accion: modo, valor: monto, fecha: hoyISO() });
+        }
+        cierra(); pinta();
+        avisoOk(modo === "guardar" ? "Guardado en el ahorro" : modo === "sacar" ? "Sacado del ahorro" : modo === "meta" ? "Meta lista" : "Listo", peso(monto));
+      }catch(e){
+        guardando = false; si.disabled = false; si.textContent = T[2];
+        $("ahErr").textContent = (e && e.message) || "No se pudo guardar. Revisa tu internet y que el flujo «Ahorro» esté activo en n8n.";
+      }
+    });
+  }
+  const ICO_AH = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 10.5c0-3.6-3.1-6-7-6s-7 2.4-7 6c0 2 .9 3.6 2.4 4.7V19h3v-2h3.2v2h3v-3.8c1-.7 1.8-1.6 2.2-2.7H21v-3h-1.8"/><path d="M9.5 7.6h4"/><circle cx="15.5" cy="10" r=".6" fill="currentColor"/></svg>';
+  view.addEventListener("click", e => { const b = e.target.closest("[data-a]"); if(b) ventana(b.dataset.a); });
+  function refresh(){ pinta(); cargar(); }
+  return { refresh };
+})();
+
 const Drawer = (function(){
   const el = document.getElementById("drawer");
   const btn = document.getElementById("menuBtn");
@@ -6610,6 +6778,7 @@ const Drawer = (function(){
   const navMercar = document.getElementById("navMercar");
   const navMes = document.getElementById("navMes");
   const navBalance = document.getElementById("navBalance");
+  const navAhorro = document.getElementById("navAhorro");
   const navAjustes = document.getElementById("navAjustes");
   const navControl = document.getElementById("navControl");
   const navControlBtn = document.getElementById("navControlBtn");
@@ -6625,9 +6794,9 @@ const Drawer = (function(){
   const navDura = document.getElementById("navDura");
   const setMercarG = on => { navMercarG.classList.toggle("abierto", on); navMercarBtn.setAttribute("aria-expanded", String(on)); };
   navMercarBtn.addEventListener("click", () => setMercarG(!navMercarG.classList.contains("abierto")));
-  const NAV = { chat: navChat, rest: navRest, ema: navEma, credito: navCredito, gmail: navGmail, glim: navGlim, recuerda: navRecuerda, mercar: navMercar, dura: navDura, mes: navMes, balance: navBalance, ajustes: navAjustes };
-  const SUB = { chat: "Presupuesto de la casa", rest: "Restaurantes", ema: "Salidas Ema", credito: "Crédito Carro", gmail: "AT Gmail", glim: "Glim", recuerda: "Recuerda", mercar: "A mercar", dura: "Duración", mes: "Tu mes", balance: "Balance", ajustes: "Ajustes" };
-  const PLACEHOLDER = { chat: "Escribe aquí…", rest: "¿Qué se te antoja?", ema: "¿A dónde llevamos a Ema?", credito: "Pregúntale sobre el crédito…", gmail: "", glim: "", recuerda: "", mercar: "", dura: "", mes: "", balance: "", ajustes: "" };
+  const NAV = { chat: navChat, rest: navRest, ema: navEma, credito: navCredito, gmail: navGmail, glim: navGlim, recuerda: navRecuerda, mercar: navMercar, dura: navDura, mes: navMes, balance: navBalance, ahorro: navAhorro, ajustes: navAjustes };
+  const SUB = { chat: "Presupuesto de la casa", rest: "Restaurantes", ema: "Salidas Ema", credito: "Crédito Carro", gmail: "AT Gmail", glim: "Glim", recuerda: "Recuerda", mercar: "A mercar", dura: "Duración", mes: "Tu mes", balance: "Balance", ahorro: "Ahorro", ajustes: "Ajustes" };
+  const PLACEHOLDER = { chat: "Escribe aquí…", rest: "¿Qué se te antoja?", ema: "¿A dónde llevamos a Ema?", credito: "Pregúntale sobre el crédito…", gmail: "", glim: "", recuerda: "", mercar: "", dura: "", mes: "", balance: "", ahorro: "", ajustes: "" };
 
   /* marca del menú */
   const m2 = document.getElementById("mark2");
@@ -6683,9 +6852,10 @@ const Drawer = (function(){
     document.body.classList.toggle("mode-dura", mode === "dura");
     document.body.classList.toggle("mode-mes", mode === "mes");
     document.body.classList.toggle("mode-balance", mode === "balance");
+    document.body.classList.toggle("mode-ahorro", mode === "ahorro");
     document.body.classList.toggle("mode-ajustes", mode === "ajustes");
     Object.entries(NAV).forEach(([m, b]) => { if(m === mode) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current"); });
-    const enControl = mode === "mes" || mode === "recuerda" || mode === "balance";
+    const enControl = mode === "mes" || mode === "recuerda" || mode === "balance" || mode === "ahorro";
     navControl.classList.toggle("activo", enControl);
     if(enControl) setControl(true);
     const enSalidas = mode === "rest" || mode === "ema";
@@ -6711,6 +6881,7 @@ const Drawer = (function(){
       if(mode === "dura") Mercar.dura(true);
       if(mode === "mes") TuMes.refresh();
       if(mode === "balance") Balance.refresh();
+      if(mode === "ahorro") Ahorro.refresh();
     }
     close(0, 1, true);   // al navegar, el menú se cierra rápido: el contenido ya está listo, no hay que esperarlo
   }
@@ -6729,6 +6900,7 @@ const Drawer = (function(){
   navDura.addEventListener("click", () => go("dura"));
   navMes.addEventListener("click", () => go("mes"));
   navBalance.addEventListener("click", () => go("balance"));
+  navAhorro.addEventListener("click", () => go("ahorro"));
   navAjustes.addEventListener("click", () => go("ajustes"));
 
   /* deslizar el menú hacia la izquierda lo cierra: sigue el dedo 1:1 y suelta con su velocidad */
@@ -7973,7 +8145,7 @@ const Mercar = (function(){
         ? '<button type="button" class="mkBtn pri full" id="mkSeguir">Seguir revisión · ' + parcial.idx + '/' + parcial.cola.length + '</button>' +
           '<button type="button" class="mkBtn sec full" id="mkDescartarParcial" style="margin-top:10px">Descartar y empezar de nuevo</button>'
         : '<button type="button" class="mkBtn pri full" id="mkEmpezar"' + (ps.length ? '' : ' disabled') + '>Empezar revisión</button>') +
-      (canasta.length ? '<div class="mkMama mkCanasta" id="mkCanastaCaja" role="button" tabindex="0" style="cursor:pointer"><b>🧺 En tu canasta · toca comprarlo:</b><div class="mkChips">' + canasta.map(p => '<span>' + emojiMercado(baseDe(p), p.grupo) + ' ' + esc(baseDe(p)) + '' + '</span>').join("") + '</div></div>' : '') +
+      (canasta.length ? '<div class="mkMama mkCanasta" id="mkCanastaCaja" role="button" tabindex="0" style="cursor:pointer"><b>🧺 En tu canasta</b><div class="mkChips">' + canasta.map(p => '<span>' + emojiMercado(baseDe(p), p.grupo) + ' ' + esc(baseDe(p)) + '' + '</span>').join("") + '</div></div>' : '') +
       (mama.length ? '<div class="mkMama" id="mkMamaCaja" role="button" tabindex="0" style="cursor:pointer"><b>Tu mamá dice que se acabó:</b><div class="mkChips">' + mama.map(p => '<span>' + emojiMercado(baseDe(p), p.grupo) + ' ' + esc(baseDe(p)) + '</span>').join("") + '</div></div>' : '') +
       '</div>';
     const ICO = {
@@ -7991,7 +8163,7 @@ const Mercar = (function(){
     if(bd) bd.addEventListener("click", () => { if(confirm("¿Descartar la revisión que dejaste a medias?")){ borraPartida(); inicio(); } });
     const cc = document.getElementById("mkCanastaCaja");
     if(cc){
-      const abrirCan = () => final(ps.filter(p => p.falta), false);
+      const abrirCan = () => final(ps.filter(p => p.falta), false, "canasta");
       cc.addEventListener("click", abrirCan);
       cc.addEventListener("keydown", e => { if(e.key === "Enter" || e.key === " "){ e.preventDefault(); abrirCan(); } });
     }
@@ -8361,7 +8533,7 @@ const Mercar = (function(){
     /* guarda en la torre lo que falta y lo que ya no falta */
     if(faltan.length) post(MERCADO_MARCAR_URL, { ids: faltan.map(p => p.id), falta: true, origen: "Juego" }).catch(() => {});
     if(yaHay.length) post(MERCADO_MARCAR_URL, { ids: yaHay.map(p => p.id), falta: false }).catch(() => {});
-    cola.forEach((p, i) => { const f = decision[i] === "no"; if(f && !esMama(p)) p.marcadoPor = "Juego"; if(!f) p.marcadoPor = null; p.falta = f; });
+    cola.forEach((p, i) => { const f = decision[i] === "no"; if(f && !esMama(p)) p.marcadoPor = "Juego"; if(!f) p.marcadoPor = null; if(f && !p.falta) anotaDejado([p.id], hoyISO()); if(!f) anotaDejado([p.id], null); p.falta = f; });
     guarda();
     final(faltan, true);
   }
@@ -8377,7 +8549,7 @@ const Mercar = (function(){
   };
 
   /* ── la lista final ── */
-  function final(items, celebrar){
+  function final(items, celebrar, desde){
     estado = "lista"; fechaCompra = hoyISO();
     lista = items.map(p => ({ p, comprar: true }));
     if(!items.length){
@@ -8388,13 +8560,13 @@ const Mercar = (function(){
     stage.innerHTML =
       '<div class="mkFin">' + (celebrar && !REDUCED ? confeti() : '') +
         (celebrar ? marcador() : '') +
-        '<h3>' + (celebrar ? '¡Revisión lista!' : 'Lista pendiente') + '</h3>' +
-        '<p>' + items.length + (items.length === 1 ? ' cosa' : ' cosas') + ' por comprar · toca para quitar lo que no compres</p>' +
+        '<h3>' + (celebrar ? '¡Revisión lista!' : desde === "canasta" ? '🧺 En tu canasta' : 'Lista pendiente') + '</h3>' +
+        '<p>' + items.length + (items.length === 1 ? ' cosa' : ' cosas') + (desde === "canasta" ? ' · toca para quitar lo que no compres' : ' por comprar · toca para quitar lo que no compres') + '</p>' +
         (celebrar && copiado ? '<div class="mkCopiado">✓ Lista copiada, ya la puedes pegar</div>' : '') +
       '</div>' +
       '<div class="gList mkLista" id="mkLista">' + lista.map((x, i) =>
         '<div class="gRow" data-i="' + i + '"><span class="mkCheck">' + ICO_OK + '</span><span class="gTx"><b>' + emojiMercado(baseDe(x.p), x.p.grupo) + ' ' + esc(baseDe(x.p)) + '</b><small>' +
-        (detDe(x.p) ? '<em class="mkDet">' + esc(detDe(x.p)) + '</em> · ' : '') + esc(x.p.grupo) + (esMama(x.p) ? ' · lo marcó tu mamá' : '') + '</small></span></div>').join("") + '</div>' +
+        (detDe(x.p) ? '<em class="mkDet">' + esc(detDe(x.p)) + '</em> · ' : '') + esc(x.p.grupo) + (esMama(x.p) ? ' · lo marcó tu mamá' : '') + (haceCanasta(x.p) ? ' · <em class="mkHace">en la canasta ' + haceCanasta(x.p) + '</em>' : '') + '</small></span></div>').join("") + '</div>' +
       '<div class="mkAcciones"><button type="button" class="mkBtn sec full" id="mkCompartir">Compartir</button>' +
       '<button type="button" class="mkBtn pri full" id="mkHecho">Ya hice el mercado</button>' +
       '<button type="button" class="mkBtn sec full" id="mkDescartar">Descartar lista</button>' +
@@ -8604,7 +8776,12 @@ const Mercar = (function(){
   const leeAcabo = () => { try{ return JSON.parse(localStorage.getItem(AKEY)) || {}; }catch{ return {}; } };
   const guardaAcabo = m => { try{ localStorage.setItem(AKEY, JSON.stringify(m)); }catch{} };
   /* hace cuánto se dejó en la canasta: desde el día en que se marcó (si no, desde que se acabó) */
-  const enCanastaDesde = p => p.falta ? (p.marcadoEl ? String(p.marcadoEl).slice(0, 10) : (p.acaboEl && p.acaboEl <= hoyISO() ? p.acaboEl : null)) : null;
+  /* el día en que se dejó: lo guardado en este celular, «Marcado el» de Notion (texto u objeto) o el día en que se acabó */
+  const DKEY = "armoni.mercar.dejado";
+  const leeDejado = () => { try{ return JSON.parse(localStorage.getItem(DKEY)) || {}; }catch{ return {}; } };
+  const anotaDejado = (ids, f) => { const m = leeDejado(); ids.forEach(id => { if(f) m[id] = f; else delete m[id]; }); try{ localStorage.setItem(DKEY, JSON.stringify(m)); }catch{} };
+  const fechaDe = v => { if(!v) return null; if(typeof v === "object") v = v.start || v.date || ""; const t = String(v).slice(0, 10); return /^\d{4}-\d{2}-\d{2}$/.test(t) ? t : null; };
+  const enCanastaDesde = p => { if(!p.falta) return null; const f = leeDejado()[p.id] || fechaDe(p.marcadoEl) || fechaDe(p.marcado_el) || (p.acaboEl && p.acaboEl <= hoyISO() ? p.acaboEl : null); return f && f <= hoyISO() ? f : null; };
   const haceCanasta = p => { const f = enCanastaDesde(p); if(!f) return ""; const d = diasDesde(f); return d === 0 ? "hoy" : d === 1 ? "ayer" : d < 14 ? "hace " + d + " días" : d < 60 ? "hace " + Math.round(d / 7) + " semanas" : "hace " + Math.round(d / 30) + " meses"; };
   const acaboDe = p => p.falta ? (p.acaboEl || (p.marcadoEl ? String(p.marcadoEl).slice(0, 10) : null)) : null;
   /* puede ser un día que ya pasó («se acabó») o uno que viene («se acaba mañana»: lo dejas listo antes) */
@@ -8657,10 +8834,10 @@ const Mercar = (function(){
       try{
         if(dentro){
           await post(MERCADO_MARCAR_URL, { ids: [p.id], falta: false });
-          p.falta = false; p.marcadoPor = null; limpiaAcabo([p.id]); delete p.acaboEl;
+          p.falta = false; p.marcadoPor = null; limpiaAcabo([p.id]); delete p.acaboEl; anotaDejado([p.id], null);
         } else {
           await post(MERCADO_MARCAR_URL, { ids: [p.id], falta: true, origen: "Canasta", fecha: fecha > hoy ? hoy : fecha, seAcaba: fecha });
-          p.falta = true; p.marcadoPor = "Canasta"; p.acaboEl = fecha;
+          p.falta = true; p.marcadoPor = "Canasta"; p.acaboEl = fecha; anotaDejado([p.id], hoyISO());
           const m = leeAcabo(); m[p.id] = fecha; guardaAcabo(m);
         }
         guarda(); cierra();
