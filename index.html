@@ -2906,7 +2906,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-11.115";
+const APP_VERSION = "2026-10-11.116";
 (function autoActualizar(){
   const patron = new RegExp("const APP_" + "VERSION = \"([^\"]+)\"");
   let ultima = 0;
@@ -6418,7 +6418,8 @@ const Balance = (function(){
       if(d && Array.isArray(d.meses) && JSON.stringify(d) !== JSON.stringify(datos)){ datos = d; try{ localStorage.setItem("armoni.tumes.datos", JSON.stringify(d)); }catch{} pinta(false); }
     }catch{}
   }
-  const meses = () => ((datos && datos.meses) || []).filter(m => m.gastos > 0 || m.ingresos > 0).slice().sort((a, b) => a.mes.localeCompare(b.mes));
+  /* el mes en curso no se muestra: se abre el primer día del mes siguiente, para la gráfica y para todo */
+  const meses = () => ((datos && datos.meses) || []).filter(m => m.mes !== mesHoy() && (m.gastos > 0 || m.ingresos > 0)).slice().sort((a, b) => a.mes.localeCompare(b.mes));
 
   /* reparte el mes en las tres partes de la regla */
   function reparto(M){
@@ -6443,7 +6444,7 @@ const Balance = (function(){
   function resumen(M){
     const ing = M.ingresos || 0, gas = M.gastos || 0, bal = ing - gas, uso = ing ? Math.min(100, gas / ing * 100) : 100;
     return '<div class="balResumen">' +
-      '<div class="rsTit"><small>Resumen general</small><b>' + esc(cap(mesNombre(M.mes))) + (M.mes === mesHoy() ? ' · en curso' : '') + '</b></div>' +
+      '<div class="rsTit"><small>Resumen general</small><b>' + esc(cap(mesNombre(M.mes))) + ' ' + M.mes.slice(0, 4) + '</b></div>' +
       '<div class="rsBal ' + (bal >= 0 ? 'pos' : 'neg') + '"><span>Balance</span><strong>' + peso(bal) + '</strong><small>' + (bal >= 0 ? 'Lo que quedó este mes' : 'Salió más de lo que entró') + '</small></div>' +
       '<div class="rsDos">' +
         '<div class="rsIng"><i aria-hidden="true">↑</i><span>Ingresos</span><b>' + peso(ing) + '</b></div>' +
@@ -6474,10 +6475,10 @@ const Balance = (function(){
   function pinta(animar){
     if(!view) return;
     const cuerpo = view.querySelector("#balCuerpo"), ms = meses();
-    if(!ms.length){ cuerpo.innerHTML = '<p class="gEmpty">Todavía no hay meses con movimientos.</p>'; return; }
-    if(!mes || !ms.find(m => m.mes === mes)){ const cerr = ms.filter(m => m.mes !== mesHoy()); mes = (cerr.length ? cerr[cerr.length - 1] : ms[ms.length - 1]).mes; }
+    if(!ms.length){ cuerpo.innerHTML = '<p class="gEmpty">Todavía no hay meses cerrados. El mes en curso se abre el primer día del mes siguiente.</p>'; return; }
+    if(!mes || !ms.find(m => m.mes === mes)) mes = ms[ms.length - 1].mes;
     const M = ms.find(m => m.mes === mes);
-    const chips = ms.slice(-12).map(m => '<button type="button" role="tab" data-m="' + m.mes + '" aria-selected="' + (m.mes === mes) + '">' + esc(mesNombre(m.mes).slice(0, 3)) + (m.mes === mesHoy() ? ' ·' : '') + '</button>').join("");
+    const chips = ms.slice(-12).map(m => '<button type="button" role="tab" data-m="' + m.mes + '" aria-selected="' + (m.mes === mes) + '">' + esc(mesNombre(m.mes).slice(0, 3)) + '</button>').join("");
     cuerpo.innerHTML =
       '<div class="balPest" role="tablist"><button type="button" role="tab" data-p="valores" aria-selected="' + (pestana === "valores") + '">Valores</button><button type="button" role="tab" data-p="grafica" aria-selected="' + (pestana === "grafica") + '">Gráfica</button></div>' +
       (pestana === "valores"
