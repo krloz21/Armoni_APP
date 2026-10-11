@@ -2118,8 +2118,13 @@ button{ transition:transform var(--t-tap) var(--ease-out); }
 .balGraf .pt.on{ r:6; }
 .balGraf .cruz{ stroke:rgba(var(--ink),.28); stroke-width:1; transition:all .2s ease; }
 .balSel{ margin-top:10px; padding:14px; border-radius:18px; border:1px solid var(--line); background:var(--panel); }
+.balMeses .gen, .selChips .gen{ font-weight:800; }
+.selChips{ display:flex; gap:6px; overflow-x:auto; margin:0 -4px 12px; padding:2px 4px 4px; scrollbar-width:none; }
+.selChips::-webkit-scrollbar{ display:none; }
+.selChips button{ flex:none; padding:7px 13px; border-radius:999px; border:1px solid var(--line); background:rgba(var(--ink),.04); color:var(--ghost); font:inherit; font-size:.8rem; font-weight:600; text-transform:capitalize; cursor:pointer; }
+.selChips button[aria-pressed="true"]{ color:var(--on-accent); border-color:transparent; background:linear-gradient(140deg, var(--cyan), var(--num-a)); }
 .selCab{ display:flex; align-items:baseline; gap:8px; margin-bottom:10px; }
-.selCab b{ font-size:.98rem; text-transform:capitalize; }
+.selCab b{ font-size:.98rem; }
 .selCab small{ font-size:.74rem; color:var(--dim); }
 .selTres{ display:grid; grid-template-columns:repeat(3, 1fr); gap:8px; }
 .selTres > div{ min-width:0; padding:10px 8px; border-radius:14px; background:rgba(var(--ink), .05); border-top:3px solid var(--c); }
@@ -2251,7 +2256,8 @@ button{ transition:transform var(--t-tap) var(--ease-out); }
 .emaDetCab{ display:flex; justify-content:space-between; align-items:baseline; gap:10px; font-size:.9rem; }
 .emaDetCab span{ font-weight:600; }
 .emaDetCab span::first-letter{ text-transform:uppercase; }
-.emaFrase{ font-size:.92rem; color:var(--ghost); margin-top:3px; }
+.emaFrase{ font-size:.84rem; color:var(--dim); margin-top:2px; }
+.emaMes{ align-self:flex-start; margin-bottom:5px; padding:3px 10px; border-radius:999px; font-size:.68rem; font-weight:800; letter-spacing:.14em; text-transform:uppercase; color:#ffb066; background:rgba(255,138,80,.14); border:1px solid rgba(255,138,80,.28); }
 .emaTx b.emaCuenta{ margin-top:0; font-size:1.3rem; line-height:1.15; }
 .emaDetCab b{ font-size:1.02rem; }
 .emaGastos{ margin-top:8px; }
@@ -2906,7 +2912,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-11.116";
+const APP_VERSION = "2026-10-11.117";
 (function autoActualizar(){
   const patron = new RegExp("const APP_" + "VERSION = \"([^\"]+)\"");
   let ultima = 0;
@@ -5361,8 +5367,9 @@ const SalidasEma = (function(){
     const lug = lugares().sort((a, b) => (a.ultima ? diasDesde(a.ultima) : 9999) - (b.ultima ? diasDesde(b.ultima) : 9999));
     stage.innerHTML =
       '<div class="emaCard' + (anim ? ' emaEntra' : '') + '">' +
-        '<div class="emaTop"><span class="emaEmo" aria-hidden="true">' + FOTO_EMA + '</span><div class="emaTx"><small>Salidas con Ema · ' + esc(mesNombre(hoyM)) + '</small>' +
-        '<span class="emaFrase">Este mes han salido</span><b class="emaCuenta"><span class="emaN">' + act.veces + '</span> ' + (act.veces === 1 ? 'vez' : 'veces') + '</b></div>' +
+        '<div class="emaTop"><span class="emaEmo" aria-hidden="true">' + FOTO_EMA + '</span><div class="emaTx"><span class="emaMes">' + esc(mesNombre(hoyM)) + '</span>' +
+        '<b class="emaCuenta"><span class="emaN">' + act.veces + '</span> ' + (act.veces === 1 ? 'salida' : 'salidas') + '</b>' +
+        '<span class="emaFrase">con Ema este mes</span></div>' +
         '<button type="button" class="emaMas" aria-label="Registrar salida"><span class="mas" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span><small>Registra salida</small></button></div>' +
         (sal.length
           ? '<div class="emaDiasTit">Los días que salieron</div><div class="emaDiasRow" role="tablist">' + chipsDias + '</div><div class="emaDetalle" id="emaDetalle">' + detalle(sal.find(q => q.fecha === abierta)) + '</div>'
@@ -6421,6 +6428,15 @@ const Balance = (function(){
   /* el mes en curso no se muestra: se abre el primer día del mes siguiente, para la gráfica y para todo */
   const meses = () => ((datos && datos.meses) || []).filter(m => m.mes !== mesHoy() && (m.gastos > 0 || m.ingresos > 0)).slice().sort((a, b) => a.mes.localeCompare(b.mes));
 
+  /* «General»: suma todos los meses cerrados (ingresos, gastos y cada categoría) */
+  function agregado(ms){
+    const cats = {};
+    ms.forEach(m => (m.categorias || []).forEach(c => { cats[c.nombre] = (cats[c.nombre] || 0) + c.total; }));
+    return { mes: "general", ingresos: ms.reduce((a, m) => a + (m.ingresos || 0), 0), gastos: ms.reduce((a, m) => a + m.gastos, 0), n: ms.length,
+      categorias: Object.entries(cats).map(([nombre, total]) => ({ nombre, total })).sort((a, b) => b.total - a.total),
+      desde: ms[0].mes, hasta: ms[ms.length - 1].mes };
+  }
+  const rango_ = (d, h) => cap(mesNombre(d).slice(0, 3)) + " " + d.slice(0, 4) + " – " + cap(mesNombre(h).slice(0, 3)) + " " + h.slice(0, 4);
   /* reparte el mes en las tres partes de la regla */
   function reparto(M){
     const cats = M.categorias || [];
@@ -6444,8 +6460,8 @@ const Balance = (function(){
   function resumen(M){
     const ing = M.ingresos || 0, gas = M.gastos || 0, bal = ing - gas, uso = ing ? Math.min(100, gas / ing * 100) : 100;
     return '<div class="balResumen">' +
-      '<div class="rsTit"><small>Resumen general</small><b>' + esc(cap(mesNombre(M.mes))) + ' ' + M.mes.slice(0, 4) + '</b></div>' +
-      '<div class="rsBal ' + (bal >= 0 ? 'pos' : 'neg') + '"><span>Balance</span><strong>' + peso(bal) + '</strong><small>' + (bal >= 0 ? 'Lo que quedó este mes' : 'Salió más de lo que entró') + '</small></div>' +
+      '<div class="rsTit"><small>Resumen general</small><b>' + (M.mes === "general" ? 'Todo junto · ' + M.n + (M.n === 1 ? ' mes' : ' meses') + '</b><small style="margin-top:2px">' + esc(rango_(M.desde, M.hasta)) + '</small>' : esc(cap(mesNombre(M.mes))) + ' ' + M.mes.slice(0, 4) + '</b>') + '</div>' +
+      '<div class="rsBal ' + (bal >= 0 ? 'pos' : 'neg') + '"><span>Balance</span><strong>' + peso(bal) + '</strong><small>' + (M.mes === "general" ? (bal >= 0 ? 'Lo que quedó en total' : 'En total salió más de lo que entró') : (bal >= 0 ? 'Lo que quedó este mes' : 'Salió más de lo que entró')) + '</small></div>' +
       '<div class="rsDos">' +
         '<div class="rsIng"><i aria-hidden="true">↑</i><span>Ingresos</span><b>' + peso(ing) + '</b></div>' +
         '<div class="rsGas"><i aria-hidden="true">↓</i><span>Gastos</span><b>' + peso(gas) + '</b></div>' +
@@ -6469,16 +6485,16 @@ const Balance = (function(){
             (filas.length ? filas.map((f, i) => '<div class="balFila" style="--i:' + i + ';--c:' + f.color + '"><span><u></u>' + esc(f.n) + '</span><em>' + peso(f.v) + ' · ' + Math.round(f.pct) + '%</em><i style="width:' + Math.max(3, f.v / mx * 100).toFixed(1) + '%"></i></div>').join("") : '<p class="gEmpty" style="margin:6px 0 0">Nada en esta parte este mes.</p>') +
           '</div></div></div>';
       }).join("") + '</div>' +
-      (R.gastaronMas ? '<p class="balAviso">⚠️ En ' + esc(mesNombre(M.mes)) + ' salió más de lo que entró: los porcentajes se miden sobre lo gastado.</p>' : '');
+      (R.gastaronMas ? '<p class="balAviso">⚠️ ' + (M.mes === "general" ? 'En total' : 'En ' + esc(mesNombre(M.mes))) + ' salió más de lo que entró: los porcentajes se miden sobre lo gastado.</p>' : '');
   }
 
   function pinta(animar){
     if(!view) return;
     const cuerpo = view.querySelector("#balCuerpo"), ms = meses();
     if(!ms.length){ cuerpo.innerHTML = '<p class="gEmpty">Todavía no hay meses cerrados. El mes en curso se abre el primer día del mes siguiente.</p>'; return; }
-    if(!mes || !ms.find(m => m.mes === mes)) mes = ms[ms.length - 1].mes;
-    const M = ms.find(m => m.mes === mes);
-    const chips = ms.slice(-12).map(m => '<button type="button" role="tab" data-m="' + m.mes + '" aria-selected="' + (m.mes === mes) + '">' + esc(mesNombre(m.mes).slice(0, 3)) + '</button>').join("");
+    if(!mes || (mes !== "general" && !ms.find(m => m.mes === mes))) mes = ms[ms.length - 1].mes;
+    const M = mes === "general" ? agregado(ms) : ms.find(m => m.mes === mes);
+    const chips = '<button type="button" role="tab" data-m="general" class="gen" aria-selected="' + (mes === "general") + '">General</button>' + ms.slice(-12).map(m => '<button type="button" role="tab" data-m="' + m.mes + '" aria-selected="' + (m.mes === mes) + '">' + esc(mesNombre(m.mes).slice(0, 3)) + '</button>').join("");
     cuerpo.innerHTML =
       '<div class="balPest" role="tablist"><button type="button" role="tab" data-p="valores" aria-selected="' + (pestana === "valores") + '">Valores</button><button type="button" role="tab" data-p="grafica" aria-selected="' + (pestana === "grafica") + '">Gráfica</button></div>' +
       (pestana === "valores"
@@ -6502,7 +6518,7 @@ const Balance = (function(){
     const g = view.querySelector("#balGraf"); if(!g) return;
     const pts = puntos();
     if(pts.length < 2){ g.innerHTML = '<p class="gEmpty" style="padding:14px">' + (vista === "anios" ? 'Cuando haya más de un año, aquí se comparan.' : 'Con dos meses o más aparece la evolución.') + '</p>'; view.querySelector("#balSel").innerHTML = ""; return; }
-    if(sel == null || !pts.find(p => p.k === sel)) sel = pts[pts.length - 1].k;
+    if(sel == null || (sel !== "general" && !pts.find(p => p.k === sel))) sel = pts[pts.length - 1].k;
     const W = 360, H = 230, L = 50, Rr = 14, T = 16, B = 28;
     const vals = pts.flatMap(p => [p.gasto, p.quedo, p.ing]), lo = Math.min(0, ...vals), hi = Math.max(...vals);
     const paso = (() => { const r = (hi - lo) / 4, e = Math.pow(10, Math.floor(Math.log10(r || 1))), f = r / e; return (f <= 1 ? 1 : f <= 2 ? 2 : f <= 5 ? 5 : 10) * e; })();
@@ -6522,12 +6538,18 @@ const Balance = (function(){
       dots("ing") + dots("gasto") + dots("quedo") + '<line class="cruz" y1="' + T + '" y2="' + (H - B) + '" x1="-9" x2="-9"/></svg>';
     const svg = g.querySelector("svg"), cruz = g.querySelector(".cruz");
     const marca = () => {
-      const i = Math.max(0, pts.findIndex(p => p.k === sel)), p = pts[i];
-      cruz.setAttribute("x1", X(i).toFixed(1)); cruz.setAttribute("x2", X(i).toFixed(1));
-      g.querySelectorAll(".pt").forEach(c => c.classList.toggle("on", c.dataset.k === sel));
-      view.querySelector("#balSel").innerHTML = '<div class="selCab"><b>' + esc(p.largo) + '</b>' + (p.curso ? '<small>en curso</small>' : '') + '</div>' +
+      const gen = sel === "general", i = Math.max(0, pts.findIndex(p => p.k === sel));
+      const p = gen ? { largo: "General · " + pts.length + (vista === "anios" ? (pts.length === 1 ? " año" : " años") : (pts.length === 1 ? " mes" : " meses")), ing: pts.reduce((a, q) => a + q.ing, 0), gasto: pts.reduce((a, q) => a + q.gasto, 0), quedo: pts.reduce((a, q) => a + q.quedo, 0) } : pts[i];
+      const x = gen ? -9 : X(i).toFixed(1);
+      cruz.setAttribute("x1", x); cruz.setAttribute("x2", x);
+      g.querySelectorAll(".pt").forEach(c => c.classList.toggle("on", !gen && c.dataset.k === sel));
+      const cintas = '<button type="button" data-s="general" class="gen" aria-pressed="' + gen + '">General</button>' + pts.map(q => '<button type="button" data-s="' + esc(q.k) + '" aria-pressed="' + (q.k === sel) + '">' + esc(vista === "anios" ? q.et : q.et + (rango > 12 || pts.length > 12 ? " " + q.k.slice(2, 4) : "")) + '</button>').join("");
+      view.querySelector("#balSel").innerHTML = '<div class="selChips" role="group" aria-label="Elegir mes">' + cintas + '</div>' +
+        '<div class="selCab"><b>' + esc(p.largo) + '</b>' + (p.curso ? '<small>en curso</small>' : '') + '</div>' +
         '<div class="selTres"><div class="i"><span>Entró</span><b>' + peso(p.ing) + '</b></div><div class="g"><span>Gastado</span><b>' + peso(p.gasto) + '</b></div><div class="q ' + (p.quedo >= 0 ? 'pos' : 'neg') + '"><span>Quedó</span><b>' + peso(p.quedo) + '</b></div></div>';
+      const sc = view.querySelector(".selChips [aria-pressed=\"true\"]"); if(sc && sc.scrollIntoView) sc.scrollIntoView({ block: "nearest", inline: "center" });
     };
+    view.querySelector("#balSel").onclick = e => { const c = e.target.closest("[data-s]"); if(c){ sel = c.dataset.s; marca(); } };
     const elige = e => {
       const r = svg.getBoundingClientRect(), x = (e.clientX - r.left) / r.width * W;
       const i = Math.max(0, Math.min(pts.length - 1, Math.round((x - L) / ((W - L - Rr) / (pts.length - 1)))));
