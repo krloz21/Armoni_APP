@@ -2767,7 +2767,7 @@ body[class*="mode-"] #masIngreso{ display:none; }
       <div class="navGrupo" id="navControl">
         <button type="button" id="navControlBtn" aria-expanded="false" aria-controls="navControlSub">
           <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l9 5-9 5-9-5z"/><path d="M3 12.5l9 5 9-5"/><path d="M3 17l9 5 9-5"/></svg></span>
-          <span class="txt"><b>Control</b><span>Tu mes, Balance, Ahorro y Dudas</span></span>
+          <span class="txt"><b>Control</b><span>Tu mes, Balance, Recuerda y Ahorro</span></span>
           <span class="chev" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
         </button>
         <div class="navSub" id="navControlSub"><div class="navSubIn">
@@ -2786,11 +2786,6 @@ body[class*="mode-"] #masIngreso{ display:none; }
       <button type="button" id="navAhorro">
         <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 10.5c0-3.6-3.1-6-7-6s-7 2.4-7 6c0 2 .9 3.6 2.4 4.7V19h3v-2h3.2v2h3v-3.8c1-.7 1.8-1.6 2.2-2.7H21v-3h-1.8"/><path d="M9.5 7.6h4"/><circle cx="15.5" cy="10" r=".6" fill="currentColor"/></svg></span>
         <span class="txt"><b>Ahorro</b><span>Lo que tenemos guardado</span></span>
-      </button>
-      <button type="button" id="navDudas">
-        <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8.5 8.5 0 0 1-12.4 7.6L3 21l1.4-5.6A8.5 8.5 0 1 1 21 12z"/><path d="M9.6 9.4a2.5 2.5 0 0 1 4.8.8c0 1.7-2.4 2-2.4 3.4M12 16.4h.01"/></svg></span>
-        <span class="txt"><b>Dudas</b><span>Lo que Armoni quiere preguntarte</span></span>
-        <span class="navBadge" id="navDudasN" hidden></span>
       </button>
         </div></div>
       </div>
@@ -2826,6 +2821,11 @@ body[class*="mode-"] #masIngreso{ display:none; }
       <button type="button" id="navAjustes">
         <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></svg></span>
         <span class="txt"><b>Ajustes</b><span>Apariencia y notificaciones</span></span>
+      </button>
+      <button type="button" id="navDudas">
+        <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8.5 8.5 0 0 1-12.4 7.6L3 21l1.4-5.6A8.5 8.5 0 1 1 21 12z"/><path d="M9.6 9.4a2.5 2.5 0 0 1 4.8.8c0 1.7-2.4 2-2.4 3.4M12 16.4h.01"/></svg></span>
+        <span class="txt"><b>Dudas</b><span>Lo que Armoni quiere preguntarte</span></span>
+        <span class="navBadge" id="navDudasN" hidden></span>
       </button>
     </nav>
 
@@ -3113,7 +3113,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-11.138";
+const APP_VERSION = "2026-10-11.139";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -7384,7 +7384,7 @@ const Drawer = (function(){
     document.body.classList.toggle("mode-dudas", mode === "dudas");
     document.body.classList.toggle("mode-ajustes", mode === "ajustes");
     Object.entries(NAV).forEach(([m, b]) => { if(m === mode) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current"); });
-    const enControl = mode === "mes" || mode === "recuerda" || mode === "balance" || mode === "ahorro" || mode === "dudas";
+    const enControl = mode === "mes" || mode === "recuerda" || mode === "balance" || mode === "ahorro";
     navControl.classList.toggle("activo", enControl);
     if(enControl) setControl(true);
     const enSalidas = mode === "rest" || mode === "ema";
