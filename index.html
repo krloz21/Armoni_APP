@@ -1023,15 +1023,77 @@ body.mode-gmail footer, body.mode-glim footer{ display:none; }
 /* ── ajustes, abajo del menú ── */
 .dFoot{ margin-top:auto; padding:14px 4px 2px; border-top:1px solid var(--line); }
 .dFootLbl{ font-size:.7rem; text-transform:uppercase; letter-spacing:.08em; color:var(--dim); font-weight:600; margin:0 8px 10px; }
-.inEma{ margin:14px 0 0; padding:12px 12px 14px; border-radius:16px; border:1px solid rgba(255,138,80,.32); background:rgba(255,138,80,.07); animation:duSube .45s var(--ease-out) backwards; }
-.inEma[hidden], #inLugarNuevo[hidden]{ display:none; }
-.inEmaT{ font-size:.9rem; font-weight:700; margin-bottom:2px; }
-.inEma .inLbl{ margin-top:12px; }
-.inEmaNota{ margin:12px 0 0; font-size:.8rem; color:var(--ghost); }
-.inStars{ display:grid; grid-template-columns:repeat(5, 1fr); gap:6px; }
-.inStars button{ flex:1; padding:10px 0; border-radius:12px; border:1px solid var(--line); background:rgba(var(--ink),.05); color:var(--ghost); font:inherit; font-size:.92rem; font-weight:600; line-height:1; cursor:pointer; transition:color .2s, background .2s, transform .15s var(--ease-spring); }
-.inStars button.on{ color:#ffb066; background:rgba(255,138,80,.16); border-color:rgba(255,138,80,.4); }
-.inStars button:active{ transform:scale(.9); }
+/* ── «+»: menú de registro ── */
+#masIngreso svg{ transition:transform .4s var(--ease-spring); }
+#masIngreso.abierto svg{ transform:rotate(45deg); }
+#masIngreso.abierto{ color:var(--cyan); border-color:rgba(var(--cyan-rgb),.5); }
+.masMenu{ position:fixed; z-index:96; width:min(280px, calc(100vw - 24px)); padding:8px; border-radius:22px; border:1px solid var(--line); background:var(--sheet-b, var(--panel)); box-shadow:0 24px 60px -18px rgba(0,0,0,.75), inset 0 1px 0 rgba(var(--hi),.12); transform-origin:bottom left; opacity:0; transform:translateY(12px) scale(.88); transition:opacity .22s ease, transform .45s var(--ease-spring); }
+.masMenu.on{ opacity:1; transform:none; }
+.masMenu button{ display:flex; align-items:center; gap:12px; width:100%; padding:10px 12px; border:0; border-radius:15px; background:none; color:var(--white); font:inherit; text-align:left; cursor:pointer; opacity:0; transform:translateY(8px); transition:background .2s, opacity .3s, transform .45s var(--ease-out); transition-delay:0s, calc(var(--i) * 45ms + 60ms), calc(var(--i) * 45ms + 60ms); }
+.masMenu.on button{ opacity:1; transform:none; }
+.masMenu button:hover, .masMenu button:active{ background:rgba(var(--ink),.07); }
+.masMenu .mi{ flex:none; width:38px; height:38px; border-radius:13px; display:grid; place-items:center; color:var(--cyan); background:rgba(var(--cyan-rgb),.1); }
+.masMenu button[data-k="ema"] .mi{ color:#ffb066; background:rgba(255,138,80,.14); }
+.masMenu .mi svg{ width:20px; height:20px; }
+.masMenu .mt{ display:flex; flex-direction:column; min-width:0; }
+.masMenu .mt b{ font-size:.95rem; font-weight:600; }
+.masMenu .mt small{ font-size:.74rem; color:var(--dim); margin-top:1px; }
+/* ── registrar una salida con Ema ── */
+.emaNuevaBtn{ margin:2px 0 14px; }
+.seCard{ position:relative; overflow:hidden; }
+.seParada{ position:relative; margin-top:12px; padding:12px; border-radius:16px; border:1px solid rgba(255,138,80,.3); background:rgba(255,138,80,.06); animation:duSube .45s var(--ease-out) backwards; }
+.seParada.seEntra{ animation:duSube .5s var(--ease-out) backwards; }
+.seCab{ display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; font-size:.82rem; }
+.seCab b{ font-size:.74rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--dim); }
+.seQuitar{ flex:none; width:28px; height:28px; border:0; border-radius:50%; background:rgba(var(--ink),.1); color:var(--white); font-size:1.05rem; line-height:1; cursor:pointer; transition:transform .15s; }
+.seQuitar:active{ transform:scale(.88); }
+.inCard .seParada input[type="text"]{ width:100%; box-sizing:border-box; }
+.seNuevo{ margin:10px 0 2px; padding:10px; border-radius:12px; background:rgba(var(--ink),.05); animation:duSube .35s var(--ease-out) backwards; }
+.seNuevo[hidden]{ display:none; }
+.seNuevo p{ margin:0 0 8px; font-size:.8rem; color:var(--ghost); }
+.seNuevo input{ margin-top:8px; }
+.seNotas{ display:grid; grid-template-columns:repeat(5, 1fr); gap:6px; }
+.seNotas button{ padding:9px 0; border-radius:11px; border:1px solid var(--line); background:rgba(var(--ink),.05); color:var(--ghost); font:inherit; font-size:.88rem; font-weight:600; cursor:pointer; transition:background .2s, color .2s, transform .15s var(--ease-spring); }
+.seNotas button.on{ color:#ffb066; background:rgba(255,138,80,.16); border-color:rgba(255,138,80,.45); }
+.seNotas button:active{ transform:scale(.9); }
+.seGastos{ display:flex; flex-direction:column; gap:8px; margin-top:10px; }
+.seGasto{ display:flex; align-items:center; gap:8px; animation:duSube .35s var(--ease-out) backwards; }
+.seGasto > input{ flex:1; min-width:0; }
+.seMonto{ flex:none; display:flex; align-items:center; width:116px; border:1px solid var(--line); border-radius:14px; background:rgba(var(--ink),.05); padding:0 10px; }
+.seMonto i{ font-style:normal; color:var(--dim); margin-right:4px; }
+.inCard .seMonto input[type="text"]{ border:0 !important; background:none !important; box-shadow:none !important; padding:11px 0 !important; text-align:right; width:100%; min-width:0; }
+.seMonto:focus-within{ border-color:rgba(var(--cyan-rgb),.6); box-shadow:0 0 0 3px rgba(var(--cyan-rgb),.15); }
+.seRapidos{ display:flex; flex-wrap:wrap; gap:6px; margin-top:10px; }
+.seRapidos button{ display:flex; align-items:center; gap:5px; padding:7px 11px; border-radius:999px; border:1px solid var(--line); background:rgba(var(--ink),.05); color:var(--ghost); font:inherit; font-size:.8rem; font-weight:600; cursor:pointer; transition:transform .15s var(--ease-spring), background .2s; }
+.seRapidos button:active{ transform:scale(.92); background:rgba(var(--cyan-rgb),.12); }
+.seOtroLugar{ width:100%; margin:12px 0 0; padding:12px; border-radius:14px; border:1px dashed rgba(var(--cyan-rgb),.45); background:rgba(var(--cyan-rgb),.06); color:var(--white); font:inherit; font-size:.86rem; font-weight:600; cursor:pointer; transition:transform .15s var(--ease-out); }
+.seOtroLugar:active{ transform:scale(.98); }
+.seTotal{ margin-top:12px; font-size:.9rem; text-align:center; color:var(--ghost); }
+.seTotal b{ color:var(--white); font-size:1.05rem; }
+.seTotal small{ color:var(--dim); }
+/* la pregunta del parqueadero sube desde abajo */
+.seParq{ position:absolute; inset:0; z-index:5; display:flex; align-items:flex-end; background:rgba(0,0,0,.55); opacity:0; transition:opacity .3s ease; }
+.seParq[hidden]{ display:none; }
+.seParq.on{ opacity:1; }
+.seParqCard{ width:100%; padding:20px 18px 18px; border-radius:24px 24px 0 0; background:var(--sheet-b, var(--panel)); border-top:1px solid var(--line); text-align:center; transform:translateY(100%); transition:transform .55s var(--ease-spring); }
+.seParq.on .seParqCard{ transform:none; }
+.seParqEmo{ font-size:2.6rem; line-height:1; animation:mkFlota 2.4s ease-in-out infinite; }
+.seParqCard h4{ margin:8px 0 2px; font-size:1.15rem; }
+.seParqSi{ text-align:left; overflow:hidden; }
+.seParqSi.seAbre{ animation:duSube .45s var(--ease-out) backwards; }
+.seParqSi[hidden]{ display:none; }
+.seParqLug, .seParqChips{ display:flex; flex-wrap:wrap; gap:6px; margin-top:6px; }
+.seParqLug button, .seParqChips button{ padding:8px 12px; border-radius:999px; border:1px solid var(--line); background:rgba(var(--ink),.05); color:var(--ghost); font:inherit; font-size:.84rem; font-weight:600; cursor:pointer; }
+.seParqLug button.on{ color:var(--on-accent); background:linear-gradient(140deg, var(--cyan), var(--blue)); border-color:transparent; }
+.seParqChips button:active{ background:rgba(var(--cyan-rgb),.14); }
+.seParqMonto{ width:100%; margin-top:8px; }
+.seParqMonto.seError, .seParqMonto input.seError{ animation:seSacude .4s; }
+@keyframes seSacude{ 20%{ transform:translateX(-6px); } 40%{ transform:translateX(6px); } 60%{ transform:translateX(-4px); } 80%{ transform:translateX(4px); } }
+.seParqBtns{ display:flex; gap:10px; margin-top:16px; }
+.seParqBtns button{ flex:1; padding:13px 8px; border-radius:14px; font:inherit; font-size:.92rem; font-weight:650; cursor:pointer; border:1px solid var(--line); background:rgba(var(--ink),.05); color:var(--white); }
+.seParqBtns button:active{ transform:scale(.97); }
+.seParqBtns .pgSi{ background:linear-gradient(140deg, #ffb066, #ff7a4d); color:var(--on-accent); border-color:transparent; }
+@media (prefers-reduced-motion:reduce){ .masMenu, .masMenu button, .seParqCard, .seParq{ transition:none; } .seParqEmo{ animation:none; } }
 .swc{ flex:none; position:relative; width:50px; height:30px; padding:0; border-radius:999px; border:1px solid var(--line); background:rgba(var(--ink),.1); cursor:pointer; transition:background .3s, border-color .3s; }
 .swc i{ position:absolute; top:3px; left:3px; width:22px; height:22px; border-radius:50%; background:var(--white); box-shadow:0 2px 6px rgba(0,0,0,.4); transition:transform .35s var(--ease-spring); }
 .swc[aria-checked="true"]{ background:linear-gradient(140deg, var(--cyan), var(--blue)); border-color:transparent; }
@@ -2185,6 +2247,7 @@ body[class*="mode-"] #masIngreso{ display:none; }
 
       <section id="emaView" aria-label="Salidas Ema">
         <div class="restIntro"><h2>Salidas con Ema</h2></div>
+        <button type="button" class="mkBtn pri full emaNuevaBtn" id="emaNueva"><span aria-hidden="true">🎈</span> Registrar una salida</button>
         <div class="restStatus" id="emaStatus"></div>
         <div id="emaStage"></div>
         <div class="restAskHead" id="emaAskHead">
@@ -2390,7 +2453,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-11.93";
+const APP_VERSION = "2026-10-11.94";
 (function autoActualizar(){
   const patron = new RegExp("const APP_" + "VERSION = \"([^\"]+)\"");
   async function revisar(){
@@ -4741,7 +4804,249 @@ const SalidasEma = (function(){
     Rain.settle();
     lock();
   }
-  return { refresh, nueva, preguntar, lugares };
+  const nombres = () => { const n = (datos && datos.nombres) || []; return n.length ? n : lugares().map(l => l.nombre); };
+  const precarga = () => { if(!datos){ try{ datos = JSON.parse(localStorage.getItem(KEY)); }catch{} } cargar(); };
+  return { refresh, nueva, preguntar, lugares, nombres, precarga };
+})();
+
+/* ════════════════════════════════════════════════════════════
+   REGISTRAR UNA SALIDA CON EMA: varios lugares en el mismo día, varios gastos por lugar y la pregunta del parqueadero
+   ════════════════════════════════════════════════════════════ */
+const SalidaEmaForm = (function(){
+  let abierta = false;
+  const esc = t => String(t == null ? "" : t).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const iso = d => d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+  const hoyISO = () => iso(new Date());
+  const diaISO = n => { const d = new Date(); d.setDate(d.getDate() - n); return iso(d); };
+  const peso = n => "$" + Math.round(n).toLocaleString("es-CO");
+  const fechaCorta = f => new Date(f + "T12:00:00").toLocaleDateString("es-CO", { day: "numeric", month: "short" }).replace(".", "");
+  const normL = t => String(t || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9 ]/g, " ").replace(/\s+/g, " ").trim().split(" ").map(w => w.replace(/s$/, "")).join(" ");
+  const PARQ = /parqu|parking/i;
+  const KP = "armoni.ema.parqueo";
+  const ultimosParq = () => { try{ return JSON.parse(localStorage.getItem(KP)) || []; }catch{ return []; } };
+  const recuerdaParq = v => { const l = [v].concat(ultimosParq().filter(x => x !== v)).slice(0, 3); try{ localStorage.setItem(KP, JSON.stringify(l)); }catch{} };
+  const conocido = nombre => { const n = normL(nombre); if(!n) return null; return SalidasEma.nombres().find(x => { const m = normL(x); return m === n || (n.length > 3 && (m.includes(n) || n.includes(m))); }) || null; };
+  const valorDe = txt => parseInt(String(txt).replace(/\D/g, ""), 10) || 0;
+  const nuevaParada = () => ({ lugar: "", puntuacion: 0, comentario: "", gastos: [{ c: "", m: 0, hecho: false }] });
+
+  function abrir(){
+    if(abierta) return; abierta = true;
+    SalidasEma.precarga();
+    let fecha = hoyISO(), paradas = [nuevaParada()], guardando = false, yaPregunto = false;
+    const scrim = document.createElement("div");
+    scrim.className = "pgScrim seScrim";
+    scrim.innerHTML =
+      '<div class="inWrap"><div class="pgCard inCard seCard" role="dialog" aria-modal="true" aria-labelledby="seT">' +
+        '<h3 id="seT"><span aria-hidden="true">🎈</span> Salida con Ema</h3>' +
+        '<div class="inBody">' +
+          '<span class="inLbl" style="margin-top:2px">¿Cuándo fue?</span>' +
+          '<div class="recDia" id="seDia">' +
+            '<button type="button" class="recChip" data-d="0" aria-pressed="true">Hoy</button>' +
+            '<button type="button" class="recChip" data-d="1" aria-pressed="false">Ayer</button>' +
+            '<button type="button" class="recChip" data-d="2" aria-pressed="false">Hace 2 días</button>' +
+            '<label class="recChip inFechaBtn" id="seFechaBtn" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg><span id="seFechaTxt">Otra fecha</span><input type="date" id="seFecha" max="' + hoyISO() + '" aria-label="Elegir otra fecha"></label>' +
+          '</div>' +
+          '<datalist id="seLista"></datalist>' +
+          '<div id="seParadas"></div>' +
+          '<button type="button" class="seOtroLugar" id="seOtroLugar">+ Fuimos a otro lugar ese día</button>' +
+          '<div class="seTotal" id="seTotal"></div>' +
+          '<p class="inErr" id="seErr" role="alert"></p>' +
+        '</div>' +
+        '<div class="pgRow"><button type="button" class="pgNo" id="seCancel">Cancelar</button><button type="button" class="pgSi" id="seGuardar" disabled>Guardar salida</button></div>' +
+        '<div class="seParq" id="seParq" hidden></div>' +
+      '</div></div>';
+    document.body.appendChild(scrim);
+    requestAnimationFrame(() => scrim.classList.add("on"));
+    const $ = id => scrim.querySelector("#" + id);
+    const cont = $("seParadas"), err = $("seErr"), guardar = $("seGuardar");
+    const dl = $("seLista");
+    const poblar = () => { dl.innerHTML = ""; SalidasEma.nombres().forEach(n => { const o = document.createElement("option"); o.value = n; dl.appendChild(o); }); };
+    poblar(); setTimeout(poblar, 1500);
+
+    const validos = () => paradas.flatMap((p, i) => p.gastos.filter(g => g.c.trim() && g.m > 0 && !g.hecho).map(g => ({ p, g, i })));
+    const todos = () => paradas.flatMap(p => p.gastos.filter(g => g.c.trim() && g.m > 0));
+    function actualiza(){
+      const t = todos(), tot = t.reduce((a, g) => a + g.m, 0);
+      $("seTotal").innerHTML = t.length ? 'Total de la salida · <b>' + peso(tot) + '</b> <small>' + t.length + (t.length === 1 ? ' gasto' : ' gastos') + (paradas.length > 1 ? ' · ' + paradas.length + ' lugares' : '') + '</small>' : '';
+      guardar.disabled = guardando || !validos().length;
+    }
+    const filaHTML = (g, j) =>
+      '<div class="seGasto" data-j="' + j + '"><input data-k="c" type="text" placeholder="Gasto (parqueadero, almuerzo…)" maxlength="60" autocomplete="off" value="' + esc(g.c) + '">' +
+      '<span class="seMonto"><i>$</i><input data-k="m" type="text" inputmode="numeric" placeholder="0" autocomplete="off" value="' + (g.m ? g.m.toLocaleString("es-CO") : "") + '"></span>' +
+      '<button type="button" class="seQuitar" data-q="gasto" aria-label="Quitar gasto">×</button></div>';
+    function pinta(foco){
+      cont.innerHTML = paradas.map((p, i) =>
+        '<div class="seParada" data-i="' + i + '"><div class="seCab"><b>' + (paradas.length > 1 ? 'Lugar ' + (i + 1) : 'Lugar') + '</b>' + (paradas.length > 1 ? '<button type="button" class="seQuitar" data-q="parada" aria-label="Quitar lugar">×</button>' : '') + '</div>' +
+          '<input class="seLugar" data-k="lugar" type="text" list="seLista" placeholder="¿Dónde fue? Pance, cine, heladería…" maxlength="60" autocomplete="off" value="' + esc(p.lugar) + '">' +
+          '<div class="seNuevo"' + (p.lugar.trim() && !conocido(p.lugar) ? '' : ' hidden') + '><p>Es un lugar nuevo: ¿cómo les pareció?</p>' +
+            '<div class="seNotas">' + [1,2,3,4,5,6,7,8,9,10].map(n => '<button type="button" data-n="' + n + '" class="' + (p.puntuacion === n ? 'on' : '') + '" aria-label="' + n + ' de 10">' + n + '</button>').join("") + '</div>' +
+            '<input data-k="comentario" type="text" placeholder="Comentario (opcional)" maxlength="200" autocomplete="off" value="' + esc(p.comentario) + '"></div>' +
+          '<div class="seGastos">' + p.gastos.map(filaHTML).join("") + '</div>' +
+          '<div class="seRapidos">' + [["🅿️", "Parqueadero"], ["🍽️", "Almuerzo"], ["🍦", "Helado"], ["🎟️", "Entradas"]].map(([e, n]) => '<button type="button" data-r="' + n + '"><span aria-hidden="true">' + e + '</span>' + n + '</button>').join("") + '<button type="button" data-r="">+ Otro gasto</button></div></div>').join("");
+      if(foco){ const f = cont.querySelectorAll(".seParada")[foco[0]]; const inp = f && f.querySelectorAll(".seGasto")[foco[1]] && f.querySelectorAll(".seGasto")[foco[1]].querySelector('input[data-k="' + foco[2] + '"]'); if(inp) setTimeout(() => inp.focus(), 60); }
+      actualiza();
+    }
+    pinta();
+    const cierra = () => { document.removeEventListener("keydown", tecla); scrim.classList.remove("on"); setTimeout(() => { scrim.remove(); abierta = false; }, 340); };
+    const tecla = e => { if(e.key === "Escape" && !guardando) cierra(); };
+    document.addEventListener("keydown", tecla);
+    $("seCancel").addEventListener("click", () => { if(!guardando) cierra(); });
+    scrim.addEventListener("click", e => { if(e.target === scrim && !guardando) cierra(); });
+
+    /* fecha */
+    const chips = [...scrim.querySelectorAll("#seDia .recChip[data-d]")], fBtn = $("seFechaBtn"), fIn = $("seFecha");
+    chips.forEach(b => b.addEventListener("click", () => { fecha = diaISO(+b.dataset.d); chips.forEach(x => x.setAttribute("aria-pressed", String(x === b))); fBtn.setAttribute("aria-pressed", "false"); $("seFechaTxt").textContent = "Otra fecha"; fIn.value = ""; }));
+    fIn.addEventListener("change", () => { if(!fIn.value) return; fecha = fIn.value > hoyISO() ? hoyISO() : fIn.value; chips.forEach(x => x.setAttribute("aria-pressed", "false")); fBtn.setAttribute("aria-pressed", "true"); $("seFechaTxt").textContent = fechaCorta(fecha); });
+
+    /* lo que se escribe va directo al estado (sin repintar, para no perder el cursor) */
+    cont.addEventListener("input", e => {
+      const el = e.target, k = el.dataset.k; if(!k) return;
+      const pa = paradas[+el.closest(".seParada").dataset.i];
+      if(k === "lugar"){ pa.lugar = el.value; el.closest(".seParada").querySelector(".seNuevo").hidden = !(pa.lugar.trim() && !conocido(pa.lugar)); }
+      else if(k === "comentario") pa.comentario = el.value;
+      else { const g = pa.gastos[+el.closest(".seGasto").dataset.j]; if(k === "c") g.c = el.value; else { const n = valorDe(el.value); g.m = n; el.value = n ? n.toLocaleString("es-CO") : ""; } }
+      err.textContent = ""; actualiza();
+    });
+    cont.addEventListener("click", e => {
+      const par = e.target.closest(".seParada"); if(!par) return;
+      const i = +par.dataset.i, pa = paradas[i];
+      const nota = e.target.closest(".seNotas button");
+      if(nota){ const n = +nota.dataset.n; pa.puntuacion = pa.puntuacion === n ? 0 : n; par.querySelectorAll(".seNotas button").forEach(x => x.classList.toggle("on", +x.dataset.n === pa.puntuacion)); return; }
+      const q = e.target.closest("[data-q]");
+      if(q){
+        if(q.dataset.q === "parada"){ paradas.splice(i, 1); pinta(); }
+        else { const j = +q.closest(".seGasto").dataset.j; pa.gastos.splice(j, 1); if(!pa.gastos.length) pa.gastos.push({ c: "", m: 0, hecho: false }); pinta(); }
+        return;
+      }
+      const r = e.target.closest("[data-r]");
+      if(r){
+        const vacio = pa.gastos.findIndex(g => !g.c.trim() && !g.m);
+        const nombre = r.dataset.r;
+        if(vacio >= 0 && !nombre){ pinta([i, vacio, "c"]); return; }
+        let j = vacio;
+        if(j < 0){ pa.gastos.push({ c: "", m: 0, hecho: false }); j = pa.gastos.length - 1; }
+        pa.gastos[j].c = nombre;
+        pinta([i, j, nombre ? "m" : "c"]);
+      }
+    });
+    $("seOtroLugar").addEventListener("click", () => { paradas.push(nuevaParada()); pinta(); const u = cont.lastElementChild; if(u){ u.classList.add("seEntra"); u.scrollIntoView({ block: "center", behavior: REDUCED ? "auto" : "smooth" }); const l = u.querySelector(".seLugar"); if(l) setTimeout(() => l.focus({ preventScroll: true }), 300); } });
+
+    /* parqueadero: casi siempre se paga, así que se pregunta antes de guardar */
+    function preguntaParqueo(){
+      const box = $("seParq"), ult = ultimosParq();
+      let destino = Math.max(0, paradas.length - 1), monto = 0;
+      box.hidden = false;
+      box.innerHTML =
+        '<div class="seParqCard"><div class="seParqEmo" aria-hidden="true">🅿️</div><h4>¿Pagaste parqueadero?</h4>' +
+        '<div class="seParqSi" hidden>' +
+          (paradas.length > 1 ? '<span class="inLbl" style="margin-top:10px">¿En qué lugar?</span><div class="seParqLug">' + paradas.map((p, i) => '<button type="button" data-l="' + i + '" class="' + (i === destino ? 'on' : '') + '">' + esc(p.lugar.trim() || 'Lugar ' + (i + 1)) + '</button>').join("") + '</div>' : '') +
+          '<span class="inLbl" style="margin-top:10px">¿Cuánto?</span>' +
+          (ult.length ? '<div class="seParqChips">' + ult.map(v => '<button type="button" data-v="' + v + '">' + peso(v) + '</button>').join("") + '</div>' : '') +
+          '<span class="seMonto seParqMonto"><i>$</i><input id="seParqIn" type="text" inputmode="numeric" placeholder="0" autocomplete="off"></span></div>' +
+        '<div class="seParqBtns"><button type="button" class="pgNo" id="seParqNo">No pagué</button><button type="button" class="pgSi" id="seParqSi">Sí, pagué</button></div></div>';
+      requestAnimationFrame(() => box.classList.add("on"));
+      const si = box.querySelector(".seParqSi"), inp = box.querySelector("#seParqIn"), bSi = box.querySelector("#seParqSi"), bNo = box.querySelector("#seParqNo");
+      let abiertoSi = false;
+      const cerrarPregunta = () => { box.classList.remove("on"); setTimeout(() => { box.hidden = true; box.innerHTML = ""; }, 320); };
+      bNo.addEventListener("click", () => { yaPregunto = true; cerrarPregunta(); ejecutar(); });
+      box.addEventListener("click", e => {
+        const l = e.target.closest("[data-l]"); if(l){ destino = +l.dataset.l; box.querySelectorAll("[data-l]").forEach(x => x.classList.toggle("on", x === l)); }
+        const v = e.target.closest("[data-v]"); if(v){ monto = +v.dataset.v; inp.value = monto.toLocaleString("es-CO"); }
+      });
+      inp.addEventListener("input", () => { monto = valorDe(inp.value); inp.value = monto ? monto.toLocaleString("es-CO") : ""; });
+      bSi.addEventListener("click", () => {
+        if(!abiertoSi){ abiertoSi = true; si.hidden = false; si.classList.add("seAbre"); bSi.textContent = "Agregar y guardar"; bNo.textContent = "No pagué"; setTimeout(() => inp.focus(), 250); return; }
+        if(!(monto > 0)){ inp.classList.add("seError"); setTimeout(() => inp.classList.remove("seError"), 500); inp.focus(); return; }
+        paradas[destino].gastos.push({ c: "Parqueadero", m: monto, hecho: false });
+        recuerdaParq(monto); yaPregunto = true; pinta(); cerrarPregunta(); ejecutar();
+      });
+    }
+
+    guardar.addEventListener("click", () => {
+      if(guardando || !validos().length) return;
+      const hayParq = todos().some(g => PARQ.test(g.c));
+      if(!hayParq && !yaPregunto){ preguntaParqueo(); return; }
+      ejecutar();
+    });
+
+    async function ejecutar(){
+      if(guardando) return;
+      guardando = true; err.textContent = ""; guardar.disabled = true;
+      const lista = validos(), total = lista.length;
+      let n = 0, suma = 0;
+      try{
+        for(const { p, g } of lista){
+          guardar.textContent = "Guardando " + (n + 1) + "/" + total + "…";
+          const dato = { tipo: "Gasto", concepto: g.c.trim(), categoria: "Salidas Ema", monto: g.m, fecha, nota: "" };
+          const l = p.lugar.trim();
+          if(l){
+            const k = conocido(l);
+            if(k) dato.lugar = k; else { dato.lugar = l; if(!p.nuevoEnviado){ dato.puntuacion = p.puntuacion || null; dato.comentario = p.comentario.trim(); } }
+          }
+          const r = await fetch(MOVIMIENTO_URL, { method: "POST", body: JSON.stringify(Object.assign({ token: MERCADO_TOKEN }, dato)) });
+          const j = await r.json().catch(() => ({}));
+          if(!r.ok || j.ok === false) throw new Error(j.error || "No se pudo guardar");
+          if(l && !conocido(l)) p.nuevoEnviado = true;
+          g.hecho = true; n++; suma += g.m;
+        }
+        const t = todos();
+        const totalSalida = t.reduce((a, g) => a + g.m, 0);
+        cierra();
+        avisoOk("Salida con Ema guardada", t.length + (t.length === 1 ? " gasto" : " gastos") + " · " + peso(totalSalida));
+        if(document.body.classList.contains("mode-ema")) setTimeout(() => SalidasEma.refresh(), 400); else SalidasEma.precarga();
+      }catch(e){
+        guardando = false; guardar.textContent = "Guardar salida"; actualiza();
+        err.textContent = (n ? "Se guardaron " + n + " de " + total + ". " : "") + ((e && e.message && e.message !== "Failed to fetch") ? e.message : "No pude guardar. Revisa la conexión y toca Guardar de nuevo: solo se enviará lo que falta.");
+      }
+    }
+    setTimeout(() => { const f = cont.querySelector(".seLugar"); if(f) f.focus(); }, 380);
+  }
+  document.getElementById("emaNueva").addEventListener("click", abrir);
+  return { abrir };
+})();
+
+/* ════════════════════════════════════════════════════════════
+   EL «+»: un menú con tres opciones (gasto, ingreso o salida con Ema)
+   ════════════════════════════════════════════════════════════ */
+const MenuMas = (function(){
+  const btn = document.getElementById("masIngreso");
+  let menu = null;
+  const ICO = {
+    gasto: '<path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/>',
+    ingreso: '<circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/>',
+    ema: '<circle cx="12" cy="9" r="5.5"/><path d="M12 14.5c0 2-1.2 3-1.2 5.5"/><path d="M9.8 7.2a3 3 0 0 1 2-1"/>'
+  };
+  const ITEMS = [["gasto", "Gasto", "Algo que pagaste"], ["ingreso", "Ingreso", "Plata que entró"], ["ema", "Salida con Ema", "Varios gastos y lugares del día"]];
+  function cierra(){
+    if(!menu) return;
+    const m = menu; menu = null;
+    btn.classList.remove("abierto"); btn.setAttribute("aria-expanded", "false");
+    m.classList.remove("on"); setTimeout(() => m.remove(), 260);
+    document.removeEventListener("pointerdown", fuera, true); document.removeEventListener("keydown", tecla);
+  }
+  const fuera = e => { if(menu && !menu.contains(e.target) && !btn.contains(e.target)) cierra(); };
+  const tecla = e => { if(e.key === "Escape") cierra(); };
+  function abre(){
+    menu = document.createElement("div");
+    menu.className = "masMenu"; menu.setAttribute("role", "menu");
+    menu.innerHTML = ITEMS.map(([k, t, d], i) =>
+      '<button type="button" role="menuitem" data-k="' + k + '" style="--i:' + i + '"><span class="mi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + ICO[k] + '</svg></span><span class="mt"><b>' + t + '</b><small>' + d + '</small></span></button>').join("");
+    document.body.appendChild(menu);
+    const r = btn.getBoundingClientRect();
+    menu.style.left = Math.max(12, Math.min(r.left - 6, innerWidth - menu.offsetWidth - 12)) + "px";
+    menu.style.bottom = (innerHeight - r.top + 10) + "px";
+    requestAnimationFrame(() => menu.classList.add("on"));
+    btn.classList.add("abierto"); btn.setAttribute("aria-expanded", "true");
+    menu.addEventListener("click", e => {
+      const b = e.target.closest("button[data-k]"); if(!b) return;
+      const k = b.dataset.k; cierra();
+      setTimeout(() => { if(k === "ema") SalidaEmaForm.abrir(); else GastoManual.abrir({ tipo: k === "ingreso" ? "Ingreso" : "Gasto" }); }, 120);
+    });
+    document.addEventListener("pointerdown", fuera, true); document.addEventListener("keydown", tecla);
+  }
+  btn.setAttribute("aria-haspopup", "menu"); btn.setAttribute("aria-expanded", "false"); btn.setAttribute("aria-label", "Registrar"); btn.title = "Registrar";
+  btn.addEventListener("click", () => { if(menu) cierra(); else abre(); });
+  return { cierra };
 })();
 
 /* ════════════════════════════════════════════════════════════
@@ -5593,7 +5898,7 @@ function avisoOk(titulo, detalle){
 
 const GastoManual = (function(){
   /* todas menos "Servicios": energía, agua, gas e internet ya se registran solos desde su aviso */
-  const CATS_GASTO = ["Alimentación", "Salidas", "Salidas Ema", "Hogar", "Carro", "Hijo", "Salud", "Tarjetas", "Ahorro", "Otros"];
+  const CATS_GASTO = ["Alimentación", "Salidas", "Hogar", "Carro", "Hijo", "Salud", "Tarjetas", "Ahorro", "Otros"];
   /* lo que entra "a mano": salarios (Hogar), lo que te devuelven al dividir una cuenta (Salidas / Alimentación) y lo demás (Otros) */
   const CATS_INGRESO = ["Hogar", "Alimentación", "Salidas", "Otros"];
   /* pagos que ya tienen su propio flujo: aquí no se registran para no duplicarlos */
@@ -5616,7 +5921,7 @@ const GastoManual = (function(){
   const ayer = () => { const d = new Date(); d.setDate(d.getDate() - 1); return iso(d); };
   let abierto = false;
 
-  function abrir(){
+  function abrir(opts){
     if(abierto) return; abierto = true;
     const scrim = document.createElement("div");
     scrim.className = "pgScrim";
@@ -5640,16 +5945,6 @@ const GastoManual = (function(){
           '<button type="button" class="recChip" data-dia="ayer" aria-pressed="false">Ayer</button>' +
           '<label class="recChip inFechaBtn" id="inFechaBtn" aria-pressed="false"><svg viewBox="0 0 24 24" ' + P + '><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg><span id="inFechaTxt">Otra fecha</span><input type="date" id="inFecha" aria-label="Elegir otra fecha"></label>' +
         '</div>' +
-        '<div class="inEma" id="inEma" hidden>' +
-          '<div class="inEmaT"><span aria-hidden="true">🎈</span> Salida con Ema</div>' +
-          '<label class="inLbl" for="inLugar">¿Dónde fue?</label>' +
-          '<input id="inLugar" type="text" list="inLugares" placeholder="Ej: Pance, parque, cine, heladería…" autocomplete="off" maxlength="60">' +
-          '<datalist id="inLugares"></datalist>' +
-          '<div id="inLugarNuevo" hidden><p class="inEmaNota">Es un lugar nuevo: cuéntame cómo les pareció.</p>' +
-            '<span class="inLbl">Puntuación <span style="font-weight:400;letter-spacing:0;text-transform:none">(de 1 a 10)</span></span><div class="inStars" id="inStars" role="group" aria-label="Puntuación">' + [1,2,3,4,5,6,7,8,9,10].map(n => '<button type="button" data-n="' + n + '" aria-label="' + n + ' de 10">' + n + '</button>').join("") + '</div>' +
-            '<label class="inLbl" for="inComent">Comentario <span style="font-weight:400;letter-spacing:0;text-transform:none">(opcional)</span></label>' +
-            '<input id="inComent" type="text" placeholder="Algo corto sobre el lugar" maxlength="200" autocomplete="off"></div>' +
-        '</div>' +
         '<label class="inLbl" for="inNota">Nota <span style="font-weight:400;letter-spacing:0;text-transform:none">(opcional)</span></label>' +
         '<textarea id="inNota" rows="1" placeholder="Algo que quieras recordar" maxlength="300"></textarea>' +
         '<button type="button" class="inIA" id="inIA" aria-pressed="false"><i class="inIAdot" aria-hidden="true"></i><b>Pasar por Armoni</b></button>' +
@@ -5666,31 +5961,7 @@ const GastoManual = (function(){
     let categoria = "", fecha = hoy(), tipo = "Gasto", iaManual = false;
     const iaBtn = $("inIA"), ia = { checked: false };
     const valor = () => parseInt(monto.value.replace(/\D/g, ""), 10) || 0;
-    const listo = () => { guardar.disabled = !(concepto.value.trim() && categoria && valor() > 0); if(typeof actualizaEma === "function") actualizaEma(); };
-    /* con la categoría «Salidas Ema» aparece el apartado del lugar (y, si es nuevo, su puntuación y comentario) */
-    const emaBox = $("inEma"), lugarIn = $("inLugar"), lugarNuevo = $("inLugarNuevo"), comentIn = $("inComent");
-    let estrellas = 0;
-    const normL = t => String(t || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9 ]/g, " ").replace(/\s+/g, " ").trim().replace(/s\b/g, "");
-    const conocido = () => { const n = normL(lugarIn.value); if(!n) return null; return SalidasEma.lugares().find(l => { const m = normL(l.nombre); return m === n || (n.length > 3 && (m.includes(n) || n.includes(m))); }) || null; };
-    function actualizaEma(){
-      const ema = tipo === "Gasto" && categoria === "Salidas Ema";
-      emaBox.hidden = !ema;
-      if(!ema) return;
-      const dl = $("inLugares"); if(!dl.childElementCount) SalidasEma.lugares().forEach(l => { const o = document.createElement("option"); o.value = l.nombre; dl.appendChild(o); });
-      lugarNuevo.hidden = !(lugarIn.value.trim() && !conocido());
-    }
-    lugarIn.addEventListener("input", actualizaEma);
-    $("inStars").addEventListener("click", e => {
-      const b = e.target.closest("button[data-n]"); if(!b) return;
-      estrellas = estrellas === +b.dataset.n ? 0 : +b.dataset.n;
-      $("inStars").querySelectorAll("button").forEach(x => x.classList.toggle("on", +x.dataset.n === estrellas));
-    });
-    const datosLugar = () => {
-      const l = lugarIn.value.trim();
-      if(!(tipo === "Gasto" && categoria === "Salidas Ema" && l)) return {};
-      const k = conocido();
-      return k ? { lugar: k.nombre } : { lugar: l, puntuacion: estrellas || null, comentario: comentIn.value.trim() };
-    };
+    const listo = () => { guardar.disabled = !(concepto.value.trim() && categoria && valor() > 0); };
     /* las categorías cambian con el tipo; si la elegida sigue existiendo, se conserva */
     function pintaCats(){
       const lista = tipo === "Gasto" ? CATS_GASTO : CATS_INGRESO;
@@ -5739,6 +6010,7 @@ const GastoManual = (function(){
       pintaCats(); pintaFrecuentes();
     }
     scrim.querySelectorAll("#inTipo button").forEach(b => b.addEventListener("click", () => poneTipo(b.dataset.t)));
+    if(opts && opts.tipo === "Ingreso") poneTipo("Ingreso");
     pintaCats(); pintaFrecuentes();
     chips.forEach(b => b.addEventListener("click", () => {
       fecha = b.dataset.dia === "hoy" ? hoy() : ayer();
@@ -5792,7 +6064,6 @@ const GastoManual = (function(){
         "Registra este " + (tipo === "Gasto" ? "GASTO" : "INGRESO") + " en Movimientos (Tipo: " + tipo + "). Concepto: " + concepto.value.trim() +
         ". Categoría: " + categoria + ". Valor: " + valor() + ". Fecha: " + fecha + " (" + cuando + ")." +
         (nota$ ? " Nota: " + nota$ + "." : "") +
-        (datosLugar().lugar ? " Lugar: " + datosLugar().lugar + (datosLugar().puntuacion ? ", puntuación " + datosLugar().puntuacion + "/10" : "") + (datosLugar().comentario ? ", comentario: " + datosLugar().comentario : "") + "." : "") +
         (tipo === "Gasto"
           ? " Revisa si esto es una salida a comer o algo que necesite más datos (por ejemplo cuántas personas comieron, el restaurante o la puntuación): si falta algún dato, pregúntamelo antes de guardar; si no falta nada, guárdalo de una."
           : " Es plata que ENTRA (por ejemplo un salario, o alguien que me devuelve su parte al dividir una cuenta en un restaurante): guárdalo de una como ingreso. No me preguntes por personas, restaurante ni puntuación; solo pregunta si de verdad falta el concepto, el valor o la fecha.");
@@ -5804,21 +6075,20 @@ const GastoManual = (function(){
         return;
       }
       /* directo a Movimientos: no pasa por el agente, no gasta IA */
-      const dato = Object.assign({ tipo, concepto: concepto.value.trim(), categoria, monto: valor(), fecha, nota: nota$ }, datosLugar());
+      const dato = { tipo, concepto: concepto.value.trim(), categoria, monto: valor(), fecha, nota: nota$ };
       guardar.disabled = true; guardar.textContent = "Guardando…"; err.textContent = "";
       fetch(MOVIMIENTO_URL, { method: "POST", body: JSON.stringify(Object.assign({ token: MERCADO_TOKEN }, dato)) })
         .then(r => r.json().catch(() => ({})).then(j => { if(!r.ok || j.ok === false) throw new Error(j.error || "No se pudo guardar"); }))
         .then(() => {
           Frecuentes.aprende(tipo, dato.concepto, categoria, dato.monto);
           cierra("guardado");
-          avisoOk((tipo === "Gasto" ? "Gasto guardado" : "Ingreso guardado"), dato.concepto + (dato.lugar ? " · " + dato.lugar : "") + " · " + monto$);
+          avisoOk((tipo === "Gasto" ? "Gasto guardado" : "Ingreso guardado"), dato.concepto + " · " + monto$);
         })
         .catch(e => { guardar.disabled = false; guardar.textContent = "Guardar"; err.textContent = (e && e.message && e.message !== "Failed to fetch") ? e.message : "No pude guardarlo. Revisa la conexión e inténtalo de nuevo."; });
     });
     sugiereIA();
     setTimeout(() => concepto.focus(), 350);
   }
-  document.getElementById("masIngreso").addEventListener("click", abrir);
   return { abrir };
 })();
 
