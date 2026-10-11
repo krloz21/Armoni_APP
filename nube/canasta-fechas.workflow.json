@@ -1,0 +1,216 @@
+{
+  "name": "Armoni - Fechas de la canasta",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "canasta-fechas",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "e5000000-0000-4000-8000-000000000001",
+      "name": "Recibir",
+      "webhookId": "e5000000-0000-4000-8000-0000000000aa"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Fechas de la canasta: desde cuándo está cada cosa marcada como «Falta» (propiedad «Marcado el» de Mercado - Productos)\nconst q = $input.first().json.query || {};\nreturn [{ json: { ok: q.token === 'mercado-7d41c2a9e05b' } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        220,
+        0
+      ],
+      "id": "e5000000-0000-4000-8000-000000000002",
+      "name": "Validar"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ $json.ok }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        440,
+        0
+      ],
+      "id": "e5000000-0000-4000-8000-000000000003",
+      "name": "¿Válido?"
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "operation": "getAll",
+        "dataSourceId": {
+          "__rl": true,
+          "value": "f1fede91-d102-42bb-920f-60edcd607d2c",
+          "mode": "list",
+          "cachedResultName": "Mercado - Productos",
+          "cachedResultUrl": "https://app.notion.com/p/266bbfb67edd491e82e2423917460283"
+        },
+        "returnAll": true,
+        "simple": false,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 3,
+      "position": [
+        660,
+        -96
+      ],
+      "id": "e5000000-0000-4000-8000-000000000004",
+      "name": "Productos",
+      "alwaysOutputData": true,
+      "credentials": {
+        "notionApi": {
+          "id": "pgk4uKXwaEEnuyRO",
+          "name": "Notion account"
+        }
+      },
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// Lee una propiedad venga como página completa de Notion (properties) o simplificada de n8n (property_xxx)\nconst clave = (n) => 'property_' + String(n).toLowerCase().replace(/\\s+/g, '_');\nconst txt = (a) => ((a || []).map(t => t.plain_text).join('') || '').trim();\nconst leer = (it, nombre, tipo) => {\n  const pr = it.properties && it.properties[nombre];\n  if (pr) {\n    if (tipo === 'titulo') return txt(pr.title);\n    if (tipo === 'texto') return txt(pr.rich_text);\n    if (tipo === 'numero') return pr.number != null ? pr.number : null;\n    if (tipo === 'fecha') return pr.date && pr.date.start ? pr.date.start.slice(0, 10) : null;\n    if (tipo === 'select') return pr.select ? pr.select.name : (pr.status ? pr.status.name : null);\n    if (tipo === 'relacion') return pr.relation && pr.relation[0] ? pr.relation[0].id : null;\n  }\n  let v = it[clave(nombre)];\n  if (v === undefined && tipo === 'titulo') v = it.name;\n  if (v === undefined || v === null || v === '') return null;\n  if (tipo === 'fecha') { const s = typeof v === 'object' ? (v.start || '') : String(v); return s ? s.slice(0, 10) : null; }\n  if (tipo === 'relacion') { const r = Array.isArray(v) ? v[0] : v; return r ? (typeof r === 'object' ? r.id : String(r)) : null; }\n  if (tipo === 'numero') return typeof v === 'number' ? v : (Number(v) || null);\n  return String(v);\n};\n\nconst fechas = {};\nfor (const it of $input.all().map(i => i.json)) {\n  if (!it || !it.id) continue;\n  const pr = it.properties || {};\n  const falta = pr['Falta'] ? !!pr['Falta'].checkbox : !!it.property_falta;\n  if (!falta) continue;\n  const f = leer(it, 'Marcado el', 'fecha');\n  if (f) fechas[String(it.id).replace(/-/g, '')] = f;\n}\nreturn [{ json: { ok: true, fechas } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        880,
+        -96
+      ],
+      "id": "e5000000-0000-4000-8000-000000000005",
+      "name": "Armar fechas"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        1100,
+        -96
+      ],
+      "id": "e5000000-0000-4000-8000-000000000006",
+      "name": "Responder"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\"ok\": false}",
+        "options": {
+          "responseCode": 400
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        660,
+        112
+      ],
+      "id": "e5000000-0000-4000-8000-000000000007",
+      "name": "Responder error"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Recibir": {
+      "main": [
+        [
+          {
+            "node": "Validar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validar": {
+      "main": [
+        [
+          {
+            "node": "¿Válido?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Válido?": {
+      "main": [
+        [
+          {
+            "node": "Productos",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Responder error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Productos": {
+      "main": [
+        [
+          {
+            "node": "Armar fechas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Armar fechas": {
+      "main": [
+        [
+          {
+            "node": "Responder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": []
+}

@@ -2965,6 +2965,7 @@ const MERCADO_MARCAR_URL = N8N + "/webhook/mercado-marcar";
 const MERCADO_COMPRADO_URL = N8N + "/webhook/mercado-comprado";
 const MERCADO_AGREGAR_URL = N8N + "/webhook/mercado-agregar";
 const MERCADO_EDITAR_URL = N8N + "/webhook/mercado-editar";
+const CANASTA_FECHAS_URL = N8N + "/webhook/canasta-fechas";   // desde cuándo está cada cosa en la canasta («Marcado el» en Notion)
 const MOVIMIENTO_URL = N8N + "/webhook/movimiento-nuevo";   // guarda un gasto/ingreso directo en Notion, sin IA
 const MERCADO_TOKEN = "mercado-7d41c2a9e05b";
 const RESUMEN_URL = N8N + "/webhook/resumen-mes";
@@ -3003,7 +3004,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-11.126";
+const APP_VERSION = "2026-10-11.127";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -8315,7 +8316,11 @@ const Mercar = (function(){
     if(bd) bd.addEventListener("click", () => { if(confirm("¿Descartar la revisión que dejaste a medias?")){ borraPartida(); inicio(); } });
     const cc = document.getElementById("mkCanastaCaja");
     if(cc){
-      const abrirCan = () => final(ps.filter(p => p.falta), false, "canasta");
+      const abrirCan = () => {
+        const items = ps.filter(p => p.falta);
+        final(items, false, "canasta");
+        traeFechas().then(c => { if(c && estado === "lista" && document.querySelector(".mkFin")) final(items, false, "canasta"); });   // llegan las fechas y se repinta
+      };
       cc.addEventListener("click", abrirCan);
       cc.addEventListener("keydown", e => { if(e.key === "Enter" || e.key === " "){ e.preventDefault(); abrirCan(); } });
     }
@@ -8718,7 +8723,7 @@ const Mercar = (function(){
       '</div>' +
       '<div class="gList mkLista" id="mkLista">' + lista.map((x, i) =>
         '<div class="gRow" data-i="' + i + '"><span class="mkCheck">' + ICO_OK + '</span><span class="gTx"><b>' + emojiMercado(baseDe(x.p), x.p.grupo) + ' ' + esc(baseDe(x.p)) + '</b><small>' +
-        (detDe(x.p) ? '<em class="mkDet">' + esc(detDe(x.p)) + '</em> · ' : '') + esc(x.p.grupo) + (esMama(x.p) ? ' · lo marcó tu mamá' : '') + (haceCanasta(x.p) ? ' · <em class="mkHace">en la canasta ' + haceCanasta(x.p) + '</em>' : '') + '</small></span></div>').join("") + '</div>' +
+        (detDe(x.p) ? '<em class="mkDet">' + esc(detDe(x.p)) + '</em> · ' : '') + esc(x.p.grupo) + (esMama(x.p) ? ' · lo marcó tu mamá' : '') + (haceCanasta(x.p) ? ' · <em class="mkHace">en la canasta ' + haceCanasta(x.p) + '</em>' : acaboDe(x.p) && acaboDe(x.p) > hoyISO() ? ' · <em class="mkHace">' + textoAcabo(acaboDe(x.p)) + '</em>' : '') + '</small></span></div>').join("") + '</div>' +
       '<div class="mkAcciones"><button type="button" class="mkBtn sec full" id="mkCompartir">Compartir</button>' +
       '<button type="button" class="mkBtn pri full" id="mkHecho">Ya hice el mercado</button>' +
       '<button type="button" class="mkBtn sec full" id="mkDescartar">Descartar lista</button>' +
@@ -8933,7 +8938,28 @@ const Mercar = (function(){
   const leeDejado = () => { try{ return JSON.parse(localStorage.getItem(DKEY)) || {}; }catch{ return {}; } };
   const anotaDejado = (ids, f) => { const m = leeDejado(); ids.forEach(id => { if(f) m[id] = f; else delete m[id]; }); try{ localStorage.setItem(DKEY, JSON.stringify(m)); }catch{} };
   const fechaDe = v => { if(!v) return null; if(typeof v === "object") v = v.start || v.date || ""; const t = String(v).slice(0, 10); return /^\d{4}-\d{2}-\d{2}$/.test(t) ? t : null; };
-  const enCanastaDesde = p => { if(!p.falta) return null; const f = leeDejado()[p.id] || fechaDe(p.marcadoEl) || fechaDe(p.marcado_el) || (p.acaboEl && p.acaboEl <= hoyISO() ? p.acaboEl : null); return f && f <= hoyISO() ? f : null; };
+  /* las fechas de Notion llegan por el flujo «canasta-fechas» (sirve para los dos celulares y para lo que marcó tu mamá) */
+  const FKEY = "armoni.mercar.fechas";
+  let fechasNotion = (() => { try{ return JSON.parse(localStorage.getItem(FKEY)) || {}; }catch{ return {}; } })();
+  async function traeFechas(){
+    try{
+      const r = await fetch(CANASTA_FECHAS_URL + "?token=" + encodeURIComponent(MERCADO_TOKEN), { cache: "no-store", signal: AbortSignal.timeout ? AbortSignal.timeout(8000) : undefined });
+      const j = await r.json();
+      if(!r.ok || !j || !j.fechas) return false;
+      const cambio = JSON.stringify(j.fechas) !== JSON.stringify(fechasNotion);
+      fechasNotion = j.fechas; try{ localStorage.setItem(FKEY, JSON.stringify(j.fechas)); }catch{}
+      return cambio;
+    }catch{ return false; }
+  }
+  /* se cuenta desde el día en que de verdad se acabó: si al dejarla dijiste «se acaba mañana», cuenta desde ese día, no desde cuando la marcaste */
+  const enCanastaDesde = p => {
+    if(!p.falta) return null;
+    const hoy = hoyISO(), ac = p.acaboEl || null;
+    if(ac && ac > hoy) return null;   // todavía no se acaba: la lista dice «se acaba mañana»
+    const marcado = fechasNotion[String(p.id).replace(/-/g, "")] || leeDejado()[p.id] || fechaDe(p.marcadoEl) || fechaDe(p.marcado_el) || fechaDe(p.property_marcado_el) || null;
+    const f = [marcado, ac].filter(Boolean).sort().pop() || null;   // la más reciente de las dos
+    return f && f <= hoy ? f : null;
+  };
   const haceCanasta = p => { const f = enCanastaDesde(p); if(!f) return ""; const d = diasDesde(f); return d === 0 ? "hoy" : d === 1 ? "ayer" : d < 14 ? "hace " + d + " días" : d < 60 ? "hace " + Math.round(d / 7) + " semanas" : "hace " + Math.round(d / 30) + " meses"; };
   const acaboDe = p => p.falta ? (p.acaboEl || (p.marcadoEl ? String(p.marcadoEl).slice(0, 10) : null)) : null;
   /* puede ser un día que ya pasó («se acabó») o uno que viene («se acaba mañana»: lo dejas listo antes) */
@@ -8946,6 +8972,7 @@ const Mercar = (function(){
     else if(estado === "inicio") inicio(true);
   }
   function abrirCanasta(p){
+    if(p.falta && !document.querySelector(".pgScrim.mkCanastaV")) traeFechas().then(c => { const n = document.querySelector(".mkCanastaV .caNota"); if(c && n && haceCanasta(p) && !/la dejaste/.test(n.textContent)) n.insertAdjacentText("beforeend", " · la dejaste " + haceCanasta(p)); });
     if(document.querySelector(".pgScrim.mkCanastaV")) return;
     const dentro = !!p.falta, acabo = acaboDe(p), nom = baseDe(p);
     const scrim = document.createElement("div");
