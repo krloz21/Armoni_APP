@@ -1057,14 +1057,23 @@ body.mode-gmail footer, body.mode-glim footer{ display:none; }
 @keyframes seDeIzq{ from{ opacity:0; transform:translateX(-34px); } to{ opacity:1; transform:none; } }
 @keyframes seFade{ from{ opacity:0; } }
 .sePregunta{ margin:16px 0 10px; font-size:1.12rem; font-weight:650; line-height:1.3; color:var(--white); }
+.seCard .inLbl.seLbl1{ margin-top:6px; }
+.seCard .recDia{ margin:0; }
+.seCard .inFrecs{ margin-top:8px; }
+.seCard .inFrecs .recChip{ display:inline-flex; align-items:center; gap:4px; }
+.seCard .fmMonto{ cursor:default; }
+.seCard label.fmMonto{ cursor:text; }
+.seCard .fmMontoIn b{ margin-right:4px; }
+.seTotN{ font-size:2.5rem; font-weight:700; letter-spacing:-.02em; font-variant-numeric:tabular-nums; color:var(--white); line-height:1.15; transition:color .3s; }
+.seTotN.cero{ color:rgba(var(--ink),.25); }
+.seTotalLugar .fmMontoLbl{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis; padding:0 12px; }
+.seParqSi .fmMonto{ margin-top:4px; }
+.seParqChips{ justify-content:center; margin-top:8px !important; }
 .sePregunta:first-child{ margin-top:4px; }
 .seCard .fmHero{ margin-bottom:4px; }
 .seLugarNom{ color:#ffb066; }
 .seContexto{ margin:4px 0 0; font-size:.76rem; font-weight:600; letter-spacing:.04em; color:var(--dim); }
 .inCard input.seLugarIn{ width:100%; box-sizing:border-box; font-size:1rem; }
-.seSugeridos{ display:flex; flex-wrap:wrap; gap:6px; margin-top:10px; }
-.seSugeridos button{ padding:8px 13px; border-radius:999px; border:1px solid rgba(255,138,80,.3); background:rgba(255,138,80,.07); color:var(--white); font:inherit; font-size:.82rem; font-weight:600; cursor:pointer; transition:transform .15s var(--ease-spring), background .2s; }
-.seSugeridos button:active{ transform:scale(.92); background:rgba(255,138,80,.18); }
 .seAparece{ animation:duSube .4s var(--ease-out) backwards; }
 .seError{ animation:seSacude .4s; border-color:rgba(255,90,90,.7) !important; }
 @keyframes seSacude{ 20%{ transform:translateX(-6px); } 40%{ transform:translateX(6px); } 60%{ transform:translateX(-4px); } 80%{ transform:translateX(4px); } }
@@ -1082,7 +1091,7 @@ body.mode-gmail footer, body.mode-glim footer{ display:none; }
 .seGastos{ display:flex; flex-direction:column; gap:8px; }
 .seGasto{ transition:opacity .2s, transform .2s; }
 .seFila{ display:flex; align-items:center; gap:8px; }
-.seGasto.pagoAntes{ padding:8px; margin:0 -8px; border-radius:16px; background:rgba(255,138,80,.07); border:1px dashed rgba(255,138,80,.35); }
+.seGasto.pagoAntes{ padding:8px; margin:0 -4px; border-radius:16px; background:rgba(255,138,80,.07); border:1px dashed rgba(255,138,80,.35); }
 .sePago{ display:flex; align-items:center; gap:6px; margin-top:7px; padding-left:2px; font-size:.8rem; color:var(--ghost); }
 .sePagoDia{ position:relative; display:inline-flex; align-items:center; gap:3px; padding:4px 9px; border-radius:999px; background:rgba(255,138,80,.16); color:#ffb066; font-weight:700; cursor:pointer; overflow:hidden; }
 .sePagoDia svg{ width:13px; height:13px; }
@@ -1101,11 +1110,6 @@ body.mode-gmail footer, body.mode-glim footer{ display:none; }
 .seMonto i{ font-style:normal; color:var(--dim); margin-right:4px; }
 .inCard .seMonto input[type="text"]{ border:0 !important; background:none !important; box-shadow:none !important; padding:11px 0 !important; text-align:right; width:100%; min-width:0; }
 .seMonto:focus-within{ border-color:rgba(var(--cyan-rgb),.6); box-shadow:0 0 0 3px rgba(var(--cyan-rgb),.15); }
-.seRapidos{ display:flex; flex-wrap:wrap; gap:6px; margin-top:12px; }
-.seRapidos button{ display:flex; align-items:center; gap:5px; padding:7px 11px; border-radius:999px; border:1px solid var(--line); background:rgba(var(--ink),.05); color:var(--ghost); font:inherit; font-size:.8rem; font-weight:600; cursor:pointer; transition:transform .15s var(--ease-spring), background .2s; }
-.seRapidos button:active{ transform:scale(.92); background:rgba(var(--cyan-rgb),.12); }
-.seSub{ margin-top:14px; font-size:.84rem; text-align:right; color:var(--dim); }
-.seSub b{ color:var(--white); font-size:1rem; }
 /* la pregunta del parqueadero */
 .seParqueo{ text-align:center; padding-top:8px; }
 .seParqEmo{ display:inline-block; font-size:3rem; line-height:1; animation:seRebota .7s var(--ease-spring) .1s backwards, mkFlota 2.6s ease-in-out .8s infinite; }
@@ -1113,16 +1117,9 @@ body.mode-gmail footer, body.mode-glim footer{ display:none; }
 .seParqueo .sePregunta{ margin-top:12px; font-size:1.2rem; }
 .seParqSi{ text-align:left; }
 .seParqSi[hidden]{ display:none; }
-.seParqChips{ display:flex; flex-wrap:wrap; justify-content:center; gap:6px; margin-bottom:10px; }
-.seParqChips button{ padding:8px 14px; border-radius:999px; border:1px solid var(--line); background:rgba(var(--ink),.05); color:var(--ghost); font:inherit; font-size:.86rem; font-weight:600; cursor:pointer; transition:background .2s, color .2s; }
-.seParqChips button.on{ color:#ffb066; background:rgba(255,138,80,.16); border-color:rgba(255,138,80,.45); }
-.seParqMonto{ width:100%; }
 .seCard .pgRow .pgSi{ background:linear-gradient(140deg, #ffb066, #ff7a4d); }
 .seParqueo .pgNo{ flex:1; }
 /* resumen */
-.seTotalGrande{ margin:12px 0 4px; padding:16px; border-radius:18px; text-align:center; background:linear-gradient(140deg, rgba(255,176,102,.14), rgba(255,122,77,.08)); border:1px solid rgba(255,138,80,.25); }
-.seTotalGrande small{ display:block; font-size:.72rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--dim); }
-.seTotalGrande b{ display:block; margin-top:2px; font-size:1.7rem; font-weight:700; color:var(--white); font-variant-numeric:tabular-nums; }
 .seParadas{ display:flex; flex-direction:column; gap:8px; margin-top:10px; }
 .seParadaRes{ display:block; width:100%; text-align:left; padding:12px 14px; border-radius:16px; border:1px solid var(--line); background:rgba(var(--ink),.04); color:var(--white); font:inherit; cursor:pointer; animation:duSube .4s var(--ease-out) backwards; transition:transform .15s, border-color .2s; }
 .seParadaRes:nth-child(2){ animation-delay:.06s; } .seParadaRes:nth-child(3){ animation-delay:.12s; }
@@ -1177,7 +1174,7 @@ body.mode-gmail footer, body.mode-glim footer{ display:none; }
 .ajCard .setRow + .setRow{ border-top:1px solid var(--line); border-radius:0; }
 
 /* ventana al tocar «Ya se pagó» del jardín */
-.pgScrim{ position:fixed; inset:0; z-index:95; display:flex; align-items:center; justify-content:center; padding:20px; background:var(--scrim); opacity:0; transition:opacity .3s ease; }
+.pgScrim{ position:fixed; inset:0; z-index:95; overscroll-behavior:contain; display:flex; align-items:center; justify-content:center; padding:20px; background:var(--scrim); opacity:0; transition:opacity .3s ease; }
 .pgScrim.on{ opacity:1; }
 .pgCard{
   width:min(100%, 340px); text-align:center; padding:26px 22px 14px; border-radius:24px;
@@ -2075,11 +2072,11 @@ button{ transition:transform var(--t-tap) var(--ease-out); }
 #masIngreso:active{ transform:scale(.88); }
 body[class*="mode-"] #masIngreso{ display:none; }
 .inCard{ max-height:calc(100dvh - 40px); display:flex; flex-direction:column; text-align:left; }
-.inBody{ flex:1 1 auto; min-height:0; overflow-y:auto; margin:0 -6px; padding:10px 6px; -webkit-overflow-scrolling:touch; -webkit-mask-image:linear-gradient(transparent 0, #000 10px, #000 calc(100% - 10px), transparent 100%); mask-image:linear-gradient(transparent 0, #000 10px, #000 calc(100% - 10px), transparent 100%); }
+.inBody{ flex:1 1 auto; min-height:0; overflow-y:auto; overflow-x:hidden; overscroll-behavior:contain; touch-action:pan-y; margin:0 -6px; padding:10px 6px; -webkit-overflow-scrolling:touch; -webkit-mask-image:linear-gradient(transparent 0, #000 10px, #000 calc(100% - 10px), transparent 100%); mask-image:linear-gradient(transparent 0, #000 10px, #000 calc(100% - 10px), transparent 100%); }
 .inBody::-webkit-scrollbar{ display:none; }
 .inCard .pgRow{ flex:none; margin-top:14px; }
 .inCard h3{ text-align:center; }
-.inFrecs{ display:flex; gap:7px; overflow-x:auto; padding:2px 18px 4px; margin:0 -18px; scrollbar-width:none; -webkit-mask-image:linear-gradient(90deg, transparent 0, #000 18px, #000 calc(100% - 28px), transparent 100%); mask-image:linear-gradient(90deg, transparent 0, #000 18px, #000 calc(100% - 28px), transparent 100%); }
+.inFrecs{ display:flex; gap:7px; overflow-x:auto; overscroll-behavior-x:contain; touch-action:pan-x; padding:2px 6px 4px; margin:0 -6px; scrollbar-width:none; -webkit-mask-image:linear-gradient(90deg, transparent 0, #000 6px, #000 calc(100% - 24px), transparent 100%); mask-image:linear-gradient(90deg, transparent 0, #000 6px, #000 calc(100% - 24px), transparent 100%); }
 .inFrecs::-webkit-scrollbar{ display:none; }
 .inFrecs .recChip{ flex:none; padding:7px 13px; font-size:.78rem; white-space:nowrap; }
 .inCard{ position:relative; transition:transform .38s cubic-bezier(.16,1,.3,1), box-shadow .6s ease, border-color .6s ease; }
@@ -2197,20 +2194,45 @@ body[class*="mode-"] #masIngreso{ display:none; }
 .inCard .fmMontoIn input::placeholder{ color:rgba(var(--ink),.25); }
 .fmLinea{ display:block; height:2px; width:70px; margin:6px auto 0; border-radius:2px; background:linear-gradient(90deg, transparent, var(--fa1), var(--fa2), transparent); opacity:.45; transition:width .45s var(--ease-out), opacity .3s; }
 .fmMonto:focus-within .fmLinea{ width:190px; opacity:1; }
-.fmCats{ display:grid; grid-template-columns:repeat(3, 1fr); gap:7px; }
-.fmCats button{ display:flex; flex-direction:column; align-items:center; gap:5px; min-width:0; padding:10px 4px 9px; border-radius:15px; border:1px solid var(--line); background:rgba(var(--ink),.04); color:var(--ghost); font:inherit; font-size:.74rem; font-weight:600; cursor:pointer; transition:background .25s, color .25s, border-color .25s, box-shadow .3s, transform .15s var(--ease-spring); animation:duSube .4s var(--ease-out) backwards; animation-delay:calc(var(--i) * 22ms); }
-.fmCats button span{ max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-.fmCats svg{ width:20px; height:20px; transition:color .25s, transform .35s var(--ease-spring); }
-.fmCats button:active{ transform:scale(.94); }
-.fmCats button[aria-checked="true"]{ color:var(--white); border-color:rgba(var(--fa-rgb),.6); background:rgba(var(--fa-rgb),.15); box-shadow:0 0 0 3px rgba(var(--fa-rgb),.12); }
-.fmCats button[aria-checked="true"] svg{ color:var(--fa1); transform:scale(1.12); }
+.fmSel{ position:relative; border-radius:16px; border:1px solid var(--line); background:rgba(var(--ink),.05); transition:border-color .3s, background .3s, box-shadow .4s; }
+.fmSel.abierto{ border-color:rgba(var(--fa-rgb),.45); background:rgba(var(--fa-rgb),.06); box-shadow:0 14px 32px -20px rgba(var(--fa-rgb),.8); }
+.fmSelBtn{ position:relative; display:flex; align-items:center; gap:11px; width:100%; padding:10px 12px; border:0; border-radius:16px; background:none; color:var(--dim); font:inherit; font-size:.95rem; text-align:left; cursor:pointer; overflow:hidden; }
+.fmSel.lleno .fmSelBtn{ color:var(--white); font-weight:600; }
+.fmSelIco{ flex:none; width:34px; height:34px; border-radius:11px; display:grid; place-items:center; color:var(--dim); background:rgba(var(--ink),.07); transition:background .35s, color .35s, box-shadow .35s; }
+.fmSel.lleno .fmSelIco{ color:#fff; background:linear-gradient(140deg, var(--fa1), var(--fa2)); box-shadow:0 8px 18px -8px rgba(var(--fa-rgb),.9); }
+.fmSelIco svg{ width:18px; height:18px; }
+.fmSelTx{ flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.fmSelFlecha{ flex:none; width:18px; height:18px; color:var(--dim); transition:transform .45s var(--ease-spring); }
+.fmSel.abierto .fmSelFlecha{ transform:rotate(180deg); color:var(--fa1); }
+.fmSelLista{ display:grid; grid-template-rows:0fr; transition:grid-template-rows .45s var(--ease-out); }
+.fmSel.abierto .fmSelLista{ grid-template-rows:1fr; }
+.fmSelIn{ min-height:0; overflow:hidden; display:grid; grid-template-columns:1fr 1fr; gap:4px; padding:0 6px; transition:padding .45s var(--ease-out); }
+.fmSel.abierto .fmSelIn{ padding:2px 6px 8px; }
+.fmSelIn button{ position:relative; display:flex; align-items:center; gap:8px; min-width:0; padding:9px 10px; border:0; border-radius:12px; background:none; color:var(--ghost); font:inherit; font-size:.86rem; font-weight:600; text-align:left; cursor:pointer; opacity:0; transform:translateY(-6px); transition:background .2s, color .2s, opacity .3s, transform .4s var(--ease-out); }
+.fmSel.abierto .fmSelIn button{ opacity:1; transform:none; transition-delay:0s, 0s, calc(var(--i) * 28ms + 60ms), calc(var(--i) * 28ms + 60ms); }
+.fmSelIn button:hover, .fmSelIn button:active{ background:rgba(var(--ink),.07); color:var(--white); }
+.fmSelIn button span{ flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.fmSelIn svg{ flex:none; width:18px; height:18px; }
+.fmSelIn .fmOk{ position:absolute; right:7px; top:50%; margin-top:-7px; width:14px; height:14px; color:var(--fa1); opacity:0; transform:scale(.4); transition:opacity .25s, transform .35s var(--ease-spring); }
+.fmSelIn button[aria-selected="true"]{ color:var(--white); background:rgba(var(--fa-rgb),.14); padding-right:24px; }
+.fmSelIn button[aria-selected="true"] > svg:first-child{ color:var(--fa1); }
+.fmSelIn button[aria-selected="true"] .fmOk{ opacity:1; transform:none; }
+/* al elegir: el ícono salta, el nombre sube y un brillo cruza el botón */
+.fmSel.elige .fmSelIco{ animation:fmIcoSalta .6s var(--ease-spring); }
+.fmSel.elige .fmSelTx{ animation:fmTxSube .45s var(--ease-out); }
+.fmSel.elige .fmSelBtn::after{ content:""; position:absolute; inset:0; background:linear-gradient(100deg, transparent 30%, rgba(var(--fa-rgb),.28) 50%, transparent 70%); transform:translateX(-100%); animation:fmBrillo .8s var(--ease-out) .05s; pointer-events:none; }
+.fmSel.elige{ animation:fmPulsa .6s var(--ease-out); }
+@keyframes fmIcoSalta{ 0%{ transform:scale(.3) rotate(-30deg); } 60%{ transform:scale(1.15) rotate(6deg); } 100%{ transform:none; } }
+@keyframes fmTxSube{ from{ opacity:0; transform:translateY(10px); } }
+@keyframes fmBrillo{ to{ transform:translateX(100%); } }
+@keyframes fmPulsa{ 0%{ box-shadow:0 0 0 0 rgba(var(--fa-rgb),.45); } 100%{ box-shadow:0 0 0 12px rgba(var(--fa-rgb),0); } }
 .fmCard .inFrecs{ margin-top:8px; }
 .fmCard #inFrecBox[hidden]{ display:none; }
 .fmRow .pgSi{ padding:14px 8px; font-size:.95rem; }
 .fmCard:not(.armoni) .fmRow .pgSi{ background:linear-gradient(140deg, var(--fa1), var(--fa2)); box-shadow:0 12px 26px -14px rgba(var(--fa-rgb),.9); }
 .fmCard .recChip[aria-pressed="true"], .fmCard .inFechaBtn[aria-pressed="true"]{ background:linear-gradient(140deg, var(--fa1), var(--fa2)); color:var(--on-accent); border-color:transparent; }
 .fmCard input:focus, .fmCard textarea:focus{ border-color:rgba(var(--fa-rgb),.6); box-shadow:0 0 0 3px rgba(var(--fa-rgb),.15); }
-@media (prefers-reduced-motion:reduce){ .fmOrb, .fmOrb::after, .fmCats button{ animation:none; } }
+@media (prefers-reduced-motion:reduce){ .fmOrb, .fmOrb::after, .fmSel, .fmSel *, .fmSel *::after{ animation:none !important; transition:none !important; } }
 </style>
 </head>
 <body>
@@ -2570,7 +2592,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-11.99";
+const APP_VERSION = "2026-10-11.100";
 (function autoActualizar(){
   const patron = new RegExp("const APP_" + "VERSION = \"([^\"]+)\"");
   async function revisar(){
@@ -5080,14 +5102,14 @@ const SalidaEmaForm = (function(){
         const sugeridos = SalidasEma.lugares().filter(l => l.visitas).sort((a, b) => b.visitas - a.visitas).slice(0, 5).map(l => l.nombre);
         vista.innerHTML =
           (idx === 0
-            ? '<div class="sePregunta">¿Cuándo fue?</div><div class="recDia" id="seDia">' +
+            ? '<span class="inLbl seLbl1">¿Cuándo fue?</span><div class="recDia" id="seDia">' +
                 [["Hoy", 0], ["Ayer", 1], ["Hace 2 días", 2]].map(([t, d]) => '<button type="button" class="recChip" data-d="' + d + '" aria-pressed="' + (fecha === diaISO(d)) + '">' + t + '</button>').join("") +
                 '<label class="recChip inFechaBtn" id="seFechaBtn" aria-pressed="' + ([0, 1, 2].every(d => fecha !== diaISO(d))) + '"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg><span>' + ([0, 1, 2].every(d => fecha !== diaISO(d)) ? esc(fecha.slice(8) + "/" + fecha.slice(5, 7)) : "Otra fecha") + '</span><input type="date" id="seFecha" max="' + hoyISO() + '" aria-label="Elegir otra fecha"></label></div>'
             : '<p class="seContexto">' + esc(fechaLarga(fecha)) + ' · lugar ' + (idx + 1) + '</p>') +
-          '<div class="sePregunta">' + (idx === 0 ? '¿A dónde fueron?' : '¿A qué otro lugar fueron?') + '</div>' +
+          '<label class="inLbl" for="seLugar">' + (idx === 0 ? '¿A dónde fueron?' : '¿A qué otro lugar fueron?') + '</label>' +
           '<datalist id="seLista">' + SalidasEma.nombres().map(n => '<option value="' + esc(n) + '">').join("") + '</datalist>' +
           '<input id="seLugar" class="seLugarIn" type="text" list="seLista" placeholder="Pance, cine, heladería…" maxlength="60" autocomplete="off" value="' + esc(p.lugar) + '">' +
-          (sugeridos.length ? '<div class="seSugeridos">' + sugeridos.map(n => '<button type="button" data-l="' + esc(n) + '">' + esc(n) + '</button>').join("") + '</div>' : '') +
+          (sugeridos.length ? '<div class="inFrecs seSugeridos">' + sugeridos.map(n => '<button type="button" class="recChip" data-l="' + esc(n) + '">' + esc(n) + '</button>').join("") + '</div>' : '') +
           '<div class="seNuevo" id="seNuevo"' + (p.lugar.trim() && !conocido(p.lugar) ? '' : ' hidden') + '><p>Es un lugar nuevo para Armoni. ¿Cómo les pareció?</p>' +
             '<div class="seNotas">' + [1,2,3,4,5,6,7,8,9,10].map(n => '<button type="button" data-n="' + n + '" class="' + (p.puntuacion === n ? 'on' : '') + '" aria-label="' + n + ' de 10">' + n + '</button>').join("") + '</div>' +
             '<input id="seComent" type="text" placeholder="Un comentario corto (opcional)" maxlength="200" autocomplete="off" value="' + esc(p.comentario) + '"></div>';
@@ -5117,15 +5139,15 @@ const SalidaEmaForm = (function(){
         const frec = SalidasEma.frecuentes();
         const atajos = (frec.length ? frec : []).concat(["Almuerzo", "Helado", "Entradas", "Juegos"]).filter((x, i, a) => a.findIndex(y => y.toLowerCase() === x.toLowerCase()) === i).slice(0, 5);
         vista.innerHTML =
-          '<p class="seContexto">' + esc(fechaLarga(fecha)) + '</p>' +
-          '<div class="sePregunta">¿Qué pagaron en <span class="seLugarNom">' + esc(nombreLugar(p)) + '</span>?</div>' +
+          '<div class="fmMonto seTotalLugar"><span class="fmMontoLbl">En ' + esc(nombreLugar(p)) + ' · ' + esc(new Date(fecha + "T12:00:00").toLocaleDateString("es-CO", { weekday: "short", day: "numeric", month: "short" }).replace(/\./g, "")) + '</span><span class="fmMontoIn"><b>$</b><span class="seTotN" id="seSub">0</span></span><i class="fmLinea" aria-hidden="true"></i></div>' +
+          '<span class="inLbl">¿Qué pagaron?</span>' +
           '<div class="seGastos" id="seGastos">' + p.gastos.map((g, j) => filaHTML(g, j)).join("") + '</div>' +
-          '<div class="seRapidos">' + atajos.map(n => '<button type="button" data-r="' + esc(n) + '"><span aria-hidden="true">' + emoGasto(n) + '</span>' + esc(n) + '</button>').join("") + '<button type="button" data-r="">+ Otro</button></div>' +
+          '<div class="inFrecs seRapidos">' + atajos.map(n => '<button type="button" class="recChip" data-r="' + esc(n) + '"><span aria-hidden="true">' + emoGasto(n) + '</span> ' + esc(n) + '</button>').join("") + '<button type="button" class="recChip" data-r="">+ Otro</button></div>' +
           '<button type="button" class="seAntes" id="seAntes"><span class="seAntesEmo" aria-hidden="true">🎟️</span><span><b>¿Algo lo pagaron otro día?</b><small>Boletas o entradas compradas antes de salir</small></span></button>' +
-          '<div class="seSub" id="seSub"></div>';
+          '';
         botones.innerHTML = '<button type="button" class="pgSi" id="seSig">Listo</button>';
         const lista = $("seGastos");
-        const actualiza = () => { const n = validos(p).length; $("seSub").innerHTML = n ? (n + (n === 1 ? ' gasto' : ' gastos') + ' · <b>' + peso(subtotal(p)) + '</b>') : 'Agrega al menos un gasto'; $("seSig").disabled = !n; };
+        const actualiza = () => { const n = validos(p).length, el = $("seSub"); el.textContent = subtotal(p).toLocaleString("es-CO"); el.classList.toggle("cero", !n); $("seSig").disabled = !n; };
         const alCambiar = e => {
           const el = e.target, fila = el.closest(".seGasto"); if(!fila) return;
           const g = p.gastos[+fila.dataset.j];
@@ -5188,13 +5210,17 @@ const SalidaEmaForm = (function(){
           '<div class="seParqueo"><div class="seParqEmo" aria-hidden="true">🅿️</div>' +
           '<div class="sePregunta">¿Pagaron parqueadero en <span class="seLugarNom">' + esc(nombreLugar(p)) + '</span>?</div>' +
           '<div class="seParqSi" id="seParqSi" hidden>' +
-            (ult.length ? '<div class="seParqChips">' + ult.map(v => '<button type="button" data-v="' + v + '">' + peso(v) + '</button>').join("") + '</div>' : '') +
-            '<span class="seMonto seParqMonto"><i>$</i><input id="seParqIn" type="text" inputmode="numeric" placeholder="¿Cuánto?" autocomplete="off"></span></div></div>';
+            '<label class="fmMonto" for="seParqIn"><span class="fmMontoLbl">¿Cuánto?</span><span class="fmMontoIn"><b>$</b><input id="seParqIn" type="text" inputmode="numeric" placeholder="0" autocomplete="off" aria-label="Valor del parqueadero"></span><i class="fmLinea" aria-hidden="true"></i></label>' +
+            (ult.length ? '<div class="recDia seParqChips">' + ult.map(v => '<button type="button" class="recChip" data-v="' + v + '">' + peso(v) + '</button>').join("") + '</div>' : '') +
+          '</div></div>';
         botones.innerHTML = '<button type="button" class="pgNo" id="seNo">No</button><button type="button" class="pgSi" id="seSi">Sí, pagamos</button>';
         const si = $("seParqSi"), inp = $("seParqIn"), bSi = $("seSi");
         const listoSi = () => { bSi.disabled = !(monto > 0); };
-        vista.addEventListener("click", e => { const v = e.target.closest("[data-v]"); if(v){ monto = +v.dataset.v; inp.value = monto.toLocaleString("es-CO"); vista.querySelectorAll("[data-v]").forEach(x => x.classList.toggle("on", x === v)); listoSi(); } });
-        inp.addEventListener("input", () => { monto = valorDe(inp.value); inp.value = monto ? monto.toLocaleString("es-CO") : ""; vista.querySelectorAll("[data-v]").forEach(x => x.classList.toggle("on", +x.dataset.v === monto)); listoSi(); });
+        const ancho = () => { inp.style.width = Math.max(1.2, (inp.value || "0").length * .62 + .6) + "em"; };
+        const marca = () => vista.querySelectorAll("[data-v]").forEach(x => x.setAttribute("aria-pressed", String(+x.dataset.v === monto)));
+        vista.addEventListener("click", e => { const v = e.target.closest("[data-v]"); if(v){ monto = +v.dataset.v; inp.value = monto.toLocaleString("es-CO"); ancho(); marca(); listoSi(); } });
+        inp.addEventListener("input", () => { monto = valorDe(inp.value); inp.value = monto ? monto.toLocaleString("es-CO") : ""; ancho(); marca(); listoSi(); });
+        ancho();
         $("seNo").addEventListener("click", () => { p.preguntado = true; ir("resumen", 1); });
         bSi.addEventListener("click", () => {
           if(si.hidden){ si.hidden = false; si.classList.add("seAparece"); bSi.textContent = "Agregar"; listoSi(); setTimeout(() => inp.focus(), 200); return; }
@@ -5208,7 +5234,7 @@ const SalidaEmaForm = (function(){
       if(paso === "resumen"){
         vista.innerHTML =
           '<p class="seContexto">' + esc(fechaLarga(fecha)) + '</p>' +
-          '<div class="seTotalGrande"><small>Total de la salida</small><b>' + peso(total()) + '</b></div>' +
+          '<div class="fmMonto"><span class="fmMontoLbl">Total de la salida</span><span class="fmMontoIn"><b>$</b><span class="seTotN">' + total().toLocaleString("es-CO") + '</span></span><i class="fmLinea" aria-hidden="true"></i></div>' +
           '<div class="seParadas">' + paradas.map((q, i) =>
             '<button type="button" class="seParadaRes" data-i="' + i + '"><div class="sprCab"><b>' + esc(nombreLugar(q)) + '</b><span>' + peso(subtotal(q)) + '</span></div>' +
             '<div class="sprGastos">' + validos(q).map(g => '<span>' + emoGasto(g.c) + ' ' + esc(g.c) + ' · ' + peso(g.m) + (g.fp ? ' <em class="sprAntes">pagado ' + esc(fechaCorta(g.fp)) + '</em>' : '') + '</span>').join("") + '</div><small class="sprEditar">Tocar para editar</small></button>').join("") + '</div>' +
@@ -6222,7 +6248,7 @@ const GastoManual = (function(){
         '<label class="inLbl" for="inConcepto">' + (esIngreso ? '¿De dónde vino?' : '¿En qué?') + '</label>' +
         '<input id="inConcepto" type="text" placeholder="' + (esIngreso ? 'Ej: Salario, trabajo extra…' : 'Ej: Almuerzo, gasolina, droguería…') + '" autocomplete="off" maxlength="80">' +
         '<div id="inFrecBox"><div class="inFrecs" id="inFrecs"></div></div>' +
-        '<span class="inLbl">Categoría</span><div class="fmCats" id="inCat" role="radiogroup" aria-label="Categoría"></div>' +
+        '<span class="inLbl">Categoría</span><div class="fmSel" id="inCatBox"><button type="button" class="fmSelBtn" id="inCatBtn" aria-expanded="false" aria-haspopup="listbox"><span class="fmSelIco" id="inCatIco"></span><span class="fmSelTx" id="inCatTx">Elegir categoría</span><svg class="fmSelFlecha" viewBox="0 0 24 24" ' + P + '><path d="M6 9l6 6 6-6"/></svg></button><div class="fmSelLista"><div class="fmSelIn" id="inCat" role="listbox" aria-label="Categoría"></div></div></div>' +
         '<span class="inLbl">¿Cuándo?</span>' +
         '<div class="recDia" id="inDia" style="margin:0">' +
           '<button type="button" class="recChip" data-dia="hoy" aria-pressed="true">Hoy</button>' +
@@ -6250,7 +6276,8 @@ const GastoManual = (function(){
     function pintaCats(){
       const lista = tipo === "Gasto" ? CATS_GASTO : CATS_INGRESO;
       if(!lista.includes(categoria)) categoria = "";
-      $("inCat").innerHTML = lista.map((c, i) => '<button type="button" role="radio" style="--i:' + i + '" data-c="' + c + '" aria-checked="' + (c === categoria) + '"><svg viewBox="0 0 24 24" ' + P + '>' + (ICO[c] || ICO.Otros) + '</svg><span>' + c + '</span></button>').join("");
+      $("inCat").innerHTML = lista.map((c, i) => '<button type="button" role="option" style="--i:' + i + '" data-c="' + c + '" aria-selected="' + (c === categoria) + '"><svg viewBox="0 0 24 24" ' + P + '>' + (ICO[c] || ICO.Otros) + '</svg><span>' + c + '</span><svg class="fmOk" viewBox="0 0 24 24" ' + P + '><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button>').join("");
+      pintaElegida(false);
       listo(); sugiereIA();
     }
     /* por defecto la IA solo revisa las salidas a comer (pueden faltar datos); lo demás se guarda directo.
@@ -6274,13 +6301,27 @@ const GastoManual = (function(){
         const b = e.target.closest(".recChip"); if(!b) return;
         const f = lista[+b.dataset.i];
         concepto.value = f.concepto; categoria = f.categoria; monto.value = Number(f.monto).toLocaleString("es-CO"); anchoMonto();
-        pintaCats(); concepto.focus(); err.textContent = "";
+        pintaCats(); pintaElegida(true); concepto.focus(); err.textContent = "";
       };
     }
+    /* el desplegable de categoría: se abre como acordeón y, al elegir, la elegida «aterriza» en el botón */
+    const catBox = $("inCatBox"), catBtn = $("inCatBtn");
+    function abreCat(on){
+      catBox.classList.toggle("abierto", on); catBtn.setAttribute("aria-expanded", String(on));
+      if(on) setTimeout(() => catBox.scrollIntoView({ block: "nearest", behavior: REDUCED ? "auto" : "smooth" }), 320);
+    }
+    function pintaElegida(anim){
+      $("inCatIco").innerHTML = '<svg viewBox="0 0 24 24" ' + P + '>' + (ICO[categoria] || '<circle cx="12" cy="12" r="8.5"/><path d="M12 8.5v7M8.5 12h7"/>') + '</svg>';
+      $("inCatTx").textContent = categoria || "Elegir categoría";
+      catBox.classList.toggle("lleno", !!categoria);
+      if(anim){ catBox.classList.remove("elige"); void catBox.offsetWidth; catBox.classList.add("elige"); }
+    }
+    catBtn.addEventListener("click", () => abreCat(!catBox.classList.contains("abierto")));
     $("inCat").addEventListener("click", e => {
       const b = e.target.closest("[data-c]"); if(!b) return;
       categoria = b.dataset.c; err.textContent = "";
-      $("inCat").querySelectorAll("[data-c]").forEach(x => x.setAttribute("aria-checked", String(x === b)));
+      $("inCat").querySelectorAll("[data-c]").forEach(x => x.setAttribute("aria-selected", String(x === b)));
+      setTimeout(() => { abreCat(false); pintaElegida(true); }, 140);
       listo(); sugiereIA();
     });
     if(esIngreso) tipo = "Ingreso";
