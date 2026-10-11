@@ -2110,12 +2110,9 @@ button{ transition:transform var(--t-tap) var(--ease-out); }
 .ahEt{ display:block; font-size:.7rem; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--dim); }
 .ahSaldo{ display:block; margin:4px 0 2px; font-size:clamp(2.2rem, 11.5vw, 3rem); font-weight:700; letter-spacing:-.04em; line-height:1.1; font-variant-numeric:tabular-nums; color:#6fe0b5; }
 .ahSub{ margin:0 0 14px; font-size:.82rem; color:var(--ghost); }
-.ahMeta{ margin-bottom:14px; }
 .ahBarra{ height:10px; border-radius:10px; background:rgba(var(--ink),.08); overflow:hidden; }
 .ahBarra i{ display:block; height:100%; border-radius:10px; background:linear-gradient(90deg, #199e70, #6fe0b5); transform-origin:left; animation:balCrece 1s cubic-bezier(.2,.8,.2,1) backwards; }
-.ahMetaTx{ display:flex; justify-content:space-between; align-items:center; margin-top:7px; font-size:.78rem; color:var(--ghost); }
-.ahMetaTx button, .ahInicial button, .ahPonMeta{ border:0; background:none; padding:4px 0; font:inherit; font-weight:700; color:var(--cyan); cursor:pointer; }
-.ahPonMeta{ display:block; margin:-4px 0 12px; font-size:.84rem; }
+.ahInicial button{ border:0; background:none; padding:4px 0; font:inherit; font-weight:700; color:var(--cyan); cursor:pointer; }
 .ahFalta{ display:block; margin-top:2px; font-size:.76rem; color:var(--dim); }
 .ahFalta.ok{ color:#6fe0b5; font-weight:700; }
 .ahBtns{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
@@ -2124,6 +2121,30 @@ button{ transition:transform var(--t-tap) var(--ease-out); }
 .ahBtn.mas{ color:#06281c; border-color:transparent; background:linear-gradient(140deg, #6fe0b5, #199e70); box-shadow:0 12px 26px -12px rgba(25,158,112,.9); }
 .ahBtn.menos{ color:var(--white); background:rgba(var(--ink),.06); }
 .ahBtn:active{ transform:scale(.96); }
+.ahReparto{ display:flex; gap:3px; height:10px; margin:0 0 14px; border-radius:10px; overflow:hidden; }
+.ahReparto i{ min-width:4px; border-radius:3px; }
+.ahCajas{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.ahCaja{ position:relative; display:flex; flex-direction:column; align-items:flex-start; gap:3px; min-height:112px; padding:14px; border-radius:20px; border:1px solid var(--line); background:linear-gradient(160deg, color-mix(in srgb, var(--c) 16%, transparent), transparent 70%), var(--panel); color:var(--white); font:inherit; text-align:left; cursor:pointer; overflow:hidden; transition:transform .2s var(--ease-spring); }
+.ahCaja::before{ content:""; position:absolute; left:0; top:14px; bottom:14px; width:3px; border-radius:0 3px 3px 0; background:var(--c); }
+.ahCaja:active{ transform:scale(.97); }
+.ahCjNom{ font-size:.84rem; font-weight:700; color:var(--ghost); max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.ahCaja > b{ font-size:1.12rem; font-variant-numeric:tabular-nums; white-space:nowrap; }
+.ahCaja .ahBarra{ width:100%; height:6px; margin-top:auto; }
+.ahCjMeta{ font-size:.7rem; color:var(--dim); }
+.ahCaja.suelta{ cursor:default; }
+.ahCaja.nueva{ align-items:center; justify-content:center; gap:6px; border-style:dashed; background:none; color:var(--ghost); font-weight:700; }
+.ahCaja.nueva::before{ display:none; }
+.ahCaja.nueva span{ display:grid; place-items:center; width:34px; height:34px; border-radius:12px; font-size:1.3rem; color:#6fe0b5; background:rgba(25,158,112,.16); }
+.ahChips{ display:flex; flex-wrap:wrap; gap:6px; margin-bottom:14px; }
+.ahChips button{ display:inline-flex; align-items:center; gap:7px; padding:8px 13px; border-radius:999px; border:1px solid var(--line); background:rgba(var(--ink),.04); color:var(--ghost); font:inherit; font-size:.84rem; font-weight:600; cursor:pointer; }
+.ahChips button i{ width:9px; height:9px; border-radius:50%; background:var(--c); }
+.ahChips button[aria-pressed="true"]{ color:var(--white); border-color:var(--c); background:color-mix(in srgb, var(--c) 18%, transparent); }
+.ahMovTx small i{ display:inline-block; width:7px; height:7px; margin-right:5px; border-radius:50%; vertical-align:1px; }
+.ahDet .ahSaldo{ margin-top:2px; }
+.ahDet h3{ margin:2px 0 0; text-align:left; font-size:1.2rem; }
+.ahDetLista{ max-height:38vh; overflow:auto; margin-top:12px; }
+.ahAyuda{ margin:6px 0 12px; font-size:.76rem; color:var(--dim); }
+.ahScrim .pgRow .pgNo#ahQuitar{ color:#ff8f8f; }
 .ahVacio{ text-align:center; }
 .ahVacio .ahIco{ display:inline-grid; place-items:center; width:56px; height:56px; margin-bottom:10px; border-radius:18px; color:#6fe0b5; background:rgba(25,158,112,.16); }
 .ahVacio .ahIco svg{ width:28px; height:28px; }
@@ -2977,7 +2998,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-11.123";
+const APP_VERSION = "2026-10-11.124";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -6687,25 +6708,30 @@ const Balance = (function(){
   return { refresh };
 })();
 
-/* ═════════ AHORRO DE LA CASA ═════════
-   El saldo = con cuánto empezaron (se guarda una vez) + lo que se guarda − lo que se saca.
-   Guardar es un gasto con categoría Ahorro (sale del presupuesto del mes y Balance lo cuenta como ahorro);
-   sacar es un ingreso con categoría Ahorro. La meta y el saldo inicial viven en el flujo «ahorro» de n8n. */
+/* ═════════ AHORRO DE LA CASA, POR CAJITAS ═════════
+   Cada cajita (Casita = fondo de emergencia, Vacaciones…) tiene con cuánto empezó, una meta opcional y sus movimientos.
+   Guardar es un gasto con categoría Ahorro y concepto «Ahorro · Cajita» (sale del mes y Balance lo cuenta como ahorro);
+   sacar es un ingreso «Retiro · Cajita». Las cajitas viven en el flujo «ahorro» de n8n, así ambos celulares ven lo mismo. */
 const Ahorro = (function(){
   const view = document.getElementById("ahorroView");
   const KEY = "armoni.ahorro";
+  const COLORES = ["#199e70", "#3987e5", "#e0a030", "#9085e9", "#d55181", "#2bb3c0", "#e66767"];
   const esc = t => String(t == null ? "" : t).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
   const peso = n => (n < 0 ? "-" : "") + "$" + Math.round(Math.abs(n)).toLocaleString("es-CO");
   const hoyISO = () => { const d = new Date(); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); };
   const fechaLinda = f => { try{ return new Date(f + "T12:00:00").toLocaleDateString("es-CO", { day: "numeric", month: "short", year: f.slice(0, 4) === hoyISO().slice(0, 4) ? undefined : "numeric" }).replace(".", ""); }catch{ return f; } };
   const mesLargo = m => { const t = new Date(+m.slice(0, 4), +m.slice(5, 7) - 1, 1).toLocaleDateString("es-CO", { month: "long", year: "numeric" }); return t.charAt(0).toUpperCase() + t.slice(1); };
+  const ICO_AH = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 10.5c0-3.6-3.1-6-7-6s-7 2.4-7 6c0 2 .9 3.6 2.4 4.7V19h3v-2h3.2v2h3v-3.8c1-.7 1.8-1.6 2.2-2.7H21v-3h-1.8"/><path d="M9.5 7.6h4"/><circle cx="15.5" cy="10" r=".6" fill="currentColor"/></svg>';
   let datos = null, cargando = false;
-  try{ datos = JSON.parse(localStorage.getItem(KEY)); }catch{}
+  try{ datos = JSON.parse(localStorage.getItem(KEY)); if(datos && !datos.cajas) datos = null; }catch{}
+  const cajas = () => (datos && datos.cajas) || [];
+  const color = c => COLORES[Math.max(0, cajas().indexOf(c)) % COLORES.length];
+  const nombreDe = id => { const c = cajas().find(x => x.id === id); return c ? c.nombre : "Sin cajita"; };
 
   async function pide(cuerpo){
-    const r = await fetch(AHORRO_URL, { method: "POST", body: JSON.stringify(Object.assign({ token: MERCADO_TOKEN, accion: "ver" }, cuerpo || {})) });
+    const r = await fetch(AHORRO_URL, { method: "POST", body: JSON.stringify(Object.assign({ token: MERCADO_TOKEN, accion: "ver", fecha: hoyISO() }, cuerpo || {})) });
     const j = await r.json().catch(() => ({}));
-    if(!r.ok || !j || j.ok === false) throw new Error(j && j.error || "http " + r.status);
+    if(!r.ok || !j || j.ok === false || !Array.isArray(j.cajas)) throw new Error(j && j.error === "nombre" ? "Ponle un nombre a la cajita." : "");
     datos = j; try{ localStorage.setItem(KEY, JSON.stringify(j)); }catch{}
     return j;
   }
@@ -6716,88 +6742,152 @@ const Ahorro = (function(){
     finally{ cargando = false; }
   }
 
+  const barra = (c, col) => c.meta ? '<div class="ahBarra"><i style="width:' + Math.min(100, Math.max(0, c.saldo / c.meta * 100)).toFixed(1) + '%;background:' + col + '"></i></div><small class="ahCjMeta">' + Math.round(Math.min(100, c.saldo / c.meta * 100)) + '% de ' + peso(c.meta) + '</small>' : '<small class="ahCjMeta">Sin meta</small>';
   function pinta(){
     const box = view.querySelector("#ahCuerpo");
     if(!datos){ box.innerHTML = '<p class="gEmpty"><span class="dot" aria-hidden="true"></span>Cargando el ahorro…</p>'; return; }
-    const d = datos, movs = d.movimientos || [], meta = d.meta || 0, pct = meta ? Math.min(100, Math.max(0, d.saldo / meta * 100)) : 0;
-    const mesAct = hoyISO().slice(0, 7), esteMes = movs.filter(m => m.fecha.startsWith(mesAct)).reduce((a, m) => a + m.monto, 0);
-    if(!d.inicialFecha && !movs.length){
-      box.innerHTML = '<div class="ahCard ahVacio"><span class="ahIco" aria-hidden="true">' + ICO_AH + '</span><b>¿Cuánto tienen ahorrado hoy?</b><p>Empieza con lo que ya tienen guardado. Desde ahí, cada vez que guarden o saquen plata, Armoni lleva la cuenta.</p>' +
-        '<button type="button" class="mkBtn pri full" data-a="inicial">Poner lo que tenemos</button></div>';
+    const cs = cajas(), movs = datos.movimientos || [];
+    if(!cs.length && !movs.length){
+      box.innerHTML = '<div class="ahCard ahVacio"><span class="ahIco" aria-hidden="true">' + ICO_AH + '</span><b>Crea su primera cajita</b><p>Como las cajitas del banco: una para cada cosa. Por ejemplo «Casita», el fondo de emergencia.</p>' +
+        '<button type="button" class="mkBtn pri full" data-a="nueva" data-sug="Casita">Crear «Casita»</button><button type="button" class="mkBtn sec full" data-a="nueva" style="margin-top:10px">Otra cajita</button></div>';
       return;
     }
-    // agrupado por mes
+    const mes = hoyISO().slice(0, 7), esteMes = movs.filter(m => m.fecha.startsWith(mes)).reduce((a, m) => a + m.monto, 0);
+    const total = datos.total || 0;
+    // la barra de arriba: cuánto pesa cada cajita en el total
+    const reparto = total > 0 ? '<div class="ahReparto" role="img" aria-label="Cómo se reparte el ahorro">' + cs.filter(c => c.saldo > 0).map(c => '<i style="flex:' + c.saldo + ';background:' + color(c) + '"></i>').join("") + (datos.sinCaja > 0 ? '<i style="flex:' + datos.sinCaja + ';background:rgba(var(--ink),.25)"></i>' : '') + '</div>' : '';
     const porMes = {};
     movs.forEach(m => { (porMes[m.fecha.slice(0, 7)] = porMes[m.fecha.slice(0, 7)] || []).push(m); });
-    const lista = Object.keys(porMes).sort().reverse().map(k => {
+    const lista = Object.keys(porMes).sort().reverse().slice(0, 6).map(k => {
       const t = porMes[k].reduce((a, m) => a + m.monto, 0);
       return '<div class="ahMes"><div class="ahMesCab"><span>' + esc(mesLargo(k)) + '</span><b class="' + (t >= 0 ? 'mas' : 'menos') + '">' + (t >= 0 ? '+' : '') + peso(t) + '</b></div>' +
-        porMes[k].map(m => '<div class="ahMov"><span class="ahMovIco ' + (m.monto >= 0 ? 'mas' : 'menos') + '" aria-hidden="true">' + (m.monto >= 0 ? '↑' : '↓') + '</span><span class="ahMovTx"><b>' + esc(m.monto >= 0 ? (m.nota || 'Guardado') : (m.nota || 'Sacado')) + '</b><small>' + esc(fechaLinda(m.fecha)) + '</small></span><b class="' + (m.monto >= 0 ? 'mas' : 'menos') + '">' + (m.monto >= 0 ? '+' : '') + peso(m.monto) + '</b></div>').join("") + '</div>';
+        porMes[k].map(m => { const c = cs.find(x => x.id === m.caja); return '<div class="ahMov"><span class="ahMovIco ' + (m.monto >= 0 ? 'mas' : 'menos') + '" aria-hidden="true">' + (m.monto >= 0 ? '↑' : '↓') + '</span><span class="ahMovTx"><b>' + esc(m.nota || (m.monto >= 0 ? 'Guardado' : 'Sacado')) + '</b><small><i style="background:' + (c ? color(c) : 'rgba(var(--ink),.3)') + '"></i>' + esc(nombreDe(m.caja)) + ' · ' + esc(fechaLinda(m.fecha)) + '</small></span><b class="' + (m.monto >= 0 ? 'mas' : 'menos') + '">' + (m.monto >= 0 ? '+' : '') + peso(m.monto) + '</b></div>'; }).join("") + '</div>';
     }).join("");
     box.innerHTML =
       '<div class="ahCard">' +
-        '<small class="ahEt">Tenemos ahorrado</small>' +
-        '<strong class="ahSaldo">' + peso(d.saldo) + '</strong>' +
-        '<p class="ahSub">' + (esteMes ? (esteMes > 0 ? '+' : '') + peso(esteMes) + ' este mes' : 'Sin movimientos este mes') + '</p>' +
-        (meta
-          ? '<div class="ahMeta"><div class="ahBarra" role="img" aria-label="Van en el ' + Math.round(pct) + '% de la meta"><i style="width:' + pct.toFixed(1) + '%"></i></div><div class="ahMetaTx"><span>' + Math.round(pct) + '% de la meta</span><button type="button" data-a="meta">Meta ' + peso(meta) + '</button></div>' +
-            (d.saldo < meta ? '<small class="ahFalta">Faltan ' + peso(meta - d.saldo) + '</small>' : '<small class="ahFalta ok">¡Meta cumplida! 🎉</small>') + '</div>'
-          : '<button type="button" class="ahPonMeta" data-a="meta">+ Ponerle una meta</button>') +
+        '<small class="ahEt">Tenemos ahorrado</small><strong class="ahSaldo">' + peso(total) + '</strong>' +
+        '<p class="ahSub">' + (esteMes ? (esteMes > 0 ? '+' : '') + peso(esteMes) + ' este mes' : 'Sin movimientos este mes') + ' · ' + cs.length + (cs.length === 1 ? ' cajita' : ' cajitas') + '</p>' + reparto +
         '<div class="ahBtns"><button type="button" class="ahBtn mas" data-a="guardar"><span aria-hidden="true">+</span>Guardar</button><button type="button" class="ahBtn menos" data-a="sacar"><span aria-hidden="true">−</span>Sacar</button></div>' +
       '</div>' +
-      (lista ? '<div class="mkSec">Movimientos</div><div class="ahLista">' + lista + '</div>' : '') +
-      '<p class="ahInicial">Empezamos con ' + peso(d.inicial || 0) + (d.inicialFecha ? ' el ' + esc(fechaLinda(d.inicialFecha)) : '') + ' · <button type="button" data-a="inicial">cambiar</button></p>';
+      '<div class="mkSec">Cajitas</div><div class="ahCajas">' +
+        cs.map(c => '<button type="button" class="ahCaja" data-a="caja" data-id="' + esc(c.id) + '" style="--c:' + color(c) + '"><span class="ahCjNom">' + esc(c.nombre) + '</span><b>' + peso(c.saldo) + '</b>' + barra(c, color(c)) + '</button>').join("") +
+        (datos.sinCaja ? '<div class="ahCaja suelta" style="--c:rgba(var(--ink),.3)"><span class="ahCjNom">Sin cajita</span><b>' + peso(datos.sinCaja) + '</b><small class="ahCjMeta">Movimientos sin cajita</small></div>' : '') +
+        '<button type="button" class="ahCaja nueva" data-a="nueva"><span aria-hidden="true">+</span>Nueva cajita</button>' +
+      '</div>' +
+      (lista ? '<div class="mkSec">Movimientos</div><div class="ahLista">' + lista + '</div>' : '');
   }
 
-  /* ventana para guardar, sacar, poner la meta o el saldo inicial */
-  function ventana(modo){
-    if(document.querySelector(".pgScrim.ahScrim")) return;
-    const T = { guardar: ["Guardar en el ahorro", "¿Cuánto guardaron?", "Guardar"], sacar: ["Sacar del ahorro", "¿Cuánto sacaron?", "Sacar"], meta: ["Meta de ahorro", "¿Cuánto quieren juntar?", "Poner meta"], inicial: ["Lo que tenemos hoy", "¿Cuánto tienen ahorrado hoy?", "Guardar"] }[modo];
-    const conNota = modo === "guardar" || modo === "sacar";
+  /* ── ventanas ── */
+  function ventana(html, alListo){
+    if(document.querySelector(".pgScrim.ahScrim")) return null;
     const scrim = document.createElement("div");
     scrim.className = "pgScrim seScrim ahScrim";
-    scrim.innerHTML = '<div class="inWrap"><div class="pgCard inCard" role="dialog" aria-modal="true" aria-labelledby="ahT">' +
-      '<h3 id="ahT">' + T[0] + '</h3><div class="inBody">' +
-      '<label class="fmMonto" for="ahMonto"><span class="fmMontoLbl">' + T[1] + '</span><span class="fmMontoIn"><b>$</b><input id="ahMonto" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" placeholder="0"></span></label>' +
-      (conNota ? '<label class="inLbl" for="ahNota">' + (modo === "guardar" ? '¿De dónde salió?' : '¿Para qué?') + ' <span style="font-weight:400;letter-spacing:0;text-transform:none">(opcional)</span></label><input id="ahNota" type="text" maxlength="80" autocomplete="off" placeholder="' + (modo === "guardar" ? 'Prima, sobrante del mes…' : 'Vacaciones, imprevisto…') + '">' : '') +
-      '<p class="inErr" id="ahErr" role="alert"></p></div>' +
-      '<div class="pgRow"><button type="button" class="pgNo" id="ahNo">Cancelar</button><button type="button" class="pgSi" id="ahSi" disabled>' + T[2] + '</button></div></div></div>';
+    scrim.innerHTML = '<div class="inWrap"><div class="pgCard inCard" role="dialog" aria-modal="true" aria-labelledby="ahT">' + html + '</div></div>';
     document.body.appendChild(scrim);
     requestAnimationFrame(() => scrim.classList.add("on"));
-    const $ = id => scrim.querySelector("#" + id), inp = $("ahMonto"), si = $("ahSi");
-    let monto = 0, guardando = false;
+    let ocupado = false;
     const cierra = () => { document.removeEventListener("keydown", tecla); scrim.classList.remove("on"); setTimeout(() => scrim.remove(), 340); };
-    const tecla = e => { if(e.key === "Escape" && !guardando) cierra(); };
+    const tecla = e => { if(e.key === "Escape" && !ocupado) cierra(); };
     document.addEventListener("keydown", tecla);
-    scrim.addEventListener("click", e => { if(e.target === scrim && !guardando && !monto) cierra(); });
-    $("ahNo").addEventListener("click", () => { if(!guardando) cierra(); });
-    inp.addEventListener("input", () => { monto = +inp.value.replace(/\D/g, "").slice(0, 12) || 0; inp.value = monto ? monto.toLocaleString("es-CO") : ""; si.disabled = !(monto > 0); });
-    if(modo === "meta" && datos && datos.meta){ monto = datos.meta; inp.value = monto.toLocaleString("es-CO"); si.disabled = false; }
-    setTimeout(() => inp.focus(), 300);
-    si.addEventListener("click", async () => {
-      if(guardando || !(monto > 0)) return;
-      if(modo === "sacar" && datos && monto > datos.saldo && !confirm("Eso es más de lo que hay ahorrado (" + peso(datos.saldo) + "). ¿Igual lo anoto?")) return;
-      guardando = true; si.disabled = true; si.textContent = "Guardando…"; $("ahErr").textContent = "";
-      try{
-        if(modo === "guardar" || modo === "sacar"){
-          const nota = ($("ahNota").value || "").trim();
-          const r = await fetch(MOVIMIENTO_URL, { method: "POST", body: JSON.stringify({ token: MERCADO_TOKEN, tipo: modo === "guardar" ? "Gasto" : "Ingreso", categoria: "Ahorro", concepto: modo === "guardar" ? "Ahorro" : "Retiro del ahorro", monto, fecha: hoyISO(), nota }) });
-          const j = await r.json().catch(() => ({}));
-          if(!r.ok || j.ok === false) throw new Error(j.error === "categoria" ? "Falta actualizar el flujo «movimiento-nuevo» en n8n para poder sacar del ahorro." : "");
-          await pide().catch(() => {});
-        } else {
-          await pide({ accion: modo, valor: monto, fecha: hoyISO() });
-        }
-        cierra(); pinta();
-        avisoOk(modo === "guardar" ? "Guardado en el ahorro" : modo === "sacar" ? "Sacado del ahorro" : modo === "meta" ? "Meta lista" : "Listo", peso(monto));
-      }catch(e){
-        guardando = false; si.disabled = false; si.textContent = T[2];
-        $("ahErr").textContent = (e && e.message) || "No se pudo guardar. Revisa tu internet y que el flujo «Ahorro» esté activo en n8n.";
-      }
-    });
+    scrim.addEventListener("click", e => { if(e.target === scrim && !ocupado) cierra(); });
+    const no = scrim.querySelector("[data-cerrar]"); if(no) no.addEventListener("click", () => { if(!ocupado) cierra(); });
+    const $ = id => scrim.querySelector("#" + id);
+    const ctl = { scrim, $, cierra, ocupa(v){ ocupado = v; } };
+    alListo && alListo(ctl);
+    return ctl;
   }
-  const ICO_AH = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 10.5c0-3.6-3.1-6-7-6s-7 2.4-7 6c0 2 .9 3.6 2.4 4.7V19h3v-2h3.2v2h3v-3.8c1-.7 1.8-1.6 2.2-2.7H21v-3h-1.8"/><path d="M9.5 7.6h4"/><circle cx="15.5" cy="10" r=".6" fill="currentColor"/></svg>';
-  view.addEventListener("click", e => { const b = e.target.closest("[data-a]"); if(b) ventana(b.dataset.a); });
+  const montoIn = (id, lbl) => '<label class="fmMonto" for="' + id + '"><span class="fmMontoLbl">' + lbl + '</span><span class="fmMontoIn"><b>$</b><input id="' + id + '" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" placeholder="0"></span></label>';
+  const leeMonto = inp => { const v = +inp.value.replace(/\D/g, "").slice(0, 12) || 0; inp.value = v ? v.toLocaleString("es-CO") : ""; return v; };
+  const errorDe = e => (e && e.message) || "No se pudo guardar. Revisa tu internet y que el flujo «Ahorro» esté activo en n8n.";
+
+  /* guardar o sacar: se elige la cajita */
+  function mover(modo, cajaId){
+    const cs = cajas(); if(!cs.length){ nueva(); return; }
+    let sel = cajaId || cs[0].id, monto = 0;
+    ventana(
+      '<h3 id="ahT">' + (modo === "guardar" ? 'Guardar en una cajita' : 'Sacar de una cajita') + '</h3><div class="inBody">' +
+      '<span class="inLbl">¿Cuál cajita?</span><div class="ahChips" id="ahChips">' + cs.map(c => '<button type="button" data-id="' + esc(c.id) + '" aria-pressed="' + (c.id === sel) + '" style="--c:' + color(c) + '"><i></i>' + esc(c.nombre) + '</button>').join("") + '</div>' +
+      montoIn("ahMonto", modo === "guardar" ? "¿Cuánto guardaron?" : "¿Cuánto sacaron?") +
+      '<label class="inLbl" for="ahNota">' + (modo === "guardar" ? '¿De dónde salió?' : '¿Para qué?') + ' <span style="font-weight:400;letter-spacing:0;text-transform:none">(opcional)</span></label><input id="ahNota" type="text" maxlength="80" autocomplete="off" placeholder="' + (modo === "guardar" ? 'Prima, sobrante del mes…' : 'Imprevisto, viaje…') + '">' +
+      '<p class="inErr" id="ahErr" role="alert"></p></div>' +
+      '<div class="pgRow"><button type="button" class="pgNo" data-cerrar>Cancelar</button><button type="button" class="pgSi" id="ahSi" disabled>' + (modo === "guardar" ? 'Guardar' : 'Sacar') + '</button></div>',
+      ({ scrim, $, cierra, ocupa }) => {
+        const inp = $("ahMonto"), si = $("ahSi");
+        $("ahChips").addEventListener("click", e => { const b = e.target.closest("[data-id]"); if(!b) return; sel = b.dataset.id; $("ahChips").querySelectorAll("[data-id]").forEach(x => x.setAttribute("aria-pressed", String(x === b))); });
+        inp.addEventListener("input", () => { monto = leeMonto(inp); si.disabled = !(monto > 0); });
+        setTimeout(() => inp.focus(), 300);
+        si.addEventListener("click", async () => {
+          const c = cajas().find(x => x.id === sel); if(!c || !(monto > 0)) return;
+          if(modo === "sacar" && monto > c.saldo && !confirm("En «" + c.nombre + "» hay " + peso(c.saldo) + ". ¿Igual lo anoto?")) return;
+          ocupa(true); si.disabled = true; si.textContent = "Guardando…"; $("ahErr").textContent = "";
+          try{
+            const r = await fetch(MOVIMIENTO_URL, { method: "POST", body: JSON.stringify({ token: MERCADO_TOKEN, tipo: modo === "guardar" ? "Gasto" : "Ingreso", categoria: "Ahorro", concepto: (modo === "guardar" ? "Ahorro · " : "Retiro · ") + c.nombre, monto, fecha: hoyISO(), nota: ($("ahNota").value || "").trim() }) });
+            const j = await r.json().catch(() => ({}));
+            if(!r.ok || j.ok === false) throw new Error(j.error === "categoria" ? "Falta actualizar el flujo «movimiento-nuevo» en n8n para poder sacar del ahorro." : "");
+            await pide().catch(() => {});
+            cierra(); pinta();
+            avisoOk(modo === "guardar" ? "Guardado en " + c.nombre : "Sacado de " + c.nombre, peso(monto));
+          }catch(e){ ocupa(false); si.disabled = false; si.textContent = modo === "guardar" ? "Guardar" : "Sacar"; $("ahErr").textContent = errorDe(e); }
+        });
+      });
+  }
+  /* crear o editar una cajita */
+  function nueva(c, sug){
+    const ed = !!c;
+    let inicial = ed ? c.inicial : 0, meta = ed ? c.meta : 0;
+    ventana(
+      '<h3 id="ahT">' + (ed ? 'Editar cajita' : 'Nueva cajita') + '</h3><div class="inBody">' +
+      '<label class="inLbl" for="ahNom">Nombre</label><input id="ahNom" type="text" maxlength="40" autocomplete="off" placeholder="Casita, Vacaciones, Carro…" value="' + esc(ed ? c.nombre : (sug || "")) + '">' +
+      (ed ? '' : '<p class="ahAyuda">Ej.: «Casita» para el fondo de emergencia.</p>') +
+      montoIn("ahIni", ed ? "¿Cuánto tenía al empezar?" : "¿Cuánto tiene hoy?") +
+      montoIn("ahMeta", "Meta (opcional)") +
+      '<p class="inErr" id="ahErr" role="alert"></p></div>' +
+      '<div class="pgRow"><button type="button" class="pgNo" data-cerrar>Cancelar</button><button type="button" class="pgSi" id="ahSi">' + (ed ? 'Guardar' : 'Crear cajita') + '</button></div>',
+      ({ $, cierra, ocupa }) => {
+        const ini = $("ahIni"), mt = $("ahMeta"), si = $("ahSi"), nom = $("ahNom");
+        if(inicial) ini.value = inicial.toLocaleString("es-CO");
+        if(meta) mt.value = meta.toLocaleString("es-CO");
+        ini.addEventListener("input", () => { inicial = leeMonto(ini); });
+        mt.addEventListener("input", () => { meta = leeMonto(mt); });
+        setTimeout(() => (ed || sug ? ini : nom).focus(), 300);
+        si.addEventListener("click", async () => {
+          const n = nom.value.trim(); if(!n){ $("ahErr").textContent = "Ponle un nombre a la cajita."; return; }
+          if(cajas().some(x => x.nombre.toLowerCase() === n.toLowerCase() && (!ed || x.id !== c.id))){ $("ahErr").textContent = "Ya hay una cajita con ese nombre."; return; }
+          ocupa(true); si.disabled = true; si.textContent = "Guardando…"; $("ahErr").textContent = "";
+          try{ await pide({ accion: "caja", id: ed ? c.id : "", nombre: n, inicial, meta }); cierra(); pinta(); avisoOk(ed ? "Cajita actualizada" : "Cajita creada", n); }
+          catch(e){ ocupa(false); si.disabled = false; si.textContent = ed ? "Guardar" : "Crear cajita"; $("ahErr").textContent = errorDe(e); }
+        });
+      });
+  }
+  /* el detalle de una cajita */
+  function detalle(id){
+    const c = cajas().find(x => x.id === id); if(!c) return;
+    const col = color(c), movs = c.movimientos || [];
+    ventana(
+      '<div class="ahDet" style="--c:' + col + '"><small class="ahEt">Cajita</small><h3 id="ahT">' + esc(c.nombre) + '</h3><strong class="ahSaldo" style="color:' + col + '">' + peso(c.saldo) + '</strong>' +
+      (c.meta ? barra(c, col) + (c.saldo < c.meta ? '<small class="ahFalta">Faltan ' + peso(c.meta - c.saldo) + '</small>' : '<small class="ahFalta ok">¡Meta cumplida!</small>') : '') +
+      '<div class="ahBtns" style="margin-top:14px"><button type="button" class="ahBtn mas" data-m="guardar"><span aria-hidden="true">+</span>Guardar</button><button type="button" class="ahBtn menos" data-m="sacar"><span aria-hidden="true">−</span>Sacar</button></div>' +
+      '<div class="ahDetLista">' + (movs.length ? movs.slice(0, 30).map(m => '<div class="ahMov"><span class="ahMovIco ' + (m.monto >= 0 ? 'mas' : 'menos') + '" aria-hidden="true">' + (m.monto >= 0 ? '↑' : '↓') + '</span><span class="ahMovTx"><b>' + esc(m.nota || (m.monto >= 0 ? 'Guardado' : 'Sacado')) + '</b><small>' + esc(fechaLinda(m.fecha)) + '</small></span><b class="' + (m.monto >= 0 ? 'mas' : 'menos') + '">' + (m.monto >= 0 ? '+' : '') + peso(m.monto) + '</b></div>').join("") : '<p class="gEmpty" style="margin:8px 0">Todavía sin movimientos.</p>') + '</div>' +
+      '<p class="ahInicial">Empezó con ' + peso(c.inicial) + (c.inicialFecha ? ' el ' + esc(fechaLinda(c.inicialFecha)) : '') + '</p></div>' +
+      '<div class="pgRow"><button type="button" class="pgNo" id="ahQuitar">Quitar</button><button type="button" class="pgNo" id="ahEditar">Editar</button><button type="button" class="pgSi" data-cerrar>Listo</button></div>',
+      ({ scrim, $, cierra, ocupa }) => {
+        scrim.querySelectorAll("[data-m]").forEach(b => b.addEventListener("click", () => { cierra(); setTimeout(() => mover(b.dataset.m, c.id), 360); }));
+        $("ahEditar").addEventListener("click", () => { cierra(); setTimeout(() => nueva(c), 360); });
+        $("ahQuitar").addEventListener("click", async e => {
+          if(!confirm("¿Quitar la cajita «" + c.nombre + "»? Sus movimientos quedan guardados en Notion, pero dejan de verse dentro de una cajita.")) return;
+          ocupa(true); e.currentTarget.disabled = true;
+          try{ await pide({ accion: "quitar", id: c.id }); cierra(); pinta(); avisoOk("Cajita quitada", c.nombre); }
+          catch{ ocupa(false); e.currentTarget.disabled = false; }
+        });
+      });
+  }
+  view.addEventListener("click", e => {
+    const b = e.target.closest("[data-a]"); if(!b) return;
+    const a = b.dataset.a;
+    if(a === "guardar" || a === "sacar") mover(a);
+    else if(a === "nueva") nueva(null, b.dataset.sug);
+    else if(a === "caja") detalle(b.dataset.id);
+  });
   function refresh(){ pinta(); cargar(); }
   return { refresh };
 })();
