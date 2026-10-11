@@ -2133,6 +2133,20 @@ button{ transition:transform var(--t-tap) var(--ease-out); }
 .duHecho{ display:flex; align-items:flex-start; gap:10px; padding:11px 12px 11px 14px; border-radius:16px; background:rgba(var(--ink),.05); font-size:.84rem; line-height:1.4; color:var(--ghost); }
 .duHecho span{ flex:1; min-width:0; }
 .duHecho button{ flex:none; width:32px; height:32px; margin:-4px -4px -4px 0; border:0; border-radius:50%; background:none; color:var(--dim); font-size:.9rem; cursor:pointer; }
+.duTabs{ display:grid; grid-template-columns:1fr 1fr; gap:4px; padding:4px; margin-bottom:14px; border-radius:16px; background:rgba(var(--ink),.07); }
+.duTabs button{ min-height:42px; border:0; border-radius:12px; background:none; font:inherit; font-size:.9rem; font-weight:600; color:var(--dim); cursor:pointer; transition:background .25s ease, color .25s ease; }
+.duTabs button[aria-selected="true"]{ color:var(--strong); background:var(--panel); box-shadow:0 1px 6px rgba(0,0,0,.25); }
+.duTabs b{ display:inline-block; min-width:20px; margin-left:4px; padding:1px 6px; border-radius:10px; font-size:.72rem; color:#fff; background:linear-gradient(140deg,#ffb066,#ff8a50); }
+.duNota{ margin:0 4px 12px; font-size:.82rem; color:var(--ghost); }
+.duVacio{ margin:0; font-size:.84rem; color:var(--dim); }
+.duDesp{ margin-bottom:10px; border-radius:18px; border:1px solid var(--line); background:var(--panel); overflow:hidden; }
+.duDesp summary{ display:flex; align-items:center; gap:10px; min-height:52px; padding:0 16px; list-style:none; cursor:pointer; font-weight:600; color:var(--strong); }
+.duDesp summary::-webkit-details-marker{ display:none; }
+.duDesp summary span{ flex:1; }
+.duDesp summary i{ font-style:normal; font-size:.78rem; font-weight:700; color:var(--dim); }
+.duDesp summary svg{ width:18px; height:18px; color:var(--dim); transition:transform .35s var(--ease-out); }
+.duDesp[open] summary svg{ transform:rotate(90deg); }
+.duDespIn{ padding:0 12px 12px; }
 .duCorr{ margin-top:8px; padding:6px 12px; border-radius:10px; border:1px solid var(--line); background:none; font:inherit; font-size:.78rem; font-weight:600; color:var(--white); cursor:pointer; }
 .duBuscar{ display:block; width:100%; margin-top:16px; min-height:46px; border-radius:14px; border:1px solid var(--line); background:none; font:inherit; font-weight:600; color:var(--white); cursor:pointer; }
 .duBuscar:disabled{ opacity:.6; }
@@ -3099,7 +3113,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-11.137";
+const APP_VERSION = "2026-10-11.138";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -7129,6 +7143,7 @@ const Preguntas = (function(){
   const peso = n => "$" + Math.round(Math.abs(n)).toLocaleString("es-CO");
   const fechaC = f => { try{ return new Date(f + "T12:00:00").toLocaleDateString("es-CO", { day: "numeric", month: "short" }).replace(".", ""); }catch{ return f; } };
   const KD = "armoni.dudas", KS = "armoni.saber";
+  let pestana = "dudas";
   /* lo que Armoni ha aprendido de nuestras respuestas (copia en el celular por si se reinstala el flujo) */
   let saber = (() => { try{ return JSON.parse(localStorage.getItem(KS)) || []; }catch{ return []; } })();
   const refDe = id => String(id).replace(/-/g, "").slice(-10);
@@ -7244,12 +7259,19 @@ const Preguntas = (function(){
     const cuerpo = document.getElementById("duCuerpo"); if(!cuerpo) return;
     const A = dudas.abiertas, H = dudas.hechas;
     const movs = q => (q.movs || []).length ? '<div class="prMovs">' + q.movs.map(m => '<div><span>' + esc(m.concepto) + '<small>' + esc(fechaC(m.fecha)) + ' · ' + esc(m.cat) + '</small></span><b class="' + (m.tipo === "Ingreso" ? 'mas' : 'menos') + '">' + (m.tipo === "Ingreso" ? '+' : '−') + peso(m.monto) + '</b></div>').join("") + '</div>' : '';
-    cuerpo.innerHTML =
+    const sab = '<div class="duSaber">' + saber.map((t, i) => '<div class="duHecho"><span>' + esc(t) + '</span><button type="button" data-o="' + i + '" aria-label="Olvidar esto">✕</button></div>').join("") + '</div>';
+    const hec = H.map(q => '<div class="duHecha"><b>' + esc(limpia(q)) + '</b><em>Tú: ' + esc(q.respuesta) + '</em><button type="button" class="duCorr" data-c="' + esc(q.id) + '">Corregir</button></div>').join("");
+    const desp = (t, n, cont, abierto) => '<details class="duDesp"' + (abierto ? ' open' : '') + '><summary><span>' + t + '</span><i>' + n + '</i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></summary><div class="duDespIn">' + cont + '</div></details>';
+    const tabs = '<div class="duTabs" role="tablist"><button type="button" role="tab" data-t="dudas" aria-selected="' + (pestana === "dudas") + '">Dudas' + (A.length ? ' <b>' + A.length + '</b>' : '') + '</button><button type="button" role="tab" data-t="aprendizaje" aria-selected="' + (pestana === "aprendizaje") + '">Aprendizaje' + (saber.length ? ' <b>' + saber.length + '</b>' : '') + '</button></div>';
+    cuerpo.innerHTML = tabs + (pestana === "dudas" ?
       '<div class="duResumen' + (A.length ? '' : ' ok') + '"><span class="duNum">' + (A.length || "✓") + '</span><div><b>' + (A.length ? (A.length === 1 ? "Tienes 1 duda por resolver" : "Tienes " + A.length + " dudas por resolver") : "Todo en orden") + '</b><span class="t">' + (A.length ? "Responderlas hace que tus cuentas queden más exactas." : "Armoni no tiene preguntas pendientes por ahora.") + '</span></div></div>' +
       (A.length ? '<div class="duLista">' + A.map((q, i) => '<article class="duCard" style="--i:' + Math.min(i, 8) + '">' + (q.saltada ? '<span class="duTag dif">La dejaste para después</span>' : '<span class="duTag">Por resolver</span>') + '<h3>' + esc(limpia(q)) + '</h3>' + movs(q) + '<button type="button" class="duBtn" data-id="' + esc(q.id) + '">Responder</button></article>').join("") + '</div>' : '') +
-      '<button type="button" class="duBuscar" id="duBuscar">Buscar dudas nuevas</button>' +
-      (saber.length ? '<div class="duGrupo">Lo que Armoni ya aprendió</div><div class="duSaber">' + saber.map((t, i) => '<div class="duHecho"><span>' + esc(t) + '</span><button type="button" data-o="' + i + '" aria-label="Olvidar esto">✕</button></div>').join("") + '</div>' : '') +
-      (H.length ? '<div class="duGrupo">Ya resueltas</div>' + H.map(q => '<div class="duHecha"><b>' + esc(limpia(q)) + '</b><em>Tú: ' + esc(q.respuesta) + '</em><button type="button" class="duCorr" data-c="' + esc(q.id) + '">Corregir</button></div>').join("") : '');
+      '<button type="button" class="duBuscar" id="duBuscar">Buscar dudas nuevas</button>'
+      :
+      '<p class="duNota">Lo que Armoni ha aprendido de tus respuestas. Si algo ya no es cierto, olvídalo con la ✕ o corrige una respuesta.</p>' +
+      desp("Lo que Armoni sabe", saber.length, saber.length ? sab : '<p class="duVacio">Todavía no ha aprendido nada.</p>', false) +
+      desp("Tus respuestas", H.length, H.length ? hec : '<p class="duVacio">Aún no has respondido ninguna duda.</p>', false));
+    cuerpo.querySelectorAll("[data-t]").forEach(b => b.addEventListener("click", () => { pestana = b.dataset.t; pinta(); }));
     cuerpo.querySelectorAll(".duCorr").forEach(b => b.addEventListener("click", () => abre(b.dataset.c)));
     cuerpo.querySelectorAll(".duBtn").forEach(b => b.addEventListener("click", () => abre(b.dataset.id)));
     cuerpo.querySelectorAll("[data-o]").forEach(b => b.addEventListener("click", () => {
@@ -7258,7 +7280,7 @@ const Preguntas = (function(){
       pide({ accion: "olvidar", texto: t }).catch(() => {});
     }));
     const bu = cuerpo.querySelector("#duBuscar");
-    bu.addEventListener("click", async () => {
+    if(bu) bu.addEventListener("click", async () => {
       bu.disabled = true; bu.textContent = "Revisando tus movimientos…";
       try{ await pide({ accion: "revisar", forzar: true }); }catch{ bu.disabled = false; bu.textContent = "No pude conectar. Inténtalo de nuevo"; return; }
       if(!dudas.abiertas.length){ const b2 = document.querySelector("#duBuscar"); if(b2){ b2.textContent = "No encontré nada nuevo"; setTimeout(() => { if(b2.isConnected) b2.textContent = "Buscar dudas nuevas"; }, 2500); } }
