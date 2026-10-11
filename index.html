@@ -2912,7 +2912,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-11.118";
+const APP_VERSION = "2026-10-11.119";
 (function autoActualizar(){
   const patron = new RegExp("const APP_" + "VERSION = \"([^\"]+)\"");
   let ultima = 0;
@@ -7949,7 +7949,7 @@ const Mercar = (function(){
         ? '<button type="button" class="mkBtn pri full" id="mkSeguir">Seguir revisión · ' + parcial.idx + '/' + parcial.cola.length + '</button>' +
           '<button type="button" class="mkBtn sec full" id="mkDescartarParcial" style="margin-top:10px">Descartar y empezar de nuevo</button>'
         : '<button type="button" class="mkBtn pri full" id="mkEmpezar"' + (ps.length ? '' : ' disabled') + '>Empezar revisión</button>') +
-      (canasta.length ? '<div class="mkMama mkCanasta" id="mkCanastaCaja" role="button" tabindex="0" style="cursor:pointer"><b>🧺 En tu canasta · toca comprarlo:</b><div class="mkChips">' + canasta.map(p => '<span>' + emojiMercado(baseDe(p), p.grupo) + ' ' + esc(baseDe(p)) + (haceCanasta(p) ? ' <em>' + haceCanasta(p) + '</em>' : '') + '</span>').join("") + '</div></div>' : '') +
+      (canasta.length ? '<div class="mkMama mkCanasta" id="mkCanastaCaja" role="button" tabindex="0" style="cursor:pointer"><b>🧺 En tu canasta · toca comprarlo:</b><div class="mkChips">' + canasta.map(p => '<span>' + emojiMercado(baseDe(p), p.grupo) + ' ' + esc(baseDe(p)) + '' + '</span>').join("") + '</div></div>' : '') +
       (mama.length ? '<div class="mkMama" id="mkMamaCaja" role="button" tabindex="0" style="cursor:pointer"><b>Tu mamá dice que se acabó:</b><div class="mkChips">' + mama.map(p => '<span>' + emojiMercado(baseDe(p), p.grupo) + ' ' + esc(baseDe(p)) + '</span>').join("") + '</div></div>' : '') +
       '</div>';
     const ICO = {
@@ -8714,7 +8714,7 @@ const Mercar = (function(){
         return '<div class="duCard ' + x.nivel + (p.falta ? ' canasta' : '') + abre + (entrando ? ' duEntra' : '') + '" data-id="' + esc(p.id) + '" ' + dly + ' role="button" tabindex="0" aria-expanded="' + !!abre + '">' +
           '<div class="duCab">' + cab + '<span class="duBadge">' + (p.falta ? '🧺 En la canasta' : '~' + plD(x.dur)) + '</span></div>' +
           '<div class="duPista"><i style="width:' + (entrando ? 0 : w) + '%" data-w="' + w + '"></i></div>' +
-          '<div class="duPie"><span>' + (p.falta ? '🧺 En la canasta' + (haceCanasta(p) ? ' · ' + haceCanasta(p) : '') : TXT_NIVEL[x.nivel]) + '</span><span>' + (p.falta ? (ac ? textoAcabo(ac) : 'ya se acabó') : x.quedan > 0 ? 'quedan ~' + plD(x.quedan) : x.quedan === 0 ? 'se acaba hoy' : 'hace ' + plD(-x.quedan) + ' que debió acabarse') + '</span></div>' +
+          '<div class="duPie"><span>' + (p.falta ? 'Toca comprarlo' : TXT_NIVEL[x.nivel]) + '</span><span>' + (p.falta ? (ac ? textoAcabo(ac) : 'ya se acabó') : x.quedan > 0 ? 'quedan ~' + plD(x.quedan) : x.quedan === 0 ? 'se acaba hoy' : 'hace ' + plD(-x.quedan) + ' que debió acabarse') + '</span></div>' +
           '<div class="duMas"><div class="duMasIn"><div class="duDatos">' +
             '<div><small>Última compra</small><b>' + fechaCorta(p.ultimaCompra) + '</b></div>' +
             '<div><small>Compras</small><b>' + x.veces + '</b></div>' +
@@ -8725,7 +8725,7 @@ const Mercar = (function(){
       if(x.tipo === "aprende"){
         return '<div class="duCard aprende' + abre + (entrando ? ' duEntra' : '') + '" data-id="' + esc(p.id) + '" ' + dly + ' role="button" tabindex="0" aria-expanded="' + !!abre + '">' +
           '<div class="duCab">' + cab + '<span class="duPuntos" aria-label="' + x.veces + ' de 2 compras"><i class="on"></i><i></i></span></div>' +
-          '<div class="duPie"><span>' + (p.falta ? '🧺 En la canasta' + (haceCanasta(p) ? ' · ' + haceCanasta(p) : '') + ' · toca comprarlo' : 'Aprendiendo · falta 1 compra más') + '</span><span>' + (p.falta && acaboDe(p) ? textoAcabo(acaboDe(p)) : x.dias != null ? 'comprado hace ' + plD(x.dias) : '') + '</span></div>' +
+          '<div class="duPie"><span>' + (p.falta ? '🧺 En la canasta · toca comprarlo' : 'Aprendiendo · falta 1 compra más') + '</span><span>' + (p.falta && acaboDe(p) ? textoAcabo(acaboDe(p)) : x.dias != null ? 'comprado hace ' + plD(x.dias) : '') + '</span></div>' +
           '<div class="duMas"><div class="duMasIn"><p class="duNota">Cuando la compres de nuevo con otra fecha, calculo cada cuánto se acaba y te aviso cuándo toca.</p>' + accionCanasta(p) + '</div></div></div>';
       }
       return '<div class="duCard sin' + (entrando ? ' duEntra' : '') + '" ' + dly + '><div class="duCab">' + cab + '<span class="duBadge mudo">Sin compras</span></div></div>';
