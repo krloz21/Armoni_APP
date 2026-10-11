@@ -670,6 +670,8 @@ body.no-gl .bar, body.no-gl .composer{ background:var(--drawer-solid); }
 }
 #ojoBtn{ flex:none; width:34px; height:34px; margin:-2px 0 -2px auto; padding:0 !important; background:none !important; border:0 !important; border-radius:50%; color:var(--ghost); cursor:pointer; display:grid; place-items:center; transition:color .2s, background .2s; }
 #ojoBtn + #reset{ margin-left:0; }
+/* fuera del chat el botón de reiniciar no existe (no solo invisible): así el ojo queda pegado a la derecha, igual que en el inicio */
+body[class*="mode-"] #reset{ display:none !important; }
 #ojoBtn:hover{ color:var(--white); background:rgba(var(--ink),.06) !important; }
 #ojoBtn svg{ width:18px !important; height:18px !important; grid-area:1/1; transition:opacity .25s, transform .35s var(--ease-spring); }
 #ojoBtn .ojoCerrado{ opacity:0; transform:scale(.6) rotate(-20deg); }
@@ -1041,59 +1043,102 @@ body.mode-gmail footer, body.mode-glim footer{ display:none; }
 /* ── registrar una salida con Ema ── */
 .emaNuevaBtn{ margin:2px 0 14px; }
 .seCard{ position:relative; overflow:hidden; }
-.seParada{ position:relative; margin-top:12px; padding:12px; border-radius:16px; border:1px solid rgba(255,138,80,.3); background:rgba(255,138,80,.06); animation:duSube .45s var(--ease-out) backwards; }
-.seParada.seEntra{ animation:duSube .5s var(--ease-out) backwards; }
-.seCab{ display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; font-size:.82rem; }
-.seCab b{ font-size:.74rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--dim); }
+/* cabecera: atrás · título · puntitos de progreso */
+.seHead{ display:flex; align-items:center; gap:8px; margin-bottom:4px; }
+.seHead h3{ flex:1; min-width:0; margin:0 !important; text-align:left !important; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-size:1.06rem !important; }
+@media (max-width:380px){ .seHead:has(.seAtras:not([hidden])) h3 span{ display:none; } }
+.seAtras{ flex:none; width:34px; height:34px; margin-left:-6px; border:0; border-radius:50%; background:rgba(var(--ink),.07); color:var(--white); display:grid; place-items:center; cursor:pointer; animation:seFade .3s ease backwards; transition:transform .15s; }
+.seAtras[hidden]{ display:none; }
+.seAtras:active{ transform:scale(.88); }
+.seAtras svg{ width:18px; height:18px; }
+.sePuntos{ flex:none; display:flex; gap:5px; }
+.sePuntos i{ width:6px; height:6px; border-radius:999px; background:rgba(var(--ink),.18); transition:width .4s var(--ease-spring), background .3s; }
+.sePuntos i.ok{ background:rgba(255,138,80,.55); }
+.sePuntos i.on{ width:18px; background:linear-gradient(90deg, #ffb066, #ff7a4d); }
+/* cada paso entra deslizándose */
+.seVista{ overflow-x:hidden; }
+.sePaso{ min-height:150px; }
+.sePaso.entra.deDer{ animation:seDeDer .42s var(--ease-out) both; }
+.sePaso.entra.deIzq{ animation:seDeIzq .42s var(--ease-out) both; }
+@keyframes seDeDer{ from{ opacity:0; transform:translateX(34px); } to{ opacity:1; transform:none; } }
+@keyframes seDeIzq{ from{ opacity:0; transform:translateX(-34px); } to{ opacity:1; transform:none; } }
+@keyframes seFade{ from{ opacity:0; } }
+.sePregunta{ margin:16px 0 10px; font-size:1.12rem; font-weight:650; line-height:1.3; color:var(--white); }
+.sePregunta:first-child{ margin-top:6px; }
+.seLugarNom{ color:#ffb066; }
+.seContexto{ margin:4px 0 0; font-size:.76rem; font-weight:600; letter-spacing:.04em; color:var(--dim); }
+.inCard input.seLugarIn{ width:100%; box-sizing:border-box; font-size:1rem; }
+.seSugeridos{ display:flex; flex-wrap:wrap; gap:6px; margin-top:10px; }
+.seSugeridos button{ padding:8px 13px; border-radius:999px; border:1px solid rgba(255,138,80,.3); background:rgba(255,138,80,.07); color:var(--white); font:inherit; font-size:.82rem; font-weight:600; cursor:pointer; transition:transform .15s var(--ease-spring), background .2s; }
+.seSugeridos button:active{ transform:scale(.92); background:rgba(255,138,80,.18); }
+.seAparece{ animation:duSube .4s var(--ease-out) backwards; }
+.seError{ animation:seSacude .4s; border-color:rgba(255,90,90,.7) !important; }
+@keyframes seSacude{ 20%{ transform:translateX(-6px); } 40%{ transform:translateX(6px); } 60%{ transform:translateX(-4px); } 80%{ transform:translateX(4px); } }
 .seQuitar{ flex:none; width:28px; height:28px; border:0; border-radius:50%; background:rgba(var(--ink),.1); color:var(--white); font-size:1.05rem; line-height:1; cursor:pointer; transition:transform .15s; }
 .seQuitar:active{ transform:scale(.88); }
-.inCard .seParada input[type="text"]{ width:100%; box-sizing:border-box; }
-.seNuevo{ margin:10px 0 2px; padding:10px; border-radius:12px; background:rgba(var(--ink),.05); animation:duSube .35s var(--ease-out) backwards; }
+.seNuevo{ margin:12px 0 2px; padding:12px; border-radius:14px; background:rgba(255,138,80,.06); border:1px solid rgba(255,138,80,.22); }
 .seNuevo[hidden]{ display:none; }
 .seNuevo p{ margin:0 0 8px; font-size:.8rem; color:var(--ghost); }
-.seNuevo input{ margin-top:8px; }
+.inCard .seNuevo input[type="text"]{ width:100%; box-sizing:border-box; margin-top:8px; }
 .seNotas{ display:grid; grid-template-columns:repeat(5, 1fr); gap:6px; }
 .seNotas button{ padding:9px 0; border-radius:11px; border:1px solid var(--line); background:rgba(var(--ink),.05); color:var(--ghost); font:inherit; font-size:.88rem; font-weight:600; cursor:pointer; transition:background .2s, color .2s, transform .15s var(--ease-spring); }
 .seNotas button.on{ color:#ffb066; background:rgba(255,138,80,.16); border-color:rgba(255,138,80,.45); }
 .seNotas button:active{ transform:scale(.9); }
-.seGastos{ display:flex; flex-direction:column; gap:8px; margin-top:10px; }
-.seGasto{ display:flex; align-items:center; gap:8px; animation:duSube .35s var(--ease-out) backwards; }
-.seGasto > input{ flex:1; min-width:0; }
-.seMonto{ flex:none; display:flex; align-items:center; width:116px; border:1px solid var(--line); border-radius:14px; background:rgba(var(--ink),.05); padding:0 10px; }
+/* gastos del lugar */
+.seGastos{ display:flex; flex-direction:column; gap:8px; }
+.seGasto{ display:flex; align-items:center; gap:8px; transition:opacity .2s, transform .2s; }
+.seGasto.nueva{ animation:duSube .35s var(--ease-out) backwards; }
+.seGasto.sale{ opacity:0; transform:translateX(24px); }
+.inCard .seGasto > input{ flex:1; min-width:0; box-sizing:border-box; }
+.seMonto{ flex:none; display:flex; align-items:center; width:112px; box-sizing:border-box; border:1px solid var(--line); border-radius:14px; background:rgba(var(--ink),.05); padding:0 10px; }
 .seMonto i{ font-style:normal; color:var(--dim); margin-right:4px; }
 .inCard .seMonto input[type="text"]{ border:0 !important; background:none !important; box-shadow:none !important; padding:11px 0 !important; text-align:right; width:100%; min-width:0; }
 .seMonto:focus-within{ border-color:rgba(var(--cyan-rgb),.6); box-shadow:0 0 0 3px rgba(var(--cyan-rgb),.15); }
-.seRapidos{ display:flex; flex-wrap:wrap; gap:6px; margin-top:10px; }
+.seRapidos{ display:flex; flex-wrap:wrap; gap:6px; margin-top:12px; }
 .seRapidos button{ display:flex; align-items:center; gap:5px; padding:7px 11px; border-radius:999px; border:1px solid var(--line); background:rgba(var(--ink),.05); color:var(--ghost); font:inherit; font-size:.8rem; font-weight:600; cursor:pointer; transition:transform .15s var(--ease-spring), background .2s; }
 .seRapidos button:active{ transform:scale(.92); background:rgba(var(--cyan-rgb),.12); }
-.seOtroLugar{ width:100%; margin:12px 0 0; padding:12px; border-radius:14px; border:1px dashed rgba(var(--cyan-rgb),.45); background:rgba(var(--cyan-rgb),.06); color:var(--white); font:inherit; font-size:.86rem; font-weight:600; cursor:pointer; transition:transform .15s var(--ease-out); }
-.seOtroLugar:active{ transform:scale(.98); }
-.seTotal{ margin-top:12px; font-size:.9rem; text-align:center; color:var(--ghost); }
-.seTotal b{ color:var(--white); font-size:1.05rem; }
-.seTotal small{ color:var(--dim); }
-/* la pregunta del parqueadero sube desde abajo */
-.seParq{ position:absolute; inset:0; z-index:5; display:flex; align-items:flex-end; background:rgba(0,0,0,.55); opacity:0; transition:opacity .3s ease; }
-.seParq[hidden]{ display:none; }
-.seParq.on{ opacity:1; }
-.seParqCard{ width:100%; padding:20px 18px 18px; border-radius:24px 24px 0 0; background:var(--sheet-b, var(--panel)); border-top:1px solid var(--line); text-align:center; transform:translateY(100%); transition:transform .55s var(--ease-spring); }
-.seParq.on .seParqCard{ transform:none; }
-.seParqEmo{ font-size:2.6rem; line-height:1; animation:mkFlota 2.4s ease-in-out infinite; }
-.seParqCard h4{ margin:8px 0 2px; font-size:1.15rem; }
-.seParqSi{ text-align:left; overflow:hidden; }
-.seParqSi.seAbre{ animation:duSube .45s var(--ease-out) backwards; }
+.seSub{ margin-top:14px; font-size:.84rem; text-align:right; color:var(--dim); }
+.seSub b{ color:var(--white); font-size:1rem; }
+/* la pregunta del parqueadero */
+.seParqueo{ text-align:center; padding-top:8px; }
+.seParqEmo{ display:inline-block; font-size:3rem; line-height:1; animation:seRebota .7s var(--ease-spring) .1s backwards, mkFlota 2.6s ease-in-out .8s infinite; }
+@keyframes seRebota{ from{ opacity:0; transform:scale(.3) rotate(-20deg); } }
+.seParqueo .sePregunta{ margin-top:12px; font-size:1.2rem; }
+.seParqSi{ text-align:left; }
 .seParqSi[hidden]{ display:none; }
-.seParqLug, .seParqChips{ display:flex; flex-wrap:wrap; gap:6px; margin-top:6px; }
-.seParqLug button, .seParqChips button{ padding:8px 12px; border-radius:999px; border:1px solid var(--line); background:rgba(var(--ink),.05); color:var(--ghost); font:inherit; font-size:.84rem; font-weight:600; cursor:pointer; }
-.seParqLug button.on{ color:var(--on-accent); background:linear-gradient(140deg, var(--cyan), var(--blue)); border-color:transparent; }
-.seParqChips button:active{ background:rgba(var(--cyan-rgb),.14); }
-.seParqMonto{ width:100%; margin-top:8px; }
-.seParqMonto.seError, .seParqMonto input.seError{ animation:seSacude .4s; }
-@keyframes seSacude{ 20%{ transform:translateX(-6px); } 40%{ transform:translateX(6px); } 60%{ transform:translateX(-4px); } 80%{ transform:translateX(4px); } }
-.seParqBtns{ display:flex; gap:10px; margin-top:16px; }
-.seParqBtns button{ flex:1; padding:13px 8px; border-radius:14px; font:inherit; font-size:.92rem; font-weight:650; cursor:pointer; border:1px solid var(--line); background:rgba(var(--ink),.05); color:var(--white); }
-.seParqBtns button:active{ transform:scale(.97); }
-.seParqBtns .pgSi{ background:linear-gradient(140deg, #ffb066, #ff7a4d); color:var(--on-accent); border-color:transparent; }
-@media (prefers-reduced-motion:reduce){ .masMenu, .masMenu button, .seParqCard, .seParq{ transition:none; } .seParqEmo{ animation:none; } }
+.seParqChips{ display:flex; flex-wrap:wrap; justify-content:center; gap:6px; margin-bottom:10px; }
+.seParqChips button{ padding:8px 14px; border-radius:999px; border:1px solid var(--line); background:rgba(var(--ink),.05); color:var(--ghost); font:inherit; font-size:.86rem; font-weight:600; cursor:pointer; transition:background .2s, color .2s; }
+.seParqChips button.on{ color:#ffb066; background:rgba(255,138,80,.16); border-color:rgba(255,138,80,.45); }
+.seParqMonto{ width:100%; }
+.seCard .pgRow .pgSi{ background:linear-gradient(140deg, #ffb066, #ff7a4d); }
+/* resumen */
+.seTotalGrande{ margin:12px 0 4px; padding:16px; border-radius:18px; text-align:center; background:linear-gradient(140deg, rgba(255,176,102,.14), rgba(255,122,77,.08)); border:1px solid rgba(255,138,80,.25); }
+.seTotalGrande small{ display:block; font-size:.72rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--dim); }
+.seTotalGrande b{ display:block; margin-top:2px; font-size:1.7rem; font-weight:700; color:var(--white); font-variant-numeric:tabular-nums; }
+.seParadas{ display:flex; flex-direction:column; gap:8px; margin-top:10px; }
+.seParadaRes{ display:block; width:100%; text-align:left; padding:12px 14px; border-radius:16px; border:1px solid var(--line); background:rgba(var(--ink),.04); color:var(--white); font:inherit; cursor:pointer; animation:duSube .4s var(--ease-out) backwards; transition:transform .15s, border-color .2s; }
+.seParadaRes:nth-child(2){ animation-delay:.06s; } .seParadaRes:nth-child(3){ animation-delay:.12s; }
+.seParadaRes:active{ transform:scale(.98); border-color:rgba(255,138,80,.45); }
+.sprCab{ display:flex; justify-content:space-between; gap:10px; align-items:baseline; }
+.sprCab b{ font-size:.95rem; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.sprCab span{ flex:none; font-weight:700; font-variant-numeric:tabular-nums; }
+.sprGastos{ display:flex; flex-wrap:wrap; gap:4px 10px; margin-top:6px; font-size:.78rem; color:var(--ghost); }
+.sprEditar{ display:block; margin-top:6px; font-size:.7rem; color:var(--dim); }
+.seOtroLugar{ width:100%; margin:12px 0 0; padding:13px; border-radius:14px; border:1px solid rgba(var(--cyan-rgb),.35); background:rgba(var(--cyan-rgb),.07); color:var(--white); font:inherit; font-size:.88rem; font-weight:600; cursor:pointer; transition:transform .15s var(--ease-out), background .2s; }
+.seOtroLugar:active{ transform:scale(.98); background:rgba(var(--cyan-rgb),.14); }
+/* guardando: aro que se llena y un check al final */
+.seGuardando{ display:flex; flex-direction:column; align-items:center; gap:6px; padding:26px 0 14px; text-align:center; }
+.seAro{ width:92px; height:92px; margin-bottom:8px; }
+.seAro circle{ fill:none; stroke-width:5; }
+.seAroBg{ stroke:rgba(var(--ink),.1); }
+.seAroFg{ stroke:#ff9a5c; stroke-linecap:round; transform:rotate(-90deg); transform-origin:40px 40px; transition:stroke-dashoffset .5s var(--ease-out); }
+.seCheck{ fill:none; stroke:#ffb066; stroke-width:5; stroke-linecap:round; stroke-linejoin:round; stroke-dasharray:40; stroke-dashoffset:40; }
+.seGuardando.listo .seCheck{ transition:stroke-dashoffset .45s var(--ease-out) .1s; stroke-dashoffset:0; }
+.seGuardando.listo .seAro{ animation:sePulso .5s var(--ease-out); }
+@keyframes sePulso{ 50%{ transform:scale(1.08); } }
+.seGuardando b{ font-size:1.1rem; }
+.seGuardando small{ font-size:.82rem; color:var(--dim); }
+@media (prefers-reduced-motion:reduce){ .masMenu, .masMenu button{ transition:none; } .sePaso.entra, .seParqEmo, .seParadaRes, .seAparece, .seGuardando.listo .seAro{ animation:none !important; } }
 .swc{ flex:none; position:relative; width:50px; height:30px; padding:0; border-radius:999px; border:1px solid var(--line); background:rgba(var(--ink),.1); cursor:pointer; transition:background .3s, border-color .3s; }
 .swc i{ position:absolute; top:3px; left:3px; width:22px; height:22px; border-radius:50%; background:var(--white); box-shadow:0 2px 6px rgba(0,0,0,.4); transition:transform .35s var(--ease-spring); }
 .swc[aria-checked="true"]{ background:linear-gradient(140deg, var(--cyan), var(--blue)); border-color:transparent; }
@@ -2454,7 +2499,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-11.96";
+const APP_VERSION = "2026-10-11.97";
 (function autoActualizar(){
   const patron = new RegExp("const APP_" + "VERSION = \"([^\"]+)\"");
   async function revisar(){
@@ -4815,20 +4860,31 @@ const SalidasEma = (function(){
   }
   const nombres = () => { const n = (datos && datos.nombres) || []; return n.length ? n : lugares().map(l => l.nombre); };
   const precarga = () => { if(!datos){ try{ datos = JSON.parse(localStorage.getItem(KEY)); }catch{} } cargar(); };
-  return { refresh, nueva, preguntar, lugares, nombres, precarga };
+  /* lo que más pagan en las salidas (para los atajos del registro), sin el parqueadero porque ese se pregunta aparte */
+  const frecuentes = () => {
+    const c = {};
+    ((datos && datos.meses) || []).forEach(m => (m.salidas || []).forEach(q => q.gastos.forEach(g => {
+      const k = String(g.c || "").trim(); if(!k || /parqu/i.test(k)) return;
+      const n = k.toLowerCase(); (c[n] || (c[n] = { nombre: k, n: 0 })).n++;
+    })));
+    return Object.values(c).sort((a, b) => b.n - a.n).map(x => x.nombre);
+  };
+  return { refresh, nueva, preguntar, lugares, nombres, precarga, frecuentes };
 })();
 
 /* ════════════════════════════════════════════════════════════
    REGISTRAR UNA SALIDA CON EMA: varios lugares en el mismo día, varios gastos por lugar y la pregunta del parqueadero
    ════════════════════════════════════════════════════════════ */
 const SalidaEmaForm = (function(){
+  /* Un paso a la vez, como una conversación:
+     1) ¿cuándo y a dónde fueron?  2) ¿qué pagaron ahí?  3) ¿pagaron parqueadero?  4) ¿fueron a otro lugar ese día?  5) se guarda todo */
   let abierta = false;
   const esc = t => String(t == null ? "" : t).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
   const iso = d => d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
   const hoyISO = () => iso(new Date());
   const diaISO = n => { const d = new Date(); d.setDate(d.getDate() - n); return iso(d); };
   const peso = n => "$" + Math.round(n).toLocaleString("es-CO");
-  const fechaCorta = f => new Date(f + "T12:00:00").toLocaleDateString("es-CO", { day: "numeric", month: "short" }).replace(".", "");
+  const fechaLarga = f => { const t = new Date(f + "T12:00:00").toLocaleDateString("es-CO", { weekday: "long", day: "numeric", month: "long" }); return t.charAt(0).toUpperCase() + t.slice(1); };
   const normL = t => String(t || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9 ]/g, " ").replace(/\s+/g, " ").trim().split(" ").map(w => w.replace(/s$/, "")).join(" ");
   const PARQ = /parqu|parking/i;
   const KP = "armoni.ema.parqueo";
@@ -4836,179 +4892,232 @@ const SalidaEmaForm = (function(){
   const recuerdaParq = v => { const l = [v].concat(ultimosParq().filter(x => x !== v)).slice(0, 3); try{ localStorage.setItem(KP, JSON.stringify(l)); }catch{} };
   const conocido = nombre => { const n = normL(nombre); if(!n) return null; return SalidasEma.nombres().find(x => { const m = normL(x); return m === n || (n.length > 3 && (m.includes(n) || n.includes(m))); }) || null; };
   const valorDe = txt => parseInt(String(txt).replace(/\D/g, ""), 10) || 0;
-  const nuevaParada = () => ({ lugar: "", puntuacion: 0, comentario: "", gastos: [{ c: "", m: 0, hecho: false }] });
+  const emoGasto = c => /parqu/i.test(c) ? "🅿️" : /almuer|comida|restaur|desayun|cena|pizza|hamburg/i.test(c) ? "🍽️" : /helad|postre|crepe|dulce/i.test(c) ? "🍦" : /juego|ficha|lego|arkadia|salto|inflable/i.test(c) ? "🎮" : /entrada|boleta|cine|museo|zoo/i.test(c) ? "🎟️" : /uber|taxi|gasolina|transporte/i.test(c) ? "🚗" : "✨";
+  const PASOS = ["lugar", "gastos", "parqueo", "resumen"];
 
   function abrir(){
     if(abierta) return; abierta = true;
     SalidasEma.precarga();
-    let fecha = hoyISO(), paradas = [nuevaParada()], guardando = false, yaPregunto = false;
+    let fecha = hoyISO(), paradas = [], idx = 0, paso = "lugar", guardando = false;
+    const nuevaParada = () => ({ lugar: "", puntuacion: 0, comentario: "", gastos: [], preguntado: false });
+    paradas.push(nuevaParada());
     const scrim = document.createElement("div");
     scrim.className = "pgScrim seScrim";
     scrim.innerHTML =
       '<div class="inWrap"><div class="pgCard inCard seCard" role="dialog" aria-modal="true" aria-labelledby="seT">' +
-        '<h3 id="seT"><span aria-hidden="true">🎈</span> Salida con Ema</h3>' +
-        '<div class="inBody">' +
-          '<span class="inLbl" style="margin-top:2px">¿Cuándo fue?</span>' +
-          '<div class="recDia" id="seDia">' +
-            '<button type="button" class="recChip" data-d="0" aria-pressed="true">Hoy</button>' +
-            '<button type="button" class="recChip" data-d="1" aria-pressed="false">Ayer</button>' +
-            '<button type="button" class="recChip" data-d="2" aria-pressed="false">Hace 2 días</button>' +
-            '<label class="recChip inFechaBtn" id="seFechaBtn" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg><span id="seFechaTxt">Otra fecha</span><input type="date" id="seFecha" max="' + hoyISO() + '" aria-label="Elegir otra fecha"></label>' +
-          '</div>' +
-          '<datalist id="seLista"></datalist>' +
-          '<div id="seParadas"></div>' +
-          '<button type="button" class="seOtroLugar" id="seOtroLugar">+ Fuimos a otro lugar ese día</button>' +
-          '<div class="seTotal" id="seTotal"></div>' +
-          '<p class="inErr" id="seErr" role="alert"></p>' +
-        '</div>' +
-        '<div class="pgRow"><button type="button" class="pgNo" id="seCancel">Cancelar</button><button type="button" class="pgSi" id="seGuardar" disabled>Guardar salida</button></div>' +
-        '<div class="seParq" id="seParq" hidden></div>' +
+        '<div class="seHead"><button type="button" class="seAtras" id="seAtras" aria-label="Atrás" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></button>' +
+          '<h3 id="seT"><span aria-hidden="true">🎈</span> Salida con Ema</h3><div class="sePuntos" id="sePuntos" aria-hidden="true">' + PASOS.map(() => '<i></i>').join("") + '</div></div>' +
+        '<div class="inBody seVista"><div class="sePaso" id="sePaso"></div></div>' +
+        '<div class="pgRow" id="seBotones"></div>' +
       '</div></div>';
     document.body.appendChild(scrim);
     requestAnimationFrame(() => scrim.classList.add("on"));
     const $ = id => scrim.querySelector("#" + id);
-    const cont = $("seParadas"), err = $("seErr"), guardar = $("seGuardar");
-    const dl = $("seLista");
-    const poblar = () => { dl.innerHTML = ""; SalidasEma.nombres().forEach(n => { const o = document.createElement("option"); o.value = n; dl.appendChild(o); }); };
-    poblar(); setTimeout(poblar, 1500);
+    const vista = $("sePaso"), botones = $("seBotones"), atras = $("seAtras");
+    const P = () => paradas[idx];
+    const validos = p => p.gastos.filter(g => g.c.trim() && g.m > 0);
+    const subtotal = p => validos(p).reduce((a, g) => a + g.m, 0);
+    const total = () => paradas.reduce((a, p) => a + subtotal(p), 0);
+    const nombreLugar = p => (p.lugar.trim() && (conocido(p.lugar) || p.lugar.trim())) || "ese lugar";
 
-    const validos = () => paradas.flatMap((p, i) => p.gastos.filter(g => g.c.trim() && g.m > 0 && !g.hecho).map(g => ({ p, g, i })));
-    const todos = () => paradas.flatMap(p => p.gastos.filter(g => g.c.trim() && g.m > 0));
-    function actualiza(){
-      const t = todos(), tot = t.reduce((a, g) => a + g.m, 0);
-      $("seTotal").innerHTML = t.length ? 'Total de la salida · <b>' + peso(tot) + '</b> <small>' + t.length + (t.length === 1 ? ' gasto' : ' gastos') + (paradas.length > 1 ? ' · ' + paradas.length + ' lugares' : '') + '</small>' : '';
-      guardar.disabled = guardando || !validos().length;
-    }
-    const filaHTML = (g, j) =>
-      '<div class="seGasto" data-j="' + j + '"><input data-k="c" type="text" placeholder="Gasto (parqueadero, almuerzo…)" maxlength="60" autocomplete="off" value="' + esc(g.c) + '">' +
-      '<span class="seMonto"><i>$</i><input data-k="m" type="text" inputmode="numeric" placeholder="0" autocomplete="off" value="' + (g.m ? g.m.toLocaleString("es-CO") : "") + '"></span>' +
-      '<button type="button" class="seQuitar" data-q="gasto" aria-label="Quitar gasto">×</button></div>';
-    function pinta(foco){
-      cont.innerHTML = paradas.map((p, i) =>
-        '<div class="seParada" data-i="' + i + '"><div class="seCab"><b>' + (paradas.length > 1 ? 'Lugar ' + (i + 1) : 'Lugar') + '</b>' + (paradas.length > 1 ? '<button type="button" class="seQuitar" data-q="parada" aria-label="Quitar lugar">×</button>' : '') + '</div>' +
-          '<input class="seLugar" data-k="lugar" type="text" list="seLista" placeholder="¿Dónde fue? Pance, cine, heladería…" maxlength="60" autocomplete="off" value="' + esc(p.lugar) + '">' +
-          '<div class="seNuevo"' + (p.lugar.trim() && !conocido(p.lugar) ? '' : ' hidden') + '><p>Es un lugar nuevo: ¿cómo les pareció?</p>' +
-            '<div class="seNotas">' + [1,2,3,4,5,6,7,8,9,10].map(n => '<button type="button" data-n="' + n + '" class="' + (p.puntuacion === n ? 'on' : '') + '" aria-label="' + n + ' de 10">' + n + '</button>').join("") + '</div>' +
-            '<input data-k="comentario" type="text" placeholder="Comentario (opcional)" maxlength="200" autocomplete="off" value="' + esc(p.comentario) + '"></div>' +
-          '<div class="seGastos">' + p.gastos.map(filaHTML).join("") + '</div>' +
-          '<div class="seRapidos">' + [["🅿️", "Parqueadero"], ["🍽️", "Almuerzo"], ["🍦", "Helado"], ["🎟️", "Entradas"]].map(([e, n]) => '<button type="button" data-r="' + n + '"><span aria-hidden="true">' + e + '</span>' + n + '</button>').join("") + '<button type="button" data-r="">+ Otro gasto</button></div></div>').join("");
-      if(foco){ const f = cont.querySelectorAll(".seParada")[foco[0]]; const inp = f && f.querySelectorAll(".seGasto")[foco[1]] && f.querySelectorAll(".seGasto")[foco[1]].querySelector('input[data-k="' + foco[2] + '"]'); if(inp) setTimeout(() => inp.focus(), 60); }
-      actualiza();
-    }
-    pinta();
     const cierra = () => { document.removeEventListener("keydown", tecla); scrim.classList.remove("on"); setTimeout(() => { scrim.remove(); abierta = false; }, 340); };
     const tecla = e => { if(e.key === "Escape" && !guardando) cierra(); };
     document.addEventListener("keydown", tecla);
-    $("seCancel").addEventListener("click", () => { if(!guardando) cierra(); });
     scrim.addEventListener("click", e => { if(e.target === scrim && !guardando) cierra(); });
-
-    /* fecha */
-    const chips = [...scrim.querySelectorAll("#seDia .recChip[data-d]")], fBtn = $("seFechaBtn"), fIn = $("seFecha");
-    chips.forEach(b => b.addEventListener("click", () => { fecha = diaISO(+b.dataset.d); chips.forEach(x => x.setAttribute("aria-pressed", String(x === b))); fBtn.setAttribute("aria-pressed", "false"); $("seFechaTxt").textContent = "Otra fecha"; fIn.value = ""; }));
-    fIn.addEventListener("change", () => { if(!fIn.value) return; fecha = fIn.value > hoyISO() ? hoyISO() : fIn.value; chips.forEach(x => x.setAttribute("aria-pressed", "false")); fBtn.setAttribute("aria-pressed", "true"); $("seFechaTxt").textContent = fechaCorta(fecha); });
-
-    /* lo que se escribe va directo al estado (sin repintar, para no perder el cursor) */
-    cont.addEventListener("input", e => {
-      const el = e.target, k = el.dataset.k; if(!k) return;
-      const pa = paradas[+el.closest(".seParada").dataset.i];
-      if(k === "lugar"){ pa.lugar = el.value; el.closest(".seParada").querySelector(".seNuevo").hidden = !(pa.lugar.trim() && !conocido(pa.lugar)); }
-      else if(k === "comentario") pa.comentario = el.value;
-      else { const g = pa.gastos[+el.closest(".seGasto").dataset.j]; if(k === "c") g.c = el.value; else { const n = valorDe(el.value); g.m = n; el.value = n ? n.toLocaleString("es-CO") : ""; } }
-      err.textContent = ""; actualiza();
+    atras.addEventListener("click", () => {
+      if(guardando) return;
+      if(paso === "gastos") ir("lugar", -1);
+      else if(paso === "parqueo") ir("gastos", -1);
+      else if(paso === "resumen"){ ir("gastos", -1); }
+      else if(paso === "lugar" && idx > 0){ paradas.splice(idx, 1); idx = paradas.length - 1; ir("resumen", -1); }
     });
-    cont.addEventListener("click", e => {
-      const par = e.target.closest(".seParada"); if(!par) return;
-      const i = +par.dataset.i, pa = paradas[i];
-      const nota = e.target.closest(".seNotas button");
-      if(nota){ const n = +nota.dataset.n; pa.puntuacion = pa.puntuacion === n ? 0 : n; par.querySelectorAll(".seNotas button").forEach(x => x.classList.toggle("on", +x.dataset.n === pa.puntuacion)); return; }
-      const q = e.target.closest("[data-q]");
-      if(q){
-        if(q.dataset.q === "parada"){ paradas.splice(i, 1); pinta(); }
-        else { const j = +q.closest(".seGasto").dataset.j; pa.gastos.splice(j, 1); if(!pa.gastos.length) pa.gastos.push({ c: "", m: 0, hecho: false }); pinta(); }
-        return;
-      }
-      const r = e.target.closest("[data-r]");
-      if(r){
-        const vacio = pa.gastos.findIndex(g => !g.c.trim() && !g.m);
-        const nombre = r.dataset.r;
-        if(vacio >= 0 && !nombre){ pinta([i, vacio, "c"]); return; }
-        let j = vacio;
-        if(j < 0){ pa.gastos.push({ c: "", m: 0, hecho: false }); j = pa.gastos.length - 1; }
-        pa.gastos[j].c = nombre;
-        pinta([i, j, nombre ? "m" : "c"]);
-      }
-    });
-    $("seOtroLugar").addEventListener("click", () => { paradas.push(nuevaParada()); pinta(); const u = cont.lastElementChild; if(u){ u.classList.add("seEntra"); u.scrollIntoView({ block: "center", behavior: REDUCED ? "auto" : "smooth" }); const l = u.querySelector(".seLugar"); if(l) setTimeout(() => l.focus({ preventScroll: true }), 300); } });
 
-    /* parqueadero: casi siempre se paga, así que se pregunta antes de guardar */
-    function preguntaParqueo(){
-      const box = $("seParq"), ult = ultimosParq();
-      let destino = Math.max(0, paradas.length - 1), monto = 0;
-      box.hidden = false;
-      box.innerHTML =
-        '<div class="seParqCard"><div class="seParqEmo" aria-hidden="true">🅿️</div><h4>¿Pagaste parqueadero?</h4>' +
-        '<div class="seParqSi" hidden>' +
-          (paradas.length > 1 ? '<span class="inLbl" style="margin-top:10px">¿En qué lugar?</span><div class="seParqLug">' + paradas.map((p, i) => '<button type="button" data-l="' + i + '" class="' + (i === destino ? 'on' : '') + '">' + esc(p.lugar.trim() || 'Lugar ' + (i + 1)) + '</button>').join("") + '</div>' : '') +
-          '<span class="inLbl" style="margin-top:10px">¿Cuánto?</span>' +
-          (ult.length ? '<div class="seParqChips">' + ult.map(v => '<button type="button" data-v="' + v + '">' + peso(v) + '</button>').join("") + '</div>' : '') +
-          '<span class="seMonto seParqMonto"><i>$</i><input id="seParqIn" type="text" inputmode="numeric" placeholder="0" autocomplete="off"></span></div>' +
-        '<div class="seParqBtns"><button type="button" class="pgNo" id="seParqNo">No pagué</button><button type="button" class="pgSi" id="seParqSi">Sí, pagué</button></div></div>';
-      requestAnimationFrame(() => box.classList.add("on"));
-      const si = box.querySelector(".seParqSi"), inp = box.querySelector("#seParqIn"), bSi = box.querySelector("#seParqSi"), bNo = box.querySelector("#seParqNo");
-      let abiertoSi = false;
-      const cerrarPregunta = () => { box.classList.remove("on"); setTimeout(() => { box.hidden = true; box.innerHTML = ""; }, 320); };
-      bNo.addEventListener("click", () => { yaPregunto = true; cerrarPregunta(); ejecutar(); });
-      box.addEventListener("click", e => {
-        const l = e.target.closest("[data-l]"); if(l){ destino = +l.dataset.l; box.querySelectorAll("[data-l]").forEach(x => x.classList.toggle("on", x === l)); }
-        const v = e.target.closest("[data-v]"); if(v){ monto = +v.dataset.v; inp.value = monto.toLocaleString("es-CO"); }
-      });
-      inp.addEventListener("input", () => { monto = valorDe(inp.value); inp.value = monto ? monto.toLocaleString("es-CO") : ""; });
-      bSi.addEventListener("click", () => {
-        if(!abiertoSi){ abiertoSi = true; si.hidden = false; si.classList.add("seAbre"); bSi.textContent = "Agregar y guardar"; bNo.textContent = "No pagué"; setTimeout(() => inp.focus(), 250); return; }
-        if(!(monto > 0)){ inp.classList.add("seError"); setTimeout(() => inp.classList.remove("seError"), 500); inp.focus(); return; }
-        paradas[destino].gastos.push({ c: "Parqueadero", m: monto, hecho: false });
-        recuerdaParq(monto); yaPregunto = true; pinta(); cerrarPregunta(); ejecutar();
-      });
+    /* cambia de paso deslizando (adelante entra por la derecha, atrás por la izquierda) */
+    function ir(nuevo, dir){
+      paso = nuevo;
+      vista.className = "sePaso " + (dir < 0 ? "deIzq" : "deDer");
+      void vista.offsetWidth;
+      vista.classList.add("entra");
+      pinta();
+      const k = PASOS.indexOf(paso);
+      $("sePuntos").querySelectorAll("i").forEach((d, i) => { d.classList.toggle("on", i === k); d.classList.toggle("ok", i < k); });
+      atras.hidden = guardando || paso === "fin" || (paso === "lugar" && idx === 0);
+      scrim.querySelector(".seVista").scrollTop = 0;
     }
 
-    guardar.addEventListener("click", () => {
-      if(guardando || !validos().length) return;
-      const hayParq = todos().some(g => PARQ.test(g.c));
-      if(!hayParq && !yaPregunto){ preguntaParqueo(); return; }
-      ejecutar();
-    });
+    function pinta(){
+      const p = P();
+      if(paso === "lugar"){
+        const sugeridos = SalidasEma.lugares().filter(l => l.visitas).sort((a, b) => b.visitas - a.visitas).slice(0, 5).map(l => l.nombre);
+        vista.innerHTML =
+          (idx === 0
+            ? '<div class="sePregunta">¿Cuándo fue?</div><div class="recDia" id="seDia">' +
+                [["Hoy", 0], ["Ayer", 1], ["Hace 2 días", 2]].map(([t, d]) => '<button type="button" class="recChip" data-d="' + d + '" aria-pressed="' + (fecha === diaISO(d)) + '">' + t + '</button>').join("") +
+                '<label class="recChip inFechaBtn" id="seFechaBtn" aria-pressed="' + ([0, 1, 2].every(d => fecha !== diaISO(d))) + '"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg><span>' + ([0, 1, 2].every(d => fecha !== diaISO(d)) ? esc(fecha.slice(8) + "/" + fecha.slice(5, 7)) : "Otra fecha") + '</span><input type="date" id="seFecha" max="' + hoyISO() + '" aria-label="Elegir otra fecha"></label></div>'
+            : '<p class="seContexto">' + esc(fechaLarga(fecha)) + ' · lugar ' + (idx + 1) + '</p>') +
+          '<div class="sePregunta">' + (idx === 0 ? '¿A dónde fueron?' : '¿A qué otro lugar fueron?') + '</div>' +
+          '<datalist id="seLista">' + SalidasEma.nombres().map(n => '<option value="' + esc(n) + '">').join("") + '</datalist>' +
+          '<input id="seLugar" class="seLugarIn" type="text" list="seLista" placeholder="Pance, cine, heladería…" maxlength="60" autocomplete="off" value="' + esc(p.lugar) + '">' +
+          (sugeridos.length ? '<div class="seSugeridos">' + sugeridos.map(n => '<button type="button" data-l="' + esc(n) + '">' + esc(n) + '</button>').join("") + '</div>' : '') +
+          '<div class="seNuevo" id="seNuevo"' + (p.lugar.trim() && !conocido(p.lugar) ? '' : ' hidden') + '><p>Es un lugar nuevo para Armoni. ¿Cómo les pareció?</p>' +
+            '<div class="seNotas">' + [1,2,3,4,5,6,7,8,9,10].map(n => '<button type="button" data-n="' + n + '" class="' + (p.puntuacion === n ? 'on' : '') + '" aria-label="' + n + ' de 10">' + n + '</button>').join("") + '</div>' +
+            '<input id="seComent" type="text" placeholder="Un comentario corto (opcional)" maxlength="200" autocomplete="off" value="' + esc(p.comentario) + '"></div>';
+        botones.innerHTML = '<button type="button" class="pgNo" id="seCancelar">' + (idx === 0 ? 'Cancelar' : 'Quitar este lugar') + '</button><button type="button" class="pgSi" id="seSig">Siguiente</button>';
+        const lugarIn = $("seLugar"), nuevoBox = $("seNuevo");
+        const refrescaNuevo = () => { const es = !!(p.lugar.trim() && !conocido(p.lugar)); if(nuevoBox.hidden === es){ nuevoBox.hidden = !es; if(es) nuevoBox.classList.add("seAparece"); } };
+        lugarIn.addEventListener("input", () => { p.lugar = lugarIn.value; refrescaNuevo(); });
+        vista.querySelectorAll(".seSugeridos [data-l]").forEach(b => b.addEventListener("click", () => { p.lugar = b.dataset.l; lugarIn.value = p.lugar; refrescaNuevo(); ir("gastos", 1); }));
+        vista.querySelectorAll(".seNotas [data-n]").forEach(b => b.addEventListener("click", () => { const n = +b.dataset.n; p.puntuacion = p.puntuacion === n ? 0 : n; vista.querySelectorAll(".seNotas [data-n]").forEach(x => x.classList.toggle("on", +x.dataset.n === p.puntuacion)); }));
+        const com = $("seComent"); com.addEventListener("input", () => { p.comentario = com.value; });
+        if(idx === 0){
+          const chips = [...vista.querySelectorAll("#seDia .recChip[data-d]")];
+          chips.forEach(b => b.addEventListener("click", () => { fecha = diaISO(+b.dataset.d); pinta(); }));
+          $("seFecha").addEventListener("change", e => { const v = e.target.value; if(!v) return; fecha = v > hoyISO() ? hoyISO() : v; pinta(); });
+        }
+        lugarIn.addEventListener("keydown", e => { if(e.key === "Enter"){ e.preventDefault(); $("seSig").click(); } });
+        $("seCancelar").addEventListener("click", () => { if(idx === 0) cierra(); else { paradas.splice(idx, 1); idx = paradas.length - 1; ir("resumen", -1); } });
+        $("seSig").addEventListener("click", () => {
+          if(!p.lugar.trim()){ lugarIn.classList.remove("seError"); void lugarIn.offsetWidth; lugarIn.classList.add("seError"); lugarIn.focus(); return; }
+          ir("gastos", 1);
+        });
+        if(!p.lugar) setTimeout(() => lugarIn.focus({ preventScroll: true }), 380);
+        return;
+      }
 
-    async function ejecutar(){
+      if(paso === "gastos"){
+        if(!p.gastos.length) p.gastos.push({ c: "", m: 0, hecho: false });
+        const frec = SalidasEma.frecuentes();
+        const atajos = (frec.length ? frec : []).concat(["Almuerzo", "Helado", "Entradas", "Juegos"]).filter((x, i, a) => a.findIndex(y => y.toLowerCase() === x.toLowerCase()) === i).slice(0, 5);
+        vista.innerHTML =
+          '<p class="seContexto">' + esc(fechaLarga(fecha)) + '</p>' +
+          '<div class="sePregunta">¿Qué pagaron en <span class="seLugarNom">' + esc(nombreLugar(p)) + '</span>?</div>' +
+          '<div class="seGastos" id="seGastos">' + p.gastos.map((g, j) => filaHTML(g, j)).join("") + '</div>' +
+          '<div class="seRapidos">' + atajos.map(n => '<button type="button" data-r="' + esc(n) + '"><span aria-hidden="true">' + emoGasto(n) + '</span>' + esc(n) + '</button>').join("") + '<button type="button" data-r="">+ Otro</button></div>' +
+          '<div class="seSub" id="seSub"></div>';
+        botones.innerHTML = '<button type="button" class="pgNo" id="seCancelar">Cancelar</button><button type="button" class="pgSi" id="seSig">Listo</button>';
+        const lista = $("seGastos");
+        const actualiza = () => { const n = validos(p).length; $("seSub").innerHTML = n ? (n + (n === 1 ? ' gasto' : ' gastos') + ' · <b>' + peso(subtotal(p)) + '</b>') : 'Agrega al menos un gasto'; $("seSig").disabled = !n; };
+        lista.addEventListener("input", e => {
+          const el = e.target, fila = el.closest(".seGasto"); if(!fila) return;
+          const g = p.gastos[+fila.dataset.j];
+          if(el.dataset.k === "c") g.c = el.value;
+          else { const n = valorDe(el.value); g.m = n; el.value = n ? n.toLocaleString("es-CO") : ""; }
+          actualiza();
+        });
+        lista.addEventListener("click", e => {
+          const q = e.target.closest(".seQuitar"); if(!q) return;
+          const fila = q.closest(".seGasto"); p.gastos.splice(+fila.dataset.j, 1);
+          if(!p.gastos.length) p.gastos.push({ c: "", m: 0, hecho: false });
+          fila.classList.add("sale"); setTimeout(() => { lista.innerHTML = p.gastos.map((g, j) => filaHTML(g, j)).join(""); actualiza(); }, 220);
+        });
+        vista.querySelector(".seRapidos").addEventListener("click", e => {
+          const r = e.target.closest("[data-r]"); if(!r) return;
+          const nombre = r.dataset.r;
+          let j = p.gastos.findIndex(g => !g.c.trim() && !g.m);
+          if(j < 0){ p.gastos.push({ c: "", m: 0, hecho: false }); j = p.gastos.length - 1; }
+          if(nombre) p.gastos[j].c = nombre;
+          lista.innerHTML = p.gastos.map((g, k) => filaHTML(g, k)).join("");
+          const fila = lista.children[j]; fila.classList.add("nueva");
+          const inp = fila.querySelector(nombre ? 'input[data-k="m"]' : 'input[data-k="c"]'); setTimeout(() => inp.focus(), 40);
+          actualiza();
+        });
+        $("seCancelar").addEventListener("click", cierra);
+        $("seSig").addEventListener("click", () => {
+          p.gastos = p.gastos.filter(g => g.c.trim() || g.m);
+          if(!validos(p).length) return;
+          const tieneParq = p.gastos.some(g => PARQ.test(g.c));
+          if(!tieneParq && !p.preguntado) ir("parqueo", 1); else ir("resumen", 1);
+        });
+        actualiza();
+        setTimeout(() => { const f = lista.querySelector('input[data-k="c"]'); if(f && !f.value && !vista.contains(document.activeElement)) f.focus({ preventScroll: true }); }, 380);
+        return;
+      }
+
+      if(paso === "parqueo"){
+        const ult = ultimosParq();
+        let monto = 0;
+        vista.innerHTML =
+          '<div class="seParqueo"><div class="seParqEmo" aria-hidden="true">🅿️</div>' +
+          '<div class="sePregunta">¿Pagaron parqueadero en <span class="seLugarNom">' + esc(nombreLugar(p)) + '</span>?</div>' +
+          '<div class="seParqSi" id="seParqSi" hidden>' +
+            (ult.length ? '<div class="seParqChips">' + ult.map(v => '<button type="button" data-v="' + v + '">' + peso(v) + '</button>').join("") + '</div>' : '') +
+            '<span class="seMonto seParqMonto"><i>$</i><input id="seParqIn" type="text" inputmode="numeric" placeholder="¿Cuánto?" autocomplete="off"></span></div></div>';
+        botones.innerHTML = '<button type="button" class="pgNo" id="seNo">No</button><button type="button" class="pgSi" id="seSi">Sí, pagamos</button>';
+        const si = $("seParqSi"), inp = $("seParqIn"), bSi = $("seSi");
+        const listoSi = () => { bSi.disabled = !(monto > 0); };
+        vista.addEventListener("click", e => { const v = e.target.closest("[data-v]"); if(v){ monto = +v.dataset.v; inp.value = monto.toLocaleString("es-CO"); vista.querySelectorAll("[data-v]").forEach(x => x.classList.toggle("on", x === v)); listoSi(); } });
+        inp.addEventListener("input", () => { monto = valorDe(inp.value); inp.value = monto ? monto.toLocaleString("es-CO") : ""; vista.querySelectorAll("[data-v]").forEach(x => x.classList.toggle("on", +x.dataset.v === monto)); listoSi(); });
+        $("seNo").addEventListener("click", () => { p.preguntado = true; ir("resumen", 1); });
+        bSi.addEventListener("click", () => {
+          if(si.hidden){ si.hidden = false; si.classList.add("seAparece"); bSi.textContent = "Agregar"; listoSi(); setTimeout(() => inp.focus(), 200); return; }
+          if(!(monto > 0)) return;
+          p.gastos.push({ c: "Parqueadero", m: monto, hecho: false }); recuerdaParq(monto); p.preguntado = true;
+          ir("resumen", 1);
+        });
+        return;
+      }
+
+      if(paso === "resumen"){
+        vista.innerHTML =
+          '<p class="seContexto">' + esc(fechaLarga(fecha)) + '</p>' +
+          '<div class="seTotalGrande"><small>Total de la salida</small><b>' + peso(total()) + '</b></div>' +
+          '<div class="seParadas">' + paradas.map((q, i) =>
+            '<button type="button" class="seParadaRes" data-i="' + i + '"><div class="sprCab"><b>' + esc(nombreLugar(q)) + '</b><span>' + peso(subtotal(q)) + '</span></div>' +
+            '<div class="sprGastos">' + validos(q).map(g => '<span>' + emoGasto(g.c) + ' ' + esc(g.c) + ' · ' + peso(g.m) + '</span>').join("") + '</div><small class="sprEditar">Tocar para editar</small></button>').join("") + '</div>' +
+          '<button type="button" class="seOtroLugar" id="seOtro"><span aria-hidden="true">📍</span> Fuimos a otro lugar ese día</button>' +
+          '<p class="inErr" id="seErr" role="alert"></p>';
+        botones.innerHTML = '<button type="button" class="pgNo" id="seCancelar">Cancelar</button><button type="button" class="pgSi" id="seGuardar">Guardar</button>';
+        vista.querySelectorAll(".seParadaRes").forEach(b => b.addEventListener("click", () => { idx = +b.dataset.i; ir("gastos", -1); }));
+        $("seOtro").addEventListener("click", () => { paradas.push(nuevaParada()); idx = paradas.length - 1; ir("lugar", 1); });
+        $("seCancelar").addEventListener("click", cierra);
+        $("seGuardar").addEventListener("click", guardar);
+        return;
+      }
+    }
+
+    function filaHTML(g, j){
+      return '<div class="seGasto" data-j="' + j + '"><input data-k="c" type="text" placeholder="¿Qué pagaron?" maxlength="60" autocomplete="off" value="' + esc(g.c) + '">' +
+        '<span class="seMonto"><i>$</i><input data-k="m" type="text" inputmode="numeric" placeholder="0" autocomplete="off" value="' + (g.m ? g.m.toLocaleString("es-CO") : "") + '"></span>' +
+        '<button type="button" class="seQuitar" aria-label="Quitar gasto">×</button></div>';
+    }
+
+    async function guardar(){
       if(guardando) return;
-      guardando = true; err.textContent = ""; guardar.disabled = true;
-      const lista = validos(), total = lista.length;
-      let n = 0, suma = 0;
+      guardando = true; atras.hidden = true;
+      const lista = paradas.flatMap(p => validos(p).filter(g => !g.hecho).map(g => ({ p, g })));
+      const n = lista.length; let k = 0;
+      paso = "fin";
+      vista.className = "sePaso deDer entra";
+      vista.innerHTML = '<div class="seGuardando"><svg class="seAro" viewBox="0 0 80 80" aria-hidden="true"><circle cx="40" cy="40" r="34" class="seAroBg"/><circle cx="40" cy="40" r="34" class="seAroFg" id="seAroFg" stroke-dasharray="213.6" stroke-dashoffset="213.6"/><path class="seCheck" d="M27 41 L36 50 L54 31"/></svg><b id="seGuardTxt">Guardando…</b><small id="seGuardSub">' + n + (n === 1 ? ' gasto' : ' gastos') + ' · ' + peso(total()) + '</small></div>';
+      botones.innerHTML = "";
+      const aro = $("seAroFg");
       try{
         for(const { p, g } of lista){
-          guardar.textContent = "Guardando " + (n + 1) + "/" + total + "…";
+          $("seGuardTxt").textContent = "Guardando " + (k + 1) + " de " + n + "…";
           const dato = { tipo: "Gasto", concepto: g.c.trim(), categoria: "Salidas Ema", monto: g.m, fecha, nota: "" };
           const l = p.lugar.trim();
-          if(l){
-            const k = conocido(l);
-            if(k) dato.lugar = k; else { dato.lugar = l; if(!p.nuevoEnviado){ dato.puntuacion = p.puntuacion || null; dato.comentario = p.comentario.trim(); } }
-          }
+          if(l){ const c = conocido(l); if(c) dato.lugar = c; else { dato.lugar = l; if(!p.nuevoEnviado){ dato.puntuacion = p.puntuacion || null; dato.comentario = p.comentario.trim(); } } }
           const r = await fetch(MOVIMIENTO_URL, { method: "POST", body: JSON.stringify(Object.assign({ token: MERCADO_TOKEN }, dato)) });
           const j = await r.json().catch(() => ({}));
           if(!r.ok || j.ok === false) throw new Error(j.error || "No se pudo guardar");
           if(l && !conocido(l)) p.nuevoEnviado = true;
-          g.hecho = true; n++; suma += g.m;
+          g.hecho = true; k++;
+          aro.style.strokeDashoffset = String(213.6 * (1 - k / n));
         }
-        const t = todos();
-        const totalSalida = t.reduce((a, g) => a + g.m, 0);
-        cierra();
-        avisoOk("Salida con Ema guardada", t.length + (t.length === 1 ? " gasto" : " gastos") + " · " + peso(totalSalida));
-        if(document.body.classList.contains("mode-ema")) setTimeout(() => SalidasEma.refresh(), 400); else SalidasEma.precarga();
+        scrim.querySelector(".seGuardando").classList.add("listo");
+        $("seGuardTxt").textContent = "¡Salida guardada!";
+        $("seGuardSub").textContent = paradas.length + (paradas.length === 1 ? " lugar" : " lugares") + " · " + peso(total());
+        if(document.body.classList.contains("mode-ema")) setTimeout(() => SalidasEma.refresh(), 300); else SalidasEma.precarga();
+        setTimeout(cierra, REDUCED ? 600 : 1500);
       }catch(e){
-        guardando = false; guardar.textContent = "Guardar salida"; actualiza();
-        err.textContent = (n ? "Se guardaron " + n + " de " + total + ". " : "") + ((e && e.message && e.message !== "Failed to fetch") ? e.message : "No pude guardar. Revisa la conexión y toca Guardar de nuevo: solo se enviará lo que falta.");
+        guardando = false;
+        ir("resumen", -1);
+        const er = $("seErr");
+        if(er) er.textContent = (k ? "Se guardaron " + k + " de " + n + ". " : "") + ((e && e.message && e.message !== "Failed to fetch") ? e.message : "No pude guardar. Revisa la conexión y toca Guardar otra vez: solo se envía lo que falta.");
       }
     }
-    setTimeout(() => { const f = cont.querySelector(".seLugar"); if(f) f.focus(); }, 380);
+
+    ir("lugar", 1);
   }
   document.getElementById("emaNueva").addEventListener("click", abrir);
   return { abrir };
