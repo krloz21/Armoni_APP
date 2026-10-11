@@ -19,7 +19,7 @@ self.addEventListener("fetch", e => {
     e.respondWith((async () => {
       const cache = await caches.open(CACHE_EXT);
       const guardada = await cache.match(r);
-      const red = fetch(r).then(async res => { if(res && (res.ok || res.type === "opaque")){ await cache.put(r, res.clone()); recorta(cache, 160); } return res; });
+      const red = fetch(r).then(async res => { if(res && (res.ok || res.type === "opaque")){ try{ await cache.put(r, res.clone()); recorta(cache, 40); }catch{} } return res; });
       if(guardada){ e.waitUntil(red.catch(() => {})); return guardada; }   // al instante; la actualización va por detrás
       return red;
     })());
@@ -29,11 +29,12 @@ self.addEventListener("fetch", e => {
   if(r.cache === "no-store" || u.searchParams.has("v")) return;   // la revisión de versión siempre va directo a la red
   e.respondWith((async () => {
     const cache = await caches.open(CACHE);
-    const red = fetch(r).then(res => { if(res && res.ok) cache.put(r, res.clone()); return res; });
-    const guardada = await cache.match(r, { ignoreSearch: true });
+    const clave = new Request(u.origin + u.pathname);   // una sola copia por archivo, sin importar el ?v=
+    const red = fetch(r).then(res => { if(res && res.ok) cache.put(clave, res.clone()).catch(() => {}); return res; });
+    const guardada = await cache.match(clave);
     if(!guardada) return red;
     red.catch(() => {});   // si la red falla en segundo plano, no pasa nada
-    return Promise.race([red, new Promise(ok => setTimeout(() => ok(guardada), 1200))]).catch(() => guardada);
+    return Promise.race([red.then(res => res.ok ? res : guardada), new Promise(ok => setTimeout(() => ok(guardada), 1200))]).catch(() => guardada);   // un error 5xx no tapa la app guardada
   })());
 });
 
