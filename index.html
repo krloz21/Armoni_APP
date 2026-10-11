@@ -2977,7 +2977,16 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-11.121";
+const APP_VERSION = "2026-10-11.123";
+/* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
+const TrasIntro = (function(){
+  let listo = false; const cola = [];
+  return {
+    hacer(fn){ if(listo) fn(); else cola.push(fn); },
+    listo(){ if(listo) return; listo = true; cola.splice(0).forEach((fn, i) => setTimeout(fn, 60 * i)); }   // uno por uno, sin amontonarlos
+  };
+})();
+setTimeout(() => TrasIntro.listo(), 6000);   // por si la presentación no corre (red de seguridad)
 (function autoActualizar(){
   const patron = new RegExp("const APP_" + "VERSION = \"([^\"]+)\"");
   let ultima = 0;
@@ -2998,10 +3007,12 @@ const APP_VERSION = "2026-10-11.121";
         await c.put(new Request(location.origin + location.pathname), new Response(txt, { headers: { "Content-Type": "text/html; charset=utf-8" } }));
       } }catch{}
       try{ if(navigator.serviceWorker){ const reg = await navigator.serviceWorker.getRegistration(); if(reg) await reg.update(); } }catch{}
-      location.replace(location.pathname + "?v=" + encodeURIComponent(m[1]));
+      /* la nueva ya quedó guardada: se recarga cuando la app se va a segundo plano (no se ve) y si no, la próxima vez que abras ya es la nueva */
+      const recarga = () => { if(document.visibilityState === "hidden") location.replace(location.pathname + "?v=" + encodeURIComponent(m[1])); };
+      document.addEventListener("visibilitychange", recarga);
     }catch{ /* sin conexión: sigue con la que tiene */ }
   }
-  revisar();
+  setTimeout(() => TrasIntro.hacer(revisar), 0);   // después de la intro: leer la versión del servidor no compite con la animación
   document.addEventListener("visibilitychange", () => { if(document.visibilityState === "visible") revisar(); });
 })();
 
@@ -4019,7 +4030,33 @@ void main(){
   }
   /* se prepara cuando el navegador está libre, para no competir con el inicio de la app */
   /* arranca en cuanto pinta la primera imagen (antes esperaba a que el celular estuviera "libre", y con la intro eso tardaba hasta 3 s) */
-  requestAnimationFrame(() => requestAnimationFrame(() => setTimeout(arranca, 400)));   // deja que la presentación arranque suave antes de preparar el fondo
+  /* En el celular el fondo es una imagen fija: se calcula UNA vez, se guarda como foto y las siguientes aperturas
+     la muestran al instante sin calcular nada (así la intro no se corta). Si cambia el tema, la temporada o el tamaño, se rehace. */
+  const cv = document.getElementById("campo");
+  const clave = () => [document.documentElement.dataset.theme || "", TEMPORADA || "", innerWidth, innerHeight, Math.min(2, devicePixelRatio || 1), "v1"].join("|");
+  const CC = "armoni-campo";
+  function guardaFoto(){
+    try{
+      const url = cv.toDataURL("image/png");   // justo después de dibujar, en el mismo instante (el lienzo WebGL se borra después)
+      if(!url || url.length < 2000 || !window.caches) return;
+      fetch(url).then(r => r.blob()).then(b => caches.open(CC).then(c => c.put("campo-img", new Response(b, { headers: { "Content-Type": "image/png", "x-clave": encodeURIComponent(clave()) } })))).catch(() => {});
+    }catch{}
+  }
+  function arrancaYGuarda(){ arranca(); if(campo && !ESCRITORIO){ guardaFoto(); const t = campo.tonos; campo.tonos = () => { t(); guardaFoto(); }; } }
+  function conFoto(blobUrl){
+    cv.style.backgroundImage = "url(" + blobUrl + ")"; cv.style.backgroundSize = "100% 100%";
+    const op = .32;
+    campo = { atenua(si){ cv.style.opacity = String(si ? op * .35 : op); }, pausa(){}, sigue(){}, mira(){},
+      tonos(){ cv.style.backgroundImage = ""; campo = null; arrancaYGuarda(); } };   // cambió el tema: se calcula de nuevo
+    window.__campoTonos = () => campo && campo.tonos();
+    requestAnimationFrame(() => campo.atenua(leyendo));
+  }
+  if(!ESCRITORIO && window.caches){
+    caches.open(CC).then(c => c.match("campo-img")).then(r => {
+      if(r && decodeURIComponent(r.headers.get("x-clave") || "") === clave()) return r.blob().then(b => conFoto(URL.createObjectURL(b)));
+      TrasIntro.hacer(() => setTimeout(arrancaYGuarda, 150));
+    }).catch(() => TrasIntro.hacer(() => setTimeout(arrancaYGuarda, 150)));
+  } else TrasIntro.hacer(() => setTimeout(arranca, 150));   // se prepara cuando ya terminó la presentación: la intro no se corta
 })();
 
 
@@ -9734,7 +9771,7 @@ const TuMes = (function(){
       "Feliz aniversario · " + ANOS_JUNTOS + (ANOS_JUNTOS === 1 ? " año juntos" : " años juntos");
   }
 
-  if(REDUCED){ el.remove(); document.querySelector(".shell").classList.add("revealed"); Typer.start(true); if(typeof Rain !== "undefined"){ Rain.reading(false); } return; }
+  if(REDUCED){ el.remove(); document.querySelector(".shell").classList.add("revealed"); Typer.start(true); if(typeof Rain !== "undefined"){ Rain.reading(false); } TrasIntro.listo(); return; }
 
   const yaVista = (() => { try{ const v = sessionStorage.getItem("armoni.splash"); sessionStorage.setItem("armoni.splash", "1"); return !!v; }catch{ return false; } })();
   const HOLD = ES_ANIVERSARIO ? 3000 : (yaVista ? 600 : 1800);   // antes 2.7 s: la presentación es más corta y un toque igual la salta
@@ -9785,7 +9822,7 @@ const TuMes = (function(){
     Rain.reading(false);   // enciende el fondo desde negro, a la par que se abre el telón
     el.classList.add("out");
     setTimeout(() => document.querySelector(".shell").classList.add("revealed"), 640);   // la marca nace cuando llega el haz
-    setTimeout(() => { running = false; el.remove(); }, 1000);
+    setTimeout(() => { running = false; el.remove(); TrasIntro.listo(); }, 1000);
     Typer.start(true);
     if(!TOUCH) field.focus();
   }
@@ -9794,9 +9831,9 @@ const TuMes = (function(){
   el.addEventListener("pointerdown", enter);   // un toque la salta
 })();
 activity();
-Servicios.check();
-Glim.check();
-TuMes.avisar();
+TrasIntro.hacer(() => Servicios.check());
+TrasIntro.hacer(() => Glim.check());
+TrasIntro.hacer(() => TuMes.avisar());
 
 /* decoración de temporada: insignia en el menú y, en Navidad, una nevada muy suave. Se activa o se quita al cambiar de tema */
 const Decora = (function(){
