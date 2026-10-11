@@ -1540,6 +1540,31 @@ body.mode-gmail footer, body.mode-glim footer{ display:none; }
 .mkBar{ flex:1; height:6px; border-radius:4px; background:rgba(var(--ink),.1); overflow:hidden; }
 .mkBar i{ display:block; height:100%; width:0; border-radius:4px; background:linear-gradient(90deg, var(--cyan), var(--blue)); transition:width .35s cubic-bezier(.22,1,.36,1); }
 .mkCount{ font-size:.78rem; color:var(--dim); font-variant-numeric:tabular-nums; min-width:44px; text-align:right; }
+/* juego: puntos, cuenta regresiva y resultado */
+.mkPts{ position:relative; font-size:.85rem; font-weight:700; padding:4px 10px; border-radius:999px; background:rgba(253,224,71,.12); border:1px solid rgba(253,224,71,.35); color:#fde047; font-variant-numeric:tabular-nums; white-space:nowrap; }
+.mkPts.pop{ animation:mkRachaPop .45s cubic-bezier(.34,1.56,.64,1); }
+.mkCuenta{ position:absolute; inset:0; z-index:5; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px; text-align:center; transition:opacity .28s ease, transform .28s ease; }
+.mkCuenta.sale{ opacity:0; transform:scale(1.15); }
+.mkCuenta .anillo{ position:absolute; top:50%; left:50%; width:170px; height:170px; margin:-118px 0 0 -85px; border-radius:50%; border:3px solid rgba(var(--cyan-rgb),.35); box-shadow:0 0 40px rgba(var(--cyan-rgb),.35), inset 0 0 30px rgba(var(--cyan-rgb),.2); animation:mkAnillo .62s ease-out infinite; }
+.mkCuenta b{ position:relative; font-size:5.2rem; font-weight:800; line-height:1; letter-spacing:-.04em; color:#fff; text-shadow:0 0 30px rgba(var(--cyan-rgb),.8); }
+.mkCuenta b.late{ animation:mkNum .6s cubic-bezier(.34,1.56,.64,1); }
+.mkCuenta.ya b{ font-size:3.4rem; background:linear-gradient(140deg, #4ade80, #fde047); -webkit-background-clip:text; background-clip:text; color:transparent; text-shadow:none; }
+.mkCuenta small{ position:relative; margin-top:40px; font-size:.82rem; color:var(--dim); max-width:240px; }
+@keyframes mkNum{ from{ transform:scale(2.4); opacity:0; filter:blur(6px); } to{ transform:none; opacity:1; filter:none; } }
+@keyframes mkAnillo{ from{ transform:scale(.7); opacity:1; } to{ transform:scale(1.25); opacity:0; } }
+.mkDeck.reparte .mkCard:not(.atras){ animation:mkReparte .6s cubic-bezier(.2,1.2,.4,1); }
+@keyframes mkReparte{ from{ transform:translateY(-120px) rotate(-14deg) scale(.7); opacity:0; } }
+.mkFlota{ position:absolute; z-index:6; left:50%; top:38%; transform:translateX(-50%); font-size:1.6rem; font-weight:800; color:#fde047; text-shadow:0 2px 12px rgba(0,0,0,.6); pointer-events:none; text-align:center; animation:mkFlota .95s cubic-bezier(.2,.8,.3,1) forwards; }
+.mkFlota small{ display:block; font-size:.7rem; letter-spacing:.12em; color:#ffb066; }
+.mkFlota.combo{ font-size:2rem; color:#fff; text-shadow:0 0 18px rgba(255,160,60,.9); }
+@keyframes mkFlota{ 0%{ opacity:0; transform:translate(-50%, 10px) scale(.6); } 25%{ opacity:1; transform:translate(-50%, -10px) scale(1.15); } 100%{ opacity:0; transform:translate(-50%, -90px) scale(1); } }
+.mkPuntaje{ position:relative; z-index:2; display:flex; flex-direction:column; align-items:center; gap:2px; margin:6px auto 10px; }
+.mkPuntaje .estrellas{ display:flex; gap:6px; font-size:2.2rem; }
+.mkPuntaje .estrellas i{ font-style:normal; color:rgba(var(--ink),.18); transform:scale(0); animation:mkEstrella .55s cubic-bezier(.34,1.56,.64,1) forwards; animation-delay:calc(.3s + var(--k) * .22s); }
+.mkPuntaje .estrellas i.on{ color:#fde047; text-shadow:0 0 18px rgba(253,224,71,.7); }
+@keyframes mkEstrella{ to{ transform:none; } }
+.mkPuntaje b{ font-size:1.5rem; font-variant-numeric:tabular-nums; }
+.mkPuntaje small{ font-size:.82rem; color:var(--ghost); }
 .mkCart{ font-size:.85rem; padding:4px 10px; border-radius:999px; background:var(--panel); border:1px solid var(--line); font-variant-numeric:tabular-nums; }
 .mkCart.pop{ animation:mkPop .35s cubic-bezier(.34,1.56,.64,1); }
 @keyframes mkPop{ 0%{ transform:scale(1); } 40%{ transform:scale(1.25); } 100%{ transform:scale(1); } }
@@ -7314,9 +7339,13 @@ const Mercar = (function(){
   let estado = "inicio";
   let datos = null;
   let cola = [], idx = 0, decision = [], lista = [], copiado = false, bloqueado = false, rachaMax = 0, fechaCompra = null;
+  /* puntos del juego: +10 por carta y combo si respondes rápido (x2, x3, x4) */
+  let puntosPor = [], combo = 0, tUlt = 0;
+  const K_RECORD = "armoni.check.record";
+  const puntos = () => puntosPor.slice(0, idx).reduce((a, b) => a + (b || 0), 0);
   /* la revisión a medias se puede dejar y retomar ("Volver") o tirar ("Descartar") */
   const PKEY = "armoni.mercar.partida";
-  const guardaPartida = () => { try{ localStorage.setItem(PKEY, JSON.stringify({ ids: cola.map(p => p.id), idx, decision: decision.slice(0, idx) })); }catch{} };
+  const guardaPartida = () => { try{ localStorage.setItem(PKEY, JSON.stringify({ ids: cola.map(p => p.id), idx, decision: decision.slice(0, idx), puntosPor: puntosPor.slice(0, idx) })); }catch{} };
   const borraPartida = () => { try{ localStorage.removeItem(PKEY); }catch{} };
   function leePartida(ps){
     try{
@@ -7324,7 +7353,7 @@ const Mercar = (function(){
       if(!d || !Array.isArray(d.ids) || !(d.idx > 0) || d.idx >= d.ids.length) return null;
       const c = d.ids.map(id => ps.find(p => p.id === id));
       if(c.some(x => !x)) return null;
-      return { cola: c, idx: d.idx, decision: d.decision.slice(0, d.idx) };
+      return { cola: c, idx: d.idx, decision: d.decision.slice(0, d.idx), puntosPor: (d.puntosPor || []).slice(0, d.idx) };
     }catch{ return null; }
   }
   const vibra = ms => { try{ if(navigator.vibrate) navigator.vibrate(ms); }catch{} };
@@ -7564,8 +7593,8 @@ const Mercar = (function(){
     bloqueado = false; estado = "juego"; rachaMax = 0;
     stage.innerHTML =
       '<div class="mkTop mkEntraJuego">' +
-      '<div class="mkBar"><i id="mkBarI"></i></div><span class="mkCount" id="mkCount"></span><span class="mkRacha" id="mkRacha" hidden></span><span class="mkCart" id="mkCart">🛒 <b>0</b></span></div>' +
-      '<div class="mkDeck" id="mkDeck"></div>' +
+      '<div class="mkBar"><i id="mkBarI"></i></div><span class="mkCount" id="mkCount"></span><span class="mkRacha" id="mkRacha" hidden></span><span class="mkPts" id="mkPts">⭐ <b>0</b></span><span class="mkCart" id="mkCart">🛒 <b>0</b></span></div>' +
+      '<div class="mkDeck" id="mkDeck">' + (REDUCED ? '' : '<div class="mkCuenta" id="mkCuenta" aria-live="polite"><span class="anillo"></span><b></b><small>' + (part && part.cola ? '¡Seguimos donde ibas!' : cola.length + ' cosas · desliza rápido para sumar combo') + '</small></div>') + '</div>' +
       '<div class="mkBtns"><button type="button" class="mkNo" id="mkNo" aria-label="Falta, hay que comprar">✕</button>' +
       '<button type="button" class="mkUndo" id="mkUndo" aria-label="Deshacer">↶</button>' +
       '<button type="button" class="mkSi" id="mkSi" aria-label="Sí hay">✓</button></div>' +
@@ -7579,7 +7608,23 @@ const Mercar = (function(){
     document.getElementById("mkDescartarJuego").addEventListener("click", () => {
       if(idx === 0 || confirm("¿Descartar esta revisión? Lo que ya marcaste se borra y no se guarda.")){ borraPartida(); inicio(); }
     });
-    pintaCartas();
+    puntosPor = (part && part.puntosPor) ? part.puntosPor.slice() : []; combo = 0; tUlt = 0;
+    if(REDUCED){ pintaCartas(); return; }
+    /* 3, 2, 1, ¡ya!: como al empezar un nivel */
+    bloqueado = true;
+    const cu = document.getElementById("mkCuenta"), num = cu.querySelector("b");
+    const pasos = ["3", "2", "1", "¡Ya!"];
+    pasos.forEach((t, k) => setTimeout(() => {
+      if(!document.body.contains(cu)) return;
+      num.textContent = t; num.classList.remove("late"); void num.offsetWidth; num.classList.add("late");
+      cu.classList.toggle("ya", k === pasos.length - 1);
+      vibra(k === pasos.length - 1 ? 25 : 8);
+    }, k * 620));
+    setTimeout(() => {
+      if(!document.body.contains(cu)) return;
+      cu.classList.add("sale");
+      setTimeout(() => { cu.remove(); bloqueado = false; pintaCartas(); const d = document.getElementById("mkDeck"); if(d) d.classList.add("reparte"); tUlt = performance.now(); }, 280);
+    }, pasos.length * 620 + 120);
   }
   function tarjeta(p, atras){
     const flag = esMama(p) ? '<span class="mkFlag">Tu mamá dijo que se acabó</span>'
@@ -7591,6 +7636,7 @@ const Mercar = (function(){
   }
   /* marcador de arriba: barra, contador, racha, carrito y deshacer */
   function pintaHud(){
+    const pt = document.getElementById("mkPts"); if(pt) pt.querySelector("b").textContent = puntos();
     document.getElementById("mkBarI").style.width = (idx / cola.length * 100) + "%";
     document.getElementById("mkCount").textContent = Math.min(idx + 1, cola.length) + "/" + cola.length;
     document.getElementById("mkCart").innerHTML = "🛒 <b>" + decision.filter(d => d === "no").length + "</b>";
@@ -7681,6 +7727,15 @@ const Mercar = (function(){
     }
     deck.appendChild(w); setTimeout(() => w.remove(), 900);
   }
+  /* «+10», «+20 COMBO x2»… saltan desde la carta hacia el marcador */
+  function sumaPuntos(n, mult){
+    const pt = document.getElementById("mkPts");
+    if(pt){ pt.querySelector("b").textContent = puntos() + n; pt.classList.remove("pop"); void pt.offsetWidth; pt.classList.add("pop"); }
+    const deck = document.getElementById("mkDeck"); if(!deck || REDUCED) return;
+    const f = document.createElement("span"); f.className = "mkFlota" + (mult > 1 ? " combo" : "");
+    f.innerHTML = "+" + n + (mult > 1 ? "<small>COMBO x" + mult + "</small>" : "");
+    deck.appendChild(f); setTimeout(() => f.remove(), 1000);
+  }
   function masUno(){
     const c = document.getElementById("mkCart"); if(!c || REDUCED) return;
     const m = document.createElement("span"); m.className = "mkMas"; m.textContent = "+1"; c.appendChild(m);
@@ -7690,6 +7745,12 @@ const Mercar = (function(){
     if(bloqueado || idx >= cola.length) return;
     bloqueado = true;
     decision[idx] = cual;
+    /* puntos: rápido seguido = combo */
+    const ahora = performance.now();
+    combo = tUlt && ahora - tUlt < 2600 ? combo + 1 : 1; tUlt = ahora;
+    const mult = Math.min(4, 1 + Math.floor((combo - 1) / 3));
+    puntosPor[idx] = 10 * mult;
+    sumaPuntos(10 * mult, mult);
     if(idx === cola.length - 1){                     // la última carta: copiar aquí, dentro del toque (el iPhone solo deja copiar así)
       const faltan = cola.filter((p, i) => decision[i] === "no");
       copiado = faltan.length ? !!copiarReferencia(textoLista(faltan)) : false;
@@ -7720,11 +7781,15 @@ const Mercar = (function(){
   }
   function deshacer(){
     if(bloqueado || idx === 0) return;
-    idx--; decision.length = idx;
+    idx--; decision.length = idx; puntosPor.length = idx; combo = 0; tUlt = 0;
     pintaCartas();
   }
   function terminar(){
     borraPartida();
+    const total = puntos();
+    let record = 0; try{ record = +localStorage.getItem(K_RECORD) || 0; }catch{}
+    resultado = { total, record, nuevo: total > record };
+    if(total > record){ try{ localStorage.setItem(K_RECORD, String(total)); }catch{} }
     const faltan = cola.filter((p, i) => decision[i] === "no");
     const yaHay = cola.filter((p, i) => decision[i] === "si" && p.falta);
     /* guarda en la torre lo que falta y lo que ya no falta */
@@ -7735,17 +7800,27 @@ const Mercar = (function(){
     final(faltan, true);
   }
 
+  let resultado = null;
+  const marcador = () => {
+    if(!resultado) return "";
+    const r = resultado; resultado = null;
+    const estrellas = r.total >= cola.length * 25 ? 3 : r.total >= cola.length * 15 ? 2 : 1;
+    return '<div class="mkPuntaje"><div class="estrellas">' + [1, 2, 3].map(k => '<i class="' + (k <= estrellas ? 'on' : '') + '" style="--k:' + k + '">★</i>').join("") + '</div>' +
+      '<b>' + r.total + ' puntos</b><small>' + (r.nuevo ? '🏆 ¡Nuevo récord!' : 'Récord: ' + r.record) + '</small></div>';
+  };
+
   /* ── la lista final ── */
   function final(items, celebrar){
     estado = "lista"; fechaCompra = hoyISO();
     lista = items.map(p => ({ p, comprar: true }));
     if(!items.length){
-      stage.innerHTML = '<div class="mkHecho">' + (celebrar && !REDUCED ? confeti() : '') + iconoCheck() + '<h3>¡No falta nada!</h3><p class="gEmpty">Todo está en la casa.</p><button type="button" class="mkBtn sec full" id="mkVolver">Volver</button></div>';
+      stage.innerHTML = '<div class="mkHecho">' + (celebrar && !REDUCED ? confeti() : '') + iconoCheck() + marcador() + '<h3>¡No falta nada!</h3><p class="gEmpty">Todo está en la casa.</p><button type="button" class="mkBtn sec full" id="mkVolver">Volver</button></div>';
       document.getElementById("mkVolver").addEventListener("click", inicio);
       return;
     }
     stage.innerHTML =
       '<div class="mkFin">' + (celebrar && !REDUCED ? confeti() : '') +
+        (celebrar ? marcador() : '') +
         '<h3>' + (celebrar ? '¡Revisión lista!' : 'Lista pendiente') + '</h3>' +
         '<p>' + items.length + (items.length === 1 ? ' cosa' : ' cosas') + ' por comprar · toca para quitar lo que no compres</p>' +
         (celebrar && copiado ? '<div class="mkCopiado">✓ Lista copiada, ya la puedes pegar</div>' : '') +
