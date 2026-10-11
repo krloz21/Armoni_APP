@@ -1867,7 +1867,6 @@ button{ transition:transform var(--t-tap) var(--ease-out); }
 .emaTot{ flex:none; display:flex; flex-direction:column; align-items:flex-end; font-size:.9rem; font-weight:700; color:var(--white); }
 .emaTot small{ font-size:.7rem; font-weight:500; color:var(--dim); margin-top:2px; }
 .emaVacio{ margin:14px 0 0; font-size:.86rem; color:var(--dim); text-align:center; }
-.emaDet p small{ color:var(--dim); }
 .emaLugares{ display:flex; flex-direction:column; gap:10px; }
 .emaLugar{ padding:14px 15px; border-radius:18px; border:1px solid var(--line); background:var(--panel); text-align:left; }
 .elTop{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
@@ -1883,10 +1882,6 @@ button{ transition:transform var(--t-tap) var(--ease-out); }
 .emaTx small{ font-size:.74rem; color:var(--dim); letter-spacing:.02em; }
 .emaTx b{ font-size:1.25rem; font-weight:700; margin-top:2px; }
 .emaN{ font-size:1.7rem; background:linear-gradient(140deg, #ffb066, #ff7a4d); -webkit-background-clip:text; background-clip:text; color:transparent; }
-.emaDias{ display:flex; gap:3px; margin:14px 0 2px; }
-.emaDias i{ flex:1; height:7px; border-radius:4px; background:rgba(var(--ink),.1); }
-.emaDias i.on{ background:linear-gradient(180deg, #ffb066, #ff7a4d); box-shadow:0 0 8px rgba(255,138,80,.55); }
-.emaDias i.hoy{ outline:1px solid rgba(var(--ink),.45); outline-offset:1px; }
 .emaBarras{ display:flex; align-items:flex-end; gap:10px; margin-top:14px; padding-top:12px; border-top:1px solid var(--line); }
 .emBar{ flex:1; display:flex; flex-direction:column; align-items:center; gap:5px; }
 .emBar b{ font-size:.82rem; }
@@ -1894,20 +1889,26 @@ button{ transition:transform var(--t-tap) var(--ease-out); }
 .emCol i{ width:100%; border-radius:8px; background:rgba(var(--ink),.28); }
 .emBar.act .emCol i{ background:linear-gradient(180deg, #ffb066, #ff7a4d); }
 .emBar small{ font-size:.68rem; color:var(--dim); text-transform:capitalize; }
-.emaLista{ display:flex; flex-direction:column; gap:6px; margin-top:12px; }
-.emaFila{ border-radius:14px; border:1px solid var(--line); background:rgba(var(--ink),.04); cursor:pointer; transition:background .3s, border-color .3s; -webkit-tap-highlight-color:transparent; }
-.emaFila.abierto{ background:rgba(255,138,80,.08); border-color:rgba(255,138,80,.3); }
-.emaFCab{ display:flex; align-items:center; gap:10px; padding:10px 12px; font-size:.86rem; }
-.emaFDia{ flex:1; font-weight:600; }
-.emaFDia::first-letter{ text-transform:uppercase; }
-.emaFN{ color:var(--dim); font-size:.76rem; }
-.emaFCab b{ font-size:.9rem; }
-.emaDet{ display:grid; grid-template-rows:0fr; transition:grid-template-rows .4s var(--ease-out); }
-.emaFila.abierto .emaDet{ grid-template-rows:1fr; }
-.emaDet > div{ overflow:hidden; min-height:0; padding:0 12px; }
-.emaFila.abierto .emaDet > div{ padding-bottom:10px; }
-.emaDet p{ display:flex; justify-content:space-between; gap:10px; margin:0; padding:5px 0; font-size:.82rem; color:var(--ghost); border-top:1px solid var(--line); }
-.emaDet p em{ font-style:normal; color:var(--white); }
+.emaDiasTit{ margin:16px 0 8px; font-size:.72rem; font-weight:700; letter-spacing:.09em; text-transform:uppercase; color:var(--dim); }
+.emaDiasRow{ display:flex; flex-wrap:wrap; gap:8px; }
+.emaDiaChip{ display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1px; width:54px; padding:8px 0 7px; border-radius:15px; border:1px solid var(--line); background:rgba(var(--ink),.05); color:var(--white); font:inherit; cursor:pointer; transition:background .25s, border-color .25s, transform .2s var(--ease-spring); }
+.emaDiaChip b{ font-size:1.2rem; font-weight:700; line-height:1.1; }
+.emaDiaChip small{ font-size:.66rem; text-transform:uppercase; letter-spacing:.06em; color:var(--dim); }
+.emaDiaChip:active{ transform:scale(.92); }
+.emaDiaChip.on{ background:linear-gradient(160deg, #ffb066, #ff7a4d); border-color:transparent; color:#1a0f08; box-shadow:0 10px 24px -12px rgba(255,138,80,.7); }
+.emaDiaChip.on small{ color:rgba(26,15,8,.75); }
+.emaDetalle{ margin-top:14px; padding:12px 14px; border-radius:16px; border:1px solid rgba(255,138,80,.28); background:rgba(255,138,80,.07); }
+.emaDetalle.cambia{ animation:emaSube .4s var(--ease-out); }
+.emaDetCab{ display:flex; justify-content:space-between; align-items:baseline; gap:10px; font-size:.9rem; }
+.emaDetCab span{ font-weight:600; }
+.emaDetCab span::first-letter{ text-transform:uppercase; }
+.emaFrase{ font-size:.92rem; color:var(--ghost); margin-top:3px; }
+.emaTx b.emaCuenta{ margin-top:0; font-size:1.3rem; line-height:1.15; }
+.emaDetCab b{ font-size:1.02rem; }
+.emaGastos{ margin-top:8px; }
+.emaGastos p{ display:flex; justify-content:space-between; gap:10px; margin:0; padding:7px 0; font-size:.86rem; color:var(--ghost); border-top:1px solid var(--line); }
+.emaGastos p small{ color:var(--dim); }
+.emaGastos p em{ font-style:normal; color:var(--white); }
 @keyframes emaSube{ from{ opacity:0; transform:translateY(14px); } to{ opacity:1; transform:none; } }
 .emaEntra{ animation:emaSube .6s var(--ease-out) backwards; }
 .duVacio{ text-align:center; padding:26px 0; }
@@ -2453,7 +2454,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-11.94";
+const APP_VERSION = "2026-10-11.96";
 (function autoActualizar(){
   const patron = new RegExp("const APP_" + "VERSION = \"([^\"]+)\"");
   async function revisar(){
@@ -4700,27 +4701,28 @@ const SalidasEma = (function(){
     if(!datos){ stage.innerHTML = ""; return; }
     const hoyM = mesHoy(), act = ms.find(m => m.mes === hoyM) || { mes: hoyM, veces: 0, total: 0, dias: [], salidas: [] };
     const ult = ms.filter(m => m.mes !== hoyM).slice(-5);
-    const diasMes = new Date(+hoyM.slice(0, 4), +hoyM.slice(5, 7), 0).getDate(), hoyDia = new Date().getDate();
-    const marcados = new Set((act.dias || []).map(f => +String(f).slice(8, 10)));
-    const puntos = Array.from({ length: diasMes }, (_, i) => '<i class="' + (marcados.has(i + 1) ? 'on' : '') + (i + 1 === hoyDia ? ' hoy' : '') + '"></i>').join("");
     const max = Math.max(1, act.veces, ...ult.map(m => m.veces));
     const barras = ult.concat([act]).map(m => '<div class="emBar' + (m.mes === hoyM ? ' act' : '') + '"><b>' + m.veces + '</b><span class="emCol"><i style="height:' + Math.max(6, Math.round(m.veces / max * 100)) + '%"></i></span><small>' + esc(mesNombre(m.mes).slice(0, 3)) + '</small></div>').join("");
-    const salidas = (act.salidas || []).slice().reverse().map(q => {
-      const f = new Date(q.fecha + "T12:00:00"), dia = f.toLocaleDateString("es-CO", { weekday: "short", day: "numeric", month: "short" }).replace(/\./g, "");
-      const ab = abierta === q.fecha;
-      return '<div class="emaFila' + (ab ? ' abierto' : '') + '" data-f="' + esc(q.fecha) + '" role="button" tabindex="0" aria-expanded="' + ab + '">' +
-        '<div class="emaFCab"><span class="emaFDia">' + esc(dia) + '</span><span class="emaFN">' + q.gastos.length + (q.gastos.length === 1 ? ' gasto' : ' gastos') + '</span><b>' + peso(q.total) + '</b></div>' +
-        '<div class="emaDet"><div>' + q.gastos.map(g => '<p><span>' + esc(g.c) + (g.l ? ' <small>· ' + esc(g.l) + '</small>' : '') + '</span><em>' + peso(g.m) + '</em></p>').join("") + '</div></div></div>';
-    }).join("");
+    const sal = (act.salidas || []).slice().sort((x, y) => x.fecha.localeCompare(y.fecha));
+    if(!sal.find(q => q.fecha === abierta)) abierta = sal.length ? sal[sal.length - 1].fecha : null;
+    const diaCorto = f => new Date(f + "T12:00:00").toLocaleDateString("es-CO", { weekday: "short" }).replace(/\./g, "");
+    const chipsDias = sal.map(q => '<button type="button" class="emaDiaChip' + (q.fecha === abierta ? ' on' : '') + '" data-f="' + esc(q.fecha) + '" aria-pressed="' + (q.fecha === abierta) + '"><b>' + (+q.fecha.slice(8, 10)) + '</b><small>' + esc(diaCorto(q.fecha)) + '</small></button>').join("");
+    const detalle = q => {
+      if(!q) return "";
+      const f = new Date(q.fecha + "T12:00:00"), largo = f.toLocaleDateString("es-CO", { weekday: "long", day: "numeric", month: "long" });
+      return '<div class="emaDetCab"><span>' + esc(largo) + '</span><b>' + peso(q.total) + '</b></div>' +
+        '<div class="emaGastos">' + q.gastos.map(g => '<p><span>' + esc(g.c) + (g.l ? ' <small>· ' + esc(g.l) + '</small>' : '') + '</span><em>' + peso(g.m) + '</em></p>').join("") + '</div>';
+    };
     const promSalida = act.veces ? act.total / act.veces : 0;
     const lug = lugares().sort((a, b) => (a.ultima ? diasDesde(a.ultima) : 9999) - (b.ultima ? diasDesde(b.ultima) : 9999));
     stage.innerHTML =
       '<div class="emaCard' + (anim ? ' emaEntra' : '') + '">' +
         '<div class="emaTop"><span class="emaEmo" aria-hidden="true">🎈</span><div class="emaTx"><small>Salidas con Ema · ' + esc(mesNombre(hoyM)) + '</small>' +
-        '<b><span class="emaN">' + act.veces + '</span> ' + (act.veces === 1 ? 'vez' : 'veces') + '</b></div>' +
+        '<span class="emaFrase">Este mes han salido</span><b class="emaCuenta"><span class="emaN">' + act.veces + '</span> ' + (act.veces === 1 ? 'vez' : 'veces') + '</b></div>' +
         (act.total ? '<span class="emaTot">' + peso(act.total) + '<small>' + (act.veces ? peso(promSalida) + ' por salida' : '') + '</small></span>' : '') + '</div>' +
-        '<div class="emaDias" aria-hidden="true">' + puntos + '</div>' +
-        (salidas ? '<div class="emaLista">' + salidas + '</div>' : '<p class="emaVacio">Todavía no hay salidas este mes.</p>') +
+        (sal.length
+          ? '<div class="emaDiasTit">Los días que salieron</div><div class="emaDiasRow" role="tablist">' + chipsDias + '</div><div class="emaDetalle" id="emaDetalle">' + detalle(sal.find(q => q.fecha === abierta)) + '</div>'
+          : '<p class="emaVacio">Todavía no hay salidas este mes.</p>') +
         (ult.length ? '<div class="emaBarras">' + barras + '</div>' : '') +
       '</div>' +
       (lug.length
@@ -4731,11 +4733,18 @@ const SalidasEma = (function(){
         : '<p class="gEmpty" style="margin-top:18px">Cuando registres una salida con su lugar (por ejemplo Pance), aparece aquí con cuánto gastan y qué tal les fue.</p>');
   }
   stage.addEventListener("click", e => {
-    const f = e.target.closest(".emaFila"); if(!f) return;
-    const abrir = abierta !== f.dataset.f; abierta = abrir ? f.dataset.f : null;
-    stage.querySelectorAll(".emaFila").forEach(x => { const on = x === f && abrir; x.classList.toggle("abierto", on); x.setAttribute("aria-expanded", String(on)); });
+    const c = e.target.closest(".emaDiaChip"); if(!c || c.classList.contains("on")) return;
+    abierta = c.dataset.f;
+    stage.querySelectorAll(".emaDiaChip").forEach(x => { const on = x === c; x.classList.toggle("on", on); x.setAttribute("aria-pressed", String(on)); });
+    const act = ((datos && datos.meses) || []).find(m => m.mes === mesHoy()), q = act && (act.salidas || []).find(z => z.fecha === abierta);
+    const box = document.getElementById("emaDetalle");
+    if(box && q){
+      const f = new Date(q.fecha + "T12:00:00"), largo = f.toLocaleDateString("es-CO", { weekday: "long", day: "numeric", month: "long" });
+      box.innerHTML = '<div class="emaDetCab"><span>' + esc(largo) + '</span><b>' + peso(q.total) + '</b></div>' +
+        '<div class="emaGastos">' + q.gastos.map(g => '<p><span>' + esc(g.c) + (g.l ? ' <small>· ' + esc(g.l) + '</small>' : '') + '</span><em>' + peso(g.m) + '</em></p>').join("") + '</div>';
+      box.classList.remove("cambia"); void box.offsetWidth; box.classList.add("cambia");
+    }
   });
-  stage.addEventListener("keydown", e => { if((e.key === "Enter" || e.key === " ") && e.target.classList && e.target.classList.contains("emaFila")){ e.preventDefault(); e.target.click(); } });
 
   async function cargar(){
     try{
