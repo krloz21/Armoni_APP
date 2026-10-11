@@ -2920,7 +2920,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-11.107";
+const APP_VERSION = "2026-10-11.108";
 (function autoActualizar(){
   const patron = new RegExp("const APP_" + "VERSION = \"([^\"]+)\"");
   async function revisar(){
@@ -2931,6 +2931,9 @@ const APP_VERSION = "2026-10-11.107";
       if(!m || m[1] === APP_VERSION) return;
       if(sessionStorage.getItem("armoni.recargo") === m[1]) return;   // por si el servidor sigue dando la vieja: no entra en bucle
       sessionStorage.setItem("armoni.recargo", m[1]);
+      /* hay versión nueva: se borra lo guardado de la app (index, fotos) y el service worker se actualiza, y luego recarga */
+      try{ if(window.caches){ const k = await caches.keys(); await Promise.all(k.filter(n => n === "armoni-app").map(n => caches.delete(n))); } }catch{}
+      try{ if(navigator.serviceWorker){ const reg = await navigator.serviceWorker.getRegistration(); if(reg) await reg.update(); } }catch{}
       location.replace(location.pathname + "?v=" + encodeURIComponent(m[1]));
     }catch{ /* sin conexión: sigue con la que tiene */ }
   }

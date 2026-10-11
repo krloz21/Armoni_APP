@@ -1,12 +1,13 @@
 /* Guarda la app en el teléfono para abrirla rápido. Pide siempre la versión nueva a la red; si la red tarda
    más de 1.2 s (o no hay), muestra al instante la guardada. Solo toca los archivos de la app, nunca /webhook. */
-const CACHE = "armoni-app";
+const CACHE = "armoni-app";   // la app se encarga de borrarla cuando sale una versión nueva
 const ARCHIVOS = ["./", "index.html", "manifest.webmanifest", "icon.png", "icon-192.png", "icon-512.png"];
 self.addEventListener("install", e => {
   self.skipWaiting();
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(ARCHIVOS.map(u => new Request(u, { cache: "reload" })))).catch(() => {}));
 });
 self.addEventListener("activate", e => e.waitUntil(self.clients.claim()));
+self.addEventListener("message", e => { if(e.data === "limpiar") e.waitUntil(caches.keys().then(k => Promise.all(k.filter(n => n === CACHE).map(n => caches.delete(n))))); });
 /* imágenes de Comfandi y la librería de la torta 3D: se muestran al instante desde el teléfono y se
    actualizan por detrás (si la red falla o Comfandi cambia algo, la imagen guardada no desaparece) */
 const CACHE_EXT = "armoni-ext";
@@ -25,6 +26,7 @@ self.addEventListener("fetch", e => {
     return;
   }
   if(r.method !== "GET" || u.origin !== location.origin || u.pathname.includes("/webhook/")) return;
+  if(r.cache === "no-store" || u.searchParams.has("v")) return;   // la revisión de versión siempre va directo a la red
   e.respondWith((async () => {
     const cache = await caches.open(CACHE);
     const red = fetch(r).then(res => { if(res && res.ok) cache.put(r, res.clone()); return res; });
