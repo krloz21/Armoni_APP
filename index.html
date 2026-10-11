@@ -2106,6 +2106,10 @@ button{ transition:transform var(--t-tap) var(--ease-out); }
 #colaPill.girando i{ animation-duration:.5s; }
 @keyframes colaLate{ 50%{ opacity:.3; transform:scale(.7); } }
 /* pantalla de Dudas */
+.prTop{ position:relative; }
+.prX{ position:absolute; top:-6px; right:-6px; width:44px; height:44px; display:grid; place-items:center; border:0; background:none; color:var(--dim); cursor:pointer; }
+.prX svg{ width:18px; height:18px; }
+.prX:active{ color:var(--strong); }
 .duResumen{ display:flex; align-items:center; gap:14px; padding:18px; margin-bottom:14px; border-radius:22px; border:1px solid var(--line); background:radial-gradient(120% 100% at 100% 0%, rgba(255,138,80,.22), transparent 60%), var(--panel); }
 .duResumen.ok{ background:radial-gradient(120% 100% at 100% 0%, rgba(25,158,112,.22), transparent 60%), var(--panel); }
 .duNum{ flex:none; display:grid; place-items:center; width:54px; height:54px; border-radius:18px; font-size:1.7rem; font-weight:700; font-variant-numeric:tabular-nums; color:#ffb066; background:rgba(255,138,80,.16); }
@@ -3090,7 +3094,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-11.134";
+const APP_VERSION = "2026-10-11.135";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -7120,6 +7124,8 @@ const Preguntas = (function(){
   const peso = n => "$" + Math.round(Math.abs(n)).toLocaleString("es-CO");
   const fechaC = f => { try{ return new Date(f + "T12:00:00").toLocaleDateString("es-CO", { day: "numeric", month: "short" }).replace(".", ""); }catch{ return f; } };
   const KD = "armoni.dudas";
+  const refDe = id => String(id).replace(/-/g, "").slice(-10);
+  const limpia = q => { let t = String(q.pregunta || ""); (q.movs || []).forEach(m => { t = t.split(refDe(m.id)).join("«" + m.concepto + "»"); }); return t.replace(/\s*\(?\b[0-9a-f]{10}\b\)?/g, "").replace(/\s{2,}/g, " ").trim(); };
   let pendientes = (() => { try{ return JSON.parse(localStorage.getItem(KP)) || []; }catch{ return []; } })();
   /* todas las dudas sin resolver (incluso las que se dejaron para después) y las últimas respondidas */
   let dudas = (() => { try{ return JSON.parse(localStorage.getItem(KD)) || { abiertas: [], hechas: [] }; }catch{ return { abiertas: [], hechas: [] }; } })();
@@ -7155,8 +7161,8 @@ const Preguntas = (function(){
     const scrim = document.createElement("div");
     scrim.className = "pgScrim seScrim prScrim";
     scrim.innerHTML = '<div class="inWrap"><div class="pgCard inCard prCard" role="dialog" aria-modal="true" aria-labelledby="prT">' +
-      '<div class="prTop"><span class="prIco" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8.5 8.5 0 0 1-12.4 7.6L3 21l1.4-5.6A8.5 8.5 0 1 1 21 12z"/><path d="M9.6 9.4a2.5 2.5 0 0 1 4.8.8c0 1.7-2.4 2-2.4 3.4M12 16.4h.01"/></svg></span><small>Armoni tiene una pregunta' + (!desdeLista && pendientes.length > 1 ? ' · 1 de ' + pendientes.length : '') + '</small></div>' +
-      '<h3 id="prT">' + esc(q.pregunta) + '</h3>' +
+      '<div class="prTop"><button type="button" class="prX" id="prX" aria-label="Cerrar, no volver a preguntar en un buen tiempo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button><span class="prIco" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8.5 8.5 0 0 1-12.4 7.6L3 21l1.4-5.6A8.5 8.5 0 1 1 21 12z"/><path d="M9.6 9.4a2.5 2.5 0 0 1 4.8.8c0 1.7-2.4 2-2.4 3.4M12 16.4h.01"/></svg></span><small>Armoni tiene una pregunta' + (!desdeLista && pendientes.length > 1 ? ' · 1 de ' + pendientes.length : '') + '</small></div>' +
+      '<h3 id="prT">' + esc(limpia(q)) + '</h3>' +
       ((q.movs || []).length ? '<div class="prMovs">' + q.movs.map(m => '<div><span>' + esc(m.concepto) + '<small>' + esc(fechaC(m.fecha)) + ' · ' + esc(m.cat) + '</small></span><b class="' + (m.tipo === "Ingreso" ? 'mas' : 'menos') + '">' + (m.tipo === "Ingreso" ? '+' : '−') + peso(m.monto) + '</b></div>').join("") + '</div>' : '') +
       '<div class="inBody">' +
       ((q.opciones || []).length ? '<div class="prOps">' + q.opciones.map(o => '<button type="button" data-op="' + esc(o) + '">' + esc(o) + '</button>').join("") + '</div>' : '') +
@@ -7173,6 +7179,12 @@ const Preguntas = (function(){
     $("prNo").addEventListener("click", () => {
       if(ocupado) return;
       if(!listo && !desdeLista) pide({ accion: "saltar", id: q.id }).catch(() => {});   // vuelve a preguntar en unos días (desde la lista no se pospone nada)
+      cierra();
+    });
+    /* la X cierra y no vuelve a preguntar por 2 semanas; la duda sigue en Control › Dudas */
+    $("prX").addEventListener("click", () => {
+      if(ocupado) return;
+      if(!listo && !desdeLista) pide({ accion: "saltar", id: q.id, dias: 14 }).catch(() => {});
       cierra();
     });
     si.addEventListener("click", async () => {
@@ -7225,7 +7237,7 @@ const Preguntas = (function(){
     const movs = q => (q.movs || []).length ? '<div class="prMovs">' + q.movs.map(m => '<div><span>' + esc(m.concepto) + '<small>' + esc(fechaC(m.fecha)) + ' · ' + esc(m.cat) + '</small></span><b class="' + (m.tipo === "Ingreso" ? 'mas' : 'menos') + '">' + (m.tipo === "Ingreso" ? '+' : '−') + peso(m.monto) + '</b></div>').join("") + '</div>' : '';
     cuerpo.innerHTML =
       '<div class="duResumen' + (A.length ? '' : ' ok') + '"><span class="duNum">' + (A.length || "✓") + '</span><div><b>' + (A.length ? (A.length === 1 ? "Tienes 1 duda por resolver" : "Tienes " + A.length + " dudas por resolver") : "Todo en orden") + '</b><span class="t">' + (A.length ? "Responderlas hace que tus cuentas queden más exactas." : "Armoni no tiene preguntas pendientes por ahora.") + '</span></div></div>' +
-      (A.length ? '<div class="duLista">' + A.map((q, i) => '<article class="duCard" style="--i:' + Math.min(i, 8) + '">' + (q.saltada ? '<span class="duTag dif">La dejaste para después</span>' : '<span class="duTag">Por resolver</span>') + '<h3>' + esc(q.pregunta) + '</h3>' + movs(q) + '<button type="button" class="duBtn" data-id="' + esc(q.id) + '">Responder</button></article>').join("") + '</div>' : '') +
+      (A.length ? '<div class="duLista">' + A.map((q, i) => '<article class="duCard" style="--i:' + Math.min(i, 8) + '">' + (q.saltada ? '<span class="duTag dif">La dejaste para después</span>' : '<span class="duTag">Por resolver</span>') + '<h3>' + esc(limpia(q)) + '</h3>' + movs(q) + '<button type="button" class="duBtn" data-id="' + esc(q.id) + '">Responder</button></article>').join("") + '</div>' : '') +
       '<button type="button" class="duBuscar" id="duBuscar">Buscar dudas nuevas</button>' +
       (H.length ? '<div class="duGrupo">Ya resueltas</div>' + H.map(q => '<div class="duHecha"><b>' + esc(q.pregunta) + '</b><em>Tú: ' + esc(q.respuesta) + '</em></div>').join("") : '');
     cuerpo.querySelectorAll(".duBtn").forEach(b => b.addEventListener("click", () => abre(b.dataset.id)));
