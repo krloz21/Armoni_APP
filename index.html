@@ -2050,6 +2050,11 @@ button{ transition:transform var(--t-tap) var(--ease-out); }
 .caProd span{ font-size:2.2rem; }
 .caNota{ margin:6px 0 0; font-size:.88rem; color:var(--ghost); text-align:center; }
 /* Salidas con Ema */
+.emaMas{ flex:none; display:flex; flex-direction:column; align-items:center; gap:6px; padding:0; border:0; background:none; font:inherit; color:var(--ghost); cursor:pointer; -webkit-tap-highlight-color:transparent; }
+.emaMas .mas{ width:52px; height:52px; border-radius:18px; display:grid; place-items:center; color:#fff; background:linear-gradient(145deg, #ffb066, #ff7a4d); box-shadow:0 12px 26px -10px rgba(255,122,77,.85), inset 0 1px 0 rgba(255,255,255,.35); transition:transform .2s var(--ease-spring); }
+.emaMas .mas svg{ width:24px; height:24px; }
+.emaMas small{ font-size:.68rem; font-weight:700; letter-spacing:.02em; }
+.emaMas:active .mas{ transform:scale(.9); }
 .emaTot{ flex:none; display:flex; flex-direction:column; align-items:flex-end; font-size:.9rem; font-weight:700; color:var(--white); }
 .emaTot small{ font-size:.7rem; font-weight:500; color:var(--dim); margin-top:2px; }
 .emaVacio{ margin:14px 0 0; font-size:.86rem; color:var(--dim); text-align:center; }
@@ -2217,6 +2222,8 @@ button{ transition:transform var(--t-tap) var(--ease-out); }
 .emaLugar{ padding:14px 15px; border-radius:18px; border:1px solid var(--line); background:var(--panel); text-align:left; }
 .elTop{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
 .elTop b{ font-size:1rem; }
+.elTop .restNum{ white-space:nowrap; font-size:1.25rem; }
+.emaLugar .elTop .restNum small{ display:inline; margin-top:0; font-size:.72rem; }
 .elNota small{ font-size:.66rem; font-weight:500; opacity:.8; margin-left:1px; }
 .elNota{ flex:none; padding:3px 10px; border-radius:999px; font-size:.78rem; font-weight:700; color:#ffb066; background:rgba(255,138,80,.14); }
 .emaLugar small{ display:block; margin-top:5px; font-size:.78rem; color:var(--dim); }
@@ -2606,13 +2613,13 @@ body[class*="mode-"] #masIngreso{ display:none; }
         <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.8 4.6L18.5 9l-4.7 1.4L12 15l-1.8-4.6L5.5 9l4.7-1.4z"/><path d="M19 15l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z"/></svg></span>
         <span class="txt"><b>Tu mes</b><span>El resumen del mes, estilo historia</span></span>
       </button>
-      <button type="button" id="navBalance">
-        <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v9l7.8 4.5"/><circle cx="12" cy="12" r="9"/></svg></span>
-        <span class="txt"><b>Balance</b><span>Gastos fijos, entretenimiento y ahorro</span></span>
-      </button>
       <button type="button" id="navRecuerda">
         <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/><path d="m9 15 2 2 4-4"/></svg></span>
         <span class="txt"><b>Recuerda</b><span>Lo que se pagó cada día</span></span>
+      </button>
+      <button type="button" id="navBalance">
+        <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v9l7.8 4.5"/><circle cx="12" cy="12" r="9"/></svg></span>
+        <span class="txt"><b>Balance</b><span>Gastos fijos, entretenimiento y ahorro</span></span>
       </button>
         </div></div>
       </div>
@@ -2702,7 +2709,6 @@ body[class*="mode-"] #masIngreso{ display:none; }
 
       <section id="emaView" aria-label="Salidas Ema">
         <div class="restIntro"><h2>Salidas con Ema</h2></div>
-        <button type="button" class="mkBtn pri full emaNuevaBtn" id="emaNueva"><span aria-hidden="true">🎈</span> Registrar una salida</button>
         <div class="restStatus" id="emaStatus"></div>
         <div id="emaEquilibrio"></div>
         <div id="emaStage"></div>
@@ -2920,7 +2926,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-11.108";
+const APP_VERSION = "2026-10-11.109";
 (function autoActualizar(){
   const patron = new RegExp("const APP_" + "VERSION = \"([^\"]+)\"");
   async function revisar(){
@@ -5335,7 +5341,7 @@ const SalidasEma = (function(){
       '<div class="emaCard' + (anim ? ' emaEntra' : '') + '">' +
         '<div class="emaTop"><span class="emaEmo icoFoto" aria-hidden="true">' + FOTO_EMA + '</span><div class="emaTx"><small>Salidas con Ema · ' + esc(mesNombre(hoyM)) + '</small>' +
         '<span class="emaFrase">Este mes han salido</span><b class="emaCuenta"><span class="emaN">' + act.veces + '</span> ' + (act.veces === 1 ? 'vez' : 'veces') + '</b></div>' +
-        (act.total ? '<span class="emaTot">' + peso(act.total) + '<small>' + (act.veces ? peso(promSalida) + ' por salida' : '') + '</small></span>' : '') + '</div>' +
+        '<button type="button" class="emaMas" aria-label="Registrar salida"><span class="mas" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span><small>Registra salida</small></button></div>' +
         (sal.length
           ? '<div class="emaDiasTit">Los días que salieron</div><div class="emaDiasRow" role="tablist">' + chipsDias + '</div><div class="emaDetalle" id="emaDetalle">' + detalle(sal.find(q => q.fecha === abierta)) + '</div>'
           : '<p class="emaVacio">Todavía no hay salidas este mes.</p>') +
@@ -5343,7 +5349,7 @@ const SalidasEma = (function(){
       '</div>' +
       (lug.length
         ? '<div class="mkSec">Lugares con Ema</div><div class="emaLugares">' + lug.map(l =>
-            '<div class="emaLugar"><div class="elTop"><b>' + esc(l.nombre) + '</b>' + (l.puntuacion ? '<span class="elNota">' + String(l.puntuacion).replace(".", ",") + '<small>/10</small></span>' : '') + '</div>' +
+            '<div class="emaLugar"><div class="elTop"><b>' + esc(l.nombre) + '</b>' + (l.puntuacion ? '<span class="restNum' + (l.puntuacion >= 8.5 ? ' top' : l.puntuacion < 6 ? ' low' : '') + '" aria-label="' + l.puntuacion + ' de 10">' + (Math.round(l.puntuacion * 10) / 10).toFixed(1) + '<small>/10</small></span>' : '') + '</div>' +
             '<small>' + (l.visitas || 0) + (l.visitas === 1 ? ' visita' : ' visitas') + (l.promedio ? ' · ~' + peso(l.promedio) + ' por salida' : '') + (l.ultima ? ' · ' + hace(diasDesde(l.ultima)) : '') + '</small>' +
             (l.notas ? '<p>' + esc(l.notas) + '</p>' : '') + '</div>').join("") + '</div>'
         : '<p class="gEmpty" style="margin-top:18px">Cuando registres una salida con su lugar (por ejemplo Pance), aparece aquí con cuánto gastan y qué tal les fue.</p>');
@@ -5878,7 +5884,7 @@ const SalidaEmaForm = (function(){
 
     ir("lugar", 1);
   }
-  document.getElementById("emaNueva").addEventListener("click", abrir);
+  document.getElementById("emaView").addEventListener("click", e => { if(e.target.closest(".emaMas")) abrir(); });
   return { abrir };
 })();
 
