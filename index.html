@@ -790,7 +790,7 @@ body.no-gl #drawer{ background:var(--drawer-solid); }
 }
 
 /* ───────── vista de restaurantes (ocupa el lugar del chat) ───────── */
-#restView, #emaView, #creditoView, #gmailView, #glimView, #recuerdaView, #mercarView, #duraView, #mesView, #balanceView, #ahorroView, #ajustesView{ display:none; padding-bottom:10px; }
+#restView, #emaView, #creditoView, #gmailView, #glimView, #recuerdaView, #mercarView, #duraView, #mesView, #balanceView, #ahorroView, #dudasView, #ajustesView{ display:none; padding-bottom:10px; }
 body.mode-rest #restView{ display:block; }
 body.mode-ema #emaView{ display:block; }
 body.mode-ema #welcome, body.mode-ema #messages, body.mode-ema #pending, body.mode-ema #servicioBanner, body.mode-ema #glimBanner{ display:none !important; }
@@ -820,6 +820,10 @@ body.mode-balance footer{ display:none; }
 body.mode-mes #welcome, body.mode-mes #messages, body.mode-mes #pending, body.mode-mes #servicioBanner, body.mode-mes #glimBanner{ display:none !important; }
 body.mode-mes #reset{ visibility:hidden; }
 body.mode-mes footer{ display:none; }
+body.mode-dudas #dudasView{ display:block; }
+body.mode-dudas #welcome, body.mode-dudas #messages, body.mode-dudas #pending, body.mode-dudas #servicioBanner, body.mode-dudas #glimBanner{ display:none !important; }
+body.mode-dudas #reset{ visibility:hidden; }
+body.mode-dudas footer{ display:none; }
 body.mode-ajustes #ajustesView{ display:block; }
 body.mode-ajustes #welcome, body.mode-ajustes #messages, body.mode-ajustes #pending, body.mode-ajustes #servicioBanner, body.mode-ajustes #glimBanner{ display:none !important; }
 body.mode-ajustes #reset{ visibility:hidden; }
@@ -2101,6 +2105,30 @@ button{ transition:transform var(--t-tap) var(--ease-out); }
 #colaPill i{ width:8px; height:8px; border-radius:50%; background:#ffb066; animation:colaLate 1.6s ease-in-out infinite; }
 #colaPill.girando i{ animation-duration:.5s; }
 @keyframes colaLate{ 50%{ opacity:.3; transform:scale(.7); } }
+/* pantalla de Dudas */
+.duResumen{ display:flex; align-items:center; gap:14px; padding:18px; margin-bottom:14px; border-radius:22px; border:1px solid var(--line); background:radial-gradient(120% 100% at 100% 0%, rgba(255,138,80,.22), transparent 60%), var(--panel); }
+.duResumen.ok{ background:radial-gradient(120% 100% at 100% 0%, rgba(25,158,112,.22), transparent 60%), var(--panel); }
+.duNum{ flex:none; display:grid; place-items:center; width:54px; height:54px; border-radius:18px; font-size:1.7rem; font-weight:700; font-variant-numeric:tabular-nums; color:#ffb066; background:rgba(255,138,80,.16); }
+.duResumen.ok .duNum{ color:#6fe0b5; background:rgba(25,158,112,.18); }
+.duResumen b{ display:block; font-size:1rem; color:var(--strong); }
+.duResumen span.t{ display:block; margin-top:2px; font-size:.82rem; color:var(--ghost); }
+.duLista{ display:grid; gap:12px; }
+.duCard{ padding:16px; border-radius:22px; border:1px solid var(--line); background:var(--panel); opacity:0; transform:translateY(8px); animation:duEntra .5s var(--ease-out) forwards; animation-delay:calc(var(--i,0) * 60ms); }
+@keyframes duEntra{ to{ opacity:1; transform:none; } }
+.duTag{ display:inline-block; margin-bottom:8px; padding:3px 9px; border-radius:20px; font-size:.68rem; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:#ffcf99; background:rgba(255,138,80,.14); }
+.duTag.dif{ color:var(--dim); background:rgba(var(--ink),.08); }
+.duCard h3{ margin:0 0 12px; font-size:1rem; font-weight:600; line-height:1.4; color:var(--strong); }
+.duBtn{ width:100%; min-height:46px; border:0; border-radius:14px; font:inherit; font-weight:700; color:#fff; background:linear-gradient(140deg,#ffb066,#ff8a50); cursor:pointer; transition:transform .2s var(--ease-spring); }
+.duBtn:active{ transform:scale(.97); }
+.duGrupo{ margin:22px 4px 10px; font-size:.7rem; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--dim); }
+.duHecha{ padding:12px 14px; border-radius:16px; background:rgba(var(--ink),.05); font-size:.84rem; color:var(--ghost); }
+.duHecha + .duHecha{ margin-top:8px; }
+.duHecha b{ display:block; margin-bottom:4px; font-weight:600; color:var(--white); }
+.duHecha em{ display:block; font-style:normal; color:#6fe0b5; }
+.duBuscar{ display:block; width:100%; margin-top:16px; min-height:46px; border-radius:14px; border:1px solid var(--line); background:none; font:inherit; font-weight:600; color:var(--white); cursor:pointer; }
+.duBuscar:disabled{ opacity:.6; }
+.navBadge{ margin-left:auto; min-width:22px; height:22px; padding:0 7px; border-radius:11px; display:grid; place-items:center; font-size:.74rem; font-weight:700; color:#fff; background:linear-gradient(140deg,#ffb066,#ff8a50); }
+.navBadge[hidden]{ display:none; }
 .yaEsta{ margin:10px 0 4px; padding:14px; border-radius:16px; border:1px solid rgba(255,176,102,.45); background:rgba(255,138,80,.1); }
 .yaEsta b{ display:block; font-size:.92rem; color:#ffcf99; }
 .yaEsta span{ display:block; margin-top:4px; font-size:.82rem; color:var(--ghost); }
@@ -2716,7 +2744,7 @@ body[class*="mode-"] #masIngreso{ display:none; }
       <div class="navGrupo" id="navControl">
         <button type="button" id="navControlBtn" aria-expanded="false" aria-controls="navControlSub">
           <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l9 5-9 5-9-5z"/><path d="M3 12.5l9 5 9-5"/><path d="M3 17l9 5 9-5"/></svg></span>
-          <span class="txt"><b>Control</b><span>Tu mes, Balance y Recuerda</span></span>
+          <span class="txt"><b>Control</b><span>Tu mes, Balance, Ahorro y Dudas</span></span>
           <span class="chev" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
         </button>
         <div class="navSub" id="navControlSub"><div class="navSubIn">
@@ -2735,6 +2763,11 @@ body[class*="mode-"] #masIngreso{ display:none; }
       <button type="button" id="navAhorro">
         <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 10.5c0-3.6-3.1-6-7-6s-7 2.4-7 6c0 2 .9 3.6 2.4 4.7V19h3v-2h3.2v2h3v-3.8c1-.7 1.8-1.6 2.2-2.7H21v-3h-1.8"/><path d="M9.5 7.6h4"/><circle cx="15.5" cy="10" r=".6" fill="currentColor"/></svg></span>
         <span class="txt"><b>Ahorro</b><span>Lo que tenemos guardado</span></span>
+      </button>
+      <button type="button" id="navDudas">
+        <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8.5 8.5 0 0 1-12.4 7.6L3 21l1.4-5.6A8.5 8.5 0 1 1 21 12z"/><path d="M9.6 9.4a2.5 2.5 0 0 1 4.8.8c0 1.7-2.4 2-2.4 3.4M12 16.4h.01"/></svg></span>
+        <span class="txt"><b>Dudas</b><span>Lo que Armoni quiere preguntarte</span></span>
+        <span class="navBadge" id="navDudasN" hidden></span>
       </button>
         </div></div>
       </div>
@@ -2920,6 +2953,12 @@ body[class*="mode-"] #masIngreso{ display:none; }
         <div class="ajCard usoCard" id="usoCard"></div>
       </section>
 
+      <section id="dudasView" aria-label="Dudas">
+        <div class="restIntro"><h2>Dudas</h2></div>
+        <p class="tmSub">Lo que Armoni no entendió de tus cuentas y quiere preguntarte</p>
+        <div id="duCuerpo"></div>
+      </section>
+
       <section id="ahorroView" aria-label="Ahorro">
         <div class="restIntro"><h2>Ahorro</h2></div>
         <p class="tmSub">Lo que tenemos guardado y cómo va creciendo</p>
@@ -3051,7 +3090,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-11.133";
+const APP_VERSION = "2026-10-11.134";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -7080,12 +7119,17 @@ const Preguntas = (function(){
   const esc = t => String(t == null ? "" : t).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
   const peso = n => "$" + Math.round(Math.abs(n)).toLocaleString("es-CO");
   const fechaC = f => { try{ return new Date(f + "T12:00:00").toLocaleDateString("es-CO", { day: "numeric", month: "short" }).replace(".", ""); }catch{ return f; } };
+  const KD = "armoni.dudas";
   let pendientes = (() => { try{ return JSON.parse(localStorage.getItem(KP)) || []; }catch{ return []; } })();
+  /* todas las dudas sin resolver (incluso las que se dejaron para después) y las últimas respondidas */
+  let dudas = (() => { try{ return JSON.parse(localStorage.getItem(KD)) || { abiertas: [], hechas: [] }; }catch{ return { abiertas: [], hechas: [] }; } })();
   const ajustes = () => { try{ return JSON.parse(localStorage.getItem(KA)) || {}; }catch{ return {}; } };
   function guarda(j){
     if(!j || j.ok === false) return;
     if(Array.isArray(j.preguntas)){ pendientes = j.preguntas; try{ localStorage.setItem(KP, JSON.stringify(pendientes)); }catch{} }
     if(j.ajustes){ try{ localStorage.setItem(KA, JSON.stringify(j.ajustes)); }catch{} }
+    if(Array.isArray(j.abiertas)){ dudas = { abiertas: j.abiertas, hechas: j.hechas || [] }; try{ localStorage.setItem(KD, JSON.stringify(dudas)); }catch{} }
+    insignia(); if(document.body.classList.contains("mode-dudas")) pinta();
     document.dispatchEvent(new CustomEvent("armoni:preguntas"));
   }
   async function pide(cuerpo){
@@ -7100,13 +7144,18 @@ const Preguntas = (function(){
     try{ await pide({ accion: "revisar" }); }catch{ return; }
     if(pendientes.length) setTimeout(() => { if(!hayVentana() && !document.hidden) abre(); }, 1500);
   }
-  function abre(){
-    if(!pendientes.length || document.querySelector(".pgScrim.prScrim")) return;
-    const q = pendientes[0];
+  function insignia(){
+    const b = document.getElementById("navDudasN"); if(!b) return;
+    const n = dudas.abiertas.length; b.textContent = n; b.hidden = !n;
+  }
+  function abre(id){
+    const desdeLista = typeof id === "string";
+    const q = desdeLista ? dudas.abiertas.find(x => x.id === id) : pendientes[0];
+    if(!q || document.querySelector(".pgScrim.prScrim")) return;
     const scrim = document.createElement("div");
     scrim.className = "pgScrim seScrim prScrim";
     scrim.innerHTML = '<div class="inWrap"><div class="pgCard inCard prCard" role="dialog" aria-modal="true" aria-labelledby="prT">' +
-      '<div class="prTop"><span class="prIco" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8.5 8.5 0 0 1-12.4 7.6L3 21l1.4-5.6A8.5 8.5 0 1 1 21 12z"/><path d="M9.6 9.4a2.5 2.5 0 0 1 4.8.8c0 1.7-2.4 2-2.4 3.4M12 16.4h.01"/></svg></span><small>Armoni tiene una pregunta' + (pendientes.length > 1 ? ' · 1 de ' + pendientes.length : '') + '</small></div>' +
+      '<div class="prTop"><span class="prIco" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8.5 8.5 0 0 1-12.4 7.6L3 21l1.4-5.6A8.5 8.5 0 1 1 21 12z"/><path d="M9.6 9.4a2.5 2.5 0 0 1 4.8.8c0 1.7-2.4 2-2.4 3.4M12 16.4h.01"/></svg></span><small>Armoni tiene una pregunta' + (!desdeLista && pendientes.length > 1 ? ' · 1 de ' + pendientes.length : '') + '</small></div>' +
       '<h3 id="prT">' + esc(q.pregunta) + '</h3>' +
       ((q.movs || []).length ? '<div class="prMovs">' + q.movs.map(m => '<div><span>' + esc(m.concepto) + '<small>' + esc(fechaC(m.fecha)) + ' · ' + esc(m.cat) + '</small></span><b class="' + (m.tipo === "Ingreso" ? 'mas' : 'menos') + '">' + (m.tipo === "Ingreso" ? '+' : '−') + peso(m.monto) + '</b></div>').join("") + '</div>' : '') +
       '<div class="inBody">' +
@@ -7117,26 +7166,26 @@ const Preguntas = (function(){
     document.body.appendChild(scrim);
     requestAnimationFrame(() => scrim.classList.add("on"));
     const $ = id => scrim.querySelector("#" + id), tx = $("prTx"), si = $("prSi");
-    let ocupado = false, listo = false;
+    let ocupado = false, listo = false, sigue = false;
     const cierra = () => { scrim.classList.remove("on"); setTimeout(() => scrim.remove(), 340); };
     tx.addEventListener("input", () => { si.disabled = !tx.value.trim(); });
     scrim.querySelectorAll("[data-op]").forEach(b => b.addEventListener("click", () => { tx.value = b.dataset.op; si.disabled = false; scrim.querySelectorAll("[data-op]").forEach(x => x.classList.toggle("on", x === b)); }));
     $("prNo").addEventListener("click", () => {
       if(ocupado) return;
-      if(!listo) pide({ accion: "saltar", id: q.id }).catch(() => {});   // vuelve a preguntar en unos días
+      if(!listo && !desdeLista) pide({ accion: "saltar", id: q.id }).catch(() => {});   // vuelve a preguntar en unos días (desde la lista no se pospone nada)
       cierra();
     });
     si.addEventListener("click", async () => {
-      if(listo){ cierra(); if(pendientes.length) setTimeout(abre, 420); return; }
+      if(listo){ cierra(); if(desdeLista){ if(sigue) setTimeout(() => abre(q.id), 420); } else if(pendientes.length) setTimeout(abre, 420); return; }
       const t = tx.value.trim(); if(!t || ocupado) return;
       ocupado = true; si.disabled = true; si.textContent = "Pensando…"; $("prErr").textContent = "";
       try{
         const j = await pide({ accion: "responder", id: q.id, respuesta: t });
-        ocupado = false; listo = true;
+        ocupado = false; listo = true; sigue = !!j.sigue;
         $("prMsg").textContent = j.mensaje || "¡Listo, ya lo aprendí!";
         tx.hidden = true; const ops = scrim.querySelector(".prOps"); if(ops) ops.hidden = true;
         $("prNo").textContent = "Cerrar"; si.disabled = false;
-        si.textContent = pendientes.length ? (j.sigue ? "Ver su otra pregunta" : "Siguiente pregunta") : "Listo";
+        si.textContent = desdeLista ? (j.sigue ? "Ver su otra pregunta" : "Listo") : pendientes.length ? (j.sigue ? "Ver su otra pregunta" : "Siguiente pregunta") : "Listo";
         if(typeof Balance !== "undefined" && document.body.classList.contains("mode-balance")) Balance.refresh();
       }catch{
         ocupado = false; si.disabled = false; si.textContent = "Responder";
@@ -7169,7 +7218,27 @@ const Preguntas = (function(){
     });
     return { meses: out, n, total };
   }
-  return { revisar, abre, aplica, cuantas: () => pendientes.length, ajustes };
+  /* pantalla «Dudas»: todo lo que Armoni todavía no sabe, con buen aspecto y a un toque de responderlo */
+  function pinta(refresca){
+    const cuerpo = document.getElementById("duCuerpo"); if(!cuerpo) return;
+    const A = dudas.abiertas, H = dudas.hechas;
+    const movs = q => (q.movs || []).length ? '<div class="prMovs">' + q.movs.map(m => '<div><span>' + esc(m.concepto) + '<small>' + esc(fechaC(m.fecha)) + ' · ' + esc(m.cat) + '</small></span><b class="' + (m.tipo === "Ingreso" ? 'mas' : 'menos') + '">' + (m.tipo === "Ingreso" ? '+' : '−') + peso(m.monto) + '</b></div>').join("") + '</div>' : '';
+    cuerpo.innerHTML =
+      '<div class="duResumen' + (A.length ? '' : ' ok') + '"><span class="duNum">' + (A.length || "✓") + '</span><div><b>' + (A.length ? (A.length === 1 ? "Tienes 1 duda por resolver" : "Tienes " + A.length + " dudas por resolver") : "Todo en orden") + '</b><span class="t">' + (A.length ? "Responderlas hace que tus cuentas queden más exactas." : "Armoni no tiene preguntas pendientes por ahora.") + '</span></div></div>' +
+      (A.length ? '<div class="duLista">' + A.map((q, i) => '<article class="duCard" style="--i:' + Math.min(i, 8) + '">' + (q.saltada ? '<span class="duTag dif">La dejaste para después</span>' : '<span class="duTag">Por resolver</span>') + '<h3>' + esc(q.pregunta) + '</h3>' + movs(q) + '<button type="button" class="duBtn" data-id="' + esc(q.id) + '">Responder</button></article>').join("") + '</div>' : '') +
+      '<button type="button" class="duBuscar" id="duBuscar">Buscar dudas nuevas</button>' +
+      (H.length ? '<div class="duGrupo">Ya resueltas</div>' + H.map(q => '<div class="duHecha"><b>' + esc(q.pregunta) + '</b><em>Tú: ' + esc(q.respuesta) + '</em></div>').join("") : '');
+    cuerpo.querySelectorAll(".duBtn").forEach(b => b.addEventListener("click", () => abre(b.dataset.id)));
+    const bu = cuerpo.querySelector("#duBuscar");
+    bu.addEventListener("click", async () => {
+      bu.disabled = true; bu.textContent = "Revisando tus movimientos…";
+      try{ await pide({ accion: "revisar", forzar: true }); }catch{ bu.disabled = false; bu.textContent = "No pude conectar. Inténtalo de nuevo"; return; }
+      if(!dudas.abiertas.length){ const b2 = document.querySelector("#duBuscar"); if(b2){ b2.textContent = "No encontré nada nuevo"; setTimeout(() => { if(b2.isConnected) b2.textContent = "Buscar dudas nuevas"; }, 2500); } }
+    });
+    if(refresca) pide({ accion: "pendientes" }).catch(() => {});
+  }
+  insignia();
+  return { revisar, abre, aplica, pinta, cuantas: () => pendientes.length, ajustes };
 })();
 TrasIntro.hacer(() => setTimeout(() => Preguntas.revisar(), 2500));
 
@@ -7188,6 +7257,7 @@ const Drawer = (function(){
   const navBalance = document.getElementById("navBalance");
   const navAhorro = document.getElementById("navAhorro");
   const navAjustes = document.getElementById("navAjustes");
+  const navDudas = document.getElementById("navDudas");
   const navControl = document.getElementById("navControl");
   const navControlBtn = document.getElementById("navControlBtn");
   const setControl = on => { navControl.classList.toggle("abierto", on); navControlBtn.setAttribute("aria-expanded", String(on)); };
@@ -7202,9 +7272,9 @@ const Drawer = (function(){
   const navDura = document.getElementById("navDura");
   const setMercarG = on => { navMercarG.classList.toggle("abierto", on); navMercarBtn.setAttribute("aria-expanded", String(on)); };
   navMercarBtn.addEventListener("click", () => setMercarG(!navMercarG.classList.contains("abierto")));
-  const NAV = { chat: navChat, rest: navRest, ema: navEma, credito: navCredito, gmail: navGmail, glim: navGlim, recuerda: navRecuerda, mercar: navMercar, dura: navDura, mes: navMes, balance: navBalance, ahorro: navAhorro, ajustes: navAjustes };
-  const SUB = { chat: "Presupuesto de la casa", rest: "Restaurantes", ema: "Salidas Ema", credito: "Crédito Carro", gmail: "AT Gmail", glim: "Glim", recuerda: "Recuerda", mercar: "A mercar", dura: "Duración", mes: "Tu mes", balance: "Balance", ahorro: "Ahorro", ajustes: "Ajustes" };
-  const PLACEHOLDER = { chat: "Escribe aquí…", rest: "¿Qué se te antoja?", ema: "¿A dónde llevamos a Ema?", credito: "Pregúntale sobre el crédito…", gmail: "", glim: "", recuerda: "", mercar: "", dura: "", mes: "", balance: "", ahorro: "", ajustes: "" };
+  const NAV = { chat: navChat, rest: navRest, ema: navEma, credito: navCredito, gmail: navGmail, glim: navGlim, recuerda: navRecuerda, mercar: navMercar, dura: navDura, mes: navMes, balance: navBalance, ahorro: navAhorro, dudas: navDudas, ajustes: navAjustes };
+  const SUB = { chat: "Presupuesto de la casa", rest: "Restaurantes", ema: "Salidas Ema", credito: "Crédito Carro", gmail: "AT Gmail", glim: "Glim", recuerda: "Recuerda", mercar: "A mercar", dura: "Duración", mes: "Tu mes", balance: "Balance", ahorro: "Ahorro", dudas: "Dudas", ajustes: "Ajustes" };
+  const PLACEHOLDER = { chat: "Escribe aquí…", rest: "¿Qué se te antoja?", ema: "¿A dónde llevamos a Ema?", credito: "Pregúntale sobre el crédito…", gmail: "", glim: "", recuerda: "", mercar: "", dura: "", mes: "", balance: "", ahorro: "", dudas: "", ajustes: "" };
 
   /* marca del menú */
   const m2 = document.getElementById("mark2");
@@ -7261,9 +7331,10 @@ const Drawer = (function(){
     document.body.classList.toggle("mode-mes", mode === "mes");
     document.body.classList.toggle("mode-balance", mode === "balance");
     document.body.classList.toggle("mode-ahorro", mode === "ahorro");
+    document.body.classList.toggle("mode-dudas", mode === "dudas");
     document.body.classList.toggle("mode-ajustes", mode === "ajustes");
     Object.entries(NAV).forEach(([m, b]) => { if(m === mode) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current"); });
-    const enControl = mode === "mes" || mode === "recuerda" || mode === "balance" || mode === "ahorro";
+    const enControl = mode === "mes" || mode === "recuerda" || mode === "balance" || mode === "ahorro" || mode === "dudas";
     navControl.classList.toggle("activo", enControl);
     if(enControl) setControl(true);
     const enSalidas = mode === "rest" || mode === "ema";
@@ -7290,6 +7361,7 @@ const Drawer = (function(){
       if(mode === "mes") TuMes.refresh();
       if(mode === "balance") Balance.refresh();
       if(mode === "ahorro") Ahorro.refresh();
+      if(mode === "dudas") Preguntas.pinta(true);
     }
     close(0, 1, true);   // al navegar, el menú se cierra rápido: el contenido ya está listo, no hay que esperarlo
   }
@@ -7309,6 +7381,7 @@ const Drawer = (function(){
   navMes.addEventListener("click", () => go("mes"));
   navBalance.addEventListener("click", () => go("balance"));
   navAhorro.addEventListener("click", () => go("ahorro"));
+  navDudas.addEventListener("click", () => go("dudas"));
   navAjustes.addEventListener("click", () => go("ajustes"));
 
   /* deslizar el menú hacia la izquierda lo cierra: sigue el dedo 1:1 y suelta con su velocidad */
