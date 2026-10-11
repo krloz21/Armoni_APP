@@ -2133,6 +2133,7 @@ button{ transition:transform var(--t-tap) var(--ease-out); }
 .duHecho{ display:flex; align-items:flex-start; gap:10px; padding:11px 12px 11px 14px; border-radius:16px; background:rgba(var(--ink),.05); font-size:.84rem; line-height:1.4; color:var(--ghost); }
 .duHecho span{ flex:1; min-width:0; }
 .duHecho button{ flex:none; width:32px; height:32px; margin:-4px -4px -4px 0; border:0; border-radius:50%; background:none; color:var(--dim); font-size:.9rem; cursor:pointer; }
+.duCorr{ margin-top:8px; padding:6px 12px; border-radius:10px; border:1px solid var(--line); background:none; font:inherit; font-size:.78rem; font-weight:600; color:var(--white); cursor:pointer; }
 .duBuscar{ display:block; width:100%; margin-top:16px; min-height:46px; border-radius:14px; border:1px solid var(--line); background:none; font:inherit; font-weight:600; color:var(--white); cursor:pointer; }
 .duBuscar:disabled{ opacity:.6; }
 .navBadge{ margin-left:auto; min-width:22px; height:22px; padding:0 7px; border-radius:11px; display:grid; place-items:center; font-size:.74rem; font-weight:700; color:#fff; background:linear-gradient(140deg,#ffb066,#ff8a50); }
@@ -3098,7 +3099,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-11.136";
+const APP_VERSION = "2026-10-11.137";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -7163,12 +7164,13 @@ const Preguntas = (function(){
   }
   function abre(id){
     const desdeLista = typeof id === "string";
-    const q = desdeLista ? dudas.abiertas.find(x => x.id === id) : pendientes[0];
+    const q = desdeLista ? (dudas.abiertas.find(x => x.id === id) || dudas.hechas.find(x => x.id === id)) : pendientes[0];
+    const corrige = desdeLista && !dudas.abiertas.some(x => x.id === id);
     if(!q || document.querySelector(".pgScrim.prScrim")) return;
     const scrim = document.createElement("div");
     scrim.className = "pgScrim seScrim prScrim";
     scrim.innerHTML = '<div class="inWrap"><div class="pgCard inCard prCard" role="dialog" aria-modal="true" aria-labelledby="prT">' +
-      '<div class="prTop"><button type="button" class="prX" id="prX" aria-label="Cerrar, no volver a preguntar en un buen tiempo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button><span class="prIco" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8.5 8.5 0 0 1-12.4 7.6L3 21l1.4-5.6A8.5 8.5 0 1 1 21 12z"/><path d="M9.6 9.4a2.5 2.5 0 0 1 4.8.8c0 1.7-2.4 2-2.4 3.4M12 16.4h.01"/></svg></span><small>Armoni tiene una pregunta' + (!desdeLista && pendientes.length > 1 ? ' · 1 de ' + pendientes.length : '') + '</small></div>' +
+      '<div class="prTop"><button type="button" class="prX" id="prX" aria-label="Cerrar, no volver a preguntar en un buen tiempo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button><span class="prIco" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8.5 8.5 0 0 1-12.4 7.6L3 21l1.4-5.6A8.5 8.5 0 1 1 21 12z"/><path d="M9.6 9.4a2.5 2.5 0 0 1 4.8.8c0 1.7-2.4 2-2.4 3.4M12 16.4h.01"/></svg></span><small>' + (corrige ? 'Corregir mi respuesta' : 'Armoni tiene una pregunta') + (!desdeLista && pendientes.length > 1 ? ' · 1 de ' + pendientes.length : '') + '</small></div>' +
       '<h3 id="prT">' + esc(limpia(q)) + '</h3>' +
       ((q.movs || []).length ? '<div class="prMovs">' + q.movs.map(m => '<div><span>' + esc(m.concepto) + '<small>' + esc(fechaC(m.fecha)) + ' · ' + esc(m.cat) + '</small></span><b class="' + (m.tipo === "Ingreso" ? 'mas' : 'menos') + '">' + (m.tipo === "Ingreso" ? '+' : '−') + peso(m.monto) + '</b></div>').join("") + '</div>' : '') +
       '<div class="inBody">' +
@@ -7247,7 +7249,8 @@ const Preguntas = (function(){
       (A.length ? '<div class="duLista">' + A.map((q, i) => '<article class="duCard" style="--i:' + Math.min(i, 8) + '">' + (q.saltada ? '<span class="duTag dif">La dejaste para después</span>' : '<span class="duTag">Por resolver</span>') + '<h3>' + esc(limpia(q)) + '</h3>' + movs(q) + '<button type="button" class="duBtn" data-id="' + esc(q.id) + '">Responder</button></article>').join("") + '</div>' : '') +
       '<button type="button" class="duBuscar" id="duBuscar">Buscar dudas nuevas</button>' +
       (saber.length ? '<div class="duGrupo">Lo que Armoni ya aprendió</div><div class="duSaber">' + saber.map((t, i) => '<div class="duHecho"><span>' + esc(t) + '</span><button type="button" data-o="' + i + '" aria-label="Olvidar esto">✕</button></div>').join("") + '</div>' : '') +
-      (H.length ? '<div class="duGrupo">Ya resueltas</div>' + H.map(q => '<div class="duHecha"><b>' + esc(q.pregunta) + '</b><em>Tú: ' + esc(q.respuesta) + '</em></div>').join("") : '');
+      (H.length ? '<div class="duGrupo">Ya resueltas</div>' + H.map(q => '<div class="duHecha"><b>' + esc(limpia(q)) + '</b><em>Tú: ' + esc(q.respuesta) + '</em><button type="button" class="duCorr" data-c="' + esc(q.id) + '">Corregir</button></div>').join("") : '');
+    cuerpo.querySelectorAll(".duCorr").forEach(b => b.addEventListener("click", () => abre(b.dataset.c)));
     cuerpo.querySelectorAll(".duBtn").forEach(b => b.addEventListener("click", () => abre(b.dataset.id)));
     cuerpo.querySelectorAll("[data-o]").forEach(b => b.addEventListener("click", () => {
       const t = saber[+b.dataset.o]; if(t == null) return;
