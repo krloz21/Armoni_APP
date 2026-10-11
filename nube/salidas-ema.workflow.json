@@ -110,7 +110,8 @@
           "id": "pgk4uKXwaEEnuyRO",
           "name": "Notion account"
         }
-      }
+      },
+      "executeOnce": true
     },
     {
       "parameters": {
@@ -141,7 +142,8 @@
           "id": "pgk4uKXwaEEnuyRO",
           "name": "Notion account"
         }
-      }
+      },
+      "executeOnce": true
     },
     {
       "parameters": {

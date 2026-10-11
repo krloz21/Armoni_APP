@@ -175,7 +175,8 @@
           "id": "pgk4uKXwaEEnuyRO",
           "name": "Notion account"
         }
-      }
+      },
+      "executeOnce": true
     },
     {
       "parameters": {
@@ -188,7 +189,8 @@
         -180
       ],
       "id": "a1000000-0000-4000-8000-000000000014",
-      "name": "Decidir lugar"
+      "name": "Decidir lugar",
+      "executeOnce": true
     },
     {
       "parameters": {
