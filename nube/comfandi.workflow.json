@@ -1,0 +1,158 @@
+{
+  "name": "Comfandi: planes y avisos",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "comfandi",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "c0f00000-0000-4000-8000-000000000001",
+      "name": "Webhook",
+      "webhookId": "c0f00000-0000-4000-8000-0000000000aa"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "40 7,18 * * *"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        220
+      ],
+      "id": "c0f00000-0000-4000-8000-000000000002",
+      "name": "Cada día"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Revisa los eventos y hoteles de Comfandi, guarda lo que ya vio y avisa al celular cuando sale algo nuevo.\n// Corre sola dos veces al día (Cada día) y también cuando Armoni abre Salidas Ema (Webhook).\nconst sd = $getWorkflowStaticData('global');\nconst http = (o) => this.helpers.httpRequest(o);\nconst AHORA = Date.now();\nconst FUENTES = [\n  { url: 'https://comfandivirtual.com.co/167-eventos-y-actividades', grupo: 'eventos' },\n  { url: 'https://comfandivirtual.com.co/1281-hoteles', grupo: 'hoteles' }\n];\nconst NO_QUIERO = /pasad[ií]a/i;   // pasadías no\nconst PARA_EMA = /ni[ñn]|infantil|kids|familia|beb[eé]|t[ií]teres|did[aá]ctic|musical|teatro|cuento|t[ií]teres|vacacional|recreaci|granja|parque|circo|magia|navide/i;\n\nlet esWeb = false;\ntry { esWeb = !!$('Webhook').first(); } catch (e) {}\nif (esWeb) {\n  const q = $('Webhook').first().json.query || {};\n  if (q.token !== 'mercado-7d41c2a9e05b') return [{ json: { ok: false } }];\n}\n\nconst limpia = (t) => String(t || '').replace(/<[^>]*>/g, ' ').replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/&#0?39;|&apos;/g, \"'\").replace(/&quot;/g, '\"').replace(/\\s+/g, ' ').trim();\nconst absoluta = (u) => !u ? '' : u.startsWith('//') ? 'https:' + u : u.startsWith('/') ? 'https://comfandivirtual.com.co' + u : u;\n\n// PrestaShop devuelve el listado en JSON cuando se le pide como lo hace su propia página\nfunction deJSON(j) {\n  const ps = (j && (j.products || (j.listing && j.listing.products))) || [];\n  return ps.map(p => ({\n    id: String(p.id_product || p.id || p.url),\n    nombre: limpia(p.name),\n    url: absoluta(p.url || p.link),\n    img: absoluta((p.cover && ((p.cover.bySize && (p.cover.bySize.home_default || p.cover.bySize.medium_default)) || p.cover.medium || p.cover.large || {}).url) || ''),\n    precio: limpia(p.price || ''),\n    detalle: limpia(p.description_short || '').slice(0, 180)\n  }));\n}\n// si no llega JSON, se lee el HTML de las tarjetas de producto\nfunction deHTML(html) {\n  const out = [];\n  const partes = String(html || '').split(/<article\\b/i).slice(1);\n  for (const a of partes) {\n    if (!/product-miniature|js-product|product_item|product-item/i.test(a.slice(0, 400))) continue;\n    const id = (a.match(/data-id-product=\"(\\d+)\"/) || [])[1];\n    const url = (a.match(/href=\"(https?:\\/\\/[^\"]+?\\.html[^\"]*)\"/i) || [])[1] || '';\n    let nombre = (a.match(/class=\"[^\"]*product-title[^\"]*\"[^>]*>([\\s\\S]*?)<\\/(?:h\\d|div|p)>/i) || [])[1] || (a.match(/\\balt=\"([^\"]+)\"/i) || [])[1] || '';\n    const img = (a.match(/data-full-size-image-url=\"([^\"]+)\"/i) || a.match(/data-src=\"([^\"]+)\"/i) || a.match(/<img[^>]+src=\"([^\"]+)\"/i) || [])[1] || '';\n    const precio = (a.match(/class=\"[^\"]*\\bprice\\b[^\"]*\"[^>]*>([\\s\\S]*?)<\\/span>/i) || [])[1] || '';\n    nombre = limpia(nombre);\n    if (!nombre || !url) continue;\n    out.push({ id: id || url, nombre, url, img: absoluta(img), precio: limpia(precio), detalle: '' });\n  }\n  return out;\n}\n\nasync function leerFuente(f) {\n  const todos = [];\n  for (let pag = 1; pag <= 4; pag++) {\n    const u = f.url + '?page=' + pag;\n    let lote = [], total = 1;\n    try {\n      const r = await http({ url: u + '&from-xhr', headers: { 'Accept': 'application/json, text/javascript, */*; q=0.01', 'X-Requested-With': 'XMLHttpRequest', 'User-Agent': 'Mozilla/5.0 (Armoni)' }, json: true, timeout: 20000 });\n      const j = typeof r === 'string' ? JSON.parse(r) : r;\n      lote = deJSON(j);\n      total = (j && j.pagination && j.pagination.pages_count) || 1;\n    } catch (e) {}\n    if (!lote.length) {\n      const html = await http({ url: u, headers: { 'User-Agent': 'Mozilla/5.0 (Armoni)', 'Accept': 'text/html' }, timeout: 20000 });\n      lote = deHTML(html);\n      const m = String(html).match(/[?&]page=(\\d+)[^\"]*\"[^>]*>\\s*(\\d+)\\s*</g);\n      total = m ? Math.max(1, ...m.map(x => +((x.match(/>\\s*(\\d+)/) || [])[1] || 1))) : 1;\n    }\n    lote.forEach(p => { if (!todos.find(x => x.id === p.id)) todos.push(p); });\n    if (pag >= total || !lote.length) break;\n  }\n  return todos.map(p => ({ ...p, grupo: f.grupo }));\n}\n\nconst hace = (h) => AHORA - h * 3600 * 1000;\nconst fresco = sd.revisado && sd.revisado > hace(6);\nlet errores = [];\nif (!esWeb || !fresco || !sd.planes) {\n  const encontrados = [];\n  for (const f of FUENTES) {\n    try { encontrados.push(...await leerFuente(f)); }\n    catch (e) { errores.push(f.grupo + ': ' + (e.message || 'no se pudo leer')); }\n  }\n  const sirven = encontrados.filter(p => !NO_QUIERO.test(p.nombre + ' ' + p.url));\n  if (sirven.length || !errores.length) {\n    const vistos = sd.vistos || {};\n    const primeraVez = !sd.revisado;\n    const nuevos = [];\n    for (const p of sirven) {\n      if (!vistos[p.id]) { vistos[p.id] = AHORA; if (!primeraVez) nuevos.push(p); }\n      p.desde = vistos[p.id];\n      p.paraEma = p.grupo === 'eventos' && PARA_EMA.test(p.nombre + ' ' + p.detalle);\n    }\n    // olvida lo que ya no está publicado desde hace más de 60 días\n    const ids = new Set(sirven.map(p => p.id));\n    for (const k of Object.keys(vistos)) if (!ids.has(k) && vistos[k] < hace(24 * 60)) delete vistos[k];\n    sd.vistos = vistos; sd.planes = sirven; sd.revisado = AHORA;\n\n    // aviso al celular (solo con lo nuevo y solo una vez por plan)\n    if (nuevos.length) {\n      const uno = nuevos[0];\n      const titulo = nuevos.length === 1 ? (uno.grupo === 'hoteles' ? '🏨 Nuevo plan para ustedes' : (uno.paraEma ? '🎈 Nuevo plan para Ema' : '🎭 Nuevo en Comfandi')) : '✨ ' + nuevos.length + ' planes nuevos en Comfandi';\n      const cuerpo = nuevos.length === 1 ? uno.nombre + (uno.precio ? ' · ' + uno.precio : '') : nuevos.slice(0, 3).map(p => p.nombre).join(' · ');\n      try { await http({ method: 'POST', url: 'http://localhost:5678/webhook/push-enviar', body: { token: 'mercado-7d41c2a9e05b', title: titulo, body: cuerpo, url: './?ver=ema', tag: 'comfandi' }, json: true, timeout: 15000 }); }\n      catch (e) { errores.push('aviso: ' + (e.message || 'no salió')); }\n    }\n  }\n}\nsd.errores = errores;\nconst planes = (sd.planes || []).slice().sort((a, b) => (b.desde || 0) - (a.desde || 0));\nreturn [{ json: { web: esWeb, ok: true, revisado: sd.revisado ? new Date(sd.revisado).toISOString() : null, planes, errores } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        260,
+        100
+      ],
+      "id": "c0f00000-0000-4000-8000-000000000003",
+      "name": "Revisar Comfandi"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "w1",
+              "leftValue": "={{ $json.web }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        520,
+        100
+      ],
+      "id": "c0f00000-0000-4000-8000-000000000004",
+      "name": "¿Lo pidió Armoni?"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        780,
+        0
+      ],
+      "id": "c0f00000-0000-4000-8000-000000000005",
+      "name": "Responder"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Revisar Comfandi",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cada día": {
+      "main": [
+        [
+          {
+            "node": "Revisar Comfandi",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Revisar Comfandi": {
+      "main": [
+        [
+          {
+            "node": "¿Lo pidió Armoni?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Lo pidió Armoni?": {
+      "main": [
+        [
+          {
+            "node": "Responder",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "America/Bogota"
+  },
+  "tags": []
+}
