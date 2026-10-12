@@ -3233,7 +3233,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-12.157";
+const APP_VERSION = "2026-10-12.158";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -7535,7 +7535,7 @@ const Cine = (function(){
     pide({ accion: "cartelera", forzar: !!forzar })
       .then(j => {
         const viejo = {}; ((datos && datos.peliculas) || []).forEach(p => { viejo[p.clave] = p; });
-        datos = { t: Date.now(), porCine: j.porCine || [], peliculas: (j.peliculas || []).map(p => Object.assign({}, viejo[p.clave] && viejo[p.clave].enr ? viejo[p.clave] : {}, p)) };
+        datos = { t: Date.now(), porCine: j.porCine || [], conClave: !!j.conClave, tmdbError: j.tmdbError || "", peliculas: (j.peliculas || []).map(p => Object.assign({}, viejo[p.clave] && viejo[p.clave].enr ? viejo[p.clave] : {}, p)) };
         guarda();
       })
       .catch(e => { error = true; errDet = e && e.detalle ? e.detalle : ""; })
@@ -7551,7 +7551,7 @@ const Cine = (function(){
     pide({ accion: "calificar", titulos: sin.map(p => p.titulo).slice(0, 20) })
       .then(j => {
         let hubo = false;
-        datos.peliculas.forEach(p => { const x = j.datos && j.datos[p.clave]; if(x){ Object.assign(p, x, { enr: true }); hubo = true; } });
+        datos.peliculas.forEach(p => { const x = j.datos && j.datos[p.clave]; if(x){ Object.keys(x).forEach(k => { const v = x[k]; if(v != null && v !== "" && !(Array.isArray(v) && !v.length)) p[k] = v; }); p.enr = true; hubo = true; } });
         if(hubo){
           datos.peliculas.sort((a, b) => (b.score == null ? -1 : b.score) - (a.score == null ? -1 : a.score) || b.cines.length - a.cines.length);
           guarda(); pinta();
@@ -7561,7 +7561,7 @@ const Cine = (function(){
       .finally(() => { calificando = false; });
   }
 
-  const badgesCines = p => (p.cines || []).map(id => '<i>' + esc(SIGLA[id] || id) + '</i>').join("");
+  const badgesCines = p => (p.cines || []).length ? p.cines.map(id => '<i>' + esc(SIGLA[id] || id) + '</i>').join("") : '<i>Cartelera en Colombia</i>';
   const poster = (p, cls) => '<div class="' + cls + '" style="--c1:' + colorDe(p.titulo)[0] + ';--c2:' + colorDe(p.titulo)[1] + '"><div class="cnTile">' + esc(p.titulo) + '</div>' +
     (p.poster ? '<img src="' + esc(p.poster) + '" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="window.__cineImgFalla(this.src);this.remove()">' : '') + '</div>';
 
@@ -7590,6 +7590,8 @@ const Cine = (function(){
       '<div class="cnPie">' + (error ? '<p class="cnNota">No pude actualizar ahora; te muestro lo último que leí.' + detalleDe({ detalle: errDet }) + '</p>' : '') +
         '<div class="cnEstado">' + estado + '</div>' +
         '<button type="button" class="cnBtn" data-a="actualizar"' + (cargando ? ' disabled' : '') + '>' + (cargando ? 'Leyendo los cines…' : 'Actualizar cartelera') + '</button>' +
+        (datos.conClave ? '' : '<div class="cnClave"><b>Pósters y lista completa (clave gratis)</b><br>Las páginas de los cines bloquean las lecturas automáticas. Con una clave gratis de TMDB salen los pósters y todas las películas en cartelera en Colombia:<br>1) Crea una cuenta en themoviedb.org · 2) Configuración › API › pide la clave · 3) pégala aquí.<input id="cnK" type="password" autocomplete="off" placeholder="Pega aquí tu clave de TMDB"><button type="button" class="cnBtn" data-a="clave" style="margin-top:8px">Guardar clave</button></div>') +
+        (datos.tmdbError ? '<p class="cnNota">TMDB respondió con error: ' + esc(datos.tmdbError) + '. Revisa la clave.</p>' : '') +
         '<details class="cnTec"><summary>Detalle técnico</summary><pre>' + esc(informe().slice(0, 4500)) + '</pre></details>' +
         '<button type="button" class="cnBtn" data-a="informe">Copiar informe técnico</button>' +
         '<p class="cnNota">Armoni lee las páginas de los cines: confirma los horarios en su página antes de ir.</p></div>';
@@ -7638,17 +7640,18 @@ const Cine = (function(){
       const fecha = masDias(n), ho = $("cnHo");
       const pintaH = j => {
         ho.innerHTML = j.cines.map(c => {
-          const link = c.url ? '<a href="' + esc(c.url) + '" target="_blank" rel="noopener noreferrer">Ver en su página</a>' : '';
+          const link = c.url ? '<a href="' + esc(c.url) + '" target="_blank" rel="noopener noreferrer">' + (c.estado === "sin_enlace" ? 'Ver cartelera' : 'Ver en su página') + '</a>' : '';
           const cuerpoC = c.estado === "ok"
             ? c.sedes.map(s => '<div class="cnSede"><span>' + esc(s.sede) + '</span><div class="cnHoras">' + s.horarios.map(h => '<i>' + esc(h.hora) + (h.formato || h.idioma ? '<small>' + esc([h.formato, h.idioma].filter(Boolean).join(" · ")) + '</small>' : '') + '</i>').join("") + '</div></div>').join("")
             : c.estado === "no_esta" ? '<p class="cnVacio">No está en la cartelera de este cine en Cali.</p>'
+            : c.estado === "sin_enlace" ? '<p class="cnVacio">No pude ubicar esta película en la página de este cine. Mira su cartelera.</p>'
             : '<p class="cnVacio">' + (c.estado === "no_leida" ? 'No pude abrir su página ahora.' : 'No pude leer los horarios de este día.') + ' Míralos en su página.</p>';
           return '<div class="cnCine' + (c.estado === "no_esta" ? ' no' : '') + '"><b>' + esc(c.cine) + link + '</b>' + cuerpoC + (c.nota ? '<p class="cnNota">' + esc(c.nota) + '</p>' : '') + '</div>';
         }).join("");
       };
       if(memo[fecha]){ pintaH(memo[fecha]); return; }
       ho.innerHTML = pensando("Leyendo las funciones en Cine Colombia, Cinépolis y Cinemark…");
-      pide({ accion: "horarios", titulo: p.titulo, fecha, urls: p.urls || {} }).then(j => { memo[fecha] = j; if(vivo && diaActivo() === n) pintaH(j); })
+      pide({ accion: "horarios", titulo: p.titulo, fecha, urls: p.urls || {}, cines: p.cines || [] }).then(j => { memo[fecha] = j; if(vivo && diaActivo() === n) pintaH(j); })
         .catch(e => { if(vivo && diaActivo() === n) ho.innerHTML = fallo("No pude traer los horarios ahora.", "ho", e); });
     };
     scrim.addEventListener("click", e => {
@@ -7667,6 +7670,12 @@ const Cine = (function(){
     if(c){ const p = datos && datos.peliculas[+c.dataset.i]; if(p) detalle(p); return; }
     const a = e.target.closest("[data-a]"); if(!a) return;
     if(a.dataset.a === "reintentar" || a.dataset.a === "actualizar") refresh(true);
+    else if(a.dataset.a === "clave"){
+      const k = (document.getElementById("cnK").value || "").trim(); if(!k) return;
+      a.disabled = true; a.textContent = "Guardando…";
+      pide({ accion: "clave", clave: k }, 20000).then(j => { if(!j.conClave){ a.disabled = false; a.textContent = "La clave no parece válida. Revisa y pégala de nuevo"; return; } if(datos) datos.conClave = true; refresh(true); })
+        .catch(() => { a.disabled = false; a.textContent = "No se pudo guardar. Inténtalo de nuevo"; });
+    }
     else if(a.dataset.a === "informe"){
       const txt = informe();
       const listo = () => { a.textContent = "Informe copiado: pégalo en el chat"; };
