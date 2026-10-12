@@ -11,7 +11,7 @@ self.addEventListener("message", e => { if(e.data === "limpiar") e.waitUntil(cac
 /* imágenes de Comfandi y la librería de la torta 3D: se muestran al instante desde el teléfono y se
    actualizan por detrás (si la red falla o Comfandi cambia algo, la imagen guardada no desaparece) */
 const CACHE_EXT = "armoni-ext";
-const EXTERNOS = /(^|\.)comfandivirtual\.com\.co$|(^|\.)comfandi\.com\.co$|^cdnjs\.cloudflare\.com$|^fonts\.(googleapis|gstatic)\.com$|^image\.tmdb\.org$/;
+const EXTERNOS = /(^|\.)comfandivirtual\.com\.co$|(^|\.)comfandi\.com\.co$|^cdnjs\.cloudflare\.com$|^fonts\.(googleapis|gstatic)\.com$|^image\.tmdb\.org$|^upload\.wikimedia\.org$/;
 async function recorta(cache, max){ const k = await cache.keys(); for(let i = 0; i < k.length - max; i++) await cache.delete(k[i]); }
 self.addEventListener("fetch", e => {
   const r = e.request, u = new URL(r.url);

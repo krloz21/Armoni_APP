@@ -3222,7 +3222,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-12.151";
+const APP_VERSION = "2026-10-12.153";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -7477,31 +7477,85 @@ const Cine = (function(){
   const esc = t => String(t == null ? "" : t).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
   const COLORES = [["#3987e5", "#9085e9"], ["#199e70", "#2bb3c0"], ["#d55181", "#e0a030"], ["#9085e9", "#d55181"], ["#2bb3c0", "#3987e5"], ["#e66767", "#e0a030"]];
   const colorDe = t => { let h = 0; for(const c of String(t)) h = (h * 31 + c.charCodeAt(0)) >>> 0; return COLORES[h % COLORES.length]; };
-  let datos = null, filtro = "todas", cargando = false, error = false;
+  let datos = null, filtro = "todas", cargando = false, error = false, errDet = "";
   try{ const d = JSON.parse(localStorage.getItem(KEY)); if(d && Array.isArray(d.peliculas)) datos = d; }catch{}
   const guarda = () => { try{ localStorage.setItem(KEY, JSON.stringify(datos)); }catch{} };
   const hoyISO = () => { const d = new Date(); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); };
   const masDias = n => { const d = new Date(); d.setDate(d.getDate() + n); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); };
   const etiquetaDia = n => n === 0 ? "Hoy" : n === 1 ? "Mañana" : (() => { const d = new Date(); d.setDate(d.getDate() + n); return d.toLocaleDateString("es-CO", { weekday: "short", day: "numeric" }).replace(".", ""); })();
 
-  /* la búsqueda en la web tarda (medio minuto o más): se espera con calma y se corta si de verdad no responde */
+  /* la búsqueda en la web tarda: el flujo contesta enseguida «estoy buscando» y aquí se pregunta cada 3 s hasta que esté lista
+     (así no depende de que la conexión aguante abierta). «forzar» solo viaja en la primera pregunta. */
   async function pide(c, ms){
-    const ctl = new AbortController(), t = setTimeout(() => ctl.abort(), ms || 150000);
+    const fin = Date.now() + (ms || 240000);
+    let primera = true, fallas = 0;
+    for(;;){
+      const ctl = new AbortController(), t = setTimeout(() => ctl.abort(), 25000);
+      let j = null;
+      try{
+        const cuerpo = Object.assign({ token: MERCADO_TOKEN }, c); if(!primera) delete cuerpo.forzar;
+        const r = await fetch(CINE_URL, { method: "POST", body: JSON.stringify(cuerpo), signal: ctl.signal });
+        j = await r.json().catch(() => null);
+        if(!r.ok || !j) throw new Error("http");
+        fallas = 0;
+      }catch(e){ if(++fallas >= 3) throw e; }
+      finally{ clearTimeout(t); }
+      primera = false;
+      if(j){
+        if(j.ok === false){ const e = new Error(j.error || "ia"); e.detalle = j.detalle || ""; throw e; }
+        if(!j.pendiente) return j;
+      }
+      if(Date.now() > fin) throw new Error("tarde");
+      await new Promise(r => setTimeout(r, 3000));
+    }
+  }
+  const detalleDe = e => e && e.detalle ? '<br><small>' + esc(String(e.detalle).slice(0, 160)) + '</small>' : '';
+
+  /* pósters: si el flujo no trae uno (no hay clave de TMDB), se busca en Wikipedia, que no pide clave: la portada de la ficha de la película es su póster */
+  const KSP = "armoni.cine.sinposter";
+  let sinPoster = {}; try{ sinPoster = JSON.parse(localStorage.getItem(KSP)) || {}; }catch{}
+  const sinTilde = t => String(t || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  async function buscaPoster(p){
+    const q = String(p.original || p.titulo).replace(/[:·]/g, " ").replace(/\s+/g, " ").trim();
+    const ctl = new AbortController(), t = setTimeout(() => ctl.abort(), 12000);
     try{
-      const r = await fetch(CINE_URL, { method: "POST", body: JSON.stringify(Object.assign({ token: MERCADO_TOKEN }, c)), signal: ctl.signal });
-      const j = await r.json().catch(() => null);
-      if(!r.ok || !j || j.ok === false) throw new Error((j && j.error) || "http");
-      return j;
+      const r = await fetch("https://en.wikipedia.org/w/api.php?action=query&format=json&origin=*&generator=search&gsrlimit=4&prop=pageimages&piprop=thumbnail&pithumbsize=420&gsrsearch=" + encodeURIComponent(q + " film"), { signal: ctl.signal });
+      const j = await r.json();
+      const norm = x => sinTilde(x).replace(/[^a-z0-9 ]/g, " ").replace(/\s+/g, " ").trim();
+      const palabras = norm(q).split(" ").filter(w => w.length > 2).slice(0, 2);
+      const pags = Object.values((j.query && j.query.pages) || {}).sort((a, b) => a.index - b.index);
+      const hit = pags.find(pg => pg.thumbnail && palabras.length && palabras.every(w => norm(pg.title).includes(w)));
+      return hit ? hit.thumbnail.source : null;
     } finally { clearTimeout(t); }
+  }
+  let buscandoP = false;
+  async function traePosters(){
+    if(buscandoP || !datos) return;
+    buscandoP = true;
+    try{
+      const falta = datos.peliculas.map((p, k) => [p, k]).filter(([p]) => !p.poster && !(sinPoster[p.id] && Date.now() - sinPoster[p.id] < 3 * 864e5));
+      for(let i = 0; i < falta.length; i += 3){
+        await Promise.all(falta.slice(i, i + 3).map(async ([p, k]) => {
+          let url = null; try{ url = await buscaPoster(p); }catch{ return; }
+          if(url){ p.poster = url; guarda(); ponPoster(k, url); }
+          else { sinPoster[p.id] = Date.now(); try{ localStorage.setItem(KSP, JSON.stringify(sinPoster)); }catch{} }
+        }));
+      }
+    } finally { buscandoP = false; }
+  }
+  function ponPoster(k, url){
+    const c = cuerpo.querySelector('.cnCard[data-i="' + k + '"]'); if(!c || c.querySelector("img")) return;
+    const im = document.createElement("img"); im.alt = ""; im.loading = "lazy"; im.onerror = () => im.remove(); im.src = url;
+    c.insertBefore(im, c.querySelector(".cnScore, .cnEncaja, .cnVelo"));
   }
 
   function refresh(forzar){
     if(datos && !forzar){ pinta(); if(Date.now() - (datos.t || 0) < TTL) return; } else pinta();
     if(cargando) return;
-    cargando = true; error = false; if(datos) pinta();
-    pide({ accion: "cartelera", forzar: !!forzar }, 170000)
+    cargando = true; error = false; errDet = ""; if(datos) pinta();
+    pide({ accion: "cartelera", forzar: !!forzar })
       .then(j => { datos = { t: Date.now(), peliculas: j.peliculas || [], conClave: !!j.conClave }; guarda(); })
-      .catch(() => { error = true; })
+      .catch(e => { error = true; errDet = e && e.detalle ? e.detalle : ""; })
       .finally(() => { cargando = false; pinta(); });
   }
 
@@ -7511,7 +7565,7 @@ const Cine = (function(){
   function pinta(){
     if(!datos){
       cuerpo.innerHTML = error
-        ? '<div class="cnErr">No pude traer la cartelera. Revisa que tengas internet y que el computador de la casa esté prendido.<button type="button" class="cnBtn" data-a="reintentar">Reintentar</button></div>'
+        ? '<div class="cnErr">No pude traer la cartelera. Revisa que tengas internet y que el computador de la casa esté prendido.' + (errDet ? '<br><small>' + esc(errDet.slice(0, 160)) + '</small>' : '') + '<button type="button" class="cnBtn" data-a="reintentar">Reintentar</button></div>'
         : '<p class="cnMsg">Armoni está mirando la cartelera de Cali… puede tardar un minuto.</p><div class="cnCarga" aria-hidden="true">' + '<div class="cnEsq"></div>'.repeat(6) + '</div>';
       return;
     }
@@ -7529,8 +7583,9 @@ const Cine = (function(){
       grid +
       '<div class="cnPie">' + (error ? '<p class="cnNota">No pude actualizar ahora; te muestro lo último que vi.</p>' : '') +
         '<button type="button" class="cnBtn" data-a="actualizar"' + (cargando ? ' disabled' : '') + '>' + (cargando ? 'Buscando en la web…' : 'Actualizar cartelera') + '</button>' +
-        (datos.conClave ? '' : '<div class="cnClave"><b>Pósters (opcional)</b><br>Con una clave gratis de TMDB (themoviedb.org › Configuración › API) salen los pósters y más puntajes.<input id="cnK" type="password" autocomplete="off" placeholder="Pega aquí tu clave de TMDB"><button type="button" class="cnBtn" data-a="clave" style="margin-top:8px">Guardar clave</button></div>') +
+        (datos.conClave ? '' : '<div class="cnClave"><b>Más pósters y puntajes (opcional)</b><br>Si algún póster no sale, una clave gratis de TMDB (themoviedb.org › Configuración › API) los completa.<input id="cnK" type="password" autocomplete="off" placeholder="Pega aquí tu clave de TMDB"><button type="button" class="cnBtn" data-a="clave" style="margin-top:8px">Guardar clave</button></div>') +
         '<p class="cnNota">Armoni busca en la web: confirma los horarios en la página del cine antes de ir.</p></div>';
+    traePosters();
   }
 
   /* detalle de una película: ¿vale la pena? y horarios en los 3 cines */
@@ -7557,7 +7612,7 @@ const Cine = (function(){
     $("cnX").addEventListener("click", cierra);
 
     const pensando = t => '<div class="cnPensando"><span class="dot"></span>' + t + '</div>';
-    const fallo = (t, a) => '<div class="cnErr">' + t + '<button type="button" class="cnBtn" data-r="' + a + '">Reintentar</button></div>';
+    const fallo = (t, a, e) => '<div class="cnErr">' + t + detalleDe(e) + '<button type="button" class="cnBtn" data-r="' + a + '">Reintentar</button></div>';
     const opinion = () => {
       $("cnOp").innerHTML = pensando("Revisando reseñas y lo que se dice… puede tardar un poco.");
       pide({ accion: "opinion", titulo: p.titulo }).then(j => {
@@ -7567,7 +7622,7 @@ const Cine = (function(){
         $("cnOp").innerHTML = '<div class="cnVeredicto"><span class="cnVd ' + esc(j.veredicto) + '">' + nom + '</span><b>' + esc(j.titular) + '</b><p>' + esc(j.resumen) + '</p>' +
           ((j.razones || []).length ? '<ul>' + j.razones.map(r => '<li>' + esc(r) + '</li>').join("") + '</ul>' : '') +
           '<div class="cnPuntajes">' + pt("Críticos", j.critica) + pt("Público", j.publico) + '<span>Se habla ' + esc(j.buzz) + '</span>' + (j.superoExpectativas ? '<span>Superó expectativas</span>' : '') + '</div></div>';
-      }).catch(() => { if(vivo) $("cnOp").innerHTML = fallo("No pude revisarla ahora.", "op"); });
+      }).catch(e => { if(vivo) $("cnOp").innerHTML = fallo("No pude revisarla ahora.", "op", e); });
     };
     const memo = {};
     const horarios = n => {
@@ -7580,7 +7635,7 @@ const Cine = (function(){
       if(memo[fecha]){ pinta(memo[fecha]); return; }
       ho.innerHTML = pensando("Buscando funciones en Cine Colombia, Cinépolis y Cinemark…");
       pide({ accion: "horarios", titulo: p.titulo, fecha }).then(j => { memo[fecha] = j; if(vivo && scrim.querySelector(".cnChip.on[data-d]").dataset.d == n) pinta(j); })
-        .catch(() => { if(vivo && scrim.querySelector(".cnChip.on[data-d]").dataset.d == n) ho.innerHTML = fallo("No pude traer los horarios ahora.", "ho"); });
+        .catch(e => { if(vivo && scrim.querySelector(".cnChip.on[data-d]").dataset.d == n) ho.innerHTML = fallo("No pude traer los horarios ahora.", "ho", e); });
     };
     scrim.addEventListener("click", e => {
       const d = e.target.closest("[data-d]");
