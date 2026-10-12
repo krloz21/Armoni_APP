@@ -9,30 +9,32 @@ $redes = @(($json | ConvertFrom-Json).PSObject.Properties.Name | Where-Object { 
 $Red = $redes[0]
 Write-Host ('Red: ' + $Red)
 
-function Prueba($ruta, $url) {
+function Prueba($ruta, $url, $extra, $patron) {
     Write-Host ''
     Write-Host ('>> ' + $ruta + '  ->  ' + $url) -ForegroundColor Cyan
-    $cuerpo = '{"url":"' + $url + '","gotoOptions":{"waitUntil":"networkidle2","timeout":30000},"bestAttempt":true}'
-    $tmp = Join-Path $env:TEMP 'cc_prueba.html'
-    $codigo = $cuerpo | docker run --rm -i --network $Red $ImagenCurl -s -o - -w '\n__CODIGO__%{http_code}' --max-time 70 -X POST -H 'Content-Type: application/json' --data-binary '@-' ('http://browserless:3000' + $ruta) 2>&1 | Out-String
+    $cuerpo = '{"url":"' + $url + '","gotoOptions":{"waitUntil":"networkidle2","timeout":40000},"waitForTimeout":9000,"bestAttempt":true' + $extra + '}'
+    $codigo = $cuerpo | docker run --rm -i --network $Red $ImagenCurl -s -o - -w '\n__CODIGO__%{http_code}' --max-time 90 -X POST -H 'Content-Type: application/json' --data-binary '@-' ('http://browserless:3000' + $ruta) 2>&1 | Out-String
     $m = [regex]::Match($codigo, '__CODIGO__(\d+)\s*$')
     $http = if ($m.Success) { $m.Groups[1].Value } else { '???' }
     $html = [regex]::Replace($codigo, '__CODIGO__\d+\s*$', '')
-    Set-Content -Path $tmp -Value $html -Encoding UTF8
     $titulo = [regex]::Match($html, '<title[^>]*>([^<]*)</title>', 'IgnoreCase').Groups[1].Value.Trim()
-    $films = [regex]::Matches($html, '/films/[a-z0-9\-]+/', 'IgnoreCase').Count
-    $bloqueo = [regex]::IsMatch($html, 'just a moment|access denied|attention required|captcha|incapsula|unusual traffic|forbidden', 'IgnoreCase')
-    Write-Host ('   Respuesta HTTP del navegador: ' + $http)
-    Write-Host ('   Tamano de la pagina: ' + $html.Length + ' caracteres')
-    Write-Host ('   Titulo de la pagina: ' + $titulo)
-    Write-Host ('   Enlaces a peliculas (/films/): ' + $films)
-    if ($bloqueo) { Write-Host '   AVISO: la pagina parece un bloqueo anti-robots.' -ForegroundColor Yellow }
-    if ($films -ge 3 -and -not $bloqueo) { Write-Host '   RESULTADO: OK, Chrome si pudo leer Cine Colombia.' -ForegroundColor Green }
-    else { Write-Host '   RESULTADO: NO se pudo leer bien.' -ForegroundColor Red }
+    $films = [regex]::Matches($html, $patron, 'IgnoreCase').Count
+    $bloqueo = [regex]::IsMatch($titulo, 'just a moment|access denied|attention required|captcha|forbidden|denied', 'IgnoreCase')
+    Write-Host ('   HTTP: ' + $http + ' | tamano: ' + $html.Length + ' | titulo: ' + $titulo + ' | enlaces a peliculas: ' + $films)
+    if ($films -ge 3 -and -not $bloqueo) { Write-Host '   RESULTADO: OK' -ForegroundColor Green }
+    else { Write-Host '   RESULTADO: NO' -ForegroundColor Red }
 }
 
-Prueba '/content' 'https://www.cinecolombia.com/cali/cartelera'
-Prueba '/content' 'https://www.cinecolombia.com/'
-Prueba '/chromium/stealth/content' 'https://www.cinecolombia.com/cali/cartelera'
+$cc = 'https://www.cinecolombia.com/cali/cartelera'
+Write-Host '=== CINE COLOMBIA (3 formas) ===' -ForegroundColor Yellow
+Prueba '/content' $cc '' '/films/[a-z0-9\-]+/'
+Prueba '/content?stealth=true' $cc '' '/films/[a-z0-9\-]+/'
+Prueba '/content?stealth=true&headless=false' $cc '' '/films/[a-z0-9\-]+/'
+Write-Host ''
+Write-Host '=== CINEPOLIS ===' -ForegroundColor Yellow
+Prueba '/content' 'https://cinepolis.com.co/cartelera/cali-colombia' '' '/pelicula/[a-z0-9\-]+'
+Write-Host ''
+Write-Host '=== CINEMARK ===' -ForegroundColor Yellow
+Prueba '/content' 'https://www.cinemark.com.co/cartelera/cali' '' '/cartelera/cali/[a-z0-9\-]+'
 Write-Host ''
 Write-Host 'Copia todo lo que salio arriba y mandamelo.'
