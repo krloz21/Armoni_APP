@@ -2041,7 +2041,9 @@ button{ transition:transform var(--t-tap) var(--ease-out); }
 .emaMas{ flex:none; display:flex; flex-direction:column; align-items:center; gap:6px; padding:0; border:0; background:none; font:inherit; color:var(--ghost); cursor:pointer; -webkit-tap-highlight-color:transparent; }
 .emaMas .mas{ width:52px; height:52px; border-radius:18px; display:grid; place-items:center; color:#fff; background:linear-gradient(145deg, #ffb066, #ff7a4d); box-shadow:0 12px 26px -10px rgba(255,122,77,.85), inset 0 1px 0 rgba(255,255,255,.35); transition:transform .2s var(--ease-spring); }
 .emaMas .mas svg{ width:24px; height:24px; }
-.emaMas small{ font-size:.68rem; font-weight:700; letter-spacing:.02em; }
+.emaMas{ position:relative; }
+.emaMas small{ position:absolute; top:calc(100% + 6px); left:50%; transform:translateX(-50%); white-space:nowrap; font-size:.68rem; font-weight:700; letter-spacing:.02em; }
+.emaTop{ margin-bottom:12px; }
 .emaMas:active .mas{ transform:scale(.9); }
 .emaVacio{ margin:14px 0 0; font-size:.86rem; color:var(--dim); text-align:center; }
 .emaLugares{ display:flex; flex-direction:column; gap:10px; }
@@ -2454,7 +2456,7 @@ button{ transition:transform var(--t-tap) var(--ease-out); }
 .emaDetCab span{ font-weight:600; }
 .emaDetCab span::first-letter{ text-transform:uppercase; }
 .emaFrase{ font-size:.84rem; color:var(--dim); margin-top:2px; }
-.emaMes{ align-self:flex-start; margin-bottom:5px; padding:3px 10px; border-radius:999px; font-size:.68rem; font-weight:800; letter-spacing:.14em; text-transform:uppercase; color:#ffb066; background:rgba(255,138,80,.14); border:1px solid rgba(255,138,80,.28); }
+.emaMes{ display:inline-block; margin:0 0 12px; padding:3px 10px; border-radius:999px; font-size:.68rem; font-weight:800; letter-spacing:.14em; text-transform:uppercase; color:#ffb066; background:rgba(255,138,80,.14); border:1px solid rgba(255,138,80,.28); }
 .emaTx b.emaCuenta{ margin-top:0; font-size:1.3rem; line-height:1.15; }
 .emaDetCab b{ font-size:1.02rem; }
 .emaGastos{ margin-top:8px; }
@@ -3134,7 +3136,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-12.146";
+const APP_VERSION = "2026-10-12.147";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -5626,7 +5628,8 @@ const SalidasEma = (function(){
     const lug = lugares().sort((a, b) => (a.ultima ? diasDesde(a.ultima) : 9999) - (b.ultima ? diasDesde(b.ultima) : 9999));
     stage.innerHTML =
       '<div class="emaCard' + (anim ? ' emaEntra' : '') + '">' +
-        '<div class="emaTop"><span class="emaEmo" aria-hidden="true">' + FOTO_EMA + '</span><div class="emaTx"><span class="emaMes">' + esc(mesNombre(hoyM)) + '</span>' +
+        '<span class="emaMes">' + esc(mesNombre(hoyM)) + '</span>' +
+        '<div class="emaTop"><span class="emaEmo" aria-hidden="true">' + FOTO_EMA + '</span><div class="emaTx">' +
         '<b class="emaCuenta"><span class="emaN">' + act.veces + '</span> ' + (act.veces === 1 ? 'salida' : 'salidas') + '</b>' +
         '<span class="emaFrase">con Ema este mes</span></div>' +
         '<button type="button" class="emaMas" aria-label="Registrar salida"><span class="mas" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span><small>Registra salida</small></button></div>' +
