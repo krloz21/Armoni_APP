@@ -3226,7 +3226,7 @@ const MERCADO_MARCAR_URL = N8N + "/webhook/mercado-marcar";
 const MERCADO_COMPRADO_URL = N8N + "/webhook/mercado-comprado";
 const MERCADO_AGREGAR_URL = N8N + "/webhook/mercado-agregar";
 const MERCADO_EDITAR_URL = N8N + "/webhook/mercado-editar";
-const CINE_URL = N8N + "/webhook/cine";   // cartelera de Cali, horarios en los 3 cines y si vale la pena
+const CINE_URL = N8N + "/webhook/cine-v2";   // cartelera de Cali, horarios en los 3 cines y si vale la pena
 const AVISO_CANASTA_URL = N8N + "/webhook/aviso-canasta";   // qué productos son indispensables y el aviso diario
 const CANASTA_FECHAS_URL = N8N + "/webhook/canasta-fechas";   // desde cuándo está cada cosa en la canasta («Marcado el» en Notion)
 const MOVIMIENTO_URL = N8N + "/webhook/movimiento-nuevo";   // guarda un gasto/ingreso directo en Notion, sin IA
@@ -3268,7 +3268,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-12.171";
+const APP_VERSION = "2026-10-12.172";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
