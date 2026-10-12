@@ -3229,7 +3229,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-12.155";
+const APP_VERSION = "2026-10-12.156";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -7572,7 +7572,8 @@ const Cine = (function(){
         (p.score != null ? '<span class="cnScore' + nivel + '">' + p.score + '</span>' : '') + (p.encaja === "si" ? '<span class="cnEncaja">Para ustedes</span>' : '') +
         '<div class="cnVelo"><b>' + esc(p.titulo) + '</b><small>' + esc([(p.generos || [])[0], p.duracion ? p.duracion + " min" : ""].filter(Boolean).join(" · ")) + '</small><span class="cnCines">' + badgesCines(p) + '</span></div></button>';
     }).join("") + '</div>' : '<p class="cnMsg">' + (todas.length ? (calificando ? 'Armoni todavía está viendo cuáles encajan…' : 'Ninguna encaja del todo con ustedes este mes.') : 'No encontré películas en cartelera.') + '</p>';
-    const motivo = x => x.peliculas ? x.peliculas + ' películas' : x.leida ? 'abrió, pero no encontré películas' : 'no pude abrirlo' + (x.http ? ' (HTTP ' + x.http + ')' : x.error ? ' (' + String(x.error).slice(0, 40) + ')' : '');
+    const CAUSAS = { bloqueo_401: "bloqueó la lectura automática", bloqueo_403: "bloqueó la lectura automática", bloqueo_429: "limitó las lecturas (muchas seguidas)", desafio_antibot: "tiene protección anti-robots", pide_ciudad: "pide elegir ciudad", spa_vacio: "su página se arma con JavaScript", sin_senales: "su página no trae la cartelera", corto: "respondió casi vacío", timeout: "tardó demasiado", dns: "no se encontró su dirección", conexion_cortada: "se cortó la conexión", tls: "falló la conexión segura", ia_sin_peliculas: "abrió, pero no encontré películas", error_interno: "falló la lectura", sin_diag: "no se pudo leer", sin_respuesta: "no respondió" };
+    const motivo = x => { if(x.peliculas) return x.peliculas + ' películas'; const c = String(x.causa || "").split(">")[0]; return (CAUSAS[c] || (/^http_/.test(c) ? "respondió con error " + c.slice(5) : x.leida ? "abrió, pero no encontré películas" : "no pude abrirlo")) + (x.http && !/http_/.test(c) && x.http !== 200 ? " (HTTP " + x.http + ")" : ""); };
     const estado = (datos.porCine || []).map(x => '<span class="' + (x.peliculas ? 'ok' : 'mal') + '">' + esc(x.cine) + ' · ' + esc(motivo(x)) + (x.via === "lectura" ? ' · lectura renderizada' : '') + '</span>').join("");
     cuerpo.innerHTML =
       '<div class="cnFiltros" role="tablist"><button type="button" class="cnChip' + (filtro === "todas" ? " on" : "") + '" data-f="todas">Todas · ' + todas.length + '</button><button type="button" class="cnChip' + (filtro === "ustedes" ? " on" : "") + '" data-f="ustedes">Para ustedes · ' + todas.filter(p => p.encaja === "si").length + '</button></div>' +
