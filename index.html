@@ -3229,7 +3229,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-12.154";
+const APP_VERSION = "2026-10-12.155";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -7572,13 +7572,15 @@ const Cine = (function(){
         (p.score != null ? '<span class="cnScore' + nivel + '">' + p.score + '</span>' : '') + (p.encaja === "si" ? '<span class="cnEncaja">Para ustedes</span>' : '') +
         '<div class="cnVelo"><b>' + esc(p.titulo) + '</b><small>' + esc([(p.generos || [])[0], p.duracion ? p.duracion + " min" : ""].filter(Boolean).join(" · ")) + '</small><span class="cnCines">' + badgesCines(p) + '</span></div></button>';
     }).join("") + '</div>' : '<p class="cnMsg">' + (todas.length ? (calificando ? 'Armoni todavía está viendo cuáles encajan…' : 'Ninguna encaja del todo con ustedes este mes.') : 'No encontré películas en cartelera.') + '</p>';
-    const estado = (datos.porCine || []).map(x => '<span class="' + (x.peliculas ? 'ok' : 'mal') + '">' + esc(x.cine) + ' · ' + (x.peliculas ? x.peliculas + ' películas' : x.leida ? 'sin películas' : 'no pude abrirlo') + '</span>').join("");
+    const motivo = x => x.peliculas ? x.peliculas + ' películas' : x.leida ? 'abrió, pero no encontré películas' : 'no pude abrirlo' + (x.http ? ' (HTTP ' + x.http + ')' : x.error ? ' (' + String(x.error).slice(0, 40) + ')' : '');
+    const estado = (datos.porCine || []).map(x => '<span class="' + (x.peliculas ? 'ok' : 'mal') + '">' + esc(x.cine) + ' · ' + esc(motivo(x)) + (x.via === "lectura" ? ' · lectura renderizada' : '') + '</span>').join("");
     cuerpo.innerHTML =
       '<div class="cnFiltros" role="tablist"><button type="button" class="cnChip' + (filtro === "todas" ? " on" : "") + '" data-f="todas">Todas · ' + todas.length + '</button><button type="button" class="cnChip' + (filtro === "ustedes" ? " on" : "") + '" data-f="ustedes">Para ustedes · ' + todas.filter(p => p.encaja === "si").length + '</button></div>' +
       grid +
       '<div class="cnPie">' + (error ? '<p class="cnNota">No pude actualizar ahora; te muestro lo último que leí.' + detalleDe({ detalle: errDet }) + '</p>' : '') +
         '<div class="cnEstado">' + estado + '</div>' +
         '<button type="button" class="cnBtn" data-a="actualizar"' + (cargando ? ' disabled' : '') + '>' + (cargando ? 'Leyendo los cines…' : 'Actualizar cartelera') + '</button>' +
+        ((datos.porCine || []).some(x => !x.peliculas) ? '<button type="button" class="cnBtn" data-a="informe">Copiar informe técnico</button>' : '') +
         '<p class="cnNota">Armoni lee las páginas de los cines: confirma los horarios en su página antes de ir.</p></div>';
   }
 
@@ -7654,6 +7656,11 @@ const Cine = (function(){
     if(c){ const p = datos && datos.peliculas[+c.dataset.i]; if(p) detalle(p); return; }
     const a = e.target.closest("[data-a]"); if(!a) return;
     if(a.dataset.a === "reintentar" || a.dataset.a === "actualizar") refresh(true);
+    else if(a.dataset.a === "informe"){
+      const txt = "Informe Cine " + new Date().toISOString() + "\n" + JSON.stringify({ porCine: (datos && datos.porCine) || [], pelis: ((datos && datos.peliculas) || []).map(p => [p.titulo, (p.cines || []).join("+"), !!p.poster]) }, null, 1);
+      const listo = () => { a.textContent = "Informe copiado: pégalo en el chat"; };
+      try{ navigator.clipboard.writeText(txt).then(listo, () => { a.textContent = "No se pudo copiar"; }); }catch{ a.textContent = "No se pudo copiar"; }
+    }
   });
   return { refresh };
 })();
