@@ -2121,46 +2121,46 @@ button{ transition:transform var(--t-tap) var(--ease-out); }
 .prX{ position:absolute; top:-6px; right:-6px; width:44px; height:44px; display:grid; place-items:center; border:0; background:none; color:var(--dim); cursor:pointer; }
 .prX svg{ width:18px; height:18px; }
 .prX:active{ color:var(--strong); }
-.duResumen{ display:flex; align-items:center; gap:14px; padding:18px; margin-bottom:14px; border-radius:22px; border:1px solid var(--line); background:radial-gradient(120% 100% at 100% 0%, rgba(255,138,80,.22), transparent 60%), var(--panel); }
-.duResumen.ok{ background:radial-gradient(120% 100% at 100% 0%, rgba(25,158,112,.22), transparent 60%), var(--panel); }
-.duNum{ flex:none; display:grid; place-items:center; width:54px; height:54px; border-radius:18px; font-size:1.7rem; font-weight:700; font-variant-numeric:tabular-nums; color:#ffb066; background:rgba(255,138,80,.16); }
-.duResumen.ok .duNum{ color:#6fe0b5; background:rgba(25,158,112,.18); }
-.duResumen b{ display:block; font-size:1rem; color:var(--strong); }
-.duResumen span.t{ display:block; margin-top:2px; font-size:.82rem; color:var(--ghost); }
-.duLista{ display:grid; gap:12px; }
-.duCard{ padding:16px; border-radius:22px; border:1px solid var(--line); background:var(--panel); opacity:0; transform:translateY(8px); animation:duEntra .5s var(--ease-out) forwards; animation-delay:calc(var(--i,0) * 60ms); }
-@keyframes duEntra{ to{ opacity:1; transform:none; } }
-.duTag{ display:inline-block; margin-bottom:8px; padding:3px 9px; border-radius:20px; font-size:.68rem; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:#ffcf99; background:rgba(255,138,80,.14); }
-.duTag.dif{ color:var(--dim); background:rgba(var(--ink),.08); }
-.duCard h3{ margin:0 0 12px; font-size:1rem; font-weight:600; line-height:1.4; color:var(--strong); }
-.duBtn{ width:100%; min-height:46px; border:0; border-radius:14px; font:inherit; font-weight:700; color:#fff; background:linear-gradient(140deg,#ffb066,#ff8a50); cursor:pointer; transition:transform .2s var(--ease-spring); }
-.duBtn:active{ transform:scale(.97); }
-.duGrupo{ margin:22px 4px 10px; font-size:.7rem; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--dim); }
-.duHecha{ padding:12px 14px; border-radius:16px; background:rgba(var(--ink),.05); font-size:.84rem; color:var(--ghost); }
-.duHecha + .duHecha{ margin-top:8px; }
-.duHecha b{ display:block; margin-bottom:4px; font-weight:600; color:var(--white); }
-.duHecha em{ display:block; font-style:normal; color:#6fe0b5; }
-.duSaber{ display:grid; gap:8px; }
-.duHecho{ display:flex; align-items:flex-start; gap:10px; padding:11px 12px 11px 14px; border-radius:16px; background:rgba(var(--ink),.05); font-size:.84rem; line-height:1.4; color:var(--ghost); }
-.duHecho span{ flex:1; min-width:0; }
-.duHecho button{ flex:none; width:32px; height:32px; margin:-4px -4px -4px 0; border:0; border-radius:50%; background:none; color:var(--dim); font-size:.9rem; cursor:pointer; }
-.duTabs{ display:grid; grid-template-columns:1fr 1fr; gap:4px; padding:4px; margin-bottom:14px; border-radius:16px; background:rgba(var(--ink),.07); }
-.duTabs button{ min-height:42px; border:0; border-radius:12px; background:none; font:inherit; font-size:.9rem; font-weight:600; color:var(--dim); cursor:pointer; transition:background .25s ease, color .25s ease; }
-.duTabs button[aria-selected="true"]{ color:var(--strong); background:var(--panel); box-shadow:0 1px 6px rgba(0,0,0,.25); }
-.duTabs b{ display:inline-block; min-width:20px; margin-left:4px; padding:1px 6px; border-radius:10px; font-size:.72rem; color:#fff; background:linear-gradient(140deg,#ffb066,#ff8a50); }
-.duNota{ margin:0 4px 12px; font-size:.82rem; color:var(--ghost); }
-.duVacio{ margin:0; font-size:.84rem; color:var(--dim); }
-.duDesp{ margin-bottom:10px; border-radius:18px; border:1px solid var(--line); background:var(--panel); overflow:hidden; }
-.duDesp summary{ display:flex; align-items:center; gap:10px; min-height:52px; padding:0 16px; list-style:none; cursor:pointer; font-weight:600; color:var(--strong); }
-.duDesp summary::-webkit-details-marker{ display:none; }
-.duDesp summary span{ flex:1; }
-.duDesp summary i{ font-style:normal; font-size:.78rem; font-weight:700; color:var(--dim); }
-.duDesp summary svg{ width:18px; height:18px; color:var(--dim); transition:transform .35s var(--ease-out); }
-.duDesp[open] summary svg{ transform:rotate(90deg); }
-.duDespIn{ padding:0 12px 12px; }
-.duCorr{ margin-top:8px; padding:6px 12px; border-radius:10px; border:1px solid var(--line); background:none; font:inherit; font-size:.78rem; font-weight:600; color:var(--white); cursor:pointer; }
-.duBuscar{ display:block; width:100%; margin-top:16px; min-height:46px; border-radius:14px; border:1px solid var(--line); background:none; font:inherit; font-weight:600; color:var(--white); cursor:pointer; }
-.duBuscar:disabled{ opacity:.6; }
+.ddResumen{ display:flex; align-items:center; gap:14px; padding:18px; margin-bottom:14px; border-radius:22px; border:1px solid var(--line); background:radial-gradient(120% 100% at 100% 0%, rgba(255,138,80,.22), transparent 60%), var(--panel); }
+.ddResumen.ok{ background:radial-gradient(120% 100% at 100% 0%, rgba(25,158,112,.22), transparent 60%), var(--panel); }
+.ddNum{ flex:none; display:grid; place-items:center; width:54px; height:54px; border-radius:18px; font-size:1.7rem; font-weight:700; font-variant-numeric:tabular-nums; color:#ffb066; background:rgba(255,138,80,.16); }
+.ddResumen.ok .ddNum{ color:#6fe0b5; background:rgba(25,158,112,.18); }
+.ddResumen b{ display:block; font-size:1rem; color:var(--strong); }
+.ddResumen span.t{ display:block; margin-top:2px; font-size:.82rem; color:var(--ghost); }
+.ddLista{ display:grid; gap:12px; }
+.ddCard{ padding:16px; border-radius:22px; border:1px solid var(--line); background:var(--panel); opacity:0; transform:translateY(8px); animation:ddEntra .5s var(--ease-out) forwards; animation-delay:calc(var(--i,0) * 60ms); }
+@keyframes ddEntra{ to{ opacity:1; transform:none; } }
+.ddTag{ display:inline-block; margin-bottom:8px; padding:3px 9px; border-radius:20px; font-size:.68rem; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:#ffcf99; background:rgba(255,138,80,.14); }
+.ddTag.dif{ color:var(--dim); background:rgba(var(--ink),.08); }
+.ddCard h3{ margin:0 0 12px; font-size:1rem; font-weight:600; line-height:1.4; color:var(--strong); }
+.ddBtn{ width:100%; min-height:46px; border:0; border-radius:14px; font:inherit; font-weight:700; color:#fff; background:linear-gradient(140deg,#ffb066,#ff8a50); cursor:pointer; transition:transform .2s var(--ease-spring); }
+.ddBtn:active{ transform:scale(.97); }
+.ddGrupo{ margin:22px 4px 10px; font-size:.7rem; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--dim); }
+.ddHecha{ padding:12px 14px; border-radius:16px; background:rgba(var(--ink),.05); font-size:.84rem; color:var(--ghost); }
+.ddHecha + .ddHecha{ margin-top:8px; }
+.ddHecha b{ display:block; margin-bottom:4px; font-weight:600; color:var(--white); }
+.ddHecha em{ display:block; font-style:normal; color:#6fe0b5; }
+.ddSaber{ display:grid; gap:8px; }
+.ddHecho{ display:flex; align-items:flex-start; gap:10px; padding:11px 12px 11px 14px; border-radius:16px; background:rgba(var(--ink),.05); font-size:.84rem; line-height:1.4; color:var(--ghost); }
+.ddHecho span{ flex:1; min-width:0; }
+.ddHecho button{ flex:none; width:32px; height:32px; margin:-4px -4px -4px 0; border:0; border-radius:50%; background:none; color:var(--dim); font-size:.9rem; cursor:pointer; }
+.ddTabs{ display:grid; grid-template-columns:1fr 1fr; gap:4px; padding:4px; margin-bottom:14px; border-radius:16px; background:rgba(var(--ink),.07); }
+.ddTabs button{ min-height:42px; border:0; border-radius:12px; background:none; font:inherit; font-size:.9rem; font-weight:600; color:var(--dim); cursor:pointer; transition:background .25s ease, color .25s ease; }
+.ddTabs button[aria-selected="true"]{ color:var(--strong); background:var(--panel); box-shadow:0 1px 6px rgba(0,0,0,.25); }
+.ddTabs b{ display:inline-block; min-width:20px; margin-left:4px; padding:1px 6px; border-radius:10px; font-size:.72rem; color:#fff; background:linear-gradient(140deg,#ffb066,#ff8a50); }
+.ddNota{ margin:0 4px 12px; font-size:.82rem; color:var(--ghost); }
+.ddVacio{ margin:0; font-size:.84rem; color:var(--dim); }
+.ddDesp{ margin-bottom:10px; border-radius:18px; border:1px solid var(--line); background:var(--panel); overflow:hidden; }
+.ddDesp summary{ display:flex; align-items:center; gap:10px; min-height:52px; padding:0 16px; list-style:none; cursor:pointer; font-weight:600; color:var(--strong); }
+.ddDesp summary::-webkit-details-marker{ display:none; }
+.ddDesp summary span{ flex:1; }
+.ddDesp summary i{ font-style:normal; font-size:.78rem; font-weight:700; color:var(--dim); }
+.ddDesp summary svg{ width:18px; height:18px; color:var(--dim); transition:transform .35s var(--ease-out); }
+.ddDesp[open] summary svg{ transform:rotate(90deg); }
+.ddDespIn{ padding:0 12px 12px; }
+.ddCorr{ margin-top:8px; padding:6px 12px; border-radius:10px; border:1px solid var(--line); background:none; font:inherit; font-size:.78rem; font-weight:600; color:var(--white); cursor:pointer; }
+.ddBuscar{ display:block; width:100%; margin-top:16px; min-height:46px; border-radius:14px; border:1px solid var(--line); background:none; font:inherit; font-weight:600; color:var(--white); cursor:pointer; }
+.ddBuscar:disabled{ opacity:.6; }
 .navBadge{ margin-left:auto; min-width:22px; height:22px; padding:0 7px; border-radius:11px; display:grid; place-items:center; font-size:.74rem; font-weight:700; color:#fff; background:linear-gradient(140deg,#ffb066,#ff8a50); }
 .navBadge[hidden]{ display:none; }
 .yaEsta{ margin:10px 0 4px; padding:14px; border-radius:16px; border:1px solid rgba(255,176,102,.45); background:rgba(255,138,80,.1); }
@@ -2990,7 +2990,7 @@ body[class*="mode-"] #masIngreso{ display:none; }
       <section id="dudasView" aria-label="Dudas">
         <div class="restIntro"><h2>Dudas</h2></div>
         <p class="tmSub">Lo que Armoni no entendió de tus cuentas y quiere preguntarte</p>
-        <div id="duCuerpo"></div>
+        <div id="ddCuerpo"></div>
       </section>
 
       <section id="ahorroView" aria-label="Ahorro">
@@ -3124,7 +3124,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-12.140";
+const APP_VERSION = "2026-10-12.141";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -7300,34 +7300,34 @@ const Preguntas = (function(){
   }
   /* pantalla «Dudas»: todo lo que Armoni todavía no sabe, con buen aspecto y a un toque de responderlo */
   function pinta(refresca){
-    const cuerpo = document.getElementById("duCuerpo"); if(!cuerpo) return;
+    const cuerpo = document.getElementById("ddCuerpo"); if(!cuerpo) return;
     const A = dudas.abiertas, H = dudas.hechas;
     const movs = q => (q.movs || []).length ? '<div class="prMovs">' + q.movs.map(m => '<div><span>' + esc(m.concepto) + '<small>' + esc(fechaC(m.fecha)) + ' · ' + esc(m.cat) + '</small></span><b class="' + (m.tipo === "Ingreso" ? 'mas' : 'menos') + '">' + (m.tipo === "Ingreso" ? '+' : '−') + peso(m.monto) + '</b></div>').join("") + '</div>' : '';
-    const sab = '<div class="duSaber">' + saber.map((t, i) => '<div class="duHecho"><span>' + esc(t) + '</span><button type="button" data-o="' + i + '" aria-label="Olvidar esto">✕</button></div>').join("") + '</div>';
-    const hec = H.map(q => '<div class="duHecha"><b>' + esc(limpia(q)) + '</b><em>Tú: ' + esc(q.respuesta) + '</em><button type="button" class="duCorr" data-c="' + esc(q.id) + '">Corregir</button></div>').join("");
-    const desp = (t, n, cont, abierto) => '<details class="duDesp"' + (abierto ? ' open' : '') + '><summary><span>' + t + '</span><i>' + n + '</i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></summary><div class="duDespIn">' + cont + '</div></details>';
-    const tabs = '<div class="duTabs" role="tablist"><button type="button" role="tab" data-t="dudas" aria-selected="' + (pestana === "dudas") + '">Dudas' + (A.length ? ' <b>' + A.length + '</b>' : '') + '</button><button type="button" role="tab" data-t="aprendizaje" aria-selected="' + (pestana === "aprendizaje") + '">Aprendizaje' + (saber.length ? ' <b>' + saber.length + '</b>' : '') + '</button></div>';
+    const sab = '<div class="ddSaber">' + saber.map((t, i) => '<div class="ddHecho"><span>' + esc(t) + '</span><button type="button" data-o="' + i + '" aria-label="Olvidar esto">✕</button></div>').join("") + '</div>';
+    const hec = H.map(q => '<div class="ddHecha"><b>' + esc(limpia(q)) + '</b><em>Tú: ' + esc(q.respuesta) + '</em><button type="button" class="ddCorr" data-c="' + esc(q.id) + '">Corregir</button></div>').join("");
+    const desp = (t, n, cont, abierto) => '<details class="ddDesp"' + (abierto ? ' open' : '') + '><summary><span>' + t + '</span><i>' + n + '</i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></summary><div class="ddDespIn">' + cont + '</div></details>';
+    const tabs = '<div class="ddTabs" role="tablist"><button type="button" role="tab" data-t="dudas" aria-selected="' + (pestana === "dudas") + '">Dudas' + (A.length ? ' <b>' + A.length + '</b>' : '') + '</button><button type="button" role="tab" data-t="aprendizaje" aria-selected="' + (pestana === "aprendizaje") + '">Aprendizaje' + (saber.length ? ' <b>' + saber.length + '</b>' : '') + '</button></div>';
     cuerpo.innerHTML = tabs + (pestana === "dudas" ?
-      '<div class="duResumen' + (A.length ? '' : ' ok') + '"><span class="duNum">' + (A.length || "✓") + '</span><div><b>' + (A.length ? (A.length === 1 ? "Tienes 1 duda por resolver" : "Tienes " + A.length + " dudas por resolver") : "Todo en orden") + '</b><span class="t">' + (A.length ? "Responderlas hace que tus cuentas queden más exactas." : "Armoni no tiene preguntas pendientes por ahora.") + '</span></div></div>' +
-      (A.length ? '<div class="duLista">' + A.map((q, i) => '<article class="duCard" style="--i:' + Math.min(i, 8) + '">' + (q.tipo === "caso" ? '<span class="duTag">Caso abierto</span>' : q.saltada ? '<span class="duTag dif">La dejaste para después</span>' : '<span class="duTag">Por resolver</span>') + ((q.hilo || []).length > 1 ? ' <span class="duTag dif">En conversación</span>' : '') + '<h3>' + esc(limpia(q)) + '</h3>' + movs(q) + '<button type="button" class="duBtn" data-id="' + esc(q.id) + '">' + (q.tipo === "caso" || (q.hilo || []).length > 1 ? "Hablar con Armoni" : "Responder") + '</button></article>').join("") + '</div>' : '') +
-      '<button type="button" class="duBuscar" id="duBuscar">Buscar dudas nuevas</button>'
+      '<div class="ddResumen' + (A.length ? '' : ' ok') + '"><span class="ddNum">' + (A.length || "✓") + '</span><div><b>' + (A.length ? (A.length === 1 ? "Tienes 1 duda por resolver" : "Tienes " + A.length + " dudas por resolver") : "Todo en orden") + '</b><span class="t">' + (A.length ? "Responderlas hace que tus cuentas queden más exactas." : "Armoni no tiene preguntas pendientes por ahora.") + '</span></div></div>' +
+      (A.length ? '<div class="ddLista">' + A.map((q, i) => '<article class="ddCard" style="--i:' + Math.min(i, 8) + '">' + (q.tipo === "caso" ? '<span class="ddTag">Caso abierto</span>' : q.saltada ? '<span class="ddTag dif">La dejaste para después</span>' : '<span class="ddTag">Por resolver</span>') + ((q.hilo || []).length > 1 ? ' <span class="ddTag dif">En conversación</span>' : '') + '<h3>' + esc(limpia(q)) + '</h3>' + movs(q) + '<button type="button" class="ddBtn" data-id="' + esc(q.id) + '">' + (q.tipo === "caso" || (q.hilo || []).length > 1 ? "Hablar con Armoni" : "Responder") + '</button></article>').join("") + '</div>' : '') +
+      '<button type="button" class="ddBuscar" id="ddBuscar">Buscar dudas nuevas</button>'
       :
-      '<p class="duNota">Lo que Armoni ha aprendido de tus respuestas. Si algo ya no es cierto, olvídalo con la ✕ o corrige una respuesta.</p>' +
-      desp("Lo que Armoni sabe", saber.length, saber.length ? sab : '<p class="duVacio">Todavía no ha aprendido nada.</p>', false) +
-      desp("Tus respuestas", H.length, H.length ? hec : '<p class="duVacio">Aún no has respondido ninguna duda.</p>', false));
+      '<p class="ddNota">Lo que Armoni ha aprendido de tus respuestas. Si algo ya no es cierto, olvídalo con la ✕ o corrige una respuesta.</p>' +
+      desp("Lo que Armoni sabe", saber.length, saber.length ? sab : '<p class="ddVacio">Todavía no ha aprendido nada.</p>', false) +
+      desp("Tus respuestas", H.length, H.length ? hec : '<p class="ddVacio">Aún no has respondido ninguna duda.</p>', false));
     cuerpo.querySelectorAll("[data-t]").forEach(b => b.addEventListener("click", () => { pestana = b.dataset.t; pinta(); }));
-    cuerpo.querySelectorAll(".duCorr").forEach(b => b.addEventListener("click", () => abre(b.dataset.c)));
-    cuerpo.querySelectorAll(".duBtn").forEach(b => b.addEventListener("click", () => abre(b.dataset.id)));
+    cuerpo.querySelectorAll(".ddCorr").forEach(b => b.addEventListener("click", () => abre(b.dataset.c)));
+    cuerpo.querySelectorAll(".ddBtn").forEach(b => b.addEventListener("click", () => abre(b.dataset.id)));
     cuerpo.querySelectorAll("[data-o]").forEach(b => b.addEventListener("click", () => {
       const t = saber[+b.dataset.o]; if(t == null) return;
-      b.closest(".duHecho").remove(); saber = saber.filter(x => x !== t); try{ localStorage.setItem(KS, JSON.stringify(saber)); }catch{}
+      b.closest(".ddHecho").remove(); saber = saber.filter(x => x !== t); try{ localStorage.setItem(KS, JSON.stringify(saber)); }catch{}
       pide({ accion: "olvidar", texto: t }).catch(() => {});
     }));
-    const bu = cuerpo.querySelector("#duBuscar");
+    const bu = cuerpo.querySelector("#ddBuscar");
     if(bu) bu.addEventListener("click", async () => {
       bu.disabled = true; bu.textContent = "Revisando tus movimientos…";
       try{ await pide({ accion: "revisar", forzar: true }); }catch{ bu.disabled = false; bu.textContent = "No pude conectar. Inténtalo de nuevo"; return; }
-      if(!dudas.abiertas.length){ const b2 = document.querySelector("#duBuscar"); if(b2){ b2.textContent = "No encontré nada nuevo"; setTimeout(() => { if(b2.isConnected) b2.textContent = "Buscar dudas nuevas"; }, 2500); } }
+      if(!dudas.abiertas.length){ const b2 = document.querySelector("#ddBuscar"); if(b2){ b2.textContent = "No encontré nada nuevo"; setTimeout(() => { if(b2.isConnected) b2.textContent = "Buscar dudas nuevas"; }, 2500); } }
     });
     if(refresca) pide({ accion: "pendientes" }).catch(() => {});
   }
