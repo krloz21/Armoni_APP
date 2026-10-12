@@ -2112,6 +2112,35 @@ button{ transition:transform var(--t-tap) var(--ease-out); }
 .cnVacio{ margin:8px 0 0; font-size:.82rem; color:var(--dim); }
 .cnNota{ margin:4px 2px 0; font-size:.72rem; color:var(--dim); }
 .cnPensando{ display:flex; align-items:center; gap:10px; padding:14px; border-radius:16px; background:rgba(var(--ink),.04); font-size:.84rem; color:var(--ghost); }
+.cnHero{ position:relative; margin:-4px -4px 14px; border-radius:22px; overflow:hidden; background:linear-gradient(160deg,var(--c1),var(--c2)); isolation:isolate; }
+.cnHeroBg{ position:absolute; inset:0; z-index:-1; }
+.cnHeroBg img{ width:100%; height:100%; object-fit:cover; filter:blur(26px) saturate(1.5) brightness(.7); transform:scale(1.5); }
+.cnHero::after{ content:""; position:absolute; inset:0; z-index:-1; background:linear-gradient(180deg,rgba(10,8,14,.15),rgba(10,8,14,.72)); }
+.cnHeroIn{ display:flex; flex-direction:column; align-items:center; gap:14px; padding:22px 18px 20px; text-align:center; }
+.cnHero .cnPoster{ width:132px; border-radius:16px; box-shadow:0 18px 40px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.12); animation:cnPop .55s cubic-bezier(.2,.9,.3,1.2) both; }
+.cnHeroTx h3{ margin:0; text-align:center; font-size:1.3rem; line-height:1.2; color:#fff; text-shadow:0 2px 14px rgba(0,0,0,.5); animation:cnSube .5s .12s both; }
+.cnTags{ display:flex; flex-wrap:wrap; justify-content:center; gap:6px; margin-top:10px; animation:cnSube .5s .2s both; }
+.cnTags span{ padding:4px 11px; border-radius:12px; font-size:.7rem; font-weight:700; color:#fff; background:rgba(255,255,255,.16); backdrop-filter:blur(6px); }
+.cnStats{ display:flex; gap:10px; margin-bottom:14px; }
+.cnStat{ flex:1; padding:12px 8px; border-radius:16px; text-align:center; border:1px solid var(--line); background:rgba(var(--ink),.05); animation:cnSube .5s .28s both; }
+.cnStat:nth-child(2){ animation-delay:.34s; } .cnStat:nth-child(3){ animation-delay:.4s; }
+.cnStat b{ display:block; font-size:1.25rem; color:var(--strong); }
+.cnStat b em{ font-style:normal; font-size:.7rem; font-weight:600; color:var(--dim); }
+.cnStat b.alto{ color:#6fe0b5; } .cnStat b.bajo{ color:#ff8f8f; }
+.cnStat small{ display:block; margin-top:3px; font-size:.64rem; color:var(--dim); letter-spacing:.04em; }
+.cnPara{ display:grid; gap:4px; margin:0 0 14px; padding:12px 14px; border-radius:16px; border:1px solid rgba(255,176,102,.4); background:rgba(255,176,102,.08); font-size:.84rem; line-height:1.4; color:var(--ghost); }
+.cnPara b{ font-size:.66rem; letter-spacing:.12em; text-transform:uppercase; color:#ffb066; }
+.cnDonde{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+.cnDondeBtn{ display:grid; gap:3px; padding:12px 6px; border-radius:16px; text-align:center; text-decoration:none; border:1px solid var(--line); background:rgba(var(--ink),.04); opacity:.7; }
+.cnDondeBtn b{ font-size:.76rem; color:var(--strong); }
+.cnDondeBtn small{ font-size:.62rem; color:var(--dim); }
+.cnDondeBtn.si{ opacity:1; border-color:rgba(255,176,102,.55); background:linear-gradient(160deg,rgba(255,176,102,.16),rgba(255,120,80,.08)); }
+.cnDondeBtn.si small{ color:#ffb066; font-weight:700; }
+.cnDondeBtn:active{ transform:scale(.96); }
+@keyframes cnPop{ from{ opacity:0; transform:scale(.8) translateY(14px); } to{ opacity:1; transform:none; } }
+@keyframes cnSube{ from{ opacity:0; transform:translateY(12px); } to{ opacity:1; transform:none; } }
+@media (prefers-reduced-motion:reduce){ .cnHero .cnPoster,.cnHeroTx h3,.cnTags,.cnStat{ animation:none; } }
+
 .cnPensando .dot{ width:8px; height:8px; border-radius:50%; background:#ffb066; animation:cnLate 1s ease-in-out infinite; }
 @keyframes cnLate{ 50%{ opacity:.25; transform:scale(.7); } }
 .cnErr{ padding:14px; border-radius:16px; background:rgba(217,89,89,.1); font-size:.84rem; color:#ffb3b3; }
@@ -3239,7 +3268,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-12.165";
+const APP_VERSION = "2026-10-12.166";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -7642,13 +7671,17 @@ const Cine = (function(){
     const scrim = document.createElement("div");
     scrim.className = "pgScrim seScrim cnScrim";
     scrim.innerHTML = '<div class="inWrap"><div class="pgCard inCard" role="dialog" aria-modal="true" aria-labelledby="cnT"><div class="inBody">' +
-      '<div class="cnCab">' + poster(p, "cnPoster") + '<div><h3 id="cnT">' + esc(p.titulo) + '</h3><p class="cnMeta">' + esc([(p.generos || []).join(", "), p.duracion ? p.duracion + " min" : "", p.clasificacion].filter(Boolean).join(" · ")) + '</p>' +
-        '<div class="cnCines">' + badgesCines(p) + '</div>' +
-        (p.score != null ? '<div class="cnPuntajes"><span>Críticos ' + p.score + (p.fuente ? ' · ' + esc(p.fuente) : '') + '</span></div>' : '') + '</div></div>' +
+      '<div class="cnHero" style="--c1:' + colorDe(p.titulo)[0] + ';--c2:' + colorDe(p.titulo)[1] + '"><div class="cnHeroBg" aria-hidden="true">' + imgPoster(p) + '</div><div class="cnHeroIn">' + poster(p, "cnPoster") +
+        '<div class="cnHeroTx"><h3 id="cnT">' + esc(p.titulo) + '</h3>' +
+        '<div class="cnTags">' + (p.generos || []).slice(0, 3).map(g => '<span>' + esc(g) + '</span>').join("") + '</div></div></div></div>' +
+      '<div class="cnStats">' +
+        (p.score != null ? '<div class="cnStat"><b class="' + (p.score >= 75 ? 'alto' : p.score < 50 ? 'bajo' : '') + '">' + p.score + '</b><small>Críticos' + (p.fuente ? ' · ' + esc(p.fuente) : '') + '</small></div>' : '') +
+        (p.duracion ? '<div class="cnStat"><b>' + esc(p.duracion) + '<em> min</em></b><small>Duración</small></div>' : '') +
+        (p.clasificacion ? '<div class="cnStat"><b>' + esc(p.clasificacion) + '</b><small>Clasificación</small></div>' : '') + '</div>' +
       (p.sinopsis ? '<p class="cnSin">' + esc(p.sinopsis) + '</p>' : '') +
-      (p.porque ? '<p class="cnSin"><b>Para ustedes:</b> ' + esc(p.porque) + '</p>' : '') +
+      (p.porque ? '<div class="cnPara"><b>Para ustedes</b><span>' + esc(p.porque) + '</span></div>' : '') +
       '<div class="cnSec">¿Vale la pena?</div><div id="cnOp"></div>' +
-      '<div class="cnSec">Horarios en Cali</div><div class="cnDias" id="cnDias">' + [0, 1, 2, 3, 4].map(n => '<button type="button" class="cnChip' + (n === 0 ? ' on' : '') + '" data-d="' + n + '">' + esc(etiquetaDia(n)) + '</button>').join("") + '</div><div id="cnHo"></div>' +
+      '<div class="cnSec">Dónde verla</div><div class="cnDonde">' + Object.keys(CINES).map(id => { const esta = (p.cines || []).includes(id); const u = (p.urls && p.urls[id]) || WEB[id]; return '<a class="cnDondeBtn' + (esta ? ' si' : '') + '" href="' + esc(u) + '" target="_blank" rel="noopener noreferrer"><b>' + esc(CINES[id]) + '</b><small>' + (esta ? 'En cartelera' : 'Ver su cartelera') + '</small></a>'; }).join("") + '</div>' +
       '</div><div class="pgRow"><button type="button" class="pgNo" id="cnX" style="flex:1">Cerrar</button></div></div></div>';
     document.body.appendChild(scrim);
     requestAnimationFrame(() => scrim.classList.add("on"));
@@ -7673,33 +7706,11 @@ const Cine = (function(){
           '<div class="cnPuntajes">' + pt("Críticos", j.critica) + pt("Público", j.publico) + '<span>Se habla ' + esc(j.buzz) + '</span>' + (j.superoExpectativas ? '<span>Superó expectativas</span>' : '') + '</div></div>';
       }).catch(e => { if(vivo) $("cnOp").innerHTML = fallo("No pude revisarla ahora.", "op", e); });
     };
-    const memo = {};
-    const diaActivo = () => +scrim.querySelector(".cnChip.on[data-d]").dataset.d;
-    const horarios = n => {
-      const fecha = masDias(n), ho = $("cnHo");
-      const pintaH = j => {
-        ho.innerHTML = j.cines.map(c => {
-          const link = c.url ? '<a href="' + esc(c.url) + '" target="_blank" rel="noopener noreferrer">' + (c.estado === "sin_enlace" ? 'Ver cartelera' : 'Ver en su página') + '</a>' : '';
-          const cuerpoC = c.estado === "ok"
-            ? c.sedes.map(s => '<div class="cnSede"><span>' + esc(s.sede) + '</span><div class="cnHoras">' + s.horarios.map(h => '<i>' + esc(h.hora) + (h.formato || h.idioma ? '<small>' + esc([h.formato, h.idioma].filter(Boolean).join(" · ")) + '</small>' : '') + '</i>').join("") + '</div></div>').join("")
-            : c.estado === "no_esta" ? '<p class="cnVacio">No está en la cartelera de este cine en Cali.</p>'
-            : c.estado === "sin_enlace" ? '<p class="cnVacio">No pude ubicar esta película en la página de este cine. Mira su cartelera.</p>'
-            : '<p class="cnVacio">' + (c.estado === "no_leida" ? 'No pude abrir su página ahora.' : 'No pude leer los horarios de este día.') + ' Míralos en su página.</p>';
-          return '<div class="cnCine' + (c.estado === "no_esta" ? ' no' : '') + '"><b>' + esc(c.cine) + link + '</b>' + cuerpoC + (c.nota ? '<p class="cnNota">' + esc(c.nota) + '</p>' : '') + '</div>';
-        }).join("");
-      };
-      if(memo[fecha]){ pintaH(memo[fecha]); return; }
-      ho.innerHTML = pensando("Leyendo las funciones en Cine Colombia, Cinépolis y Cinemark…");
-      pide({ accion: "horarios", titulo: p.titulo, fecha, urls: p.urls || {}, cines: p.cines || [] }).then(j => { memo[fecha] = j; if(vivo && diaActivo() === n) pintaH(j); })
-        .catch(e => { if(vivo && diaActivo() === n) ho.innerHTML = fallo("No pude traer los horarios ahora.", "ho", e); });
-    };
     scrim.addEventListener("click", e => {
-      const d = e.target.closest("[data-d]");
-      if(d){ scrim.querySelectorAll("[data-d]").forEach(x => x.classList.toggle("on", x === d)); horarios(+d.dataset.d); return; }
       const r = e.target.closest("[data-r]");
-      if(r){ if(r.dataset.r === "op") opinion(); else horarios(diaActivo()); }
+      if(r) opinion();
     });
-    opinion(); horarios(0);
+    opinion();
   }
 
   cuerpo.addEventListener("click", e => {
