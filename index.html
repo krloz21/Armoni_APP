@@ -104,6 +104,7 @@ body{
 
 /* en reposo, todo lo animado se congela: cero consumo */
 body.asleep *, body.asleep *::before, body.asleep *::after{ animation-play-state:paused !important; }
+body.asleep :is(.tmTile,.duCard,.ddCard,.seAparece,.seParadaRes,.msg .body > *){ animation:none !important; opacity:1 !important; transform:none !important; }   /* si el reposo pilla una entrada a medias, se ve ya terminada */
 
 #rain{ position:fixed; inset:0; z-index:0; display:block; }
 #campo{ position:fixed; inset:0; z-index:0; display:block; width:100%; height:100%; pointer-events:none; opacity:0; transition:opacity .9s ease; }
@@ -364,11 +365,11 @@ body:not([class*="mode-"]) #thread.sinChat{ overflow-y:hidden; }
 .svTrack{ display:flex; align-items:flex-start; will-change:transform; }
 .svSlide{ flex:0 0 100%; min-width:0; display:flex; align-items:center; gap:13px; }
 /* al estar "caliente" (muy cerca del vencimiento) respira un resplandor suave */
-.svBanner::after{ content:""; position:absolute; inset:0; border-radius:inherit; pointer-events:none; opacity:0; }
+.svBanner::after{ content:""; position:absolute; inset:0; border-radius:inherit; pointer-events:none; opacity:0; box-shadow:inset 0 0 24px rgba(229,52,45,.2), inset 0 0 0 1px rgba(240,90,70,.5); }
 .svBanner.hot::after{ animation:svPulse 2s ease-in-out infinite; }
 @keyframes svPulse{
-  0%,100%{ opacity:0; box-shadow:inset 0 0 0 1px transparent; }
-  50%{ opacity:1; box-shadow:inset 0 0 24px rgba(229,52,45,.2), inset 0 0 0 1px rgba(240,90,70,.5); }
+  0%,100%{ opacity:0; }
+  50%{ opacity:1; }
 }
 .svBanner .ico{
   flex:none; width:38px; height:38px; border-radius:11px; display:grid; place-items:center;
@@ -790,7 +791,7 @@ body.no-gl #drawer{ background:var(--drawer-solid); }
 }
 
 /* ───────── vista de restaurantes (ocupa el lugar del chat) ───────── */
-#restView, #emaView, #creditoView, #gmailView, #glimView, #recuerdaView, #mercarView, #duraView, #mesView, #balanceView, #ahorroView, #dudasView, #ajustesView{ display:none; padding-bottom:10px; }
+#restView, #emaView, #creditoView, #gmailView, #glimView, #recuerdaView, #mercarView, #duraView, #mesView, #balanceView, #ahorroView, #dudasView, #cineView, #ajustesView{ display:none; padding-bottom:10px; }
 body.mode-rest #restView{ display:block; }
 body.mode-ema #emaView{ display:block; }
 body.mode-ema #welcome, body.mode-ema #messages, body.mode-ema #pending, body.mode-ema #servicioBanner, body.mode-ema #glimBanner{ display:none !important; }
@@ -824,6 +825,10 @@ body.mode-dudas #dudasView{ display:block; }
 body.mode-dudas #welcome, body.mode-dudas #messages, body.mode-dudas #pending, body.mode-dudas #servicioBanner, body.mode-dudas #glimBanner{ display:none !important; }
 body.mode-dudas #reset{ visibility:hidden; }
 body.mode-dudas footer{ display:none; }
+body.mode-cine #cineView{ display:block; }
+body.mode-cine #welcome, body.mode-cine #messages, body.mode-cine #pending, body.mode-cine #servicioBanner, body.mode-cine #glimBanner{ display:none !important; }
+body.mode-cine #reset{ visibility:hidden; }
+body.mode-cine footer{ display:none; }
 body.mode-ajustes #ajustesView{ display:block; }
 body.mode-ajustes #welcome, body.mode-ajustes #messages, body.mode-ajustes #pending, body.mode-ajustes #servicioBanner, body.mode-ajustes #glimBanner{ display:none !important; }
 body.mode-ajustes #reset{ visibility:hidden; }
@@ -1454,7 +1459,7 @@ body.mode-gmail footer, body.mode-glim footer{ display:none; }
   .wsCol i{ animation:none; transform:none; } .wsCol em, .wsDato{ animation:none; opacity:1; transform:none; filter:none; }
   .wsCuerpo > *{ animation-duration:.01s; animation-delay:0s; }
 }
-@media (prefers-reduced-motion: reduce){ .wsCuerpo > *{ animation:none; opacity:1; transform:none; } .wsFondo i{ animation:none; } .wsW > span, .wsChips > .wsChip{ animation:none; opacity:1; transform:none; } }
+@media (prefers-reduced-motion: reduce){ .wsCuerpo > *{ animation:none; opacity:1; transform:none; filter:none; } .wsFondo i{ animation:none; } .wsW > span, .wsChips > .wsChip{ animation:none; opacity:1; transform:none; } }
 
 
 /* ── Tu mes más fino: se abre desde la tarjeta, las pantallas se relevan sin cortes y se cierra arrastrando ── */
@@ -2034,8 +2039,69 @@ button{ transition:transform var(--t-tap) var(--ease-out); }
 .duCanasta:active{ transform:scale(.97); }
 #menuBtn, #ojoBtn, #reset, #masIngreso{ position:relative; }
 #menuBtn::before, #ojoBtn::before, #reset::before, #masIngreso::before, #send::before{ content:""; position:absolute; inset:-6px; }   /* el botón se ve igual, pero el toque llega a 44px */
+/* Cine */
+.cnFiltros{ display:flex; gap:8px; margin:0 0 14px; overflow-x:auto; scrollbar-width:none; }
+.cnFiltros::-webkit-scrollbar{ display:none; }
+.cnChip{ flex:none; min-height:36px; padding:0 15px; border-radius:18px; border:1px solid var(--line); background:none; font:inherit; font-size:.84rem; font-weight:600; color:var(--ghost); cursor:pointer; transition:transform .2s var(--ease-spring); }
+.cnChip:active{ transform:scale(.96); }
+.cnChip.on{ color:#1a1208; border-color:transparent; background:linear-gradient(140deg,#ffb066,#ff8a50); }
+.cnGrid{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.cnCard{ position:relative; display:block; width:100%; padding:0; border:0; border-radius:18px; overflow:hidden; background:var(--panel); text-align:left; font:inherit; color:var(--white); cursor:pointer; aspect-ratio:2/3; opacity:0; transform:translateY(8px); animation:cnEntra .5s var(--ease-out) forwards; animation-delay:calc(var(--i,0) * 50ms); -webkit-tap-highlight-color:transparent; }
+@keyframes cnEntra{ to{ opacity:1; transform:none; } }
+.cnCard:active{ transform:scale(.97); }
+.cnCard img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+.cnTile{ position:absolute; inset:0; font-size:0; background:linear-gradient(160deg, var(--c1,#3987e5), var(--c2,#9085e9)); }   /* sin póster, queda un degradado; el título va en la parte de abajo */
+.cnVelo{ position:absolute; inset:auto 0 0 0; padding:34px 11px 11px; background:linear-gradient(to top, rgba(0,0,0,.88), transparent); }
+.cnVelo b{ display:block; font-size:.86rem; line-height:1.25; color:#fff; }
+.cnVelo small{ display:block; margin-top:3px; font-size:.7rem; color:rgba(255,255,255,.72); }
+.cnScore{ position:absolute; top:9px; left:9px; min-width:34px; padding:4px 8px; border-radius:10px; font-size:.78rem; font-weight:800; text-align:center; color:#fff; background:rgba(0,0,0,.62); -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px); }
+.cnScore.alto{ color:#6fe0b5; } .cnScore.bajo{ color:#ff8f8f; }
+.cnEncaja{ position:absolute; top:9px; right:9px; padding:4px 9px; border-radius:10px; font-size:.66rem; font-weight:800; letter-spacing:.04em; text-transform:uppercase; color:#1a1208; background:linear-gradient(140deg,#ffb066,#ff8a50); }
+.cnCarga{ display:grid; gap:12px; grid-template-columns:1fr 1fr; }
+.cnEsq{ aspect-ratio:2/3; border-radius:18px; background:linear-gradient(100deg, rgba(var(--ink),.05) 30%, rgba(var(--ink),.12) 50%, rgba(var(--ink),.05) 70%); background-size:200% 100%; animation:cnBrilla 1.4s linear infinite; }
+@keyframes cnBrilla{ to{ background-position:-200% 0; } }
+.cnMsg{ margin:0 4px 14px; font-size:.84rem; color:var(--ghost); text-align:center; }
+.cnPie{ display:grid; gap:10px; margin-top:18px; }
+.cnBtn{ display:block; width:100%; min-height:46px; border-radius:14px; border:1px solid var(--line); background:none; font:inherit; font-weight:600; color:var(--white); cursor:pointer; }
+.cnBtn:disabled{ opacity:.6; }
+.cnClave{ padding:14px; border-radius:16px; background:rgba(var(--ink),.05); font-size:.8rem; color:var(--ghost); }
+.cnClave input{ width:100%; min-height:44px; margin-top:8px; padding:0 12px; border-radius:12px; border:1px solid var(--line); background:rgba(var(--ink),.05); font:inherit; font-size:16px; color:var(--white); }
+.cnCab{ display:flex; gap:14px; margin-bottom:14px; }
+.cnPoster{ flex:none; width:84px; aspect-ratio:2/3; border-radius:12px; overflow:hidden; position:relative; }
+.cnPoster img{ width:100%; height:100%; object-fit:cover; display:block; }
+.cnCab > div:last-child{ min-width:0; text-align:left; }
+.cnCab h3{ margin:0 0 6px; text-align:left; font-size:1.12rem; line-height:1.25; color:var(--strong); }
+.cnMeta{ margin:0 0 6px; font-size:.78rem; color:var(--dim); }
+.cnSin{ margin:0 0 14px; font-size:.86rem; line-height:1.45; color:var(--ghost); }
+.cnSec{ margin:16px 0 8px; font-size:.7rem; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--dim); }
+.cnVeredicto{ padding:14px; border-radius:16px; border:1px solid var(--line); background:rgba(var(--ink),.04); }
+.cnVd{ display:inline-block; margin-bottom:8px; padding:4px 11px; border-radius:12px; font-size:.74rem; font-weight:800; letter-spacing:.05em; text-transform:uppercase; }
+.cnVd.vale{ color:#063; background:#6fe0b5; } .cnVd.esperar{ color:#1a1208; background:#ffcf99; } .cnVd.no{ color:#fff; background:#d95959; }
+.cnVeredicto b{ display:block; font-size:.94rem; color:var(--strong); }
+.cnVeredicto p{ margin:6px 0 0; font-size:.84rem; line-height:1.45; color:var(--ghost); }
+.cnVeredicto ul{ margin:8px 0 0; padding-left:18px; font-size:.82rem; color:var(--ghost); }
+.cnPuntajes{ display:flex; gap:8px; margin-top:10px; flex-wrap:wrap; }
+.cnPuntajes span{ padding:4px 10px; border-radius:10px; font-size:.74rem; font-weight:600; background:rgba(var(--ink),.08); color:var(--ghost); }
+.cnDias{ display:flex; gap:8px; overflow-x:auto; scrollbar-width:none; margin-bottom:12px; }
+.cnDias::-webkit-scrollbar{ display:none; }
+.cnCine{ margin-bottom:12px; padding:12px 14px; border-radius:16px; border:1px solid var(--line); background:rgba(var(--ink),.03); }
+.cnCine > b{ display:flex; justify-content:space-between; align-items:center; font-size:.92rem; color:var(--strong); }
+.cnCine > b a{ font-size:.74rem; font-weight:600; color:#ffb066; text-decoration:none; }
+.cnSede{ margin-top:10px; }
+.cnSede > span{ display:block; margin-bottom:6px; font-size:.78rem; color:var(--dim); }
+.cnHoras{ display:flex; flex-wrap:wrap; gap:6px; }
+.cnHoras i{ font-style:normal; padding:6px 10px; border-radius:10px; font-size:.82rem; font-weight:700; font-variant-numeric:tabular-nums; color:var(--white); background:rgba(var(--ink),.09); }
+.cnHoras i small{ margin-left:5px; font-size:.64rem; font-weight:600; color:var(--dim); }
+.cnVacio{ margin:8px 0 0; font-size:.82rem; color:var(--dim); }
+.cnNota{ margin:4px 2px 0; font-size:.72rem; color:var(--dim); }
+.cnPensando{ display:flex; align-items:center; gap:10px; padding:14px; border-radius:16px; background:rgba(var(--ink),.04); font-size:.84rem; color:var(--ghost); }
+.cnPensando .dot{ width:8px; height:8px; border-radius:50%; background:#ffb066; animation:cnLate 1s ease-in-out infinite; }
+@keyframes cnLate{ 50%{ opacity:.25; transform:scale(.7); } }
+.cnErr{ padding:14px; border-radius:16px; background:rgba(217,89,89,.1); font-size:.84rem; color:#ffb3b3; }
+.cnErr button{ margin-top:8px; }
 .duEsc{ display:flex; align-items:center; justify-content:center; gap:10px; width:100%; margin-top:8px; padding:11px 14px; border-radius:14px; border:1px solid var(--line); background:none; font:inherit; font-size:.84rem; font-weight:600; color:var(--ghost); cursor:pointer; transition:transform .2s var(--ease-spring), background .25s, border-color .25s, color .25s; }
 .duEsc:active{ transform:scale(.97); }
+:where(.ddChip,.ddBuscar,.ddCorr,.rsAhorro,.rsPreg,.ahMetaBtn,.mkBuscaX):active{ transform:scale(.96); }
 .duEscPt{ width:10px; height:10px; border-radius:50%; background:rgba(var(--ink),.3); transition:background .25s, box-shadow .25s; }
 .duEsc.on{ color:#ffcf99; border-color:rgba(255,176,102,.45); background:rgba(255,138,80,.1); }
 .duEsc.on .duEscPt{ background:#ffb066; box-shadow:0 0 10px rgba(255,176,102,.8); }
@@ -2831,7 +2897,7 @@ body[class*="mode-"] #masIngreso{ display:none; }
       <div class="navGrupo" id="navSalidasG">
         <button type="button" id="navSalidasBtn" aria-expanded="false" aria-controls="navSalidasSub">
           <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9a2.2 2.2 0 0 0 0 4.4V17a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1v-3.6a2.2 2.2 0 0 0 0-4.4V6.5a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1z"/><path d="M14.5 5.5v2.3M14.5 10.9v2.2M14.5 16.2V18"/></svg></span>
-          <span class="txt"><b>Salidas</b><span>Restaurantes y salidas con Ema</span></span>
+          <span class="txt"><b>Salidas</b><span>Restaurantes, cine y salidas con Ema</span></span>
           <span class="chev" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
         </button>
         <div class="navSub" id="navSalidasSub"><div class="navSubIn">
@@ -2842,6 +2908,10 @@ body[class*="mode-"] #masIngreso{ display:none; }
       <button type="button" id="navEma">
         <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8.5 14.2c.9 1.5 2.1 2.2 3.5 2.2s2.6-.7 3.5-2.2"/><path d="M9 9.6h.01M15 9.6h.01"/></svg></span>
         <span class="txt"><b>Salidas Ema</b><span>Planes, gastos y a dónde ir</span></span>
+      </button>
+      <button type="button" id="navCine">
+        <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2.4"/><path d="M3 9h18M3 15h18M8 4v16M16 4v16"/></svg></span>
+        <span class="txt"><b>Cine</b><span>Cartelera, horarios y si vale la pena</span></span>
       </button>
         </div></div>
       </div>
@@ -3013,6 +3083,12 @@ body[class*="mode-"] #masIngreso{ display:none; }
         <div id="ddCuerpo"></div>
       </section>
 
+      <section id="cineView" aria-label="Cine">
+        <div class="restIntro"><h2>Cine</h2></div>
+        <p class="tmSub">Lo que hay este mes en Cali, y si vale la pena</p>
+        <div id="cnCuerpo"></div>
+      </section>
+
       <section id="ahorroView" aria-label="Ahorro">
         <div class="restIntro"><h2>Ahorro</h2></div>
         <p class="tmSub">Lo que tenemos guardado y cómo va creciendo</p>
@@ -3104,6 +3180,7 @@ const MERCADO_MARCAR_URL = N8N + "/webhook/mercado-marcar";
 const MERCADO_COMPRADO_URL = N8N + "/webhook/mercado-comprado";
 const MERCADO_AGREGAR_URL = N8N + "/webhook/mercado-agregar";
 const MERCADO_EDITAR_URL = N8N + "/webhook/mercado-editar";
+const CINE_URL = N8N + "/webhook/cine";   // cartelera de Cali, horarios en los 3 cines y si vale la pena
 const AVISO_CANASTA_URL = N8N + "/webhook/aviso-canasta";   // qué productos son indispensables y el aviso diario
 const CANASTA_FECHAS_URL = N8N + "/webhook/canasta-fechas";   // desde cuándo está cada cosa en la canasta («Marcado el» en Notion)
 const MOVIMIENTO_URL = N8N + "/webhook/movimiento-nuevo";   // guarda un gasto/ingreso directo en Notion, sin IA
@@ -3145,7 +3222,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-12.150";
+const APP_VERSION = "2026-10-12.151";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -5058,7 +5135,7 @@ let MODE = "chat";
    También se ven en Ajustes → «Uso de Armoni». Sirve para decidir qué mejorar según la tendencia. */
 const Uso = (function(){
   const K = "armoni.uso", DIAS = 90;
-  const NOMBRES = { chat: "Arm", mercar: "Check", dura: "Duración", mes: "Tu mes", balance: "Balance", ahorro: "Ahorro", recuerda: "Recuerda", credito: "Crédito carro", glim: "Glim", rest: "Restaurantes", ema: "Salidas Ema", gmail: "AT Gmail", ajustes: "Ajustes" };
+  const NOMBRES = { chat: "Arm", mercar: "Check", dura: "Duración", mes: "Tu mes", balance: "Balance", ahorro: "Ahorro", recuerda: "Recuerda", credito: "Crédito carro", glim: "Glim", rest: "Restaurantes", cine: "Cine", ema: "Salidas Ema", gmail: "AT Gmail", ajustes: "Ajustes" };
   const hoy = () => { const d = new Date(); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); };
   const lee = () => { try{ return JSON.parse(localStorage.getItem(K)) || { dias: {} }; }catch{ return { dias: {} }; } };
   const guarda = d => {
@@ -7393,6 +7470,144 @@ const Preguntas = (function(){
 })();
 TrasIntro.hacer(() => setTimeout(() => Preguntas.revisar(), 2500));
 
+/* ───────── Cine: cartelera de Cali, horarios en los 3 cines y si vale la pena ───────── */
+const Cine = (function(){
+  const cuerpo = document.getElementById("cnCuerpo");
+  const KEY = "armoni.cine", TTL = 12 * 3600 * 1000;
+  const esc = t => String(t == null ? "" : t).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const COLORES = [["#3987e5", "#9085e9"], ["#199e70", "#2bb3c0"], ["#d55181", "#e0a030"], ["#9085e9", "#d55181"], ["#2bb3c0", "#3987e5"], ["#e66767", "#e0a030"]];
+  const colorDe = t => { let h = 0; for(const c of String(t)) h = (h * 31 + c.charCodeAt(0)) >>> 0; return COLORES[h % COLORES.length]; };
+  let datos = null, filtro = "todas", cargando = false, error = false;
+  try{ const d = JSON.parse(localStorage.getItem(KEY)); if(d && Array.isArray(d.peliculas)) datos = d; }catch{}
+  const guarda = () => { try{ localStorage.setItem(KEY, JSON.stringify(datos)); }catch{} };
+  const hoyISO = () => { const d = new Date(); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); };
+  const masDias = n => { const d = new Date(); d.setDate(d.getDate() + n); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); };
+  const etiquetaDia = n => n === 0 ? "Hoy" : n === 1 ? "Mañana" : (() => { const d = new Date(); d.setDate(d.getDate() + n); return d.toLocaleDateString("es-CO", { weekday: "short", day: "numeric" }).replace(".", ""); })();
+
+  /* la búsqueda en la web tarda (medio minuto o más): se espera con calma y se corta si de verdad no responde */
+  async function pide(c, ms){
+    const ctl = new AbortController(), t = setTimeout(() => ctl.abort(), ms || 150000);
+    try{
+      const r = await fetch(CINE_URL, { method: "POST", body: JSON.stringify(Object.assign({ token: MERCADO_TOKEN }, c)), signal: ctl.signal });
+      const j = await r.json().catch(() => null);
+      if(!r.ok || !j || j.ok === false) throw new Error((j && j.error) || "http");
+      return j;
+    } finally { clearTimeout(t); }
+  }
+
+  function refresh(forzar){
+    if(datos && !forzar){ pinta(); if(Date.now() - (datos.t || 0) < TTL) return; } else pinta();
+    if(cargando) return;
+    cargando = true; error = false; if(datos) pinta();
+    pide({ accion: "cartelera", forzar: !!forzar }, 170000)
+      .then(j => { datos = { t: Date.now(), peliculas: j.peliculas || [], conClave: !!j.conClave }; guarda(); })
+      .catch(() => { error = true; })
+      .finally(() => { cargando = false; pinta(); });
+  }
+
+  const poster = (p, cls) => '<div class="' + cls + '" style="--c1:' + colorDe(p.titulo)[0] + ';--c2:' + colorDe(p.titulo)[1] + '"><div class="cnTile">' + esc(p.titulo) + '</div>' +
+    (p.poster ? '<img src="' + esc(p.poster) + '" alt="" loading="lazy" onerror="this.remove()">' : '') + '</div>';
+
+  function pinta(){
+    if(!datos){
+      cuerpo.innerHTML = error
+        ? '<div class="cnErr">No pude traer la cartelera. Revisa que tengas internet y que el computador de la casa esté prendido.<button type="button" class="cnBtn" data-a="reintentar">Reintentar</button></div>'
+        : '<p class="cnMsg">Armoni está mirando la cartelera de Cali… puede tardar un minuto.</p><div class="cnCarga" aria-hidden="true">' + '<div class="cnEsq"></div>'.repeat(6) + '</div>';
+      return;
+    }
+    const todas = datos.peliculas || [];
+    const lista = todas.filter(p => filtro === "todas" || p.encaja === "si");
+    const grid = lista.length ? '<div class="cnGrid">' + lista.map((p, i) => {
+      const k = todas.indexOf(p), nivel = p.score == null ? "" : p.score >= 75 ? " alto" : p.score < 50 ? " bajo" : "";
+      return '<button type="button" class="cnCard" data-i="' + k + '" style="--i:' + Math.min(i, 10) + ';--c1:' + colorDe(p.titulo)[0] + ';--c2:' + colorDe(p.titulo)[1] + '" aria-label="' + esc(p.titulo) + '">' +
+        '<div class="cnTile">' + esc(p.titulo) + '</div>' + (p.poster ? '<img src="' + esc(p.poster) + '" alt="" loading="lazy" onerror="this.remove()">' : '') +
+        (p.score != null ? '<span class="cnScore' + nivel + '">' + p.score + '</span>' : '') + (p.encaja === "si" ? '<span class="cnEncaja">Para ustedes</span>' : '') +
+        '<div class="cnVelo"><b>' + esc(p.titulo) + '</b><small>' + esc([(p.generos || [])[0], p.duracion ? p.duracion + " min" : ""].filter(Boolean).join(" · ")) + '</small></div></button>';
+    }).join("") + '</div>' : '<p class="cnMsg">' + (todas.length ? 'Ninguna encaja del todo con ustedes este mes.' : 'No encontré películas en cartelera.') + '</p>';
+    cuerpo.innerHTML =
+      '<div class="cnFiltros" role="tablist"><button type="button" class="cnChip' + (filtro === "todas" ? " on" : "") + '" data-f="todas">Todas · ' + todas.length + '</button><button type="button" class="cnChip' + (filtro === "ustedes" ? " on" : "") + '" data-f="ustedes">Para ustedes · ' + todas.filter(p => p.encaja === "si").length + '</button></div>' +
+      grid +
+      '<div class="cnPie">' + (error ? '<p class="cnNota">No pude actualizar ahora; te muestro lo último que vi.</p>' : '') +
+        '<button type="button" class="cnBtn" data-a="actualizar"' + (cargando ? ' disabled' : '') + '>' + (cargando ? 'Buscando en la web…' : 'Actualizar cartelera') + '</button>' +
+        (datos.conClave ? '' : '<div class="cnClave"><b>Pósters (opcional)</b><br>Con una clave gratis de TMDB (themoviedb.org › Configuración › API) salen los pósters y más puntajes.<input id="cnK" type="password" autocomplete="off" placeholder="Pega aquí tu clave de TMDB"><button type="button" class="cnBtn" data-a="clave" style="margin-top:8px">Guardar clave</button></div>') +
+        '<p class="cnNota">Armoni busca en la web: confirma los horarios en la página del cine antes de ir.</p></div>';
+  }
+
+  /* detalle de una película: ¿vale la pena? y horarios en los 3 cines */
+  function detalle(p){
+    if(document.querySelector(".pgScrim.cnScrim")) return;
+    const scrim = document.createElement("div");
+    scrim.className = "pgScrim seScrim cnScrim";
+    scrim.innerHTML = '<div class="inWrap"><div class="pgCard inCard" role="dialog" aria-modal="true" aria-labelledby="cnT"><div class="inBody">' +
+      '<div class="cnCab">' + poster(p, "cnPoster") + '<div><h3 id="cnT">' + esc(p.titulo) + '</h3><p class="cnMeta">' + esc([(p.generos || []).join(", "), p.duracion ? p.duracion + " min" : "", p.clasificacion].filter(Boolean).join(" · ")) + '</p>' +
+        (p.score != null ? '<div class="cnPuntajes"><span>Críticos ' + p.score + (p.fuente ? ' · ' + esc(p.fuente) : '') + '</span></div>' : '') + '</div></div>' +
+      (p.sinopsis ? '<p class="cnSin">' + esc(p.sinopsis) + '</p>' : '') +
+      (p.porque ? '<p class="cnSin"><b>Para ustedes:</b> ' + esc(p.porque) + '</p>' : '') +
+      '<div class="cnSec">¿Vale la pena?</div><div id="cnOp"></div>' +
+      '<div class="cnSec">Horarios en Cali</div><div class="cnDias" id="cnDias">' + [0, 1, 2, 3, 4].map(n => '<button type="button" class="cnChip' + (n === 0 ? ' on' : '') + '" data-d="' + n + '">' + esc(etiquetaDia(n)) + '</button>').join("") + '</div><div id="cnHo"></div>' +
+      '</div><div class="pgRow"><button type="button" class="pgNo" id="cnX" style="flex:1">Cerrar</button></div></div></div>';
+    document.body.appendChild(scrim);
+    requestAnimationFrame(() => scrim.classList.add("on"));
+    let vivo = true;
+    const $ = id => scrim.querySelector("#" + id);
+    const cierra = () => { vivo = false; document.removeEventListener("keydown", tecla); scrim.classList.remove("on"); setTimeout(() => scrim.remove(), 340); };
+    const tecla = e => { if(e.key === "Escape") cierra(); };
+    document.addEventListener("keydown", tecla);
+    scrim.addEventListener("click", e => { if(e.target === scrim) cierra(); });
+    $("cnX").addEventListener("click", cierra);
+
+    const pensando = t => '<div class="cnPensando"><span class="dot"></span>' + t + '</div>';
+    const fallo = (t, a) => '<div class="cnErr">' + t + '<button type="button" class="cnBtn" data-r="' + a + '">Reintentar</button></div>';
+    const opinion = () => {
+      $("cnOp").innerHTML = pensando("Revisando reseñas y lo que se dice… puede tardar un poco.");
+      pide({ accion: "opinion", titulo: p.titulo }).then(j => {
+        if(!vivo) return;
+        const nom = { vale: "Vale la pena", esperar: "Mejor esperar", no: "No la recomiendo" }[j.veredicto] || "Mejor esperar";
+        const pt = (t, o) => o && o.score != null ? '<span>' + t + ' ' + o.score + (o.fuente ? ' · ' + esc(o.fuente) : '') + '</span>' : '';
+        $("cnOp").innerHTML = '<div class="cnVeredicto"><span class="cnVd ' + esc(j.veredicto) + '">' + nom + '</span><b>' + esc(j.titular) + '</b><p>' + esc(j.resumen) + '</p>' +
+          ((j.razones || []).length ? '<ul>' + j.razones.map(r => '<li>' + esc(r) + '</li>').join("") + '</ul>' : '') +
+          '<div class="cnPuntajes">' + pt("Críticos", j.critica) + pt("Público", j.publico) + '<span>Se habla ' + esc(j.buzz) + '</span>' + (j.superoExpectativas ? '<span>Superó expectativas</span>' : '') + '</div></div>';
+      }).catch(() => { if(vivo) $("cnOp").innerHTML = fallo("No pude revisarla ahora.", "op"); });
+    };
+    const memo = {};
+    const horarios = n => {
+      const fecha = masDias(n), ho = $("cnHo");
+      const pinta = j => {
+        ho.innerHTML = j.cines.map(c => '<div class="cnCine"><b>' + esc(c.cine) + (c.url ? '<a href="' + esc(c.url) + '" target="_blank" rel="noopener noreferrer">Ver en su página</a>' : '') + '</b>' +
+          (c.sedes.length ? c.sedes.map(s => '<div class="cnSede"><span>' + esc(s.sede) + '</span><div class="cnHoras">' + s.horarios.map(h => '<i>' + esc(h.hora) + (h.formato || h.idioma ? '<small>' + esc([h.formato, h.idioma].filter(Boolean).join(" · ")) + '</small>' : '') + '</i>').join("") + '</div></div>').join("") : '<p class="cnVacio">No la encontré en este cine para ese día.</p>') + '</div>').join("") +
+          (j.nota ? '<p class="cnNota">' + esc(j.nota) + '</p>' : '');
+      };
+      if(memo[fecha]){ pinta(memo[fecha]); return; }
+      ho.innerHTML = pensando("Buscando funciones en Cine Colombia, Cinépolis y Cinemark…");
+      pide({ accion: "horarios", titulo: p.titulo, fecha }).then(j => { memo[fecha] = j; if(vivo && scrim.querySelector(".cnChip.on[data-d]").dataset.d == n) pinta(j); })
+        .catch(() => { if(vivo && scrim.querySelector(".cnChip.on[data-d]").dataset.d == n) ho.innerHTML = fallo("No pude traer los horarios ahora.", "ho"); });
+    };
+    scrim.addEventListener("click", e => {
+      const d = e.target.closest("[data-d]");
+      if(d){ scrim.querySelectorAll("[data-d]").forEach(x => x.classList.toggle("on", x === d)); horarios(+d.dataset.d); return; }
+      const r = e.target.closest("[data-r]");
+      if(r){ if(r.dataset.r === "op") opinion(); else horarios(+scrim.querySelector(".cnChip.on[data-d]").dataset.d); }
+    });
+    opinion(); horarios(0);
+  }
+
+  cuerpo.addEventListener("click", async e => {
+    const f = e.target.closest("[data-f]");
+    if(f){ filtro = f.dataset.f; pinta(); return; }
+    const c = e.target.closest(".cnCard");
+    if(c){ const p = datos && datos.peliculas[+c.dataset.i]; if(p) detalle(p); return; }
+    const a = e.target.closest("[data-a]"); if(!a) return;
+    if(a.dataset.a === "reintentar" || a.dataset.a === "actualizar") refresh(true);
+    else if(a.dataset.a === "clave"){
+      const k = (document.getElementById("cnK").value || "").trim(); if(!k) return;
+      a.disabled = true; a.textContent = "Guardando…";
+      try{ await pide({ accion: "clave", clave: k }, 20000); if(datos) datos.conClave = true; refresh(true); }
+      catch{ a.disabled = false; a.textContent = "No se pudo guardar. Inténtalo de nuevo"; }
+    }
+  });
+  return { refresh };
+})();
+
 const Drawer = (function(){
   const el = document.getElementById("drawer");
   const btn = document.getElementById("menuBtn");
@@ -7416,6 +7631,7 @@ const Drawer = (function(){
   const navSalidasG = document.getElementById("navSalidasG");
   const navSalidasBtn = document.getElementById("navSalidasBtn");
   const navEma = document.getElementById("navEma");
+  const navCine = document.getElementById("navCine");
   const setSalidasG = on => { navSalidasG.classList.toggle("abierto", on); navSalidasBtn.setAttribute("aria-expanded", String(on)); };
   navSalidasBtn.addEventListener("click", () => setSalidasG(!navSalidasG.classList.contains("abierto")));
   const navMercarG = document.getElementById("navMercarG");
@@ -7423,9 +7639,9 @@ const Drawer = (function(){
   const navDura = document.getElementById("navDura");
   const setMercarG = on => { navMercarG.classList.toggle("abierto", on); navMercarBtn.setAttribute("aria-expanded", String(on)); };
   navMercarBtn.addEventListener("click", () => setMercarG(!navMercarG.classList.contains("abierto")));
-  const NAV = { chat: navChat, rest: navRest, ema: navEma, credito: navCredito, gmail: navGmail, glim: navGlim, recuerda: navRecuerda, mercar: navMercar, dura: navDura, mes: navMes, balance: navBalance, ahorro: navAhorro, dudas: navDudas, ajustes: navAjustes };
-  const SUB = { chat: "Presupuesto de la casa", rest: "Restaurantes", ema: "Salidas Ema", credito: "Crédito Carro", gmail: "AT Gmail", glim: "Glim", recuerda: "Recuerda", mercar: "A mercar", dura: "Duración", mes: "Tu mes", balance: "Balance", ahorro: "Ahorro", dudas: "Dudas", ajustes: "Ajustes" };
-  const PLACEHOLDER = { chat: "Escribe aquí…", rest: "¿Qué se te antoja?", ema: "¿A dónde llevamos a Ema?", credito: "Pregúntale sobre el crédito…", gmail: "", glim: "", recuerda: "", mercar: "", dura: "", mes: "", balance: "", ahorro: "", dudas: "", ajustes: "" };
+  const NAV = { chat: navChat, rest: navRest, ema: navEma, cine: navCine, credito: navCredito, gmail: navGmail, glim: navGlim, recuerda: navRecuerda, mercar: navMercar, dura: navDura, mes: navMes, balance: navBalance, ahorro: navAhorro, dudas: navDudas, ajustes: navAjustes };
+  const SUB = { chat: "Presupuesto de la casa", rest: "Restaurantes", ema: "Salidas Ema", cine: "Cine", credito: "Crédito Carro", gmail: "AT Gmail", glim: "Glim", recuerda: "Recuerda", mercar: "A mercar", dura: "Duración", mes: "Tu mes", balance: "Balance", ahorro: "Ahorro", dudas: "Dudas", ajustes: "Ajustes" };
+  const PLACEHOLDER = { chat: "Escribe aquí…", rest: "¿Qué se te antoja?", ema: "¿A dónde llevamos a Ema?", cine: "", credito: "Pregúntale sobre el crédito…", gmail: "", glim: "", recuerda: "", mercar: "", dura: "", mes: "", balance: "", ahorro: "", dudas: "", ajustes: "" };
 
   /* marca del menú */
   const m2 = document.getElementById("mark2");
@@ -7483,12 +7699,13 @@ const Drawer = (function(){
     document.body.classList.toggle("mode-balance", mode === "balance");
     document.body.classList.toggle("mode-ahorro", mode === "ahorro");
     document.body.classList.toggle("mode-dudas", mode === "dudas");
+    document.body.classList.toggle("mode-cine", mode === "cine");
     document.body.classList.toggle("mode-ajustes", mode === "ajustes");
     Object.entries(NAV).forEach(([m, b]) => { if(m === mode) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current"); });
     const enControl = mode === "mes" || mode === "recuerda" || mode === "balance" || mode === "ahorro";
     navControl.classList.toggle("activo", enControl);
     if(enControl) setControl(true);
-    const enSalidas = mode === "rest" || mode === "ema";
+    const enSalidas = mode === "rest" || mode === "ema" || mode === "cine";
     navSalidasG.classList.toggle("activo", enSalidas);
     if(enSalidas) setSalidasG(true);
     const enMercar = mode === "mercar" || mode === "dura";
@@ -7513,6 +7730,7 @@ const Drawer = (function(){
       if(mode === "balance") Balance.refresh();
       if(mode === "ahorro") Ahorro.refresh();
       if(mode === "dudas") Preguntas.pinta(true);
+      if(mode === "cine") Cine.refresh();
     }
     close(0, 1, true);   // al navegar, el menú se cierra rápido: el contenido ya está listo, no hay que esperarlo
   }
@@ -7523,6 +7741,7 @@ const Drawer = (function(){
   navChat.addEventListener("click", () => go("chat"));
   navRest.addEventListener("click", () => go("rest"));
   navEma.addEventListener("click", () => go("ema"));
+  navCine.addEventListener("click", () => go("cine"));
   navCredito.addEventListener("click", () => go("credito"));
   navGmail.addEventListener("click", () => go("gmail"));
   navGlim.addEventListener("click", () => go("glim"));
