@@ -3148,7 +3148,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-12.174";
+const APP_VERSION = "2026-10-12.175";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -5837,7 +5837,7 @@ const PlanesComfandi = (function(){
   const esc = t => String(t == null ? "" : t).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
   const vistos = () => { try{ return JSON.parse(localStorage.getItem(KV)) || []; }catch{ return []; } };
   const esNuevo = p => p.desde && Date.now() - p.desde < 10 * 864e5 && !vistos().includes(p.id);
-  const conEma = p => !!p.paraEma && !/\bcine\b|pel[ií]cula/i.test(p.nombre || "");   // el cine es plan de ustedes dos
+  const conEma = p => !!p.paraEma && !/\bcin[eé]\b|cinemark|cin[eé]polis|cine ?colombia|pel[ií]cula/i.test((p.nombre || "") + " " + (p.description_short || "") + " " + (p.detalle || ""));   // el cine es plan de ustedes dos
   const urlSegura = u => /^https:\/\/([a-z0-9-]+\.)*comfandi(virtual)?\.com\.co\//i.test(String(u || "")) ? u : "";
   const cuando = f => { const d = new Date(f + "T12:00:00"), dias = Math.round((d - new Date(new Date().toDateString() + " 12:00")) / 864e5); return dias === 0 ? "hoy" : dias === 1 ? "mañana" : d.toLocaleDateString("es-CO", { weekday: "short", day: "numeric", month: "short" }).replace(/\./g, ""); };
   const hace = t => { const h = Math.round((Date.now() - t) / 36e5); return h < 1 ? "hace un momento" : h < 24 ? "hace " + h + " h" : "hace " + Math.round(h / 24) + " días"; };
