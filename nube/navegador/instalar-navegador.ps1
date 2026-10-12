@@ -97,12 +97,15 @@ Bien 'Contenedor creado.'
 
 # 6) Esperar a que responda, desde la MISMA red (igual que lo hara n8n)
 Paso 'Esperando a que el navegador responda...'
+Write-Host '   (la primera vez descarga una herramienta pequena y puede tardar 1-2 minutos; no cierres la ventana)'
+docker pull $ImagenCurl *> $null
 $listo = $false
 $codigo = ''
 for ($i = 1; $i -le 30; $i++) {
     $codigo = docker run --rm --network $Red $ImagenCurl -s -o /dev/null -w '%{http_code}' --max-time 5 http://browserless:3000/docs 2>$null
     if ($codigo -eq '200') { $listo = $true; break }
     if ($codigo -eq '401' -or $codigo -eq '403') { $listo = $true; break }
+    Write-Host ('   ... intento ' + $i + ' de 30 (respuesta: ' + $codigo + ')')
     Start-Sleep -Seconds 3
 }
 if (-not $listo) {
