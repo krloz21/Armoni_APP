@@ -2067,6 +2067,10 @@ button{ transition:transform var(--t-tap) var(--ease-out); }
 .cnTec summary{ min-height:44px; display:flex; align-items:center; padding:0 14px; font-size:.8rem; font-weight:600; color:var(--ghost); cursor:pointer; list-style:none; }
 .cnTec summary::-webkit-details-marker{ display:none; }
 .cnTec pre{ margin:0; padding:0 14px 14px; max-height:260px; overflow:auto; font-size:.68rem; line-height:1.4; color:var(--dim); white-space:pre-wrap; word-break:break-all; }
+.cnWeb{ display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin:-4px 0 14px; font-size:.78rem; color:var(--dim); }
+.cnWeb a{ padding:7px 12px; border-radius:12px; border:1px solid var(--line); font-weight:600; color:#ffb066; text-decoration:none; }
+.cnWeb a:active{ transform:scale(.96); }
+.cnTerror{ display:block; width:100%; margin:12px 0 0; padding:10px; border:0; background:none; font:inherit; font-size:.76rem; color:var(--dim); text-decoration:underline; cursor:pointer; }
 .cnEstado{ display:flex; flex-wrap:wrap; gap:6px; justify-content:center; }
 .cnEstado span{ padding:4px 10px; border-radius:10px; font-size:.7rem; font-weight:600; color:var(--ghost); background:rgba(var(--ink),.07); }
 .cnEstado .mal{ color:#ffb3b3; background:rgba(217,89,89,.12); }
@@ -3235,7 +3239,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-12.160";
+const APP_VERSION = "2026-10-12.161";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -7489,6 +7493,13 @@ const Cine = (function(){
   const KEY = "armoni.cine", TTL = 6 * 3600 * 1000;
   const CINES = { cc: "Cine Colombia", cp: "Cinépolis", cm: "Cinemark" };
   const SIGLA = { cc: "Cine Colombia", cp: "Cinépolis", cm: "Cinemark" };
+  const WEB = { cc: "https://www.cinecolombia.com/", cp: "https://cinepolis.com.co/cartelera/cali-colombia", cm: "https://www.cinemark.com.co/ciudad/cali" };
+  /* géneros: se unifican los nombres (cada fuente los escribe distinto) y el terror se oculta */
+  const sinT = t => String(t || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  const GEN = [[/terror|horror|miedo/, "Terror"], [/accion/, "Acción"], [/comedia/, "Comedia"], [/animacion|anime|dibujos/, "Animación"], [/suspens|thriller|misterio|intriga/, "Suspenso"], [/ciencia|sci-?fi/, "Ciencia ficción"], [/aventura/, "Aventura"], [/drama/, "Drama"], [/familia|infantil/, "Familiar"], [/romanc|romant/, "Romance"], [/guerra|belic/, "Guerra"], [/documental/, "Documental"], [/fantas/, "Fantasía"], [/crimen|policia/, "Crimen"], [/music/, "Música"], [/biograf|historia/, "Historia"]];
+  const generosDe = p => { const r = []; (p.generos || []).forEach(g => { const k = sinT(g), m = GEN.find(x => x[0].test(k)); const n = m ? m[1] : (String(g).trim() ? String(g).trim().charAt(0).toUpperCase() + String(g).trim().slice(1) : ""); if(n && !r.includes(n)) r.push(n); }); return r; };
+  const esTerror = p => generosDe(p).includes("Terror");
+  let verTerror = false;
   const esc = t => String(t == null ? "" : t).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
   const COLORES = [["#3987e5", "#9085e9"], ["#199e70", "#2bb3c0"], ["#d55181", "#e0a030"], ["#9085e9", "#d55181"], ["#2bb3c0", "#3987e5"], ["#e66767", "#e0a030"]];
   const colorDe = t => { let h = 0; for(const c of String(t)) h = (h * 31 + c.charCodeAt(0)) >>> 0; return COLORES[h % COLORES.length]; };
@@ -7575,10 +7586,15 @@ const Cine = (function(){
         : cajaClave() + '<p class="cnMsg">Armoni está leyendo la cartelera de Cine Colombia, Cinépolis y Cinemark… puede tardar un minuto.</p><div class="cnCarga" aria-hidden="true">' + '<div class="cnEsq"></div>'.repeat(6) + '</div>';
       return;
     }
-    const todas = datos.peliculas || [];
-    const lista = todas.filter(p => filtro === "todas" || p.encaja === "si");
+    const todasT = datos.peliculas || [];
+    const ocultas = todasT.filter(esTerror).length;
+    const todas = verTerror ? todasT : todasT.filter(p => !esTerror(p));
+    const cuentaG = {}; todas.forEach(p => generosDe(p).forEach(g => { if(g !== "Terror") cuentaG[g] = (cuentaG[g] || 0) + 1; }));
+    const generos = Object.keys(cuentaG).sort((a, b) => cuentaG[b] - cuentaG[a] || a.localeCompare(b));
+    if(filtro.startsWith("g:") && !cuentaG[filtro.slice(2)]) filtro = "todas";
+    const lista = todas.filter(p => filtro === "todas" || (filtro === "ustedes" ? p.encaja === "si" : generosDe(p).includes(filtro.slice(2))));
     const grid = lista.length ? '<div class="cnGrid">' + lista.map((p, i) => {
-      const k = todas.indexOf(p), nivel = p.score == null ? "" : p.score >= 75 ? " alto" : p.score < 50 ? " bajo" : "";
+      const k = todasT.indexOf(p), nivel = p.score == null ? "" : p.score >= 75 ? " alto" : p.score < 50 ? " bajo" : "";
       return '<button type="button" class="cnCard" data-i="' + k + '" style="--i:' + Math.min(i, 10) + ';--c1:' + colorDe(p.titulo)[0] + ';--c2:' + colorDe(p.titulo)[1] + '" aria-label="' + esc(p.titulo) + '">' +
         '<div class="cnTile">' + esc(p.titulo) + '</div>' + (p.poster ? '<img src="' + esc(p.poster) + '" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="window.__cineImgFalla(this.src);this.remove()">' : '') +
         (p.score != null ? '<span class="cnScore' + nivel + '">' + p.score + '</span>' : '') + (p.encaja === "si" ? '<span class="cnEncaja">Para ustedes</span>' : '') +
@@ -7589,8 +7605,11 @@ const Cine = (function(){
     const estado = (datos.porCine || []).map(x => '<span class="' + (x.peliculas ? 'ok' : 'mal') + '">' + esc(x.cine) + ' · ' + esc(motivo(x)) + (x.via === "lectura" ? ' · lectura renderizada' : '') + '</span>').join("");
     cuerpo.innerHTML =
       (datos.conClave ? '' : cajaClave()) +
-      '<div class="cnFiltros" role="tablist"><button type="button" class="cnChip' + (filtro === "todas" ? " on" : "") + '" data-f="todas">Todas · ' + todas.length + '</button><button type="button" class="cnChip' + (filtro === "ustedes" ? " on" : "") + '" data-f="ustedes">Para ustedes · ' + todas.filter(p => p.encaja === "si").length + '</button></div>' +
+      '<div class="cnFiltros" role="tablist"><button type="button" class="cnChip' + (filtro === "todas" ? " on" : "") + '" data-f="todas">Todas · ' + todas.length + '</button><button type="button" class="cnChip' + (filtro === "ustedes" ? " on" : "") + '" data-f="ustedes">Para ustedes · ' + todas.filter(p => p.encaja === "si").length + '</button>' +
+        generos.map(g => '<button type="button" class="cnChip' + (filtro === "g:" + g ? " on" : "") + '" data-f="g:' + esc(g) + '">' + esc(g) + ' · ' + cuentaG[g] + '</button>').join("") + '</div>' +
+      '<div class="cnWeb"><span>Ver en la página de:</span>' + Object.keys(WEB).map(id => '<a href="' + esc(WEB[id]) + '" target="_blank" rel="noopener noreferrer">' + esc(CINES[id]) + '</a>').join("") + '</div>' +
       grid +
+      (ocultas ? '<button type="button" class="cnTerror" data-a="terror">' + (verTerror ? 'Ocultar las ' + ocultas + ' de terror' : 'Hay ' + ocultas + (ocultas === 1 ? ' película' : ' películas') + ' de terror ocultas · mostrar') + '</button>' : '') +
       '<div class="cnPie">' + (error ? '<p class="cnNota">No pude actualizar ahora; te muestro lo último que leí.' + detalleDe({ detalle: errDet }) + '</p>' : '') +
         '<div class="cnEstado">' + estado + '</div>' +
         '<button type="button" class="cnBtn" data-a="actualizar"' + (cargando ? ' disabled' : '') + '>' + (cargando ? 'Leyendo los cines…' : 'Actualizar cartelera') + '</button>' +
@@ -7673,6 +7692,7 @@ const Cine = (function(){
     const c = e.target.closest(".cnCard");
     if(c){ const p = datos && datos.peliculas[+c.dataset.i]; if(p) detalle(p); return; }
     const a = e.target.closest("[data-a]"); if(!a) return;
+    if(a.dataset.a === "terror"){ verTerror = !verTerror; pinta(); return; }
     if(a.dataset.a === "reintentar" || a.dataset.a === "actualizar") refresh(true);
     else if(a.dataset.a === "clave"){
       const k = (document.getElementById("cnK").value || "").trim(); if(!k) return;
