@@ -3124,7 +3124,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-12.143";
+const APP_VERSION = "2026-10-12.145";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -9357,7 +9357,7 @@ const Mercar = (function(){
     } finally { enVuelo = false; }
   }
   function refresh(entrando){
-    if(!datos){ try{ datos = JSON.parse(localStorage.getItem(KEY)); }catch{} }
+    if(!datos){ try{ const c = JSON.parse(localStorage.getItem(KEY)); if(c && Array.isArray(c.productos)) datos = c; }catch{} }
     if(entrando && estado !== "inicio"){      // al volver a la pantalla siempre arranca limpia, no donde la dejaste
       if(estado === "juego" && idx > 0) guardaPartida();
       estado = "inicio";
@@ -9489,7 +9489,7 @@ const Mercar = (function(){
   /* cada producto en uno de tres estados: con duración calculada, aprendiendo (le falta una compra) o sin compras */
   function infoDura(p){
     const veces = p.veces || 0;
-    if(p.duraDias && p.ultimaCompra){
+    if(p.duraDias > 0 && /^\d{4}-\d{2}-\d{2}/.test(p.ultimaCompra || "")){
       const dias = diasDesde(p.ultimaCompra), dur = p.duraDias, pct = dias / dur;
       const nivel = pct >= 1 ? "ya" : pct >= .85 ? "pronto" : pct >= .5 ? "medio" : "fresco";
       return { tipo: "dura", p, veces, dias, dur, pct, nivel: p.falta ? "ya" : nivel, quedan: Math.round(dur - dias), proxima: sumaDias(p.ultimaCompra, dur) };
@@ -9501,8 +9501,8 @@ const Mercar = (function(){
 
   const accionCanasta = p => '<button type="button" class="duCanasta' + (p.falta ? ' dentro' : '') + '" data-canasta="' + esc(p.id) + '"><span aria-hidden="true">🧺</span>' + (p.falta ? 'En la canasta · tocar para quitar' : 'Se acabó · dejar en la canasta') + '</button>';
   function pintaDura(entrando){
-    if(!datos){ try{ datos = JSON.parse(localStorage.getItem(KEY)); }catch{} }
-    const ps = (datos && datos.productos) || [];
+    if(!datos){ try{ const c = JSON.parse(localStorage.getItem(KEY)); if(c && Array.isArray(c.productos)) datos = c; }catch{} }
+    const ps = Array.isArray(datos && datos.productos) ? datos.productos : [];
     if(!ps.length){ duEl.innerHTML = '<p class="gEmpty">' + (datos ? 'Todavía no hay productos.' : 'Cargando…') + '</p>'; return; }
     const todos = ps.map(infoDura);
     const dura = todos.filter(x => x.tipo === "dura").sort((a, b) => b.pct - a.pct);
@@ -9602,7 +9602,7 @@ const Mercar = (function(){
   });
   duEl.addEventListener("keydown", e => { if((e.key === "Enter" || e.key === " ") && e.target.classList && e.target.classList.contains("duCard")){ e.preventDefault(); e.target.click(); } });
   function dura(entrando){
-    if(!datos){ try{ datos = JSON.parse(localStorage.getItem(KEY)); }catch{} }
+    if(!datos){ try{ const c = JSON.parse(localStorage.getItem(KEY)); if(c && Array.isArray(c.productos)) datos = c; }catch{} }
     if(entrando){ filtroD = "todo"; duAbierto = null; abiertosD.clear(); duInicia = true; }
     pintaDura(!!entrando);
     cargar();
