@@ -3239,7 +3239,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-12.164";
+const APP_VERSION = "2026-10-12.165";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -7499,7 +7499,7 @@ const Cine = (function(){
   const GEN = [[/terror|horror|miedo/, "Terror"], [/accion/, "Acción"], [/comedia/, "Comedia"], [/animacion|anime|dibujos/, "Animación"], [/suspens|thriller|misterio|intriga/, "Suspenso"], [/ciencia|sci-?fi/, "Ciencia ficción"], [/aventura/, "Aventura"], [/drama/, "Drama"], [/familia|infantil/, "Familiar"], [/romanc|romant/, "Romance"], [/guerra|belic/, "Guerra"], [/documental/, "Documental"], [/fantas/, "Fantasía"], [/crimen|policia/, "Crimen"], [/music/, "Música"], [/biograf|historia/, "Historia"]];
   const generosDe = p => { const r = []; (p.generos || []).forEach(g => { const k = sinT(g), m = GEN.find(x => x[0].test(k)); const n = m ? m[1] : (String(g).trim() ? String(g).trim().charAt(0).toUpperCase() + String(g).trim().slice(1) : ""); if(n && !r.includes(n)) r.push(n); }); return r; };
   const esTerror = p => generosDe(p).includes("Terror");
-  let verTerror = false;
+  let verTerror = false, cineSel = "";
   const esc = t => String(t == null ? "" : t).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
   const COLORES = [["#3987e5", "#9085e9"], ["#199e70", "#2bb3c0"], ["#d55181", "#e0a030"], ["#9085e9", "#d55181"], ["#2bb3c0", "#3987e5"], ["#e66767", "#e0a030"]];
   const colorDe = t => { let h = 0; for(const c of String(t)) h = (h * 31 + c.charCodeAt(0)) >>> 0; return COLORES[h % COLORES.length]; };
@@ -7606,7 +7606,9 @@ const Cine = (function(){
     }
     const todasT = datos.peliculas || [];
     const ocultas = todasT.filter(esTerror).length;
-    const todas = verTerror ? todasT : todasT.filter(p => !esTerror(p));
+    const sinT = verTerror ? todasT : todasT.filter(p => !esTerror(p));
+    const cuentaC = {}; Object.keys(CINES).forEach(id => { cuentaC[id] = sinT.filter(p => (p.cines || []).includes(id)).length; });
+    const todas = cineSel ? sinT.filter(p => (p.cines || []).includes(cineSel)) : sinT;
     const cuentaG = {}; todas.forEach(p => generosDe(p).forEach(g => { if(g !== "Terror") cuentaG[g] = (cuentaG[g] || 0) + 1; }));
     const generos = Object.keys(cuentaG).sort((a, b) => cuentaG[b] - cuentaG[a] || a.localeCompare(b));
     if(filtro.startsWith("g:") && !cuentaG[filtro.slice(2)]) filtro = "todas";
@@ -7617,12 +7619,13 @@ const Cine = (function(){
         '<div class="cnTile">' + esc(p.titulo) + '</div>' + imgPoster(p) +
         (p.score != null ? '<span class="cnScore' + nivel + '">' + p.score + '</span>' : '') + (p.encaja === "si" ? '<span class="cnEncaja">Para ustedes</span>' : '') +
         '<div class="cnVelo"><b>' + esc(p.titulo) + '</b><small>' + esc([(p.generos || [])[0], p.duracion ? p.duracion + " min" : ""].filter(Boolean).join(" · ")) + '</small><span class="cnCines">' + badgesCines(p) + '</span></div></button>';
-    }).join("") + '</div>' : '<p class="cnMsg">' + (todas.length ? (calificando ? 'Armoni todavía está viendo cuáles encajan…' : 'Ninguna encaja del todo con ustedes este mes.') : 'No encontré películas en cartelera.') + '</p>';
+    }).join("") + '</div>' : '<p class="cnMsg">' + (todas.length ? (calificando ? 'Armoni todavía está viendo cuáles encajan…' : 'Ninguna encaja del todo con ustedes este mes.') : cineSel ? 'Armoni no pudo leer la cartelera de ' + esc(CINES[cineSel]) + ' ahora mismo. Ábrela con «Ver en la página de».' : 'No encontré películas en cartelera.') + '</p>';
     const CAUSAS = { bloqueo_401: "bloqueó la lectura automática", bloqueo_403: "bloqueó la lectura automática", bloqueo_429: "limitó las lecturas (muchas seguidas)", desafio_antibot: "tiene protección anti-robots", pide_ciudad: "pide elegir ciudad", spa_vacio: "su página se arma con JavaScript", sin_senales: "su página no trae la cartelera", corto: "respondió casi vacío", timeout: "tardó demasiado", dns: "no se encontró su dirección", conexion_cortada: "se cortó la conexión", tls: "falló la conexión segura", ia_sin_peliculas: "abrió, pero no encontré películas", error_interno: "falló la lectura", sin_diag: "no se pudo leer", sin_respuesta: "no respondió" };
     const motivo = x => { if(x.peliculas) return x.peliculas + ' películas'; const c = String(x.causa || "").split(">")[0]; return (CAUSAS[c] || (/^http_/.test(c) ? "respondió con error " + c.slice(5) : x.leida ? "abrió, pero no encontré películas" : "no pude abrirlo")) + (x.http && !/http_/.test(c) && x.http !== 200 ? " (HTTP " + x.http + ")" : ""); };
     const estado = (datos.porCine || []).map(x => '<span class="' + (x.peliculas ? 'ok' : 'mal') + '">' + esc(x.cine) + ' · ' + esc(motivo(x)) + (x.via === "lectura" ? ' · lectura renderizada' : '') + '</span>').join("");
     cuerpo.innerHTML =
       (datos.conClave ? '' : cajaClave()) +
+      '<div class="cnFiltros cnCineSel" role="tablist"><button type="button" class="cnChip' + (!cineSel ? " on" : "") + '" data-c="">Todos los cines</button>' + Object.keys(CINES).map(id => '<button type="button" class="cnChip' + (cineSel === id ? " on" : "") + '" data-c="' + id + '">' + esc(CINES[id]) + (cuentaC[id] ? ' · ' + cuentaC[id] : '') + '</button>').join("") + '</div>' +
       '<div class="cnFiltros" role="tablist"><button type="button" class="cnChip' + (filtro === "todas" ? " on" : "") + '" data-f="todas">Todas · ' + todas.length + '</button><button type="button" class="cnChip' + (filtro === "ustedes" ? " on" : "") + '" data-f="ustedes">Para ustedes · ' + todas.filter(p => p.encaja === "si").length + '</button>' +
         generos.map(g => '<button type="button" class="cnChip' + (filtro === "g:" + g ? " on" : "") + '" data-f="g:' + esc(g) + '">' + esc(g) + ' · ' + cuentaG[g] + '</button>').join("") + '</div>' +
       '<div class="cnWeb"><span>Ver en la página de:</span>' + Object.keys(WEB).map(id => '<a href="' + esc(WEB[id]) + '" target="_blank" rel="noopener noreferrer">' + esc(CINES[id]) + '</a>').join("") + '</div>' +
@@ -7700,6 +7703,8 @@ const Cine = (function(){
   }
 
   cuerpo.addEventListener("click", e => {
+    const cs = e.target.closest("[data-c]");
+    if(cs && cs.closest(".cnCineSel")){ cineSel = cs.dataset.c; filtro = "todas"; pinta(); return; }
     const f = e.target.closest("[data-f]");
     if(f){ filtro = f.dataset.f; pinta(); return; }
     const c = e.target.closest(".cnCard");
