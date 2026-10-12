@@ -3268,7 +3268,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-12.169";
+const APP_VERSION = "2026-10-12.170";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -7595,7 +7595,7 @@ const Cine = (function(){
     pide({ accion: "cartelera", forzar: !!forzar })
       .then(j => {
         const viejo = {}; ((datos && datos.peliculas) || []).forEach(p => { viejo[p.clave] = p; });
-        datos = { t: Date.now(), porCine: j.porCine || [], conClave: !!j.conClave, tmdbError: j.tmdbError || "", peliculas: (j.peliculas || []).map(p => Object.assign({}, viejo[p.clave] && viejo[p.clave].enr ? viejo[p.clave] : {}, p)) };
+        datos = { t: Date.now(), flujo: j.flujo || "viejo", porCine: j.porCine || [], conClave: !!j.conClave, tmdbError: j.tmdbError || "", peliculas: (j.peliculas || []).map(p => Object.assign({}, viejo[p.clave] && viejo[p.clave].enr ? viejo[p.clave] : {}, p)) };
         guarda();
       })
       .catch(e => { error = true; errDet = e && e.detalle ? e.detalle : ""; })
