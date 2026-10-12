@@ -2076,6 +2076,8 @@ button{ transition:transform var(--t-tap) var(--ease-out); }
 .cnBtn{ display:block; width:100%; min-height:46px; border-radius:14px; border:1px solid var(--line); background:none; font:inherit; font-weight:600; color:var(--white); cursor:pointer; }
 .cnBtn:disabled{ opacity:.6; }
 .cnClave{ padding:14px; border-radius:16px; background:rgba(var(--ink),.05); font-size:.8rem; color:var(--ghost); }
+.cnArriba{ margin-bottom:14px; border:1px solid rgba(255,176,102,.5); background:rgba(255,138,80,.08); color:var(--white); }
+.cnArriba b{ color:#ffcf99; }
 .cnClave input{ width:100%; min-height:44px; margin-top:8px; padding:0 12px; border-radius:12px; border:1px solid var(--line); background:rgba(var(--ink),.05); font:inherit; font-size:16px; color:var(--white); }
 .cnCab{ display:flex; gap:14px; margin-bottom:14px; }
 .cnPoster{ flex:none; width:84px; aspect-ratio:2/3; border-radius:12px; overflow:hidden; position:relative; }
@@ -3233,7 +3235,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-12.159";
+const APP_VERSION = "2026-10-12.160";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -7565,11 +7567,12 @@ const Cine = (function(){
   const poster = (p, cls) => '<div class="' + cls + '" style="--c1:' + colorDe(p.titulo)[0] + ';--c2:' + colorDe(p.titulo)[1] + '"><div class="cnTile">' + esc(p.titulo) + '</div>' +
     (p.poster ? '<img src="' + esc(p.poster) + '" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="window.__cineImgFalla(this.src);this.remove()">' : '') + '</div>';
 
+  const cajaClave = () => '<div class="cnClave cnArriba"><b>Paso 1: pega aquí tu clave de TMDB</b><br>Con ella salen los pósters y todas las películas en cartelera en Colombia. Es la clave larga que empieza por «eyJ…» (o la de 32 letras y números).<input id="cnK" type="password" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="Toca aquí y pega la clave"><button type="button" class="cnBtn" data-a="clave" style="margin-top:8px">Guardar clave</button></div>';
   function pinta(){
     if(!datos){
       cuerpo.innerHTML = error
-        ? '<div class="cnErr">No pude traer la cartelera. Revisa que tengas internet y que el computador de la casa esté prendido.' + detalleDe({ detalle: errDet }) + '<button type="button" class="cnBtn" data-a="reintentar">Reintentar</button></div>'
-        : '<p class="cnMsg">Armoni está leyendo la cartelera de Cine Colombia, Cinépolis y Cinemark… puede tardar un minuto.</p><div class="cnCarga" aria-hidden="true">' + '<div class="cnEsq"></div>'.repeat(6) + '</div>';
+        ? cajaClave() + '<div class="cnErr">No pude traer la cartelera. Revisa que tengas internet y que el computador de la casa esté prendido.' + detalleDe({ detalle: errDet }) + '<button type="button" class="cnBtn" data-a="reintentar">Reintentar</button></div>'
+        : cajaClave() + '<p class="cnMsg">Armoni está leyendo la cartelera de Cine Colombia, Cinépolis y Cinemark… puede tardar un minuto.</p><div class="cnCarga" aria-hidden="true">' + '<div class="cnEsq"></div>'.repeat(6) + '</div>';
       return;
     }
     const todas = datos.peliculas || [];
@@ -7585,12 +7588,12 @@ const Cine = (function(){
     const motivo = x => { if(x.peliculas) return x.peliculas + ' películas'; const c = String(x.causa || "").split(">")[0]; return (CAUSAS[c] || (/^http_/.test(c) ? "respondió con error " + c.slice(5) : x.leida ? "abrió, pero no encontré películas" : "no pude abrirlo")) + (x.http && !/http_/.test(c) && x.http !== 200 ? " (HTTP " + x.http + ")" : ""); };
     const estado = (datos.porCine || []).map(x => '<span class="' + (x.peliculas ? 'ok' : 'mal') + '">' + esc(x.cine) + ' · ' + esc(motivo(x)) + (x.via === "lectura" ? ' · lectura renderizada' : '') + '</span>').join("");
     cuerpo.innerHTML =
+      (datos.conClave ? '' : cajaClave()) +
       '<div class="cnFiltros" role="tablist"><button type="button" class="cnChip' + (filtro === "todas" ? " on" : "") + '" data-f="todas">Todas · ' + todas.length + '</button><button type="button" class="cnChip' + (filtro === "ustedes" ? " on" : "") + '" data-f="ustedes">Para ustedes · ' + todas.filter(p => p.encaja === "si").length + '</button></div>' +
       grid +
       '<div class="cnPie">' + (error ? '<p class="cnNota">No pude actualizar ahora; te muestro lo último que leí.' + detalleDe({ detalle: errDet }) + '</p>' : '') +
         '<div class="cnEstado">' + estado + '</div>' +
         '<button type="button" class="cnBtn" data-a="actualizar"' + (cargando ? ' disabled' : '') + '>' + (cargando ? 'Leyendo los cines…' : 'Actualizar cartelera') + '</button>' +
-        (datos.conClave ? '' : '<div class="cnClave"><b>Pósters y lista completa (clave gratis)</b><br>Las páginas de los cines bloquean las lecturas automáticas. Con una clave gratis de TMDB salen los pósters y todas las películas en cartelera en Colombia:<br>1) Crea una cuenta en themoviedb.org · 2) Configuración › API › pide la clave · 3) pégala aquí.<input id="cnK" type="password" autocomplete="off" placeholder="Pega aquí tu clave de TMDB"><button type="button" class="cnBtn" data-a="clave" style="margin-top:8px">Guardar clave</button></div>') +
         (datos.tmdbError ? '<p class="cnNota">TMDB respondió con error: ' + esc(datos.tmdbError) + '. Revisa la clave.</p>' : '') +
         '<details class="cnTec"><summary>Detalle técnico</summary><pre>' + esc(informe().slice(0, 4500)) + '</pre></details>' +
         '<button type="button" class="cnBtn" data-a="informe">Copiar informe técnico</button>' +
