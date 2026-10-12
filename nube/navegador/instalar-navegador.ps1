@@ -103,8 +103,7 @@ $listo = $false
 $codigo = ''
 for ($i = 1; $i -le 30; $i++) {
     $codigo = docker run --rm --network $Red $ImagenCurl -s -o /dev/null -w '%{http_code}' --max-time 5 http://browserless:3000/docs 2>$null
-    if ($codigo -eq '200') { $listo = $true; break }
-    if ($codigo -eq '401' -or $codigo -eq '403') { $listo = $true; break }
+    if ($codigo -match '^[1-5][0-9][0-9]$') { $listo = $true; break }   # cualquier respuesta HTTP (incluso 404) significa que el servidor ya esta vivo
     Write-Host ('   ... intento ' + $i + ' de 30 (respuesta: ' + $codigo + ')')
     Start-Sleep -Seconds 3
 }
@@ -113,7 +112,7 @@ if (-not $listo) {
     docker logs --tail 25 $NombreNav
     Fallo 'El navegador no respondio en ~90 segundos. Mira el registro de arriba.'
 }
-if ($codigo -ne '200') {
+if ($codigo -eq '401' -or $codigo -eq '403') {
     Write-Host ('   AVISO: el navegador respondio ' + $codigo + ' (pide token). Mira el registro con: docker logs ' + $NombreNav) -ForegroundColor Yellow
 } else {
     Bien 'El navegador responde dentro de la red de n8n.'
