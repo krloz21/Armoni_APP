@@ -3239,7 +3239,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-12.161";
+const APP_VERSION = "2026-10-12.162";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -7504,8 +7504,25 @@ const Cine = (function(){
   const COLORES = [["#3987e5", "#9085e9"], ["#199e70", "#2bb3c0"], ["#d55181", "#e0a030"], ["#9085e9", "#d55181"], ["#2bb3c0", "#3987e5"], ["#e66767", "#e0a030"]];
   const colorDe = t => { let h = 0; for(const c of String(t)) h = (h * 31 + c.charCodeAt(0)) >>> 0; return COLORES[h % COLORES.length]; };
   let datos = null, filtro = "todas", cargando = false, error = false, errDet = "", calificando = false;
-  const imgFalla = {};   // pósters que no cargaron: se incluyen en el informe
-  window.__cineImgFalla = u => { imgFalla[u] = 1; };
+  const imgFalla = {};   // pósters que no cargaron (url -> motivo): van al «Detalle técnico»
+  let imgMalas = {};     // los mismos, para no volver a probarlos al repintar (se vacía al actualizar)
+  window.__cineImgFalla = (u, why) => { if(!u) return; imgFalla[u] = why || "error"; imgMalas[u] = 1; };
+  /* cadena de pósters de una película: Cine Colombia, Cinépolis, Cinemark y al final TMDB (el flujo la arma en `posters`).
+     Con datos viejos (solo `poster`) sigue funcionando. Solo https (en una página https el celular bloquea el resto). */
+  const listaPosters = p => {
+    const a = Array.isArray(p.posters) && p.posters.length ? p.posters : (p.poster ? [p.poster] : []);
+    return a.filter((u, i) => typeof u === "string" && /^https:\/\//.test(u) && a.indexOf(u) === i && !imgMalas[u]).slice(0, 4);
+  };
+  /* si un póster falla se prueba el siguiente; si ya no queda ninguno se quita la imagen y se ve el degradado con el título */
+  window.__cineImgErr = (img, why) => {
+    window.__cineImgFalla(img.getAttribute("src"), why);
+    let ps = []; try{ ps = JSON.parse(img.dataset.ps || "[]"); }catch{}
+    const n = +img.dataset.n || 1;
+    if(n < ps.length){ img.dataset.n = n + 1; img.src = ps[n]; } else img.remove();
+  };
+  /* una imagen que «carga» pero es un puntito de 1 px (pixel de seguimiento, placeholder) también cuenta como falla */
+  window.__cineImgOk = img => { if(img.naturalWidth > 0 && img.naturalWidth < 24) window.__cineImgErr(img, "diminuta"); };
+  const imgPoster = p => { const ps = listaPosters(p); return ps.length ? '<img src="' + esc(ps[0]) + '" data-ps="' + esc(JSON.stringify(ps)) + '" data-n="1" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="window.__cineImgErr(this)" onload="window.__cineImgOk(this)">' : ''; };
   try{ const d = JSON.parse(localStorage.getItem(KEY)); if(d && Array.isArray(d.peliculas) && (!d.peliculas.length || d.peliculas[0].cines)) datos = d; }catch{}
   const guarda = () => { try{ localStorage.setItem(KEY, JSON.stringify(datos)); }catch{} };
   const masDias = n => { const d = new Date(); d.setDate(d.getDate() + n); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); };
@@ -7539,9 +7556,10 @@ const Cine = (function(){
   const detalleDe = e => e && e.detalle ? '<br><small>' + esc(String(e.detalle).slice(0, 220)) + '</small>' : '';
 
   function informe(){
-    return "Informe Cine " + new Date().toISOString() + " · app " + APP_VERSION + "\n" + JSON.stringify({ porCine: (datos && datos.porCine) || [], pelis: ((datos && datos.peliculas) || []).map(p => [p.titulo, (p.cines || []).join("+"), p.poster || null]), postersQueNoCargaron: Object.keys(imgFalla).slice(0, 12), guardadoHace: datos && datos.t ? Math.round((Date.now() - datos.t) / 60000) + " min" : null }, null, 1);
+    return "Informe Cine " + new Date().toISOString() + " · app " + APP_VERSION + "\n" + JSON.stringify({ porCine: (datos && datos.porCine) || [], postersQueNoCargaron: Object.keys(imgFalla).slice(0, 12).map(u => u.slice(0, 110) + " [" + imgFalla[u] + "]"), pelis: ((datos && datos.peliculas) || []).map(p => [p.titulo, (p.cines || []).join("+"), (p.posterSrc || []).join(">") || (p.poster ? "1" : "sin póster"), (listaPosters(p)[0] || "").slice(0, 70)]), guardadoHace: datos && datos.t ? Math.round((Date.now() - datos.t) / 60000) + " min" : null }, null, 1);
   }
   function refresh(forzar){
+    if(forzar) imgMalas = {};
     if(datos && !forzar){ pinta(); if(Date.now() - (datos.t || 0) < TTL){ califica(); return; } } else pinta();
     if(cargando) return;
     cargando = true; error = false; errDet = ""; if(datos) pinta();
@@ -7576,7 +7594,7 @@ const Cine = (function(){
 
   const badgesCines = p => (p.cines || []).length ? p.cines.map(id => '<i>' + esc(SIGLA[id] || id) + '</i>').join("") : '<i>Cartelera en Colombia</i>';
   const poster = (p, cls) => '<div class="' + cls + '" style="--c1:' + colorDe(p.titulo)[0] + ';--c2:' + colorDe(p.titulo)[1] + '"><div class="cnTile">' + esc(p.titulo) + '</div>' +
-    (p.poster ? '<img src="' + esc(p.poster) + '" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="window.__cineImgFalla(this.src);this.remove()">' : '') + '</div>';
+    imgPoster(p) + '</div>';
 
   const cajaClave = () => '<div class="cnClave cnArriba"><b>Paso 1: pega aquí tu clave de TMDB</b><br>Con ella salen los pósters y todas las películas en cartelera en Colombia. Es la clave larga que empieza por «eyJ…» (o la de 32 letras y números).<input id="cnK" type="password" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="Toca aquí y pega la clave"><button type="button" class="cnBtn" data-a="clave" style="margin-top:8px">Guardar clave</button></div>';
   function pinta(){
@@ -7596,7 +7614,7 @@ const Cine = (function(){
     const grid = lista.length ? '<div class="cnGrid">' + lista.map((p, i) => {
       const k = todasT.indexOf(p), nivel = p.score == null ? "" : p.score >= 75 ? " alto" : p.score < 50 ? " bajo" : "";
       return '<button type="button" class="cnCard" data-i="' + k + '" style="--i:' + Math.min(i, 10) + ';--c1:' + colorDe(p.titulo)[0] + ';--c2:' + colorDe(p.titulo)[1] + '" aria-label="' + esc(p.titulo) + '">' +
-        '<div class="cnTile">' + esc(p.titulo) + '</div>' + (p.poster ? '<img src="' + esc(p.poster) + '" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="window.__cineImgFalla(this.src);this.remove()">' : '') +
+        '<div class="cnTile">' + esc(p.titulo) + '</div>' + imgPoster(p) +
         (p.score != null ? '<span class="cnScore' + nivel + '">' + p.score + '</span>' : '') + (p.encaja === "si" ? '<span class="cnEncaja">Para ustedes</span>' : '') +
         '<div class="cnVelo"><b>' + esc(p.titulo) + '</b><small>' + esc([(p.generos || [])[0], p.duracion ? p.duracion + " min" : ""].filter(Boolean).join(" · ")) + '</small><span class="cnCines">' + badgesCines(p) + '</span></div></button>';
     }).join("") + '</div>' : '<p class="cnMsg">' + (todas.length ? (calificando ? 'Armoni todavía está viendo cuáles encajan…' : 'Ninguna encaja del todo con ustedes este mes.') : 'No encontré películas en cartelera.') + '</p>';

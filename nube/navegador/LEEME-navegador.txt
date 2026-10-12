@@ -1,0 +1,59 @@
+NAVEGADOR PARA n8n (Chrome real en un contenedor)
+=================================================
+
+Para que sirve: algunas paginas (Cine Colombia, Cinepolis, Cinemark) no se
+dejan leer por n8n. Este "navegador" es un Chrome de verdad que corre dentro
+de Docker, y n8n le pide que abra la pagina por el.
+Nadie fuera de tu computador puede usarlo (no se abre ningun puerto).
+
+LOS 5 PASOS
+-----------
+1. Abre Docker Desktop y espera a que diga "Engine running" (verde, abajo a
+   la izquierda). n8n tambien debe estar encendido.
+
+2. Abre PowerShell:
+   - Presiona la tecla Windows, escribe:  PowerShell
+   - Haz clic en "Windows PowerShell" (no hace falta "como administrador").
+
+3. Ve a la carpeta donde guardaste el archivo instalar-navegador.ps1.
+   Truco facil: escribe  cd  (con un espacio despues), arrastra la CARPETA
+   a la ventana azul y presiona Enter.
+   Ejemplo:  cd C:\Users\TuNombre\Downloads
+
+4. Permite scripts SOLO en esta ventana (se borra al cerrarla) y ejecuta:
+      Set-ExecutionPolicy -Scope Process Bypass
+      (si pregunta, escribe S y Enter)
+      .\instalar-navegador.ps1
+   La primera vez descarga cerca de 1 GB: puede tardar varios minutos.
+
+5. Mira el final. Si ves en verde  "RESULTADO: OK"  y  "LISTO", funciono.
+   En n8n usa la direccion:  http://browserless:3000
+
+COMO SABER SI FUNCIONO
+----------------------
+- El script termina con el cuadro verde "LISTO".
+- En Docker Desktop > Containers aparece "browserless" en verde (running).
+- Si sale "ERROR" en rojo, copia el mensaje y mandamelo.
+
+COMO QUITARLO
+-------------
+Misma ventana de PowerShell, en la misma carpeta:
+      Set-ExecutionPolicy -Scope Process Bypass
+      .\detener-navegador.ps1
+(o en Docker Desktop > Containers > browserless > icono de papelera).
+n8n y sus datos no se tocan.
+
+ALTERNATIVA SIN SCRIPT (una sola linea)
+---------------------------------------
+Primero averigua la red de n8n:
+      docker inspect n8n --format '{{json .NetworkSettings.Networks}}'
+(el nombre sale antes de los dos puntos, por ejemplo  n8n-ai-starter-kit_demo)
+Luego (cambia NOMBRE_RED por ese nombre):
+      docker run -d --name browserless --network NOMBRE_RED --restart unless-stopped --shm-size=1g --memory=2g -e CONCURRENT=2 -e QUEUED=10 -e TIMEOUT=60000 ghcr.io/browserless/chromium
+Para quitarlo:   docker rm -f browserless
+
+NOTAS
+-----
+- Usa memoria: cada pagina abierta puede gastar 300 MB a 1 GB. El limite
+  esta puesto en 2 GB y 2 paginas a la vez. Si tu PC es lenta, avisame.
+- Si reinicias el computador, Docker lo vuelve a encender solo.
