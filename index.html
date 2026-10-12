@@ -914,7 +914,7 @@ body.mode-gmail footer, body.mode-glim footer{ display:none; }
 .gmBtn:focus-visible{ outline:2px solid var(--cyan); outline-offset:2px; }
 
 /* tarjeta de resumen del crédito: reusa el estilo de la ficha de restaurante (rmTop/rmStats/rmNote) */
-.credCard{ background:var(--panel); border:1px solid var(--line); border-radius:16px; padding:18px 16px; margin-bottom:6px; }
+.credCard{ background:var(--panel); border:1px solid var(--line); border-radius:22px; padding:18px 16px; margin-bottom:6px; }
 .credCard .rmTop{ padding-right:0; }
 .credCard .rmNote p.bien{ color:#8fe6a8; }
 .credCard .rmNote p.mal{ color:var(--late); }
@@ -1178,7 +1178,7 @@ body.mode-gmail footer, body.mode-glim footer{ display:none; }
 .ajVolver svg{ width:16px; height:16px; }
 .ajVolver:active{ transform:scale(.95); }
 .ajGrupo{ margin:22px 4px 8px; font-size:.72rem; color:var(--dim); letter-spacing:.08em; text-transform:uppercase; }
-.ajCard{ background:var(--panel); border:1px solid var(--line); border-radius:16px; padding:4px 8px; }
+.ajCard{ background:var(--panel); border:1px solid var(--line); border-radius:22px; padding:4px 8px; }
 .ajCard .setRow{ padding:12px 8px; }
 .ajCard .setRow + .setRow{ border-top:1px solid var(--line); border-radius:0; }
 
@@ -1630,7 +1630,7 @@ body.mode-gmail footer, body.mode-glim footer{ display:none; }
 #recCard.cargando{ opacity:.45; }
 
 /* ═════════ Glim: saldo tipo app bancaria ═════════ */
-.glimHero{ background:var(--panel); border:1px solid var(--line); border-radius:20px; padding:20px 18px 16px; box-shadow:inset 0 1px 0 rgba(var(--hi),.08); }
+.glimHero{ background:var(--panel); border:1px solid var(--line); border-radius:22px; padding:20px 18px 16px; box-shadow:inset 0 1px 0 rgba(var(--hi),.08); }
 .glimHero .gLbl, .gHead{ display:block; font-size:.72rem; color:var(--dim); letter-spacing:.08em; text-transform:uppercase; }
 .glimHero .gSaldo{ display:block; font-size:2.2rem; line-height:1.1; letter-spacing:-.02em; font-weight:600; margin:6px 0 14px; font-variant-numeric:tabular-nums; color:var(--white); }
 .gBar{ height:6px; border-radius:4px; background:rgba(var(--ink),.1); overflow:hidden; }
@@ -2032,6 +2032,8 @@ button{ transition:transform var(--t-tap) var(--ease-out); }
 .mkCanasta .mkChips em{ font-style:normal; font-size:.7rem; color:var(--dim); margin-left:3px; }
 .duCanasta{ display:flex; align-items:center; justify-content:center; gap:8px; width:100%; margin-top:14px; padding:12px 14px; border-radius:14px; border:1px solid rgba(var(--cyan-rgb),.3); background:rgba(var(--cyan-rgb),.08); color:var(--white); font:inherit; font-size:.88rem; font-weight:600; cursor:pointer; transition:transform .15s var(--ease-out), background .3s, border-color .3s; }
 .duCanasta:active{ transform:scale(.97); }
+#menuBtn, #ojoBtn, #reset, #masIngreso{ position:relative; }
+#menuBtn::before, #ojoBtn::before, #reset::before, #masIngreso::before, #send::before{ content:""; position:absolute; inset:-6px; }   /* el botón se ve igual, pero el toque llega a 44px */
 .duEsc{ display:flex; align-items:center; justify-content:center; gap:10px; width:100%; margin-top:8px; padding:11px 14px; border-radius:14px; border:1px solid var(--line); background:none; font:inherit; font-size:.84rem; font-weight:600; color:var(--ghost); cursor:pointer; transition:transform .2s var(--ease-spring), background .25s, border-color .25s, color .25s; }
 .duEsc:active{ transform:scale(.97); }
 .duEscPt{ width:10px; height:10px; border-radius:50%; background:rgba(var(--ink),.3); transition:background .25s, box-shadow .25s; }
@@ -2063,7 +2065,7 @@ button{ transition:transform var(--t-tap) var(--ease-out); }
 .balSec{ animation:duSube .45s var(--ease-out) backwards; }
 .balSec.quieto{ animation:none; }
 /* resumen general */
-.balResumen{ position:relative; overflow:hidden; padding:18px 16px 14px; border-radius:24px; border:1px solid var(--line); background:radial-gradient(120% 90% at 100% 0%, rgba(25,158,112,.14), transparent 55%), radial-gradient(100% 90% at 0% 100%, rgba(230,103,103,.10), transparent 55%), var(--panel); }
+.balResumen{ position:relative; overflow:hidden; padding:18px 16px 14px; border-radius:22px; border:1px solid var(--line); background:radial-gradient(120% 90% at 100% 0%, rgba(25,158,112,.14), transparent 55%), radial-gradient(100% 90% at 0% 100%, rgba(230,103,103,.10), transparent 55%), var(--panel); }
 .rsTit small{ display:block; font-size:.7rem; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--dim); }
 .rsTit b{ display:block; margin-top:2px; font-size:1.05rem; }
 .rsBal{ margin:14px 0 12px; }
@@ -2153,8 +2155,9 @@ button{ transition:transform var(--t-tap) var(--ease-out); }
 .ddHecho button{ flex:none; width:32px; height:32px; margin:-4px -4px -4px 0; border:0; border-radius:50%; background:none; color:var(--dim); font-size:.9rem; cursor:pointer; }
 .ddTabs{ display:grid; grid-template-columns:1fr 1fr; gap:4px; padding:4px; margin-bottom:14px; border-radius:16px; background:rgba(var(--ink),.07); }
 .ddTabs button{ min-height:42px; border:0; border-radius:12px; background:none; font:inherit; font-size:.9rem; font-weight:600; color:var(--dim); cursor:pointer; transition:background .25s ease, color .25s ease; }
-.ddTabs button[aria-selected="true"]{ color:var(--strong); background:var(--panel); box-shadow:0 1px 6px rgba(0,0,0,.25); }
-.ddTabs b{ display:inline-block; min-width:20px; margin-left:4px; padding:1px 6px; border-radius:10px; font-size:.72rem; color:#fff; background:linear-gradient(140deg,#ffb066,#ff8a50); }
+.ddTabs button[aria-selected="true"]{ color:#1a1208; background:linear-gradient(140deg,#ffb066,#ff8a50); box-shadow:0 4px 14px -6px rgba(255,138,80,.7); }
+.ddTabs b{ display:inline-block; min-width:20px; margin-left:4px; padding:1px 6px; border-radius:10px; font-size:.72rem; color:#fff; background:rgba(var(--ink),.22); }
+.ddTabs button[aria-selected="true"] b{ background:rgba(26,18,8,.28); }
 .ddNota{ margin:0 4px 12px; font-size:.82rem; color:var(--ghost); }
 .ddVacio{ margin:0; font-size:.84rem; color:var(--dim); }
 .ddDesp{ margin-bottom:10px; border-radius:18px; border:1px solid var(--line); background:var(--panel); overflow:hidden; }
@@ -2191,7 +2194,7 @@ button{ transition:transform var(--t-tap) var(--ease-out); }
 .balRegla b{ display:block; font-size:.95rem; }
 .balRegla small{ font-size:.76rem; color:var(--dim); }
 .balPartes{ display:grid; gap:8px; }
-.balParte{ border-radius:18px; border:1px solid var(--line); background:var(--panel); transition:border-color .25s ease, box-shadow .25s ease; }
+.balParte{ border-radius:22px; border:1px solid var(--line); background:var(--panel); transition:border-color .25s ease, box-shadow .25s ease; }
 .balParte.on{ border-color:color-mix(in srgb, var(--c) 55%, transparent); box-shadow:0 0 0 3px color-mix(in srgb, var(--c) 14%, transparent); }
 .bpCab{ display:flex; align-items:center; gap:12px; width:100%; padding:13px 14px; border:0; background:none; color:var(--white); font:inherit; text-align:left; cursor:pointer; }
 .bpCab > i{ flex:none; width:10px; height:34px; border-radius:6px; background:var(--c); }
@@ -2210,7 +2213,7 @@ button{ transition:transform var(--t-tap) var(--ease-out); }
 .bpIn{ overflow:hidden; padding:0 14px; }
 .balParte.on .bpIn{ padding-bottom:12px; }
 .bpNota{ margin:0 0 6px; font-size:.76rem; color:var(--dim); }
-.balTotal{ margin-top:12px; padding:6px 16px; border-radius:20px; border:1px solid var(--line); background:var(--panel); }
+.balTotal{ margin-top:12px; padding:6px 16px; border-radius:22px; border:1px solid var(--line); background:var(--panel); }
 .balTotal .bt{ display:flex; justify-content:space-between; align-items:baseline; gap:10px; padding:10px 0; font-size:.88rem; border-bottom:1px solid var(--line); }
 .balTotal .bt:last-child{ border-bottom:0; }
 .balTotal .bt span{ display:flex; align-items:center; gap:8px; color:var(--ghost); }
@@ -2223,7 +2226,7 @@ button{ transition:transform var(--t-tap) var(--ease-out); }
 .balTotal .tot span{ color:var(--white); font-weight:800; font-size:.95rem; }
 .balTotal .tot b{ font-size:1.25rem; background:linear-gradient(140deg, var(--cyan), var(--num-a)); -webkit-background-clip:text; background-clip:text; color:transparent; }
 /* ── Ahorro ── */
-.ahCard{ position:relative; overflow:hidden; padding:20px 18px 16px; border-radius:24px; border:1px solid var(--line); background:radial-gradient(120% 100% at 100% 0%, rgba(25,158,112,.22), transparent 60%), var(--panel); }
+.ahCard{ position:relative; overflow:hidden; padding:20px 18px 16px; border-radius:22px; border:1px solid var(--line); background:radial-gradient(120% 100% at 100% 0%, rgba(25,158,112,.22), transparent 60%), var(--panel); }
 .ahEt{ display:block; font-size:.7rem; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--dim); }
 .ahSaldo{ display:block; margin:4px 0 2px; font-size:clamp(2.2rem, 11.5vw, 3rem); font-weight:700; letter-spacing:-.04em; line-height:1.1; font-variant-numeric:tabular-nums; color:#6fe0b5; }
 .ahSub{ margin:0 0 14px; font-size:.82rem; color:var(--ghost); }
@@ -2882,7 +2885,7 @@ body[class*="mode-"] #masIngreso{ display:none; }
     </div>
   </header>
 
-  <main id="thread" class="sinChat" tabindex="-1">
+  <main id="thread" class="sinChat" tabindex="-1" role="log" aria-live="polite" aria-relevant="additions">
     <div class="inner">
 
       <div id="glimBanner"></div>
@@ -3142,7 +3145,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-12.148";
+const APP_VERSION = "2026-10-12.150";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -3211,8 +3214,8 @@ const ES_ANIVERSARIO =
 const ANOS_JUNTOS = HOY.getFullYear() - ANIVERSARIO.casadosDesde;
 
 const FRASES_TEMPORADA = {
-  halloween: ["Que no te asusten las cuentas 🎃", "Hasta los fantasmas llevan sus gastos 👻"],
-  navidad: ["Feliz Navidad, familia 🎄", "Que el presupuesto de diciembre te alcance 🎁"]
+  halloween: ["Que no te asusten las cuentas", "Hasta los fantasmas llevan sus gastos"],
+  navidad: ["Feliz Navidad, familia", "Que el presupuesto de diciembre te alcance"]
 };
 /* orden: aniversario (si es el día) → temporada → las de siempre. Así lo primero que ves al abrir es lo especial. */
 const FRASES = [];
@@ -5848,7 +5851,7 @@ const PlanesComfandi = (function(){
       '<div class="cfLista">' + G[grupo].slice().sort((a, b) => esNuevo(b) - esNuevo(a) || (a.fecha || "9999").localeCompare(b.fecha || "9999") || (b.desde || 0) - (a.desde || 0)).map((p, i) =>
         '<a class="cfPlan" href="' + esc(urlSegura(p.url)) + '" target="_blank" rel="noopener noreferrer" data-id="' + esc(p.id) + '" style="--i:' + Math.min(i, 8) + '">' +
           '<span class="cfImg">' + (/^https:\/\//.test(p.img || "") ? '<img src="' + esc(p.img) + '" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">' : '') + '<span class="cfEmo" aria-hidden="true">' + (p.grupo === "hoteles" ? "🏨" : p.paraEma ? "🎈" : "🎭") + '</span>' + (esNuevo(p) ? '<b class="cfNuevo">' + (p.actualizado ? 'Actualizado' : 'Nuevo') + '</b>' : '') + '</span>' +
-          '<span class="cfTx"><b>' + esc(p.nombre) + '</b>' + ((p.fecha || p.precio) ? '<small>' + (p.fecha ? '<span class="cfFecha">📅 ' + esc(cuando(p.fecha)) + '</span>' : '') + esc(p.precio === "$ 0" ? "Subsidiado" : (p.precio || "")) + '</small>' : '') + '</span></a>').join("") + '</div>';
+          '<span class="cfTx"><b>' + esc(p.nombre) + '</b>' + ((p.fecha || p.precio) ? '<small>' + (p.fecha ? '<span class="cfFecha">' + esc(cuando(p.fecha)) + '</span>' : '') + esc(p.precio === "$ 0" ? "Subsidiado" : (p.precio || "")) + '</small>' : '') + '</span></a>').join("") + '</div>';
   }
   box.addEventListener("click", e => {
     const t = e.target.closest("[data-g]");
@@ -5877,7 +5880,7 @@ const PlanesComfandi = (function(){
           '<button type="button" class="cfAnX" aria-label="Cerrar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>' +
         '<div class="cfAnTx"><small>' + (p.paraEma ? '🎈 Para ir con Ema' : '💑 Para ustedes dos') + '</small>' +
           '<h3 id="cfAnT">' + esc(p.nombre) + '</h3>' +
-          '<p>' + (p.fecha ? '<span>📅 ' + esc(cuando(p.fecha)) + '</span>' : '') + (p.precio ? '<span>' + esc(p.precio === "$ 0" ? "Subsidiado" : p.precio) + '</span>' : '') + '</p>' +
+          '<p>' + (p.fecha ? '<span>' + esc(cuando(p.fecha)) + '</span>' : '') + (p.precio ? '<span>' + esc(p.precio === "$ 0" ? "Subsidiado" : p.precio) + '</span>' : '') + '</p>' +
           (mas ? '<em>y ' + mas + (mas === 1 ? ' novedad más' : ' novedades más') + ' abajo</em>' : '') + '</div>' +
         '<div class="cfAnBtns"><a class="cfAnSi" href="' + esc(urlSegura(p.url)) + '" target="_blank" rel="noopener noreferrer">Ver en Comfandi</a><button type="button" class="cfAnNo">Después</button></div>' +
       '</div>';
@@ -6277,8 +6280,8 @@ const CreditoCarro = (function(){
         '<div style="flex:1;min-width:0">' +
           '<div class="rmName">Kia Sportage HEV</div>' +
           '<div class="rmEmos">' +
-            '<span><b>📅</b>' + r.cuotasPagadas + ' de ' + r.plazoMeses + ' cuotas</span>' +
-            '<span><b>🏁</b>termina ' + esc(mesLargo(c.fechaFinEstimada)) + '</span>' +
+            '<span><b><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg></b>' + r.cuotasPagadas + ' de ' + r.plazoMeses + ' cuotas</span>' +
+            '<span><b><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 21V4M5 4h11l-2 4 2 4H5"/></svg></b>termina ' + esc(mesLargo(c.fechaFinEstimada)) + '</span>' +
           '</div>' +
         '</div>' +
         '<div class="rmScoreWrap">' +
@@ -6604,9 +6607,9 @@ const Spring = (function(){
 const Privacidad = (function(){
   const KEY = "armoni.oculto";
   /* $12.000 · $ 1.250.000 · 1.120.000 · 2.565.684,50 · $50000 */
-  const RE = /\$\s?\d[\d.,]*\s?[kKM]?\b|\b\d{1,3}(?:[.,]\d{3})+(?:[.,]\d+)?\b/g;
+  const RE = /\$\s?\d[\d.,]*(?:\s?[kKM]\b)?|\b\d{1,3}(?:[.,]\d{3})+(?:[.,]\d+)?\b|\b\d{4,}(?:[.,]\d+)?(?=\s?(?:COP|pesos)\b)|\b\d+(?:[.,]\d+)?\s?(?:millones?|mil|[kKM])\b/g;
   const MASCARA = "*****";
-  const HAY = /\$\s?\d[\d.,]*\s?[kKM]?\b|\b\d{1,3}[.,]\d{3}\b/;
+  const HAY = /\$\s?\d|\b\d{1,3}[.,]\d{3}\b|\b\d{4,}\s?(?:COP|pesos)\b|\d\s?(?:millon|mil\b|[kKM]\b)/;
   const orig = new Map();            // nodo de texto → texto real
   let on = false, mo = null, hecho = false;
   const lee = () => { try{ return localStorage.getItem(KEY) === "1"; }catch{ return false; } };
@@ -6778,7 +6781,7 @@ const Balance = (function(){
             (filas.length ? filas.map((f, i) => '<div class="balFila" style="--i:' + i + ';--c:' + f.color + '"><span><u></u>' + esc(f.n) + '</span><em>' + peso(f.v) + ' · ' + Math.round(f.pct) + '%</em><i style="width:' + Math.max(3, f.v / mx * 100).toFixed(1) + '%"></i></div>').join("") : '<p class="gEmpty" style="margin:6px 0 0">Nada en esta parte este mes.</p>') +
           '</div></div></div>';
       }).join("") + '</div>' + totales(R) +
-      (R.gastaronMas ? '<p class="balAviso">⚠️ ' + (M.mes === "general" ? 'En total' : 'En ' + esc(mesNombre(M.mes))) + ' salió más de lo que entró: los porcentajes se miden sobre lo gastado.</p>' : '');
+      (R.gastaronMas ? '<p class="balAviso">' + (M.mes === "general" ? 'En total' : 'En ' + esc(mesNombre(M.mes))) + ' salió más de lo que entró: los porcentajes se miden sobre lo gastado.</p>' : '');
   }
 
   /* la suma de todo al final: fijos + entretenimiento = lo gastado; con el ahorro da el total */
@@ -7055,9 +7058,10 @@ const Ahorro = (function(){
     requestAnimationFrame(() => scrim.classList.add("on"));
     let ocupado = false;
     const cierra = () => { document.removeEventListener("keydown", tecla); scrim.classList.remove("on"); setTimeout(() => scrim.remove(), 340); };
-    const tecla = e => { if(e.key === "Escape" && !ocupado) cierra(); };
+    const hayDatos = () => [...scrim.querySelectorAll("input:not([type=hidden]), textarea")].some(i => !i.readOnly && i.value !== i.defaultValue);   // si ya escribiste algo, tocar fuera no lo pierde
+    const tecla = e => { if(e.key === "Escape" && !ocupado && !hayDatos()) cierra(); };
     document.addEventListener("keydown", tecla);
-    scrim.addEventListener("click", e => { if(e.target === scrim && !ocupado) cierra(); });
+    scrim.addEventListener("click", e => { if(e.target === scrim && !ocupado && !hayDatos()) cierra(); });
     const no = scrim.querySelector("[data-cerrar]"); if(no) no.addEventListener("click", () => { if(!ocupado) cierra(); });
     const $ = id => scrim.querySelector("#" + id);
     const ctl = { scrim, $, cierra, ocupa(v){ ocupado = v; } };
@@ -7858,7 +7862,7 @@ function avisoOk(titulo, detalle){
   t.innerHTML = '<span class="mkOkMini" aria-hidden="true">✓</span><span class="pt"><b>' + esc(titulo) + '</b><small>' + esc(detalle) + '</small></span>';
   document.body.appendChild(t);
   requestAnimationFrame(() => t.classList.add("on"));
-  setTimeout(() => { t.classList.remove("on"); setTimeout(() => t.remove(), 300); }, 2600);
+  setTimeout(() => { t.classList.remove("on"); setTimeout(() => t.remove(), 300); }, 4500);
 }
 
 const GastoManual = (function(){
@@ -10535,7 +10539,7 @@ const Decora = (function(){
   let last = 0;
   function aplica(){
     const tag = document.getElementById("seasonTag");
-    if(tag) tag.textContent = TEMPORADA ? (TEMPORADA === "halloween" ? "🎃" : "🎄") : "";
+    if(tag) tag.textContent = TEMPORADA ? "" : "";
     nieve = TEMPORADA === "navidad" && !REDUCED;
     if(nieve && !c){
       c = document.createElement("canvas"); c.id = "snow"; document.body.appendChild(c);
