@@ -3233,7 +3233,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-12.158";
+const APP_VERSION = "2026-10-12.159";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -7594,7 +7594,8 @@ const Cine = (function(){
         (datos.tmdbError ? '<p class="cnNota">TMDB respondió con error: ' + esc(datos.tmdbError) + '. Revisa la clave.</p>' : '') +
         '<details class="cnTec"><summary>Detalle técnico</summary><pre>' + esc(informe().slice(0, 4500)) + '</pre></details>' +
         '<button type="button" class="cnBtn" data-a="informe">Copiar informe técnico</button>' +
-        '<p class="cnNota">Armoni lee las páginas de los cines: confirma los horarios en su página antes de ir.</p></div>';
+        '<p class="cnNota">Confirma los horarios en la página de cada cine antes de ir.</p>' +
+        (datos.conClave ? '<p class="cnNota">Los pósters y puntajes vienen de TMDB. Esta app usa la API de TMDB, pero no está avalada ni certificada por TMDB.</p>' : '') + '</div>';
   }
 
   /* detalle de una película: ¿vale la pena? y horarios en los 3 cines */
