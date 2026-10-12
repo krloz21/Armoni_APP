@@ -2106,6 +2106,17 @@ button{ transition:transform var(--t-tap) var(--ease-out); }
 #colaPill.girando i{ animation-duration:.5s; }
 @keyframes colaLate{ 50%{ opacity:.3; transform:scale(.7); } }
 /* pantalla de Dudas */
+.prHilo{ display:grid; gap:8px; margin:0 0 12px; max-height:36vh; overflow-y:auto; }
+.prHilo[hidden]{ display:none; }
+.prB{ padding:10px 13px; border-radius:16px; font-size:.88rem; line-height:1.4; max-width:90%; }
+.prB.yo{ justify-self:end; border-bottom-right-radius:5px; color:var(--strong); background:rgba(255,138,80,.2); }
+.prB.ar{ justify-self:start; border-bottom-left-radius:5px; color:var(--white); background:rgba(var(--ink),.08); }
+.prReg{ display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:14px; border:1px solid rgba(111,224,181,.4); background:rgba(25,158,112,.1); }
+.prReg span{ flex:1; min-width:0; font-size:.84rem; }
+.prReg b{ display:block; font-weight:600; color:var(--strong); }
+.prReg small{ display:block; margin-top:2px; font-size:.72rem; color:var(--ghost); }
+.prReg button{ flex:none; min-height:36px; padding:0 14px; border:0; border-radius:12px; font:inherit; font-size:.82rem; font-weight:700; color:#063; background:#6fe0b5; cursor:pointer; }
+.prReg em{ flex:none; font-style:normal; font-size:.8rem; font-weight:700; color:#6fe0b5; }
 .prTop{ position:relative; }
 .prX{ position:absolute; top:-6px; right:-6px; width:44px; height:44px; display:grid; place-items:center; border:0; background:none; color:var(--dim); cursor:pointer; }
 .prX svg{ width:18px; height:18px; }
@@ -2818,14 +2829,14 @@ body[class*="mode-"] #masIngreso{ display:none; }
         <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3.5 7l8.5 6.5L20.5 7"/></svg></span>
         <span class="txt"><b>AT Gmail</b><span>Enviar el comprobante a la inmobiliaria</span></span>
       </button>
-      <button type="button" id="navAjustes">
-        <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></svg></span>
-        <span class="txt"><b>Ajustes</b><span>Apariencia y notificaciones</span></span>
-      </button>
       <button type="button" id="navDudas">
         <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8.5 8.5 0 0 1-12.4 7.6L3 21l1.4-5.6A8.5 8.5 0 1 1 21 12z"/><path d="M9.6 9.4a2.5 2.5 0 0 1 4.8.8c0 1.7-2.4 2-2.4 3.4M12 16.4h.01"/></svg></span>
         <span class="txt"><b>Dudas</b><span>Lo que Armoni quiere preguntarte</span></span>
         <span class="navBadge" id="navDudasN" hidden></span>
+      </button>
+      <button type="button" id="navAjustes">
+        <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></svg></span>
+        <span class="txt"><b>Ajustes</b><span>Apariencia y notificaciones</span></span>
       </button>
     </nav>
 
@@ -3113,7 +3124,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-11.139";
+const APP_VERSION = "2026-10-12.140";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -7147,7 +7158,7 @@ const Preguntas = (function(){
   /* lo que Armoni ha aprendido de nuestras respuestas (copia en el celular por si se reinstala el flujo) */
   let saber = (() => { try{ return JSON.parse(localStorage.getItem(KS)) || []; }catch{ return []; } })();
   const refDe = id => String(id).replace(/-/g, "").slice(-10);
-  const limpia = q => { let t = String(q.pregunta || ""); (q.movs || []).forEach(m => { t = t.split(refDe(m.id)).join("«" + m.concepto + "»"); }); return t.replace(/\s*\(?\b[0-9a-f]{10}\b\)?/g, "").replace(/\s{2,}/g, " ").trim(); };
+  const limpia = (q, txt) => { let t = String(txt != null ? txt : q.pregunta || ""); (q.movs || []).forEach(m => { t = t.split(refDe(m.id)).join("«" + m.concepto + "»"); }); return t.replace(/\s*\(?\b[0-9a-f]{10}\b\)?/g, "").replace(/\s{2,}/g, " ").trim(); };
   let pendientes = (() => { try{ return JSON.parse(localStorage.getItem(KP)) || []; }catch{ return []; } })();
   /* todas las dudas sin resolver (incluso las que se dejaron para después) y las últimas respondidas */
   let dudas = (() => { try{ return JSON.parse(localStorage.getItem(KD)) || { abiertas: [], hechas: [] }; }catch{ return { abiertas: [], hechas: [] }; } })();
@@ -7177,54 +7188,87 @@ const Preguntas = (function(){
     const b = document.getElementById("navDudasN"); if(!b) return;
     const n = dudas.abiertas.length; b.textContent = n; b.hidden = !n;
   }
+  const KR = "armoni.regs";
+  const regsHechos = () => { try{ return JSON.parse(localStorage.getItem(KR)) || []; }catch{ return []; } };
+  const claveReg = (qid, r) => qid + "|" + r.concepto + "|" + r.monto + "|" + r.fecha;
+  /* chat temporal: Armoni pregunta, tú respondes, y sigue preguntando si lo necesita hasta cerrar el caso */
   function abre(id){
     const desdeLista = typeof id === "string";
     const q = desdeLista ? (dudas.abiertas.find(x => x.id === id) || dudas.hechas.find(x => x.id === id)) : pendientes[0];
     const corrige = desdeLista && !dudas.abiertas.some(x => x.id === id);
     if(!q || document.querySelector(".pgScrim.prScrim")) return;
+    const hilo = (q.hilo && q.hilo.length) ? q.hilo : [{ r: "a", t: q.pregunta }];
+    const burbuja = h => '<div class="prB ' + (h.r === "u" ? "yo" : "ar") + '">' + esc(limpia(q, h.t)) + '</div>' + ((h.reg || []).map(r => regHtml(q.id, r)).join(""));
+    const regHtml = (qid, r) => {
+      const hecho = regsHechos().includes(claveReg(qid, r));
+      return '<div class="prReg"><span><b>' + esc(r.concepto) + '</b><small>' + esc(r.tipo) + ' · ' + esc(r.categoria) + ' · ' + peso(r.monto) + ' · ' + esc(fechaC(r.fecha)) + '</small></span>' +
+        (hecho ? '<em>✓ Registrado</em>' : '<button type="button" data-reg=\'' + esc(JSON.stringify(r)) + '\'>Registrar</button>') + '</div>';
+    };
     const scrim = document.createElement("div");
     scrim.className = "pgScrim seScrim prScrim";
     scrim.innerHTML = '<div class="inWrap"><div class="pgCard inCard prCard" role="dialog" aria-modal="true" aria-labelledby="prT">' +
-      '<div class="prTop"><button type="button" class="prX" id="prX" aria-label="Cerrar, no volver a preguntar en un buen tiempo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button><span class="prIco" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8.5 8.5 0 0 1-12.4 7.6L3 21l1.4-5.6A8.5 8.5 0 1 1 21 12z"/><path d="M9.6 9.4a2.5 2.5 0 0 1 4.8.8c0 1.7-2.4 2-2.4 3.4M12 16.4h.01"/></svg></span><small>' + (corrige ? 'Corregir mi respuesta' : 'Armoni tiene una pregunta') + (!desdeLista && pendientes.length > 1 ? ' · 1 de ' + pendientes.length : '') + '</small></div>' +
-      '<h3 id="prT">' + esc(limpia(q)) + '</h3>' +
+      '<div class="prTop"><button type="button" class="prX" id="prX" aria-label="Cerrar, no volver a preguntar en un buen tiempo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button><span class="prIco" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8.5 8.5 0 0 1-12.4 7.6L3 21l1.4-5.6A8.5 8.5 0 1 1 21 12z"/><path d="M9.6 9.4a2.5 2.5 0 0 1 4.8.8c0 1.7-2.4 2-2.4 3.4M12 16.4h.01"/></svg></span><small>' + (corrige ? 'Corregir mi respuesta' : q.tipo === "caso" ? 'Armoni quiere cerrar un caso' : 'Armoni tiene una pregunta') + (!desdeLista && pendientes.length > 1 ? ' · 1 de ' + pendientes.length : '') + '</small></div>' +
+      '<h3 id="prT">' + esc(limpia(q, hilo[0].t)) + '</h3>' +
       ((q.movs || []).length ? '<div class="prMovs">' + q.movs.map(m => '<div><span>' + esc(m.concepto) + '<small>' + esc(fechaC(m.fecha)) + ' · ' + esc(m.cat) + '</small></span><b class="' + (m.tipo === "Ingreso" ? 'mas' : 'menos') + '">' + (m.tipo === "Ingreso" ? '+' : '−') + peso(m.monto) + '</b></div>').join("") + '</div>' : '') +
+      '<div class="prHilo" id="prHilo"' + (hilo.length > 1 ? '' : ' hidden') + '>' + hilo.slice(1).map(burbuja).join("") + '</div>' +
       '<div class="inBody">' +
-      ((q.opciones || []).length ? '<div class="prOps">' + q.opciones.map(o => '<button type="button" data-op="' + esc(o) + '">' + esc(o) + '</button>').join("") + '</div>' : '') +
+      ((q.opciones || []).length && hilo.length < 2 ? '<div class="prOps">' + q.opciones.map(o => '<button type="button" data-op="' + esc(o) + '">' + esc(o) + '</button>').join("") + '</div>' : '') +
       '<textarea id="prTx" rows="3" maxlength="600" placeholder="Escríbele a Armoni con tus palabras…"></textarea>' +
       '<p class="prMsg" id="prMsg" role="status"></p><p class="inErr" id="prErr" role="alert"></p></div>' +
       '<div class="pgRow"><button type="button" class="pgNo" id="prNo">Después</button><button type="button" class="pgSi" id="prSi" disabled>Responder</button></div></div></div>';
     document.body.appendChild(scrim);
     requestAnimationFrame(() => scrim.classList.add("on"));
-    const $ = id => scrim.querySelector("#" + id), tx = $("prTx"), si = $("prSi");
-    let ocupado = false, listo = false, sigue = false;
+    const $ = id => scrim.querySelector("#" + id), tx = $("prTx"), si = $("prSi"), hl = $("prHilo");
+    let ocupado = false, listo = false;
     const cierra = () => { scrim.classList.remove("on"); setTimeout(() => scrim.remove(), 340); };
+    const abajo = () => { hl.hidden = false; hl.scrollTop = hl.scrollHeight; };
+    abajo(); if(hilo.length < 2) hl.hidden = true;
     tx.addEventListener("input", () => { si.disabled = !tx.value.trim(); });
     scrim.querySelectorAll("[data-op]").forEach(b => b.addEventListener("click", () => { tx.value = b.dataset.op; si.disabled = false; scrim.querySelectorAll("[data-op]").forEach(x => x.classList.toggle("on", x === b)); }));
+    /* confirmar un movimiento que Armoni propone registrar */
+    scrim.addEventListener("click", async e => {
+      const b = e.target.closest("[data-reg]"); if(!b || b.disabled) return;
+      let r; try{ r = JSON.parse(b.dataset.reg); }catch{ return; }
+      b.disabled = true; b.textContent = "Guardando…";
+      try{
+        const resp = await Cola.post(MOVIMIENTO_URL, { method: "POST", body: JSON.stringify({ token: MERCADO_TOKEN, tipo: r.tipo, concepto: r.concepto, categoria: r.categoria, monto: r.monto, fecha: r.fecha, nota: "Registrado desde Dudas", forzar: true }) });
+        const j = await resp.json().catch(() => ({}));
+        if(!resp.ok || j.ok === false) throw new Error(j.error || "no");
+        const hs = regsHechos(); hs.push(claveReg(q.id, r)); try{ localStorage.setItem(KR, JSON.stringify(hs.slice(-200))); }catch{}
+        b.outerHTML = '<em>' + (j.enCola ? "✓ Guardado, se envía al prender el PC" : "✓ Registrado") + '</em>';
+      }catch(er){ b.disabled = false; b.textContent = "Registrar"; $("prErr").textContent = (er && er.message && er.message !== "Failed to fetch" && er.message !== "no") ? er.message : "No pude registrarlo. Inténtalo de nuevo."; }
+    });
     $("prNo").addEventListener("click", () => {
       if(ocupado) return;
       if(!listo && !desdeLista) pide({ accion: "saltar", id: q.id }).catch(() => {});   // vuelve a preguntar en unos días (desde la lista no se pospone nada)
       cierra();
     });
-    /* la X cierra y no vuelve a preguntar por 2 semanas; la duda sigue en Control › Dudas */
+    /* la X cierra y no vuelve a preguntar por 2 semanas; la duda sigue en Dudas */
     $("prX").addEventListener("click", () => {
       if(ocupado) return;
       if(!listo && !desdeLista) pide({ accion: "saltar", id: q.id, dias: 14 }).catch(() => {});
       cierra();
     });
     si.addEventListener("click", async () => {
-      if(listo){ cierra(); if(desdeLista){ if(sigue) setTimeout(() => abre(q.id), 420); } else if(pendientes.length) setTimeout(abre, 420); return; }
+      if(listo){ cierra(); if(!desdeLista && pendientes.length) setTimeout(abre, 420); return; }
       const t = tx.value.trim(); if(!t || ocupado) return;
       ocupado = true; si.disabled = true; si.textContent = "Pensando…"; $("prErr").textContent = "";
+      hl.insertAdjacentHTML("beforeend", burbuja({ r: "u", t })); abajo();
       try{
         const j = await pide({ accion: "responder", id: q.id, respuesta: t });
-        ocupado = false; listo = true; sigue = !!j.sigue;
-        $("prMsg").textContent = j.mensaje || "¡Listo, ya lo aprendí!";
-        tx.hidden = true; const ops = scrim.querySelector(".prOps"); if(ops) ops.hidden = true;
-        $("prNo").textContent = "Cerrar"; si.disabled = false;
-        si.textContent = desdeLista ? (j.sigue ? "Ver su otra pregunta" : "Listo") : pendientes.length ? (j.sigue ? "Ver su otra pregunta" : "Siguiente pregunta") : "Listo";
+        ocupado = false;
+        const ops = scrim.querySelector(".prOps"); if(ops) ops.hidden = true;
+        hl.insertAdjacentHTML("beforeend", burbuja({ r: "a", t: j.sigue ? (j.pregunta || j.mensaje) : (j.mensaje || "¡Listo, ya lo aprendí!"), reg: j.registrar })); abajo();
+        if(j.sigue){            // el chat sigue: Armoni necesita saber más
+          tx.value = ""; si.textContent = "Responder"; si.disabled = true; tx.focus();
+        }else{                  // caso cerrado
+          listo = true; tx.hidden = true; $("prNo").textContent = "Cerrar"; si.disabled = false;
+          si.textContent = desdeLista ? "Listo" : pendientes.length ? "Siguiente pregunta" : "Listo";
+        }
         if(typeof Balance !== "undefined" && document.body.classList.contains("mode-balance")) Balance.refresh();
       }catch{
         ocupado = false; si.disabled = false; si.textContent = "Responder";
+        hl.lastElementChild && hl.lastElementChild.classList.contains("yo") && hl.lastElementChild.remove();
         $("prErr").textContent = "No pude enviarla. Revisa tu internet y que el flujo «Preguntas» esté activo en n8n.";
       }
     });
@@ -7265,7 +7309,7 @@ const Preguntas = (function(){
     const tabs = '<div class="duTabs" role="tablist"><button type="button" role="tab" data-t="dudas" aria-selected="' + (pestana === "dudas") + '">Dudas' + (A.length ? ' <b>' + A.length + '</b>' : '') + '</button><button type="button" role="tab" data-t="aprendizaje" aria-selected="' + (pestana === "aprendizaje") + '">Aprendizaje' + (saber.length ? ' <b>' + saber.length + '</b>' : '') + '</button></div>';
     cuerpo.innerHTML = tabs + (pestana === "dudas" ?
       '<div class="duResumen' + (A.length ? '' : ' ok') + '"><span class="duNum">' + (A.length || "✓") + '</span><div><b>' + (A.length ? (A.length === 1 ? "Tienes 1 duda por resolver" : "Tienes " + A.length + " dudas por resolver") : "Todo en orden") + '</b><span class="t">' + (A.length ? "Responderlas hace que tus cuentas queden más exactas." : "Armoni no tiene preguntas pendientes por ahora.") + '</span></div></div>' +
-      (A.length ? '<div class="duLista">' + A.map((q, i) => '<article class="duCard" style="--i:' + Math.min(i, 8) + '">' + (q.saltada ? '<span class="duTag dif">La dejaste para después</span>' : '<span class="duTag">Por resolver</span>') + '<h3>' + esc(limpia(q)) + '</h3>' + movs(q) + '<button type="button" class="duBtn" data-id="' + esc(q.id) + '">Responder</button></article>').join("") + '</div>' : '') +
+      (A.length ? '<div class="duLista">' + A.map((q, i) => '<article class="duCard" style="--i:' + Math.min(i, 8) + '">' + (q.tipo === "caso" ? '<span class="duTag">Caso abierto</span>' : q.saltada ? '<span class="duTag dif">La dejaste para después</span>' : '<span class="duTag">Por resolver</span>') + ((q.hilo || []).length > 1 ? ' <span class="duTag dif">En conversación</span>' : '') + '<h3>' + esc(limpia(q)) + '</h3>' + movs(q) + '<button type="button" class="duBtn" data-id="' + esc(q.id) + '">' + (q.tipo === "caso" || (q.hilo || []).length > 1 ? "Hablar con Armoni" : "Responder") + '</button></article>').join("") + '</div>' : '') +
       '<button type="button" class="duBuscar" id="duBuscar">Buscar dudas nuevas</button>'
       :
       '<p class="duNota">Lo que Armoni ha aprendido de tus respuestas. Si algo ya no es cierto, olvídalo con la ✕ o corrige una respuesta.</p>' +
