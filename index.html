@@ -3239,7 +3239,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-12.162";
+const APP_VERSION = "2026-10-12.163";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -7627,9 +7627,7 @@ const Cine = (function(){
         generos.map(g => '<button type="button" class="cnChip' + (filtro === "g:" + g ? " on" : "") + '" data-f="g:' + esc(g) + '">' + esc(g) + ' · ' + cuentaG[g] + '</button>').join("") + '</div>' +
       '<div class="cnWeb"><span>Ver en la página de:</span>' + Object.keys(WEB).map(id => '<a href="' + esc(WEB[id]) + '" target="_blank" rel="noopener noreferrer">' + esc(CINES[id]) + '</a>').join("") + '</div>' +
       grid +
-      (ocultas ? '<button type="button" class="cnTerror" data-a="terror">' + (verTerror ? 'Ocultar las ' + ocultas + ' de terror' : 'Hay ' + ocultas + (ocultas === 1 ? ' película' : ' películas') + ' de terror ocultas · mostrar') + '</button>' : '') +
       '<div class="cnPie">' + (error ? '<p class="cnNota">No pude actualizar ahora; te muestro lo último que leí.' + detalleDe({ detalle: errDet }) + '</p>' : '') +
-        '<div class="cnEstado">' + estado + '</div>' +
         '<button type="button" class="cnBtn" data-a="actualizar"' + (cargando ? ' disabled' : '') + '>' + (cargando ? 'Leyendo los cines…' : 'Actualizar cartelera') + '</button>' +
         (datos.tmdbError ? '<p class="cnNota">TMDB respondió con error: ' + esc(datos.tmdbError) + '. Revisa la clave.</p>' : '') +
         '<details class="cnTec"><summary>Detalle técnico</summary><pre>' + esc(informe().slice(0, 4500)) + '</pre></details>' +
