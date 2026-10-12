@@ -3124,7 +3124,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-12.141";
+const APP_VERSION = "2026-10-12.143";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -6993,7 +6993,8 @@ const Ahorro = (function(){
     const mes = hoyISO().slice(0, 7), esteMes = movs.filter(m => m.fecha.startsWith(mes)).reduce((a, m) => a + m.monto, 0);
     const total = datos.total || 0;
     // la barra de arriba: cuánto pesa cada cajita en el total
-    const reparto = total > 0 ? '<div class="ahReparto" role="img" aria-label="Cómo se reparte el ahorro">' + cs.filter(c => c.saldo > 0).map(c => '<i style="flex:' + c.saldo + ';background:' + color(c) + '"></i>').join("") + (datos.sinCaja > 0 ? '<i style="flex:' + datos.sinCaja + ';background:rgba(var(--ink),.25)"></i>' : '') + '</div>' : '';
+    const repT = datos.cuenta != null ? datos.cuenta : total;
+    const reparto = repT > 0 ? '<div class="ahReparto" role="img" aria-label="Cómo se reparte la plata">' + cs.filter(c => c.saldo > 0).map(c => '<i style="flex:' + c.saldo + ';background:' + color(c) + '"></i>').join("") + (datos.sinCaja > 0 ? '<i style="flex:' + datos.sinCaja + ';background:rgba(var(--ink),.25)"></i>' : '') + '</div>' : '';
     const porMes = {};
     movs.forEach(m => { (porMes[m.fecha.slice(0, 7)] = porMes[m.fecha.slice(0, 7)] || []).push(m); });
     const lista = Object.keys(porMes).sort().reverse().slice(0, 6).map(k => {
@@ -7003,18 +7004,20 @@ const Ahorro = (function(){
     }).join("");
     box.innerHTML =
       '<div class="ahCard">' +
-        '<small class="ahEt">Tenemos ahorrado</small><strong class="ahSaldo">' + peso(total) + '</strong>' +
-        '<p class="ahSub">' + (esteMes ? (esteMes > 0 ? '+' : '') + peso(esteMes) + ' este mes' : 'Sin movimientos este mes') + ' · ' + cs.length + (cs.length === 1 ? ' cajita' : ' cajitas') + '</p>' + reparto +
+        (datos.cuenta != null ? '<small class="ahEt">En la cuenta</small><strong class="ahSaldo">' + peso(datos.cuenta) + '</strong>' +
+          '<p class="ahSub">Ahorrado ' + peso(total) + ' · Para gastar ' + peso(datos.paraGastar || 0) + '</p>' :
+          '<small class="ahEt">Tenemos ahorrado</small><strong class="ahSaldo">' + peso(total) + '</strong>' +
+          '<p class="ahSub">' + (esteMes ? (esteMes > 0 ? '+' : '') + peso(esteMes) + ' este mes' : 'Sin movimientos este mes') + ' · ' + cs.length + (cs.length === 1 ? ' cajita' : ' cajitas') + '</p>') + reparto +
         '<div class="ahBtns"><button type="button" class="ahBtn mas" data-a="guardar"><span aria-hidden="true">+</span>Guardar</button><button type="button" class="ahBtn menos" data-a="sacar"><span aria-hidden="true">−</span>Sacar</button></div>' +
       '</div>' +
-      '<div class="mkSec">Cajitas</div><div class="ahCajas">' +
+      '<div class="mkSec">Apartados</div><div class="ahCajas">' +
         cs.map(c => {
           const delMes = (c.movimientos || []).filter(m => m.fecha.startsWith(mes)).reduce((a, m) => a + m.monto, 0);
-          const pct = c.meta ? Math.min(999, Math.round(c.saldo / c.meta * 100)) : null;
+          const pct = c.meta && !c.gasto ? Math.min(999, Math.round(c.saldo / c.meta * 100)) : null;
           return '<button type="button" class="ahCaja" data-a="caja" data-id="' + esc(c.id) + '" style="--c:' + color(c) + '">' +
-            '<span class="ahTile">' + iconoDe(c.nombre) + (pct != null ? '<em>' + pct + '%</em>' : '') + '</span>' +
+            '<span class="ahTile">' + (c.gasto ? SV('<rect x="3" y="6" width="18" height="12" rx="2.3"/><path d="M3 10h18"/><path d="M7 14h4"/>') : iconoDe(c.nombre)) + (pct != null ? '<em>' + pct + '%</em>' : '') + '</span>' +
             '<span class="ahCjTx"><span class="ahCjNom">' + esc(c.nombre) + '</span><b>' + peso(c.saldo) + '</b>' +
-            (delMes ? '<small class="ahCjMes ' + (delMes > 0 ? 'mas' : 'menos') + '">' + (delMes > 0 ? '↑ ' : '↓ ') + peso(Math.abs(delMes)) + ' este mes</small>' : '<small class="ahCjMes">' + (c.meta ? 'Meta ' + peso(c.meta) : 'Sin movimientos este mes') + '</small>') + (c.meta ? '' : '<span class="ahPonMeta" data-a="meta" data-id="' + esc(c.id) + '" role="button">+ Agregar meta</span>') + '</span>' +
+            (delMes ? '<small class="ahCjMes ' + (delMes > 0 ? 'mas' : 'menos') + '">' + (delMes > 0 ? '↑ ' : '↓ ') + peso(Math.abs(delMes)) + ' este mes</small>' : '<small class="ahCjMes">' + (c.gasto ? 'Para el día a día' : c.meta ? 'Meta ' + peso(c.meta) : 'Sin movimientos este mes') + '</small>') + (c.meta || c.gasto ? '' : '<span class="ahPonMeta" data-a="meta" data-id="' + esc(c.id) + '" role="button">+ Agregar meta</span>') + '</span>' +
             '<svg class="ahFl" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></button>';
         }).join("") +
         (datos.sinCaja ? '<div class="ahCaja suelta" style="--c:rgba(150,150,160,1)"><span class="ahTile">' + SV(ICO_CERDO) + '</span><span class="ahCjTx"><span class="ahCjNom">Sin cajita</span><b>' + peso(datos.sinCaja) + '</b><small class="ahCjMes">Movimientos sin cajita</small></span></div>' : '') +
@@ -7049,7 +7052,7 @@ const Ahorro = (function(){
 
   /* guardar o sacar: se elige la cajita */
   function mover(modo, cajaId){
-    const cs = cajas(); if(!cs.length){ nueva(); return; }
+    const cs = cajas().filter(c => !c.gasto); if(!cs.length){ nueva(); return; }
     let sel = cajaId || cs[0].id, monto = 0;
     ventana(
       '<h3 id="ahT">' + (modo === "guardar" ? 'Guardar en una cajita' : 'Sacar de una cajita') + '</h3><div class="inBody">' +
@@ -7451,7 +7454,7 @@ const Drawer = (function(){
       if(mode === "glim") Glim.refresh(true);
       if(mode === "recuerda") Recuerda.refresh(MODE_PREV === "recuerda");
       if(mode === "mercar") Mercar.refresh(true);
-      if(mode === "dura") Mercar.dura(true);
+      if(mode === "dura") Mercar.dura(MODE_PREV !== "dura");
       if(mode === "mes") TuMes.refresh();
       if(mode === "balance") Balance.refresh();
       if(mode === "ahorro") Ahorro.refresh();
@@ -9336,6 +9339,8 @@ const Mercar = (function(){
       const res = await fetch(MERCADO_ESTADO_URL, { cache: "no-store", signal: AbortSignal.timeout ? AbortSignal.timeout(10000) : undefined });
       if(!res.ok) throw new Error("http " + res.status);
       const d = await res.json();
+      /* una respuesta vacía o rara (n8n a medio arrancar) no debe borrar lo que ya se ve ni lo guardado */
+      if(!d || !Array.isArray(d.productos) || (!d.productos.length && datos && datos.productos && datos.productos.length)) throw new Error("vacio");
       const firma = x => x ? JSON.stringify([(x.productos || []).map(p => [p.id, p.nombre, p.grupo, p.falta, p.marcadoPor, p.ultimaCompra, p.duraDias, p.veces]), x.ultimoMercado]) : "";
       const cambio = firma(d) !== firma(datos);
       datos = d; aplicaAcabo(); if(cambio) guarda();
