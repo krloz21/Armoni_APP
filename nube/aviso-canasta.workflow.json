@@ -1,0 +1,158 @@
+{
+  "name": "Aviso diario de lo indispensable",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "aviso-canasta",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "a1c00000-0000-4000-8000-000000000001",
+      "name": "Webhook",
+      "webhookId": "a1c00000-0000-4000-8000-0000000000aa"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 8 * * *"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        220
+      ],
+      "id": "a1c00000-0000-4000-8000-000000000002",
+      "name": "Cada mañana"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Aviso diario de lo indispensable: cada mañana, si algo básico (huevos, arroz, arepas, queso…) está por acabarse y no está en la canasta,\n// manda UNA notificación al celular. Lo opcional (aguacate, etc.) no avisa. Cada producto se puede marcar o desmarcar como indispensable desde Duración.\n// Webhook (POST aviso-canasta): ver → qué productos son indispensables · esencial → marcar/desmarcar uno · probar → mandar el aviso ahora\nconst http = (o) => this.helpers.httpRequest(o);\nconst sd = $getWorkflowStaticData('global');\nsd.esenciales = sd.esenciales || {};\nlet esWeb = false, b = {};\ntry { const w = $('Webhook').first(); if (w) { esWeb = true; b = w.json.body; if (typeof b === 'string') b = JSON.parse(b); } } catch (e) {}\nb = b || {};\nif (esWeb && b.token !== 'mercado-7d41c2a9e05b') return [{ json: { web: true, ok: false, error: 'token' } }];\nconst accion = esWeb ? (['ver', 'esencial', 'probar'].includes(b.accion) ? b.accion : 'ver') : 'avisar';\n\nconst norm = (t) => String(t || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').trim();\nconst BASICOS = [/\\bhuevos?\\b/, /\\barroz\\b/, /\\barepas?\\b/, /\\bquesos?\\b/, /\\bleche\\b/, /\\bpan\\b/, /\\baceite\\b/, /\\bsal\\b/, /\\bazucar\\b/, /\\bcafe\\b/, /\\bpapel higienico\\b/, /\\bpanales\\b/];\nconst base = (p) => String(p.nombre || '').split(' · ')[0].trim();\nconst esEsencial = (p) => (p.id in sd.esenciales) ? !!sd.esenciales[p.id] : BASICOS.some(re => re.test(norm(base(p))));\n\nif (accion === 'esencial') {\n  const id = String(b.id || '');\n  if (!/^[0-9a-fA-F-]{32,36}$/.test(id)) return [{ json: { web: true, ok: false, error: 'id' } }];\n  sd.esenciales[id] = !!b.valor;\n}\n\nlet productos = [];\ntry {\n  const est = await http({ method: 'GET', url: 'http://localhost:5678/webhook/mercado-estado', json: true, timeout: 20000 });\n  productos = Array.isArray(est && est.productos) ? est.productos : [];\n} catch (e) {\n  if (accion === 'avisar' || accion === 'probar') return [{ json: { web: esWeb, ok: false, error: 'estado' } }];\n}\n\nconst hoy = new Date(Date.now() - 5 * 3600 * 1000).toISOString().slice(0, 10);   // hora de Colombia\nconst dias = (f) => Math.floor((Date.parse(hoy + 'T12:00:00Z') - Date.parse(String(f).slice(0, 10) + 'T12:00:00Z')) / 864e5);\n// igual que Duración: «pronto» es desde el 85% de lo que suele durar; lo que ya está en la canasta no se avisa\nconst urgentes = productos\n  .filter(p => !p.falta && p.duraDias > 0 && /^\\d{4}-\\d{2}-\\d{2}/.test(p.ultimaCompra || '') && esEsencial(p))\n  .map(p => ({ p, pct: dias(p.ultimaCompra) / p.duraDias }))\n  .filter(x => x.pct >= 0.85)\n  .sort((a, b) => b.pct - a.pct);\n\nconst ids = productos.filter(esEsencial).map(p => p.id);\nlet enviado = false;\nif ((accion === 'avisar' || accion === 'probar') && urgentes.length && (accion === 'probar' || sd.ultimoAviso !== hoy)) {\n  const nombres = urgentes.map(x => base(x.p));\n  const lista = nombres.length <= 4 ? nombres : nombres.slice(0, 4).concat('' + (nombres.length - 4) + ' más');\n  const texto = lista.length > 1 ? lista.slice(0, -1).join(', ') + ' y ' + lista[lista.length - 1] : lista[0];\n  try {\n    await http({ method: 'POST', url: 'http://localhost:5678/webhook/push-enviar', body: { token: 'mercado-7d41c2a9e05b', title: 'Toca comprar', body: texto + (nombres.length === 1 ? ' se está acabando' : ' se están acabando') + '. Déjal' + (nombres.length === 1 ? 'o' : 'os') + ' en la canasta.', url: './?ver=dura', tag: 'canasta' }, json: true, timeout: 15000 });\n    enviado = true; if (accion === 'avisar') sd.ultimoAviso = hoy;\n  } catch (e) {}\n}\nreturn [{ json: { web: esWeb, ok: true, accion, ids, urgentes: urgentes.length, enviado } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        260,
+        100
+      ],
+      "id": "a1c00000-0000-4000-8000-000000000003",
+      "name": "Revisar y avisar"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "w1",
+              "leftValue": "={{ $json.web }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        520,
+        100
+      ],
+      "id": "a1c00000-0000-4000-8000-000000000004",
+      "name": "¿Lo pidió Armoni?"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        780,
+        0
+      ],
+      "id": "a1c00000-0000-4000-8000-000000000005",
+      "name": "Responder"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Revisar y avisar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cada mañana": {
+      "main": [
+        [
+          {
+            "node": "Revisar y avisar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Revisar y avisar": {
+      "main": [
+        [
+          {
+            "node": "¿Lo pidió Armoni?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Lo pidió Armoni?": {
+      "main": [
+        [
+          {
+            "node": "Responder",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "America/Bogota"
+  },
+  "tags": []
+}

@@ -2032,6 +2032,11 @@ button{ transition:transform var(--t-tap) var(--ease-out); }
 .mkCanasta .mkChips em{ font-style:normal; font-size:.7rem; color:var(--dim); margin-left:3px; }
 .duCanasta{ display:flex; align-items:center; justify-content:center; gap:8px; width:100%; margin-top:14px; padding:12px 14px; border-radius:14px; border:1px solid rgba(var(--cyan-rgb),.3); background:rgba(var(--cyan-rgb),.08); color:var(--white); font:inherit; font-size:.88rem; font-weight:600; cursor:pointer; transition:transform .15s var(--ease-out), background .3s, border-color .3s; }
 .duCanasta:active{ transform:scale(.97); }
+.duEsc{ display:flex; align-items:center; justify-content:center; gap:10px; width:100%; margin-top:8px; padding:11px 14px; border-radius:14px; border:1px solid var(--line); background:none; font:inherit; font-size:.84rem; font-weight:600; color:var(--ghost); cursor:pointer; transition:transform .2s var(--ease-spring), background .25s, border-color .25s, color .25s; }
+.duEsc:active{ transform:scale(.97); }
+.duEscPt{ width:10px; height:10px; border-radius:50%; background:rgba(var(--ink),.3); transition:background .25s, box-shadow .25s; }
+.duEsc.on{ color:#ffcf99; border-color:rgba(255,176,102,.45); background:rgba(255,138,80,.1); }
+.duEsc.on .duEscPt{ background:#ffb066; box-shadow:0 0 10px rgba(255,176,102,.8); }
 .duCanasta.dentro{ background:rgba(255,138,80,.1); border-color:rgba(255,138,80,.35); color:#ffb066; }
 .duCard.canasta .duBadge{ color:#ffb066; background:rgba(255,138,80,.16); }
 .caProd{ display:flex; align-items:center; justify-content:center; gap:12px; margin:4px 0 8px; font-size:1.2rem; }
@@ -2042,7 +2047,7 @@ button{ transition:transform var(--t-tap) var(--ease-out); }
 .emaMas .mas{ width:52px; height:52px; border-radius:18px; display:grid; place-items:center; color:#fff; background:linear-gradient(145deg, #ffb066, #ff7a4d); box-shadow:0 12px 26px -10px rgba(255,122,77,.85), inset 0 1px 0 rgba(255,255,255,.35); transition:transform .2s var(--ease-spring); }
 .emaMas .mas svg{ width:24px; height:24px; }
 .emaMas{ position:relative; }
-.emaMas small{ position:absolute; top:calc(100% + 6px); left:50%; transform:translateX(-50%); white-space:nowrap; font-size:.68rem; font-weight:700; letter-spacing:.02em; }
+.emaMas small{ position:absolute; top:calc(100% + 6px); right:0; white-space:nowrap; font-size:.68rem; font-weight:700; letter-spacing:.02em; }
 .emaTop{ margin-bottom:12px; }
 .emaMas:active .mas{ transform:scale(.9); }
 .emaVacio{ margin:14px 0 0; font-size:.86rem; color:var(--dim); text-align:center; }
@@ -2822,7 +2827,7 @@ body[class*="mode-"] #masIngreso{ display:none; }
       </button>
       <div class="navGrupo" id="navSalidasG">
         <button type="button" id="navSalidasBtn" aria-expanded="false" aria-controls="navSalidasSub">
-          <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="9" r="5.5"/><path d="M12 14.5c0 2-1.2 3-1.2 5.5"/><path d="M9.8 7.2a3 3 0 0 1 2-1"/></svg></span>
+          <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9a2.2 2.2 0 0 0 0 4.4V17a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1v-3.6a2.2 2.2 0 0 0 0-4.4V6.5a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1z"/><path d="M14.5 5.5v2.3M14.5 10.9v2.2M14.5 16.2V18"/></svg></span>
           <span class="txt"><b>Salidas</b><span>Restaurantes y salidas con Ema</span></span>
           <span class="chev" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
         </button>
@@ -3096,6 +3101,7 @@ const MERCADO_MARCAR_URL = N8N + "/webhook/mercado-marcar";
 const MERCADO_COMPRADO_URL = N8N + "/webhook/mercado-comprado";
 const MERCADO_AGREGAR_URL = N8N + "/webhook/mercado-agregar";
 const MERCADO_EDITAR_URL = N8N + "/webhook/mercado-editar";
+const AVISO_CANASTA_URL = N8N + "/webhook/aviso-canasta";   // qué productos son indispensables y el aviso diario
 const CANASTA_FECHAS_URL = N8N + "/webhook/canasta-fechas";   // desde cuándo está cada cosa en la canasta («Marcado el» en Notion)
 const MOVIMIENTO_URL = N8N + "/webhook/movimiento-nuevo";   // guarda un gasto/ingreso directo en Notion, sin IA
 const MERCADO_TOKEN = "mercado-7d41c2a9e05b";
@@ -3136,7 +3142,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-12.147";
+const APP_VERSION = "2026-10-12.148";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -7574,9 +7580,10 @@ Uso.entra(MODE);   // empieza a medir el apartado con el que abre la app
 
 /* el aviso de un plan nuevo de Comfandi abre Armoni directo en Salidas Ema */
 try{
-  if(new URLSearchParams(location.search).get("ver") === "ema"){
+  const ver = new URLSearchParams(location.search).get("ver");
+  if(ver === "ema" || ver === "dura"){
     history.replaceState(null, "", location.pathname);
-    setTimeout(() => Drawer.go("ema"), 250);
+    setTimeout(() => Drawer.go(ver), 250);
   }
 }catch{}
 
@@ -9543,6 +9550,20 @@ const Mercar = (function(){
   }
   const TXT_NIVEL = { fresco: "Recién comprado", medio: "Va por la mitad", pronto: "Se está acabando", ya: "Ya toca comprarlo" };
 
+  /* lo indispensable (huevos, arroz, arepas…) avisa cada mañana al celular cuando se está acabando; lo opcional no */
+  let esenciales = (() => { try{ return new Set(JSON.parse(localStorage.getItem("armoni.esenciales")) || []); }catch{ return new Set(); } })();
+  const guardaEsc = () => { try{ localStorage.setItem("armoni.esenciales", JSON.stringify([...esenciales])); }catch{} };
+  async function traeEsenciales(){
+    try{
+      const r = await fetch(AVISO_CANASTA_URL, { method: "POST", body: JSON.stringify({ token: MERCADO_TOKEN, accion: "ver" }), signal: AbortSignal.timeout ? AbortSignal.timeout(8000) : undefined });
+      const j = await r.json();
+      if(!r.ok || !j || !Array.isArray(j.ids)) return;
+      const nuevo = new Set(j.ids), igual = nuevo.size === esenciales.size && [...nuevo].every(x => esenciales.has(x));
+      esenciales = nuevo; guardaEsc();
+      if(!igual && document.body.classList.contains("mode-dura")) pintaDura(false);
+    }catch{}
+  }
+  const accionEsencial = p => '<button type="button" class="duEsc' + (esenciales.has(p.id) ? ' on' : '') + '" data-esc="' + esc(p.id) + '" aria-pressed="' + esenciales.has(p.id) + '"><span class="duEscPt" aria-hidden="true"></span>' + (esenciales.has(p.id) ? 'Indispensable · te aviso cada mañana' : 'Opcional · tocar para que te avise') + '</button>';
   const accionCanasta = p => '<button type="button" class="duCanasta' + (p.falta ? ' dentro' : '') + '" data-canasta="' + esc(p.id) + '"><span aria-hidden="true">🧺</span>' + (p.falta ? 'En la canasta · tocar para quitar' : 'Se acabó · dejar en la canasta') + '</button>';
   function pintaDura(entrando){
     if(!datos){ try{ const c = JSON.parse(localStorage.getItem(KEY)); if(c && Array.isArray(c.productos)) datos = c; }catch{} }
@@ -9594,13 +9615,13 @@ const Mercar = (function(){
             (ac && ac > hoyISO() ? '<div><small>Se acaba</small><b>' + fechaCorta(ac) + '</b></div><div><small>Te dura</small><b>~' + plD(x.dur) + '</b></div>'
               : ac ? '<div><small>Se acabó</small><b>' + fechaCorta(ac) + '</b></div><div><small>Duró</small><b>' + plD(real) + '</b></div>'
                 : '<div><small>Te dura</small><b>~' + plD(x.dur) + '</b></div><div><small>Próxima</small><b>' + fechaCorta(x.proxima) + '</b></div>') +
-          '</div>' + accionCanasta(p) + '</div></div></div>';
+          '</div>' + accionCanasta(p) + accionEsencial(p) + '</div></div></div>';
       }
       if(x.tipo === "aprende"){
         return '<div class="duCard aprende' + abre + (entrando ? ' duEntra' : '') + '" data-id="' + esc(p.id) + '" ' + dly + ' role="button" tabindex="0" aria-expanded="' + !!abre + '">' +
           '<div class="duCab">' + cab + '<span class="duPuntos" aria-label="' + x.veces + ' de 2 compras"><i class="on"></i><i></i></span></div>' +
           '<div class="duPie"><span>' + (p.falta ? '🧺 En la canasta · toca comprarlo' : 'Aprendiendo · falta 1 compra más') + '</span><span>' + (p.falta && acaboDe(p) ? textoAcabo(acaboDe(p)) : x.dias != null ? 'comprado hace ' + plD(x.dias) : '') + '</span></div>' +
-          '<div class="duMas"><div class="duMasIn"><p class="duNota">Cuando la compres de nuevo con otra fecha, calculo cada cuánto se acaba y te aviso cuándo toca.</p>' + accionCanasta(p) + '</div></div></div>';
+          '<div class="duMas"><div class="duMasIn"><p class="duNota">Cuando la compres de nuevo con otra fecha, calculo cada cuánto se acaba y te aviso cuándo toca.</p>' + accionCanasta(p) + accionEsencial(p) + '</div></div></div>';
       }
       return '<div class="duCard sin' + (entrando ? ' duEntra' : '') + '" ' + dly + '><div class="duCab">' + cab + '<span class="duBadge mudo">Sin compras</span></div></div>';
     };
@@ -9629,6 +9650,18 @@ const Mercar = (function(){
     (function paso(t){ const k = Math.min(1, (t - t0) / 900), e = 1 - Math.pow(1 - k, 3); el.innerHTML = Math.round(n * e) + suf; if(k < 1) requestAnimationFrame(paso); })(t0);
   }
   duEl.addEventListener("click", e => {
+    const eb = e.target.closest(".duEsc");
+    if(eb){
+      e.stopPropagation();
+      const id = eb.dataset.esc, valor = !esenciales.has(id);
+      if(valor) esenciales.add(id); else esenciales.delete(id);
+      guardaEsc(); pintaDura(false);
+      fetch(AVISO_CANASTA_URL, { method: "POST", body: JSON.stringify({ token: MERCADO_TOKEN, accion: "esencial", id, valor }) }).then(r => { if(!r.ok) throw 0; }).catch(() => {
+        if(valor) esenciales.delete(id); else esenciales.add(id); guardaEsc(); pintaDura(false);
+        avisoOk("No se pudo guardar", "Revisa tu conexión e inténtalo de nuevo");
+      });
+      return;
+    }
     const cb = e.target.closest(".duCanasta");
     if(cb){ e.stopPropagation(); const p = ((datos && datos.productos) || []).find(x => x.id === cb.dataset.canasta); if(p) abrirCanasta(p); return; }
     const gr = e.target.closest(".rgGrupo");
@@ -9646,6 +9679,7 @@ const Mercar = (function(){
   });
   duEl.addEventListener("keydown", e => { if((e.key === "Enter" || e.key === " ") && e.target.classList && e.target.classList.contains("duCard")){ e.preventDefault(); e.target.click(); } });
   function dura(entrando){
+    if(entrando) traeEsenciales();
     if(!datos){ try{ const c = JSON.parse(localStorage.getItem(KEY)); if(c && Array.isArray(c.productos)) datos = c; }catch{} }
     if(entrando){ filtroD = "todo"; duAbierto = null; abiertosD.clear(); duInicia = true; }
     pintaDura(!!entrando);
