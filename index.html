@@ -1835,9 +1835,11 @@ button{ transition:transform var(--t-tap) var(--ease-out); }
 .rmScoreWrap .num b{ font-size:1.3rem; font-weight:600; letter-spacing:-.02em; line-height:1; }
 .rmScoreWrap .num small{ font-size:.62rem; color:var(--dim); margin-top:1px; }
 
+.sheetBody{ padding-bottom:30px !important; }
 .rmStats{ display:grid; grid-template-columns:repeat(3,1fr); gap:1px; margin-top:24px; background:var(--line); border-radius:14px; overflow:hidden; border:1px solid var(--line); }
 .rmStats div{ background:var(--cell); padding:12px 10px; text-align:center; display:flex; flex-direction:column; align-items:center; justify-content:center; }
 .rmStats b{ display:block; font-size:1rem; font-weight:600; line-height:1.25; }
+.rmStats em{ display:block; margin-top:2px; font-style:normal; font-size:.64rem; color:var(--dim); }
 .rmStats span{ display:block; font-size:.68rem; color:var(--dim); margin-top:3px; text-transform:uppercase; letter-spacing:.04em; }
 
 .rmNote{ margin-top:20px; }
@@ -2698,8 +2700,8 @@ body[class*="mode-"] #masIngreso{ display:none; }
 .fmMontoIn{ display:flex; align-items:center; justify-content:center; gap:2px; margin-top:2px; }
 .fmMontoIn b{ font-size:1.5rem; font-weight:600; color:var(--dim); }
 .inCard .fmMontoIn input[type="text"]{ width:2.2ch; max-width:none; padding:0 !important; border:0 !important; background:none !important; box-shadow:none !important; font-size:2.5rem; font-weight:700; letter-spacing:-.02em; text-align:center; font-variant-numeric:tabular-nums; color:var(--white); caret-color:var(--fa1); }
-.inCard .fmMontoIn input::placeholder{ color:rgba(var(--ink),.25); }
-.inCard .fmMontoIn input:focus::placeholder{ color:transparent; }   /* al tocar, el 0 se va y queda solo el cursor */
+.inCard .fmMontoIn input::placeholder{ color:rgba(var(--ink),.25); opacity:1; transition:opacity .45s ease, color .45s ease; }
+.inCard .fmMontoIn input:focus::placeholder{ color:transparent; opacity:0; }   /* al tocar, el 0 se va y queda solo el cursor */
 .fmLinea{ display:block; height:2px; width:70px; margin:6px auto 0; border-radius:2px; background:linear-gradient(90deg, transparent, var(--fa1), var(--fa2), transparent); opacity:.45; transition:width .45s var(--ease-out), opacity .3s; }
 .fmMonto:focus-within .fmLinea{ width:190px; opacity:1; }
 /* recurrentes: lista desplegable */
@@ -3175,7 +3177,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-13.185";
+const APP_VERSION = "2026-10-13.188";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -5279,6 +5281,9 @@ const Restaurantes = (function(){
       veces,
       precio: (v => Array.isArray(v) ? v[0] : v)(r.property_precio ?? r.property_rango_de_precio) || "",
       prom: numero(r.property_promedio_de_gasto ?? r.property_gasto_promedio),
+      porPersona: numero(r.property_gasto_por_persona),
+      personasTot: numero(r.property_total_personas),
+      totalGastado: numero(r.property_total_gastado),
       dias,
       ciudad: String((v => Array.isArray(v) ? v[0] : v)(r.property_ciudad) || "Cali"),
       momento: (v => (Array.isArray(v) ? v : v ? [v] : []).map(String))(r.property_momento)
@@ -5447,7 +5452,14 @@ const Restaurantes = (function(){
         { v: hace(r.dias) ? hace(r.dias).replace(/^./, c => c.toUpperCase()) : "—", l: "Última vez" },
         { v: r.veces || 0, l: (r.veces === 1 ? "Visita" : "Visitas") }
       ];
-      if(r.prom || r.precio) stats.push({ v: r.prom ? plata(r.prom) : esc(r.precio), l: r.prom ? "Promedio" : "Precio" });
+      /* promedio de gasto y, debajo, con cuántas personas se come en promedio (entre paréntesis) */
+      const prom = r.prom || (r.totalGastado && r.veces ? r.totalGastado / r.veces : 0);
+      const gente = r.personasTot && r.veces ? Math.max(1, Math.round(r.personasTot / r.veces)) : 0;
+      const porP = r.porPersona || (r.totalGastado && r.personasTot ? Math.round(r.totalGastado / r.personasTot) : 0);
+      if(prom) stats.push({ v: plata(prom), l: "Promedio", s: gente ? "(" + gente + (gente === 1 ? " persona" : " personas") + ")" : "" });
+      else if(r.precio) stats.push({ v: esc(r.precio), l: "Precio", s: "" });
+      if(porP) stats.push({ v: plata(porP), l: "Por persona", s: "" });
+      const cols = stats.length <= 3 ? stats.length : stats.length === 4 ? 2 : 3;
       const c = Math.PI * 2 * 32;
       body.innerHTML =
         '<button type="button" class="sheetBack"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>Volver</button>' +
@@ -5462,7 +5474,7 @@ const Restaurantes = (function(){
             '<div class="num"><b>' + nota10(r.score) + '</b><small>de 10</small></div>' +
           '</div>' +
         '</div>' +
-        '<div class="rmStats" style="grid-template-columns:repeat(' + stats.length + ',1fr)">' + stats.map(x => '<div><b>' + x.v + '</b><span>' + esc(x.l) + '</span></div>').join('') + '</div>' +
+        '<div class="rmStats" style="grid-template-columns:repeat(' + cols + ',1fr)">' + stats.map((x, i) => '<div' + (i === stats.length - 1 && stats.length % cols ? ' style="grid-column:span ' + (cols - (stats.length % cols) + 1) + '"' : '') + '><b>' + x.v + '</b><span>' + esc(x.l) + '</span>' + (x.s ? '<em>' + esc(x.s) + '</em>' : '') + '</div>').join('') + '</div>' +
         '<div class="rmNote' + (r.nota ? '' : ' empty') + '"><h4>Lo que dijeron</h4><p>' + (r.nota ? esc(r.nota) : "Todavía no hay una nota para este lugar.") + '</p></div>' +
         '<button type="button" class="rmAsk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg>Preguntar por este lugar</button>';
       requestAnimationFrame(() => {
@@ -5508,7 +5520,19 @@ const Restaurantes = (function(){
 
   const readCache = () => { try{ return JSON.parse(localStorage.getItem(KEY)); }catch{ return null; } };
   const writeCache = raw => { try{ localStorage.setItem(KEY, JSON.stringify({ items: raw, at: Date.now() })); }catch{} };
-  const cargar = raw => { todosItems = (raw || []).filter(r => String(r.property_clase || "") !== "Plan Ema").map(leer); statusEl.innerHTML = ""; paint(); };
+  /* si por error quedan dos páginas con el mismo nombre (ej. dos «Hunter Hamburguesa»), se muestra una sola: la que tiene nota, con las visitas sumadas */
+  const unePorNombre = lista => {
+    const clave = x => limpio(x.nombre).replace(/[^a-z0-9]+/g, " ").trim();
+    const grupos = new Map();
+    lista.forEach(x => { const k = clave(x); if(!grupos.has(k)) grupos.set(k, []); grupos.get(k).push(x); });
+    return [...grupos.values()].map(g => {
+      if(g.length === 1) return g[0];
+      const base = g.slice().sort((a, b) => (b.score > 0) - (a.score > 0) || b.veces - a.veces)[0];
+      const dias = g.map(x => x.dias).filter(d => d != null);
+      return Object.assign({}, base, { personasTot: g.reduce((t, x) => t + (x.personasTot || 0), 0), totalGastado: g.reduce((t, x) => t + (x.totalGastado || 0), 0), veces: g.reduce((t, x) => t + (x.veces || 0), 0), dias: dias.length ? Math.min(...dias) : base.dias, nota: base.nota || (g.find(x => x.nota) || {}).nota || "" });
+    });
+  };
+  const cargar = raw => { todosItems = unePorNombre((raw || []).filter(r => String(r.property_clase || "") !== "Plan Ema").map(leer)); statusEl.innerHTML = ""; paint(); };
 
   async function fetchLive(anterior){
     const res = await fetch(RESTAURANTES_URL, { cache: "no-store" });
@@ -5625,16 +5649,16 @@ const Restaurantes = (function(){
   function nueva(){ charla = null; askEl.innerHTML = ""; }
 
   /* para Dudas: ¿ese lugar ya está en Restaurantes? cuántas veces han ido (con lo último guardado en el celular) */
-  const todosCache = () => { const c = readCache(); return c && c.items ? c.items.map(leer).filter(x => x && x.nombre) : []; };
+  const todosCache = () => { const c = readCache(); return c && c.items ? unePorNombre(c.items.map(leer).filter(x => x && x.nombre)) : []; };
   function info(nombre){
     const norm = t => limpio(t).replace(/[^a-z0-9 ]/g, " ").replace(/\s+/g, " ").trim().split(" ").map(w => w.replace(/s$/, "")).join(" ");
     const b = norm(nombre); if(b.length < 3) return null;
     const lista = todosCache();
     const conPal = (a, z) => (" " + a + " ").includes(" " + z + " ");
     const x = lista.find(r => norm(r.nombre) === b) || lista.find(r => { const n = norm(r.nombre); return n.length > 3 && b.length > 3 && (conPal(n, b) || conPal(b, n)); });
-    return x ? { nombre: x.nombre, veces: x.veces || 0, dias: x.dias, hace: hace(x.dias), score: x.score || 0 } : null;
+    return x ? { id: x.id, nombre: x.nombre, veces: x.veces || 0, dias: x.dias, hace: hace(x.dias), score: x.score || 0 } : null;
   }
-  const lista = () => todosCache().map(x => ({ nombre: x.nombre, veces: x.veces || 0, dias: x.dias == null ? 9999 : x.dias })).sort((a, b) => b.veces - a.veces || a.dias - b.dias);
+  const lista = () => todosCache().map(x => ({ id: x.id, nombre: x.nombre, veces: x.veces || 0, score: x.score || 0, dias: x.dias == null ? 9999 : x.dias })).sort((a, b) => b.veces - a.veces || a.dias - b.dias);
   return { refresh, preguntar, nueva, info, lista };
 })();
 
@@ -7546,6 +7570,8 @@ const Preguntas = (function(){
     const mm = nt.match(RATING);
     const nombreIni = q.sug && q.sug.nombre ? q.sug.nombre : adivina(m.concepto);
     let lugar = nombreIni, personas = /\bpareja\b/i.test(m.concepto) ? 2 : 0;
+    const existente = () => { try{ return Restaurantes.info(lugar); }catch{ return null; } };   // el lugar ya está en Restaurantes
+    const yaCalificado = () => { const e = existente(); return !!(e && e.score > 0); };         // y ya tiene nota: no se vuelve a puntuar
     let puntos = mm ? Math.min(10, Math.max(1, Math.round(parseFloat((mm[1] || mm[2]).replace(",", ".")) * 2) / 2)) : 0;
     const resto = nt.replace(RATING, "").replace(/^[\s,.\-–:;]+|[\s,.\-–:;]+$/g, "").trim();
     let coment = resto && OPINA.test(resto) ? resto : "";   // solo se usa si de verdad es una opinión (rico, caro, barato, la comida…)
@@ -7574,7 +7600,7 @@ const Preguntas = (function(){
       $("lgSub").textContent = (lugar.trim() || original) + " · " + peso(m.monto);
       scrim.querySelector(".inBody").scrollTop = 0;
     };
-    const sigue = () => ir(editando ? "comentario" : PASOS[PASOS.indexOf(paso) + 1], 1);
+    const sigue = () => ir(editando ? "comentario" : (paso === "personas" && yaCalificado() ? "comentario" : PASOS[PASOS.indexOf(paso) + 1]), 1);
     const grilla = (cls, n, max) => '<div class="seNotas ' + cls + '">' + Array.from({ length: max }, (_, i) => i + 1).map(k => '<button type="button" data-n="' + k + '" class="' + (k === n ? "on" : "") + '">' + k + '</button>').join("") + '</div>';
     function pinta(){
       if(paso === "lugar"){
@@ -7623,6 +7649,15 @@ const Preguntas = (function(){
         $("lgSig").addEventListener("click", sigue);
         return;
       }
+      if(yaCalificado()){
+        const e = existente();
+        vista.innerHTML = '<div class="fmResumen"><button type="button" data-ir="lugar"><small>Lugar</small><b>' + esc(e.nombre) + '</b></button><button type="button" data-ir="personas"><small>Comieron</small><b>' + personas + '</b></button><button type="button" disabled><small>Visita</small><b>#' + ((e.veces || 0) + 1) + '</b></button></div>' +
+          '<p class="fmAyuda" style="margin-top:14px">Solo se suma una visita a <b>' + esc(e.nombre) + '</b> (nota ' + (Math.round(e.score * 10) / 10) + ' · han ido ' + e.veces + (e.veces === 1 ? ' vez' : ' veces') + '). No se vuelve a puntuar ni se cambia el nombre.</p><p class="inErr" id="lgErr" role="alert"></p>';
+        botones.innerHTML = '<button type="button" class="pgSi" id="lgGuardar">Sumar la visita</button>';
+        vista.querySelector(".fmResumen").addEventListener("click", ev => { const b = ev.target.closest("[data-ir]"); if(b){ editando = true; ir(b.dataset.ir, -1); } });
+        $("lgGuardar").addEventListener("click", () => guardaLugar());
+        return;
+      }
       /* comentario + resumen */
       const TAGS = ["Rico", "Caro", "Barato", "Buena atención", "Porciones grandes", "Lento", "Buen ambiente", "Volvemos"];
       vista.innerHTML = '<div class="fmResumen">' +
@@ -7644,22 +7679,23 @@ const Preguntas = (function(){
         coment = inp.value; marcaTags();
       }));
       vista.querySelector(".fmResumen").addEventListener("click", e => { const b = e.target.closest("[data-ir]"); if(b){ editando = true; ir(b.dataset.ir, -1); } });
-      $("lgGuardar").addEventListener("click", async () => {
+      $("lgGuardar").addEventListener("click", () => { coment = inp.value.trim(); guardaLugar(); });
+    }
+    async function guardaLugar(){
         if(guardando) return;
         const err = $("lgErr"), btn = $("lgGuardar");
-        coment = inp.value.trim();
+        const ex = existente(), rated = !!(ex && ex.score > 0);
         if(lugar.trim().length < 2){ err.textContent = "Falta el nombre del lugar."; return; }
         if(!personas){ err.textContent = "Falta cuántos comieron."; return; }
         guardando = true; err.textContent = ""; btn.disabled = true; btn.textContent = "Guardando…";
         try{
-          const r = await fetch(MOVIMIENTO_COMPLETAR_URL, { method: "POST", body: JSON.stringify({ token: MERCADO_TOKEN, id: m.id, lugar: lugar.trim(), personas, puntuacion: puntos || undefined, comentario: coment || undefined }) });
+          const r = await fetch(MOVIMIENTO_COMPLETAR_URL, { method: "POST", body: JSON.stringify({ token: MERCADO_TOKEN, id: m.id, lugarId: ex ? ex.id : undefined, lugar: lugar.trim(), personas, puntuacion: !rated && puntos ? puntos : undefined, comentario: !rated && coment ? coment : undefined }) });
           const j = await r.json().catch(() => ({}));
           if(!r.ok || j.ok === false) throw new Error(j.error === "lugar" ? "Escribe el nombre del lugar." : "");
           await pide({ accion: "completar", id: q.id, alias: { concepto: m.concepto, lugar: lugar.trim() }, respuesta: "Fue en " + lugar.trim() + " · " + personas + (personas === 1 ? " persona" : " personas") + (puntos ? " · nota " + puntos : "") });
           cierra();
           if(typeof avisoOk === "function") avisoOk("Guardado en Restaurantes", lugar.trim() + " · " + personas + (personas === 1 ? " persona" : " personas"));
-        }catch(e){ guardando = false; btn.disabled = false; btn.textContent = "Guardar en Restaurantes"; err.textContent = (e && e.message) || "No pude guardarlo. Revisa que el flujo «movimiento-completar» esté activo en n8n."; }
-      });
+        }catch(e){ guardando = false; btn.disabled = false; btn.textContent = rated ? "Sumar la visita" : "Guardar en Restaurantes"; err.textContent = (e && e.message) || "No pude guardarlo. Revisa que el flujo «movimiento-completar» esté activo en n8n."; }
     }
     ir("lugar", 1, true);
   }
@@ -8183,7 +8219,9 @@ const GastoManual = (function(){
     try{ SalidasEma.precarga(); }catch{}   // trae los recurrentes al día para la próxima vez
     const frec = Frecuentes.top(tipo);
     let concepto = "", monto = 0, categoria = "", fecha = hoy(), nota = "", pareja = false, iaManual = false, iaOn = false;
-    let lugar = "", personas = 0, puntos = 0, comentario = "", lugarVisto = false;   // salidas a comer: dónde, cuántos y qué nota (van a «Restaurantes»)
+    let lugar = "", personas = 0, puntos = 0, comentario = "", lugarVisto = false;
+    const existente = () => { try{ return Restaurantes.info(lugar); }catch{ return null; } };   // el lugar ya está en Restaurantes
+    const yaCalif = () => { const e = existente(); return !!(e && e.score > 0); };              // y ya tiene nota: no se vuelve a puntuar   // salidas a comer: dónde, cuántos y qué nota (van a «Restaurantes»)
     let paso = "que", guardando = false, editando = false, preguntoPareja = false;
     const historia = [];
     let histResumen = null;   // el camino hasta el resumen: al volver de editar se recupera tal cual
@@ -8341,19 +8379,23 @@ const GastoManual = (function(){
         return;
       }
       if(paso === "lugar"){
-        const sug = SalidasEma.lugares().filter(l => l.visitas).sort((a, b) => b.visitas - a.visitas).slice(0, 5).map(l => l.nombre);
+        let sug = []; try{ sug = Restaurantes.lista().slice(0, 6).map(l => l.nombre); }catch{}
+        if(!sug.length) try{ sug = SalidasEma.lugares().filter(l => l.visitas).sort((a, b) => b.visitas - a.visitas).slice(0, 5).map(l => l.nombre); }catch{}
         vista.innerHTML =
           '<label class="inLbl seLbl1" for="inLugar">¿Dónde fue?</label>' +
           '<datalist id="inLista">' + SalidasEma.nombres().map(n => '<option value="' + escH(n) + '">').join("") + '</datalist>' +
           '<input id="inLugar" class="seLugarIn" type="text" list="inLista" placeholder="Restaurante, heladería, café…" maxlength="60" autocomplete="off" value="' + escH(lugar) + '">' +
           (sug.length ? '<div class="inFrecs seSugeridos">' + sug.map(n => '<button type="button" class="recChip" data-l="' + escH(n) + '">' + escH(n) + '</button>').join("") + '</div>' : '') +
+          '<p class="fmAyuda" id="inVisitas"></p>' +
           '<div class="inFrecs"><button type="button" class="recChip" id="inSinLugar">No fue en un lugar (cine, mercado…)</button></div>' +
           '<p class="inErr" id="inErr" role="alert"></p>';
         botones.innerHTML = '<button type="button" class="pgSi" id="inSig">Siguiente</button>';
         const inp = $("inLugar");
+        const visitas = () => { const e = existente(); const el = $("inVisitas"); if(el) el.textContent = e ? "✓ Ya está en Restaurantes: han ido " + e.veces + (e.veces === 1 ? " vez" : " veces") + (e.hace ? " · última " + e.hace : "") + (e.score > 0 ? ". Solo se suma una visita (no se vuelve a puntuar)." : ". Esta será una más.") : (lugar.trim().length >= 3 ? "Es un lugar nuevo: se va a crear en Restaurantes." : ""); };
         const sigue = () => { lugarVisto = true; ir(editando ? "nota" : (lugar.trim() ? "personas" : "nota"), 1); };
-        inp.addEventListener("input", () => { lugar = inp.value; });
+        inp.addEventListener("input", () => { lugar = inp.value; visitas(); });
         inp.addEventListener("keydown", e => { if(e.key === "Enter"){ e.preventDefault(); $("inSig").click(); } });
+        visitas();
         vista.querySelectorAll(".seSugeridos [data-l]").forEach(b => b.addEventListener("click", () => { lugar = b.dataset.l; inp.value = lugar; sigue(); }));
         $("inSinLugar").addEventListener("click", () => { lugar = ""; personas = 0; puntos = 0; comentario = ""; lugarVisto = true; ir("nota", 1); });
         $("inSig").addEventListener("click", () => { if(!lugar.trim()){ inp.classList.remove("seError"); void inp.offsetWidth; inp.classList.add("seError"); inp.focus(); return; } sigue(); });
@@ -8368,7 +8410,7 @@ const GastoManual = (function(){
           '<p class="inErr" id="inErr" role="alert"></p>';
         botones.innerHTML = '<button type="button" class="pgSi" id="inSig">Siguiente</button>';
         vista.querySelectorAll(".fmCuantos [data-n]").forEach(b => b.addEventListener("click", () => { personas = +b.dataset.n; vista.querySelectorAll(".fmCuantos [data-n]").forEach(x => x.classList.toggle("on", +x.dataset.n === personas)); }));
-        $("inSig").addEventListener("click", () => { if(!personas){ avisoErr("Toca cuántas personas comieron."); return; } ir(editando ? "nota" : "puntos", 1); });
+        $("inSig").addEventListener("click", () => { if(!personas){ avisoErr("Toca cuántas personas comieron."); return; } ir(editando || yaCalif() ? "nota" : "puntos", 1); });
         return;
       }
       if(paso === "puntos"){
@@ -8391,7 +8433,7 @@ const GastoManual = (function(){
             '<button type="button" data-ir="cuanto"><small>Valor</small><b>' + pesoG(monto) + '</b></button>' +
             '<button type="button" data-ir="categoria"><small>Categoría</small><b>' + escH(categoria) + (pareja ? ' 💑' : '') + '</b></button>' +
             '<button type="button" data-ir="fecha"><small>Fecha</small><b>' + escH(fechaBonita(fecha)) + '</b></button>' +
-            (lugar.trim() ? '<button type="button" data-ir="lugar"><small>Lugar</small><b>' + escH(lugar.trim()) + '</b></button><button type="button" data-ir="personas"><small>Comieron</small><b>' + personas + '</b></button><button type="button" data-ir="puntos"><small>Nota</small><b>' + (puntos ? puntos + ' / 10' : 'Sin nota') + '</b></button>' : '') +
+            (lugar.trim() ? '<button type="button" data-ir="lugar"><small>Lugar</small><b>' + escH(lugar.trim()) + '</b></button><button type="button" data-ir="personas"><small>Comieron</small><b>' + personas + '</b></button><button type="button" data-ir="puntos"><small>Nota</small><b>' + (yaCalif() ? 'Ya tiene' : puntos ? puntos + ' / 10' : 'Sin nota') + '</b></button>' : '') +
           '</div>' +
           '<label class="inLbl" for="inNota">Nota <span style="font-weight:400;letter-spacing:0;text-transform:none">(opcional)</span></label>' +
           '<textarea id="inNota" rows="2" placeholder="Algo que quieras recordar" maxlength="300">' + escH(nota) + '</textarea>' +
@@ -8433,7 +8475,7 @@ const GastoManual = (function(){
       }
       const dato = { tipo, concepto: nombre, categoria, monto, fecha, nota: nota$ };
       if(pareja) dato.salida = "Pareja";
-      if(conLugar() && lugar.trim()){ dato.lugar = lugar.trim(); dato.personas = personas; if(puntos) dato.puntuacion = puntos; if(comentario.trim()) dato.comentario = comentario.trim(); }
+      if(conLugar() && lugar.trim()){ const ex = existente(), rated = !!(ex && ex.score > 0); dato.lugar = lugar.trim(); dato.personas = personas; if(ex && ex.id) dato.lugarId = ex.id; if(!rated && puntos) dato.puntuacion = puntos; if(!rated && comentario.trim()) dato.comentario = comentario.trim(); }
       guardando = true; btn.disabled = true; btn.textContent = "Guardando…"; err.textContent = "";
       const enviar = forzar => Cola.post(MOVIMIENTO_URL, { method: "POST", body: JSON.stringify(Object.assign({ token: MERCADO_TOKEN }, dato, forzar ? { forzar: true } : {})) })
         .then(r => r.json().catch(() => ({})).then(j => {

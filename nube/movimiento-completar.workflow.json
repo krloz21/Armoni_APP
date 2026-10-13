@@ -20,7 +20,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// Completa un gasto de salidas que quedó sin restaurante: lo enlaza a su lugar (lo crea si es nuevo) y anota cuántos comieron\nconst TOKEN = 'mercado-7d41c2a9e05b';\nlet b = $input.first().json.body;\nif (typeof b === 'string') { try { b = JSON.parse(b); } catch (e) { b = {}; } }\nb = b || {};\nconst falla = (error) => [{ json: { ok: false, error } }];\nif (b.token !== TOKEN) return falla('token');\nconst id = String(b.id || '').trim();\nif (!/^[0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12}$/i.test(id)) return falla('id');\nconst lugar = String(b.lugar || '').replace(/[<>{}\\[\\]]/g, ' ').replace(/\\s+/g, ' ').trim().slice(0, 80);\nif (lugar.length < 2) return falla('lugar');\nconst pers = Math.round(Number(b.personas));\nconst personas = pers >= 1 && pers <= 30 ? pers : null;\nconst punt = Number(b.puntuacion);\nconst puntuacion = punt >= 1 && punt <= 10 ? Math.round(punt * 2) / 2 : null;\nconst comentario = String(b.comentario || '').trim().slice(0, 200);\n// nombre nuevo del gasto (cuando dos registros parecidos fueron a lugares distintos): «Helado · Crepes»\nconst concepto = String(b.concepto || '').replace(/[<>{}\\[\\]]/g, ' ').replace(/\\s+/g, ' ').trim().slice(0, 80);\nreturn [{ json: { ok: true, id, lugar, personas, puntuacion, comentario, concepto, categoria: 'Salidas', salida: '' } }];\n"
+        "jsCode": "// Completa un gasto de salidas que quedó sin restaurante: lo enlaza a su lugar (lo crea si es nuevo) y anota cuántos comieron\nconst TOKEN = 'mercado-7d41c2a9e05b';\nlet b = $input.first().json.body;\nif (typeof b === 'string') { try { b = JSON.parse(b); } catch (e) { b = {}; } }\nb = b || {};\nconst falla = (error) => [{ json: { ok: false, error } }];\nif (b.token !== TOKEN) return falla('token');\nconst id = String(b.id || '').trim();\nif (!/^[0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12}$/i.test(id)) return falla('id');\nconst lugarId = /^[0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12}$/i.test(String(b.lugarId || '').trim()) ? String(b.lugarId).trim() : '';   // el lugar ya existe en Restaurantes: la app manda su código\nconst lugar = String(b.lugar || '').replace(/[<>{}\\[\\]]/g, ' ').replace(/\\s+/g, ' ').trim().slice(0, 80);\nif (!lugarId && lugar.length < 2) return falla('lugar');\nconst pers = Math.round(Number(b.personas));\nconst personas = pers >= 1 && pers <= 30 ? pers : null;\nconst punt = Number(b.puntuacion);\nconst puntuacion = punt >= 1 && punt <= 10 ? Math.round(punt * 2) / 2 : null;\nconst comentario = String(b.comentario || '').trim().slice(0, 200);\n// nombre nuevo del gasto (cuando dos registros parecidos fueron a lugares distintos): «Helado · Crepes»\nconst concepto = String(b.concepto || '').replace(/[<>{}\\[\\]]/g, ' ').replace(/\\s+/g, ' ').trim().slice(0, 80);\nreturn [{ json: { ok: true, id, lugarId, lugar, personas, puntuacion, comentario, concepto, categoria: 'Salidas', salida: '' } }];\n"
       },
       "id": "3813cbf9-bac0-43fd-be7c-d829df0b2243",
       "name": "Validar movimiento",
@@ -210,6 +210,10 @@
         "propertiesUi": {
           "propertyValues": [
             {
+              "key": "Clase|select",
+              "selectValue": "Restaurante"
+            },
+            {
               "key": "Puntuación|number",
               "numberValue": "={{ $('Decidir lugar').first().json.puntuacion }}"
             },
@@ -250,6 +254,10 @@
         "propertiesUi": {
           "propertyValues": [
             {
+              "key": "Clase|select",
+              "selectValue": "Restaurante"
+            },
+            {
               "key": "Notas|rich_text",
               "textContent": "={{ $('Decidir lugar').first().json.comentario }}"
             }
@@ -274,7 +282,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const v = $('Validar movimiento').first().json;\nlet lugarId = null;\nfor (const n of ['Crear restaurante con puntuación', 'Crear restaurante sin puntuación']) {\n  try { const c = $(n).first(); if (c && c.json && c.json.id) { lugarId = c.json.id; break; } } catch (e) {}\n}\nif (!lugarId) { try { const d = $('Decidir lugar').first(); if (d && d.json && d.json.lugarId) lugarId = d.json.lugarId; } catch (e) {} }\nreturn [{ json: { id: v.id, lugarId, personas: v.personas, ok: !!lugarId } }];\n"
+        "jsCode": "const v = $('Validar movimiento').first().json;\nlet lugarId = v.lugarId || null;\nfor (const n of ['Crear restaurante con puntuación', 'Crear restaurante sin puntuación']) {\n  try { const c = $(n).first(); if (c && c.json && c.json.id) { lugarId = c.json.id; break; } } catch (e) {}\n}\nif (!lugarId) { try { const d = $('Decidir lugar').first(); if (d && d.json && d.json.lugarId) lugarId = d.json.lugarId; } catch (e) {} }\nreturn [{ json: { id: v.id, lugarId, personas: v.personas, ok: !!lugarId } }];\n"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -407,6 +415,40 @@
           "name": "Notion account"
         }
       }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c10",
+              "leftValue": "={{ $json.lugarId }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "317e83e0-bfe3-45de-abe3-a62729c5b0c8",
+      "name": "¿Ya sé el lugar?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        600,
+        -120
+      ]
     }
   ],
   "pinData": {},
@@ -437,7 +479,7 @@
       "main": [
         [
           {
-            "node": "Lugares existentes",
+            "node": "¿Ya sé el lugar?",
             "type": "main",
             "index": 0
           }
@@ -576,6 +618,24 @@
         [
           {
             "node": "Responder bien",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Ya sé el lugar?": {
+      "main": [
+        [
+          {
+            "node": "Armar datos",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Lugares existentes",
             "type": "main",
             "index": 0
           }

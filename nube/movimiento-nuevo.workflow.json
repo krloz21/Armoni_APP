@@ -20,7 +20,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// Valida lo que manda Armoni y lo deja listo para Notion\nconst TOKEN = 'mercado-7d41c2a9e05b';\nconst CAT_GASTO = ['Alimentación', 'Salidas', 'Salidas Ema', 'Hogar', 'Carro', 'Hijo', 'Salud', 'Tarjetas', 'Ahorro', 'Otros'];   // Servicios se registra solo\nconst CAT_INGRESO = ['Hogar', 'Alimentación', 'Salidas', 'Ahorro', 'Otros'];   // Ahorro como ingreso = plata que se sacó del ahorro\nconst AUTOMATICOS = /arriendo|jard[ií]n|cuota\\s+(del\\s+)?(carro|cr[eé]dito)/i;\n\nlet b = $input.first().json.body;\nif (typeof b === 'string') { try { b = JSON.parse(b); } catch (e) { b = {}; } }\nb = b || {};\n\nconst falla = (error) => [{ json: { ok: false, error } }];\n\nif (b.token !== TOKEN) return falla('token');\n// registros que esperaron sin conexión: cada uno trae un código; si ya llegó antes, no se guarda dos veces\nconst colaId = String(b.colaId || '').slice(0, 40);\nif (colaId) {\n  const sd = $getWorkflowStaticData('global'); sd.cola = sd.cola || {};\n  if (sd.cola[colaId]) return falla('repetido');\n  sd.cola[colaId] = Date.now();\n  const ks = Object.keys(sd.cola); if (ks.length > 2000) ks.slice(0, ks.length - 2000).forEach(k => delete sd.cola[k]);\n}\nconst tipo = String(b.tipo || '');\nif (tipo !== 'Gasto' && tipo !== 'Ingreso') return falla('tipo');\nconst concepto = String(b.concepto || '').trim().slice(0, 80);\nconst categoria = String(b.categoria || '');\nconst fecha = String(b.fecha || '');\nconst monto = Math.round(Number(b.monto));\nconst notas = String(b.nota || b.notas || '').trim().slice(0, 300);\nconst lugar = String(b.lugar || '').trim().slice(0, 80);\nconst punt = Number(b.puntuacion);\nconst puntuacion = punt >= 1 && punt <= 10 ? Math.round(punt * 2) / 2 : null;\nconst comentario = String(b.comentario || '').trim().slice(0, 200);\n// cuántos comieron (solo salidas con lugar): entero de 1 a 30\nconst pers = Math.round(Number(b.personas));\nconst personas = pers >= 1 && pers <= 30 ? pers : null;\n// Salidas Ema: si se pagó otro día (boletas compradas antes), el día en que salieron\n// «Salida»: a qué salida pertenece (la categoría dice en qué se fue la plata; esto dice con quién fue)\nconst salida = ['Con Ema', 'Pareja'].includes(b.salida) ? b.salida : (categoria === 'Salidas Ema' ? 'Con Ema' : '');\nlet fechaSalida = String(b.fechaSalida || '');\nif (!/^\\d{4}-\\d{2}-\\d{2}$/.test(fechaSalida) || fechaSalida === String(b.fecha || '') || salida !== 'Con Ema') fechaSalida = '';\n\nif (!concepto) return falla('concepto');\nif (!(tipo === 'Gasto' ? CAT_GASTO : CAT_INGRESO).includes(categoria)) return falla('categoria');\nif (tipo === 'Gasto' && AUTOMATICOS.test(concepto)) return falla('Eso ya se registra solo desde su aviso');\nif (!/^\\d{4}-\\d{2}-\\d{2}$/.test(fecha)) return falla('fecha');\nif (!(monto > 0) || monto > 1000000000) return falla('monto');\n\nreturn [{ json: { ok: true, tipo, concepto, categoria, fecha, monto, notas, lugar, puntuacion, comentario, personas, fechaSalida, salida, forzar: !!b.forzar } }];\n"
+        "jsCode": "// Valida lo que manda Armoni y lo deja listo para Notion\nconst TOKEN = 'mercado-7d41c2a9e05b';\nconst CAT_GASTO = ['Alimentación', 'Salidas', 'Salidas Ema', 'Hogar', 'Carro', 'Hijo', 'Salud', 'Tarjetas', 'Ahorro', 'Otros'];   // Servicios se registra solo\nconst CAT_INGRESO = ['Hogar', 'Alimentación', 'Salidas', 'Ahorro', 'Otros'];   // Ahorro como ingreso = plata que se sacó del ahorro\nconst AUTOMATICOS = /arriendo|jard[ií]n|cuota\\s+(del\\s+)?(carro|cr[eé]dito)/i;\n\nlet b = $input.first().json.body;\nif (typeof b === 'string') { try { b = JSON.parse(b); } catch (e) { b = {}; } }\nb = b || {};\n\nconst falla = (error) => [{ json: { ok: false, error } }];\n\nif (b.token !== TOKEN) return falla('token');\n// registros que esperaron sin conexión: cada uno trae un código; si ya llegó antes, no se guarda dos veces\nconst colaId = String(b.colaId || '').slice(0, 40);\nif (colaId) {\n  const sd = $getWorkflowStaticData('global'); sd.cola = sd.cola || {};\n  if (sd.cola[colaId]) return falla('repetido');\n  sd.cola[colaId] = Date.now();\n  const ks = Object.keys(sd.cola); if (ks.length > 2000) ks.slice(0, ks.length - 2000).forEach(k => delete sd.cola[k]);\n}\nconst tipo = String(b.tipo || '');\nif (tipo !== 'Gasto' && tipo !== 'Ingreso') return falla('tipo');\nconst concepto = String(b.concepto || '').trim().slice(0, 80);\nconst categoria = String(b.categoria || '');\nconst fecha = String(b.fecha || '');\nconst monto = Math.round(Number(b.monto));\nconst notas = String(b.nota || b.notas || '').trim().slice(0, 300);\nconst lugar = String(b.lugar || '').trim().slice(0, 80);\nconst lugarId = /^[0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12}$/i.test(String(b.lugarId || '').trim()) ? String(b.lugarId).trim() : '';   // lugar que ya existe en Restaurantes: no se busca ni se crea\nconst punt = Number(b.puntuacion);\nconst puntuacion = punt >= 1 && punt <= 10 ? Math.round(punt * 2) / 2 : null;\nconst comentario = String(b.comentario || '').trim().slice(0, 200);\n// cuántos comieron (solo salidas con lugar): entero de 1 a 30\nconst pers = Math.round(Number(b.personas));\nconst personas = pers >= 1 && pers <= 30 ? pers : null;\n// Salidas Ema: si se pagó otro día (boletas compradas antes), el día en que salieron\n// «Salida»: a qué salida pertenece (la categoría dice en qué se fue la plata; esto dice con quién fue)\nconst salida = ['Con Ema', 'Pareja'].includes(b.salida) ? b.salida : (categoria === 'Salidas Ema' ? 'Con Ema' : '');\nlet fechaSalida = String(b.fechaSalida || '');\nif (!/^\\d{4}-\\d{2}-\\d{2}$/.test(fechaSalida) || fechaSalida === String(b.fecha || '') || salida !== 'Con Ema') fechaSalida = '';\n\nif (!concepto) return falla('concepto');\nif (!(tipo === 'Gasto' ? CAT_GASTO : CAT_INGRESO).includes(categoria)) return falla('categoria');\nif (tipo === 'Gasto' && AUTOMATICOS.test(concepto)) return falla('Eso ya se registra solo desde su aviso');\nif (!/^\\d{4}-\\d{2}-\\d{2}$/.test(fecha)) return falla('fecha');\nif (!(monto > 0) || monto > 1000000000) return falla('monto');\n\nreturn [{ json: { ok: true, tipo, concepto, categoria, fecha, monto, notas, lugar, lugarId, puntuacion, comentario, personas, fechaSalida, salida, forzar: !!b.forzar } }];\n"
       },
       "id": "191f7681-ac7c-44ab-85d5-4f463f80723e",
       "name": "Validar movimiento",
@@ -101,7 +101,7 @@
     },
     {
       "parameters": {
-        "jsCode": "return [{ json: { hayLugar: !!$('Validar movimiento').first().json.lugar } }];"
+        "jsCode": "const v = $('Validar movimiento').first().json;\nreturn [{ json: { hayLugar: !!v.lugar && !v.lugarId } }];"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -346,7 +346,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const v = $('Validar movimiento').first().json;\nlet lugarId = null;\nfor (const n of ['Crear lugar con puntuación', 'Crear lugar sin puntuación', 'Crear restaurante con puntuación', 'Crear restaurante sin puntuación']) {\n  try { const c = $(n).first(); if (c && c.json && c.json.id) { lugarId = c.json.id; break; } } catch (e) {}\n}\nif (!lugarId) { try { const d = $('Decidir lugar').first(); if (d && d.json && d.json.lugarId) lugarId = d.json.lugarId; } catch (e) {} }\nreturn [{ json: { concepto: v.concepto, monto: v.monto, tipo: v.tipo, categoria: v.categoria, fecha: v.fecha, notas: v.notas || '',\n  personas: v.personas != null ? v.personas : (v.categoria === 'Salidas Ema' ? 0 : null), lugarId, tieneLugar: !!lugarId, fechaSalida: v.fechaSalida || '', salida: v.salida || '' } }];\n"
+        "jsCode": "const v = $('Validar movimiento').first().json;\nlet lugarId = v.lugarId || null;\nfor (const n of ['Crear lugar con puntuación', 'Crear lugar sin puntuación', 'Crear restaurante con puntuación', 'Crear restaurante sin puntuación']) {\n  try { const c = $(n).first(); if (c && c.json && c.json.id) { lugarId = c.json.id; break; } } catch (e) {}\n}\nif (!lugarId) { try { const d = $('Decidir lugar').first(); if (d && d.json && d.json.lugarId) lugarId = d.json.lugarId; } catch (e) {} }\nreturn [{ json: { concepto: v.concepto, monto: v.monto, tipo: v.tipo, categoria: v.categoria, fecha: v.fecha, notas: v.notas || '',\n  personas: v.personas != null ? v.personas : (v.categoria === 'Salidas Ema' ? 0 : null), lugarId, tieneLugar: !!lugarId, fechaSalida: v.fechaSalida || '', salida: v.salida || '' } }];\n"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -840,6 +840,10 @@
         "propertiesUi": {
           "propertyValues": [
             {
+              "key": "Clase|select",
+              "selectValue": "Restaurante"
+            },
+            {
               "key": "Puntuación|number",
               "numberValue": "={{ $('Decidir lugar').first().json.puntuacion }}"
             },
@@ -879,6 +883,10 @@
         "title": "={{ $('Decidir lugar').first().json.nombre }}",
         "propertiesUi": {
           "propertyValues": [
+            {
+              "key": "Clase|select",
+              "selectValue": "Restaurante"
+            },
             {
               "key": "Notas|rich_text",
               "textContent": "={{ $('Decidir lugar').first().json.comentario }}"
