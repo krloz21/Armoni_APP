@@ -8,13 +8,13 @@
         "responseMode": "responseNode",
         "options": {}
       },
-      "id": "a1000000-0000-4000-8000-000000000001",
+      "id": "f222805e-317f-43c5-bd01-d1714f80240a",
       "name": "Recibir movimiento",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
       "position": [
-        0,
-        0
+        -21696,
+        4208
       ],
       "webhookId": "movimiento-nuevo-armoni"
     },
@@ -22,13 +22,13 @@
       "parameters": {
         "jsCode": "// Valida lo que manda Armoni y lo deja listo para Notion\nconst TOKEN = 'mercado-7d41c2a9e05b';\nconst CAT_GASTO = ['Alimentación', 'Salidas', 'Salidas Ema', 'Hogar', 'Carro', 'Hijo', 'Salud', 'Tarjetas', 'Ahorro', 'Otros'];   // Servicios se registra solo\nconst CAT_INGRESO = ['Hogar', 'Alimentación', 'Salidas', 'Ahorro', 'Otros'];   // Ahorro como ingreso = plata que se sacó del ahorro\nconst AUTOMATICOS = /arriendo|jard[ií]n|cuota\\s+(del\\s+)?(carro|cr[eé]dito)/i;\n\nlet b = $input.first().json.body;\nif (typeof b === 'string') { try { b = JSON.parse(b); } catch (e) { b = {}; } }\nb = b || {};\n\nconst falla = (error) => [{ json: { ok: false, error } }];\n\nif (b.token !== TOKEN) return falla('token');\n// registros que esperaron sin conexión: cada uno trae un código; si ya llegó antes, no se guarda dos veces\nconst colaId = String(b.colaId || '').slice(0, 40);\nif (colaId) {\n  const sd = $getWorkflowStaticData('global'); sd.cola = sd.cola || {};\n  if (sd.cola[colaId]) return falla('repetido');\n  sd.cola[colaId] = Date.now();\n  const ks = Object.keys(sd.cola); if (ks.length > 2000) ks.slice(0, ks.length - 2000).forEach(k => delete sd.cola[k]);\n}\nconst tipo = String(b.tipo || '');\nif (tipo !== 'Gasto' && tipo !== 'Ingreso') return falla('tipo');\nconst concepto = String(b.concepto || '').trim().slice(0, 80);\nconst categoria = String(b.categoria || '');\nconst fecha = String(b.fecha || '');\nconst monto = Math.round(Number(b.monto));\nconst notas = String(b.nota || b.notas || '').trim().slice(0, 300);\nconst lugar = String(b.lugar || '').trim().slice(0, 80);\nconst punt = Number(b.puntuacion);\nconst puntuacion = punt >= 1 && punt <= 10 ? Math.round(punt * 2) / 2 : null;\nconst comentario = String(b.comentario || '').trim().slice(0, 200);\n// cuántos comieron (solo salidas con lugar): entero de 1 a 30\nconst pers = Math.round(Number(b.personas));\nconst personas = pers >= 1 && pers <= 30 ? pers : null;\n// Salidas Ema: si se pagó otro día (boletas compradas antes), el día en que salieron\n// «Salida»: a qué salida pertenece (la categoría dice en qué se fue la plata; esto dice con quién fue)\nconst salida = ['Con Ema', 'Pareja'].includes(b.salida) ? b.salida : (categoria === 'Salidas Ema' ? 'Con Ema' : '');\nlet fechaSalida = String(b.fechaSalida || '');\nif (!/^\\d{4}-\\d{2}-\\d{2}$/.test(fechaSalida) || fechaSalida === String(b.fecha || '') || salida !== 'Con Ema') fechaSalida = '';\n\nif (!concepto) return falla('concepto');\nif (!(tipo === 'Gasto' ? CAT_GASTO : CAT_INGRESO).includes(categoria)) return falla('categoria');\nif (tipo === 'Gasto' && AUTOMATICOS.test(concepto)) return falla('Eso ya se registra solo desde su aviso');\nif (!/^\\d{4}-\\d{2}-\\d{2}$/.test(fecha)) return falla('fecha');\nif (!(monto > 0) || monto > 1000000000) return falla('monto');\n\nreturn [{ json: { ok: true, tipo, concepto, categoria, fecha, monto, notas, lugar, puntuacion, comentario, personas, fechaSalida, salida, forzar: !!b.forzar } }];\n"
       },
-      "id": "a1000000-0000-4000-8000-000000000002",
+      "id": "191f7681-ac7c-44ab-85d5-4f463f80723e",
       "name": "Validar movimiento",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        240,
-        0
+        -21456,
+        4208
       ]
     },
     {
@@ -56,13 +56,13 @@
         },
         "options": {}
       },
-      "id": "a1000000-0000-4000-8000-000000000003",
+      "id": "a7a78402-c53e-4ac0-bc31-babf0dbaf701",
       "name": "¿Es válido?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        480,
-        0
+        -21216,
+        4208
       ]
     },
     {
@@ -73,13 +73,13 @@
           "responseCode": 200
         }
       },
-      "id": "a1000000-0000-4000-8000-000000000005",
+      "id": "f33da0a0-e83e-4de4-987c-7ee858e624fb",
       "name": "Responder bien",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
       "position": [
-        4080,
-        -80
+        -17616,
+        4128
       ]
     },
     {
@@ -90,13 +90,13 @@
           "responseCode": 400
         }
       },
-      "id": "a1000000-0000-4000-8000-000000000006",
+      "id": "dc3a042f-2055-406f-b33e-6c102cad048f",
       "name": "Responder error",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
       "position": [
-        720,
-        100
+        -20976,
+        4320
       ]
     },
     {
@@ -106,10 +106,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        720,
-        -80
+        -20976,
+        4128
       ],
-      "id": "a1000000-0000-4000-8000-000000000011",
+      "id": "a29d4cfa-2351-4091-b92a-b3ec40b81e0c",
       "name": "Hay lugar"
     },
     {
@@ -140,10 +140,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        960,
-        -80
+        -20736,
+        4128
       ],
-      "id": "a1000000-0000-4000-8000-000000000012",
+      "id": "8615d69a-fe03-476e-ad02-06d8437d6d53",
       "name": "¿Trae lugar?"
     },
     {
@@ -164,19 +164,19 @@
       "type": "n8n-nodes-base.notion",
       "typeVersion": 3,
       "position": [
-        1200,
-        -180
+        -20496,
+        4032
       ],
-      "id": "a1000000-0000-4000-8000-000000000013",
+      "id": "ec0e7919-ae7d-4a53-ac13-104827e72ac3",
       "name": "Lugares existentes",
       "alwaysOutputData": true,
+      "executeOnce": true,
       "credentials": {
         "notionApi": {
           "id": "pgk4uKXwaEEnuyRO",
           "name": "Notion account"
         }
-      },
-      "executeOnce": true
+      }
     },
     {
       "parameters": {
@@ -185,10 +185,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1440,
-        -180
+        -20256,
+        4032
       ],
-      "id": "a1000000-0000-4000-8000-000000000014",
+      "id": "d3a89430-a6db-4b9d-b6b8-a368850e4499",
       "name": "Decidir lugar",
       "executeOnce": true
     },
@@ -220,10 +220,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        1680,
-        -180
+        -20016,
+        4032
       ],
-      "id": "a1000000-0000-4000-8000-000000000015",
+      "id": "d71077a2-6462-42a9-8eb5-31d7ae585624",
       "name": "¿Crear lugar?"
     },
     {
@@ -254,10 +254,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        2160,
-        -280
+        -19536,
+        3936
       ],
-      "id": "a1000000-0000-4000-8000-000000000018",
+      "id": "c0a65c04-6776-4b90-b5db-48662994306c",
       "name": "¿Trae puntuación?"
     },
     {
@@ -292,10 +292,10 @@
       "type": "n8n-nodes-base.notion",
       "typeVersion": 3,
       "position": [
-        2400,
-        -380
+        -19296,
+        3840
       ],
-      "id": "a1000000-0000-4000-8000-000000000019",
+      "id": "0a3d8c7f-72ec-4fd9-9870-7767b78125b4",
       "name": "Crear lugar con puntuación",
       "credentials": {
         "notionApi": {
@@ -332,10 +332,10 @@
       "type": "n8n-nodes-base.notion",
       "typeVersion": 3,
       "position": [
-        2400,
-        -200
+        -19296,
+        4016
       ],
-      "id": "a1000000-0000-4000-8000-000000000020",
+      "id": "155f20ba-0565-4a94-b8ba-bbfe76053a32",
       "name": "Crear lugar sin puntuación",
       "credentials": {
         "notionApi": {
@@ -351,10 +351,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2400,
-        -80
+        -19296,
+        4128
       ],
-      "id": "a1000000-0000-4000-8000-000000000017",
+      "id": "d30a9642-c6cf-42d5-8d43-e3a4ab66e10e",
       "name": "Armar datos"
     },
     {
@@ -385,10 +385,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        2640,
-        -80
+        -19056,
+        4128
       ],
-      "id": "a1000000-0000-4000-8000-000000000021",
+      "id": "b055c154-127c-4b9f-bf04-98fa82a80f90",
       "name": "¿Tiene lugar?"
     },
     {
@@ -450,10 +450,10 @@
       "type": "n8n-nodes-base.notion",
       "typeVersion": 3,
       "position": [
-        2880,
-        -180
+        -18816,
+        4032
       ],
-      "id": "a1000000-0000-4000-8000-000000000022",
+      "id": "d5e502db-149b-465c-8157-0aa550ff326f",
       "name": "Crear movimiento con lugar",
       "credentials": {
         "notionApi": {
@@ -513,10 +513,10 @@
       "type": "n8n-nodes-base.notion",
       "typeVersion": 3,
       "position": [
-        2880,
-        40
+        -18816,
+        4256
       ],
-      "id": "a1000000-0000-4000-8000-000000000004",
+      "id": "c5fa005e-610b-4f50-aef1-294f5bb7a8bb",
       "name": "Crear movimiento",
       "credentials": {
         "notionApi": {
@@ -553,10 +553,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        3120,
-        -280
+        -18576,
+        3936
       ],
-      "id": "a1000000-0000-4000-8000-000000000030",
+      "id": "995c012d-784c-44e7-8369-77ba2c120508",
       "name": "¿Salieron otro día?"
     },
     {
@@ -582,10 +582,10 @@
       "type": "n8n-nodes-base.notion",
       "typeVersion": 3,
       "position": [
-        3360,
-        -380
+        -18336,
+        3840
       ],
-      "id": "a1000000-0000-4000-8000-000000000031",
+      "id": "af62461b-422d-47e4-b66b-c063ff1f3719",
       "name": "Marcar día de la salida",
       "credentials": {
         "notionApi": {
@@ -622,10 +622,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        3600,
-        -280
+        -18096,
+        3936
       ],
-      "id": "a1000000-0000-4000-8000-000000000032",
+      "id": "9e3dd0cd-2146-4eb0-ad1a-fe8924f69505",
       "name": "¿Es de una salida?"
     },
     {
@@ -650,10 +650,10 @@
       "type": "n8n-nodes-base.notion",
       "typeVersion": 3,
       "position": [
-        3840,
-        -380
+        -17856,
+        3840
       ],
-      "id": "a1000000-0000-4000-8000-000000000033",
+      "id": "08ffbe08-c6d1-481a-a6e4-ba101ddf4f59",
       "name": "Marcar salida",
       "credentials": {
         "notionApi": {
@@ -680,19 +680,19 @@
       "type": "n8n-nodes-base.notion",
       "typeVersion": 3,
       "position": [
-        720,
-        -420
+        -20976,
+        3792
       ],
-      "id": "a7000000-0000-4000-8000-000000000001",
+      "id": "9606fc05-fb2b-43ec-b57b-15dab448c92e",
       "name": "Movimientos recientes",
       "alwaysOutputData": true,
+      "executeOnce": true,
       "credentials": {
         "notionApi": {
           "id": "pgk4uKXwaEEnuyRO",
           "name": "Notion account"
         }
-      },
-      "executeOnce": true
+      }
     },
     {
       "parameters": {
@@ -701,10 +701,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        940,
-        -420
+        -20768,
+        3792
       ],
-      "id": "a7000000-0000-4000-8000-000000000002",
+      "id": "1a29ae3f-8eaa-42ba-99e3-7de0e9dd5f38",
       "name": "¿Ya estaba?"
     },
     {
@@ -735,10 +735,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        1160,
-        -420
+        -20544,
+        3792
       ],
-      "id": "a7000000-0000-4000-8000-000000000003",
+      "id": "06ad6ca2-7f0e-4822-8e32-28196b8d6924",
       "name": "¿Repetido?"
     },
     {
@@ -752,10 +752,10 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
       "position": [
-        1380,
-        -520
+        -20320,
+        3696
       ],
-      "id": "a7000000-0000-4000-8000-000000000004",
+      "id": "df199b97-a1c7-4e4c-896c-93df37184d5f",
       "name": "Responder ya estaba"
     },
     {
@@ -769,7 +769,7 @@
           },
           "conditions": [
             {
-              "id": "c5",
+              "id": "c8",
               "leftValue": "={{ $json.esEma }}",
               "rightValue": true,
               "operator": {
@@ -786,9 +786,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        1920,
-        -180
+        -19776,
+        4032
       ],
+      "id": "7e310479-9da8-4a04-8e16-c734ec31af7b",
       "name": "¿Lugar de Ema?"
     },
     {
@@ -819,9 +820,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        2160,
-        40
+        -19536,
+        4256
       ],
+      "id": "c85da577-d9ce-4934-9201-22aef06aa4c8",
       "name": "¿Trae puntuación? (restaurante)"
     },
     {
@@ -852,9 +854,10 @@
       "type": "n8n-nodes-base.notion",
       "typeVersion": 3,
       "position": [
-        2400,
-        -20
+        -19296,
+        4200
       ],
+      "id": "7d362c97-851d-4f92-9a37-32e21db2f08d",
       "name": "Crear restaurante con puntuación",
       "credentials": {
         "notionApi": {
@@ -887,9 +890,10 @@
       "type": "n8n-nodes-base.notion",
       "typeVersion": 3,
       "position": [
-        2400,
-        160
+        -19296,
+        4376
       ],
+      "id": "24c25ed6-a677-4ee6-b3fa-5859618481b0",
       "name": "Crear restaurante sin puntuación",
       "credentials": {
         "notionApi": {
@@ -899,6 +903,7 @@
       }
     }
   ],
+  "pinData": {},
   "connections": {
     "Recibir movimiento": {
       "main": [
@@ -1257,12 +1262,10 @@
       ]
     }
   },
+  "active": false,
   "settings": {
     "executionOrder": "v1",
-    "timezone": "America/Bogota"
+    "binaryMode": "separate"
   },
-  "pinData": {},
-  "meta": {
-    "templateCredsSetupCompleted": true
-  }
+  "tags": []
 }
