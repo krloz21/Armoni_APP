@@ -3148,7 +3148,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-12.175";
+const APP_VERSION = "2026-10-13.176";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -7912,6 +7912,7 @@ const GastoManual = (function(){
     try{ SalidasEma.precarga(); }catch{}   // trae los recurrentes al día para la próxima vez
     const frec = Frecuentes.top(tipo);
     let concepto = "", monto = 0, categoria = "", fecha = hoy(), nota = "", pareja = false, iaManual = false, iaOn = false;
+    let lugar = "", personas = 0, puntos = 0, comentario = "", lugarVisto = false;   // salidas a comer: dónde, cuántos y qué nota (van a «Restaurantes»)
     let paso = "que", guardando = false, editando = false, preguntoPareja = false;
     const historia = [];
     let histResumen = null;   // el camino hasta el resumen: al volver de editar se recupera tal cual
@@ -7929,7 +7930,8 @@ const GastoManual = (function(){
     const vista = $("inPaso"), botones = $("inBotones"), volver = scrim.querySelector(".fmVolver");
     const card = scrim.querySelector(".inCard"), wrap = scrim.querySelector("#inWrap");
     const marca = (c, on) => { card.classList.toggle(c, on); wrap.classList.toggle(c, on); };
-    const obligada = () => tipo === "Gasto" && categoria === "Salidas";
+    const obligada = () => false;   // antes las salidas pasaban por el chat; ahora se piden lugar, personas y nota aquí mismo
+    const conLugar = () => tipo === "Gasto" && categoria === "Salidas";
     const pintaIA = () => { const on = obligada() || iaOn; marca("armoni", on); const b = $("inIA"); if(b){ b.setAttribute("aria-pressed", String(on)); b.disabled = obligada(); } };
 
     function cierra(modo){
@@ -7961,7 +7963,7 @@ const GastoManual = (function(){
       paso = nuevo;
       vista.className = "sePaso " + (dir < 0 ? "deIzq" : "deDer"); void vista.offsetWidth; vista.classList.add("entra");
       pinta();
-      const k = PASOS_G.indexOf(paso === "pareja" ? "categoria" : paso);
+      const k = PASOS_G.indexOf(paso === "pareja" ? "categoria" : (paso === "lugar" || paso === "personas" || paso === "puntos") ? "fecha" : paso);
       $("inPuntos").querySelectorAll("i").forEach((d, i) => { d.classList.toggle("on", i === k); d.classList.toggle("ok", i < k); });
       $("inSubT").textContent = paso === "que" ? (esIngreso ? "Plata que entró a la casa" : "Algo que pagaste") : concepto + (monto ? " · " + pesoG(monto) : "");
       scrim.querySelector(".inBody").scrollTop = 0;
@@ -7972,7 +7974,7 @@ const GastoManual = (function(){
       return "fecha";
     };
     const siguienteTrasCategoria = () => esSalidaPareja(tipo, categoria, concepto) && !preguntoPareja ? "pareja" : (editando ? "nota" : "fecha");
-    const siguienteDeFecha = () => "nota";
+    const siguienteDeFecha = () => conLugar() && !lugarVisto && !editando ? "lugar" : "nota";
     /* corrigiendo un dato desde el resumen: después de ese paso vuelve al resumen (no a la fecha) */
     const trasEditar = () => !monto ? "cuanto" : !categoria ? "categoria" : (esSalidaPareja(tipo, categoria, concepto) && !preguntoPareja) ? "pareja" : "nota";
     const usarRecurrente = f => {
@@ -8067,6 +8069,49 @@ const GastoManual = (function(){
         alElegirFecha($("inFecha"), v => { fecha = v > hoy() ? hoy() : v; setTimeout(() => ir(siguienteDeFecha(), 1), 200); });
         return;
       }
+      if(paso === "lugar"){
+        const sug = SalidasEma.lugares().filter(l => l.visitas).sort((a, b) => b.visitas - a.visitas).slice(0, 5).map(l => l.nombre);
+        vista.innerHTML =
+          '<label class="inLbl seLbl1" for="inLugar">¿Dónde fue?</label>' +
+          '<datalist id="inLista">' + SalidasEma.nombres().map(n => '<option value="' + escH(n) + '">').join("") + '</datalist>' +
+          '<input id="inLugar" class="seLugarIn" type="text" list="inLista" placeholder="Restaurante, heladería, café…" maxlength="60" autocomplete="off" value="' + escH(lugar) + '">' +
+          (sug.length ? '<div class="inFrecs seSugeridos">' + sug.map(n => '<button type="button" class="recChip" data-l="' + escH(n) + '">' + escH(n) + '</button>').join("") + '</div>' : '') +
+          '<div class="inFrecs"><button type="button" class="recChip" id="inSinLugar">No fue en un lugar (cine, mercado…)</button></div>' +
+          '<p class="inErr" id="inErr" role="alert"></p>';
+        botones.innerHTML = '<button type="button" class="pgSi" id="inSig">Siguiente</button>';
+        const inp = $("inLugar");
+        const sigue = () => { lugarVisto = true; ir(editando ? "nota" : (lugar.trim() ? "personas" : "nota"), 1); };
+        inp.addEventListener("input", () => { lugar = inp.value; });
+        inp.addEventListener("keydown", e => { if(e.key === "Enter"){ e.preventDefault(); $("inSig").click(); } });
+        vista.querySelectorAll(".seSugeridos [data-l]").forEach(b => b.addEventListener("click", () => { lugar = b.dataset.l; inp.value = lugar; sigue(); }));
+        $("inSinLugar").addEventListener("click", () => { lugar = ""; personas = 0; puntos = 0; comentario = ""; lugarVisto = true; ir("nota", 1); });
+        $("inSig").addEventListener("click", () => { if(!lugar.trim()){ inp.classList.remove("seError"); void inp.offsetWidth; inp.classList.add("seError"); inp.focus(); return; } sigue(); });
+        if(!lugar) setTimeout(() => inp.focus({ preventScroll: true }), 380);
+        return;
+      }
+      if(paso === "personas"){
+        if(!personas) personas = pareja ? 2 : 0;
+        vista.innerHTML =
+          '<span class="inLbl seLbl1">¿Cuántos comieron?</span><p class="fmAyuda">En ' + escH(lugar.trim()) + '</p>' +
+          '<div class="seNotas fmCuantos">' + [1,2,3,4,5,6,7,8,9,10].map(n => '<button type="button" data-n="' + n + '" class="' + (personas === n ? 'on' : '') + '" aria-label="' + n + (n === 1 ? ' persona' : ' personas') + '">' + n + '</button>').join("") + '</div>' +
+          '<p class="inErr" id="inErr" role="alert"></p>';
+        botones.innerHTML = '<button type="button" class="pgSi" id="inSig">Siguiente</button>';
+        vista.querySelectorAll(".fmCuantos [data-n]").forEach(b => b.addEventListener("click", () => { personas = +b.dataset.n; vista.querySelectorAll(".fmCuantos [data-n]").forEach(x => x.classList.toggle("on", +x.dataset.n === personas)); }));
+        $("inSig").addEventListener("click", () => { if(!personas){ avisoErr("Toca cuántas personas comieron."); return; } ir(editando ? "nota" : "puntos", 1); });
+        return;
+      }
+      if(paso === "puntos"){
+        vista.innerHTML =
+          '<span class="inLbl seLbl1">¿Qué nota le ponen?</span><p class="fmAyuda">' + escH(lugar.trim()) + ' · de 1 a 10</p>' +
+          '<div class="seNotas fmNota">' + [1,2,3,4,5,6,7,8,9,10].map(n => '<button type="button" data-n="' + n + '" class="' + (puntos === n ? 'on' : '') + '" aria-label="' + n + ' de 10">' + n + '</button>').join("") + '</div>' +
+          '<input id="inComent" class="seLugarIn" type="text" placeholder="Un comentario corto (opcional)" maxlength="200" autocomplete="off" value="' + escH(comentario) + '">' +
+          '<p class="inErr" id="inErr" role="alert"></p>';
+        botones.innerHTML = '<button type="button" class="pgSi" id="inSig">Siguiente</button>';
+        vista.querySelectorAll(".fmNota [data-n]").forEach(b => b.addEventListener("click", () => { const n = +b.dataset.n; puntos = puntos === n ? 0 : n; vista.querySelectorAll(".fmNota [data-n]").forEach(x => x.classList.toggle("on", +x.dataset.n === puntos)); }));
+        $("inComent").addEventListener("input", e => { comentario = e.target.value; });
+        $("inSig").addEventListener("click", () => ir("nota", 1));
+        return;
+      }
       if(paso === "nota"){
         const nombre = conPareja(concepto, pareja);
         vista.innerHTML =
@@ -8075,6 +8120,7 @@ const GastoManual = (function(){
             '<button type="button" data-ir="cuanto"><small>Valor</small><b>' + pesoG(monto) + '</b></button>' +
             '<button type="button" data-ir="categoria"><small>Categoría</small><b>' + escH(categoria) + (pareja ? ' 💑' : '') + '</b></button>' +
             '<button type="button" data-ir="fecha"><small>Fecha</small><b>' + escH(fechaBonita(fecha)) + '</b></button>' +
+            (lugar.trim() ? '<button type="button" data-ir="lugar"><small>Lugar</small><b>' + escH(lugar.trim()) + '</b></button><button type="button" data-ir="personas"><small>Comieron</small><b>' + personas + '</b></button><button type="button" data-ir="puntos"><small>Nota</small><b>' + (puntos ? puntos + ' / 10' : 'Sin nota') + '</b></button>' : '') +
           '</div>' +
           '<label class="inLbl" for="inNota">Nota <span style="font-weight:400;letter-spacing:0;text-transform:none">(opcional)</span></label>' +
           '<textarea id="inNota" rows="2" placeholder="Algo que quieras recordar" maxlength="300">' + escH(nota) + '</textarea>' +
@@ -8116,6 +8162,7 @@ const GastoManual = (function(){
       }
       const dato = { tipo, concepto: nombre, categoria, monto, fecha, nota: nota$ };
       if(pareja) dato.salida = "Pareja";
+      if(conLugar() && lugar.trim()){ dato.lugar = lugar.trim(); dato.personas = personas; if(puntos) dato.puntuacion = puntos; if(comentario.trim()) dato.comentario = comentario.trim(); }
       guardando = true; btn.disabled = true; btn.textContent = "Guardando…"; err.textContent = "";
       const enviar = forzar => Cola.post(MOVIMIENTO_URL, { method: "POST", body: JSON.stringify(Object.assign({ token: MERCADO_TOKEN }, dato, forzar ? { forzar: true } : {})) })
         .then(r => r.json().catch(() => ({})).then(j => {
