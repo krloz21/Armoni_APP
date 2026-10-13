@@ -1153,6 +1153,15 @@ body.mode-gmail footer, body.mode-glim footer{ display:none; }
 .lgOpc .recChip.on, .lgTags .recChip[aria-pressed="true"]{ color:#1a1208; border-color:transparent; background:linear-gradient(140deg,#ffb066,#ff8a50); }
 .fmCuantos, .fmNota{ gap:8px; margin-top:6px; }
 .fmCuantos button, .fmNota button{ padding:16px 0; font-size:1.05rem; border-radius:14px; }
+.ddMas{ margin:0 0 10px; border-radius:14px; border:1px solid var(--line); background:rgba(var(--ink),.03); }
+.ddMas summary{ min-height:42px; display:flex; align-items:center; padding:0 14px; font-size:.84rem; font-weight:600; color:#ffb066; cursor:pointer; list-style:none; }
+.ddMas summary::-webkit-details-marker{ display:none; }
+.ddInfo{ display:grid; gap:10px; padding:0 14px 14px; font-size:.82rem; color:var(--ghost); line-height:1.4; }
+.ddInfoM{ display:grid; gap:3px; padding:10px 12px; border-radius:12px; background:rgba(var(--ink),.05); }
+.ddInfoM b{ color:var(--strong); font-size:.88rem; }
+.ddEst{ color:#ffb066; font-weight:600; font-size:.74rem; }
+.ddRev{ margin-top:12px; }
+.lgConoc{ max-height:170px; overflow-y:auto; }
 .recBar{ display:block; height:12px; border-radius:6px; background:linear-gradient(100deg,rgba(var(--ink),.08) 30%,rgba(var(--ink),.2) 50%,rgba(var(--ink),.08) 70%); background-size:200% 100%; animation:recBrilla 1.3s linear infinite; }
 .recBar.w20{ width:20%; } .recBar.w40{ width:40%; } .recBar.w60{ width:60%; height:34px; border-radius:10px; } .recBar.w70{ width:70%; margin-bottom:6px; }
 .gIco.recBar{ width:38px; height:38px; border-radius:12px; }
@@ -3166,7 +3175,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-13.183";
+const APP_VERSION = "2026-10-13.185";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -5436,8 +5445,9 @@ const Restaurantes = (function(){
       const stats = [
         { v: r.score > 0 ? nota10(r.score) : "—", l: "Puntuación" },
         { v: hace(r.dias) ? hace(r.dias).replace(/^./, c => c.toUpperCase()) : "—", l: "Última vez" },
-        { v: r.prom ? plata(r.prom) : r.precio ? esc(r.precio) : (r.veces || 0), l: r.prom || r.precio ? "Promedio" : "Visitas" }
+        { v: r.veces || 0, l: (r.veces === 1 ? "Visita" : "Visitas") }
       ];
+      if(r.prom || r.precio) stats.push({ v: r.prom ? plata(r.prom) : esc(r.precio), l: r.prom ? "Promedio" : "Precio" });
       const c = Math.PI * 2 * 32;
       body.innerHTML =
         '<button type="button" class="sheetBack"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>Volver</button>' +
@@ -5452,7 +5462,7 @@ const Restaurantes = (function(){
             '<div class="num"><b>' + nota10(r.score) + '</b><small>de 10</small></div>' +
           '</div>' +
         '</div>' +
-        '<div class="rmStats">' + stats.map(x => '<div><b>' + x.v + '</b><span>' + esc(x.l) + '</span></div>').join('') + '</div>' +
+        '<div class="rmStats" style="grid-template-columns:repeat(' + stats.length + ',1fr)">' + stats.map(x => '<div><b>' + x.v + '</b><span>' + esc(x.l) + '</span></div>').join('') + '</div>' +
         '<div class="rmNote' + (r.nota ? '' : ' empty') + '"><h4>Lo que dijeron</h4><p>' + (r.nota ? esc(r.nota) : "Todavía no hay una nota para este lugar.") + '</p></div>' +
         '<button type="button" class="rmAsk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg>Preguntar por este lugar</button>';
       requestAnimationFrame(() => {
@@ -5614,7 +5624,18 @@ const Restaurantes = (function(){
   /* cada vez que entras a la pantalla empieza una charla nueva */
   function nueva(){ charla = null; askEl.innerHTML = ""; }
 
-  return { refresh, preguntar, nueva };
+  /* para Dudas: ¿ese lugar ya está en Restaurantes? cuántas veces han ido (con lo último guardado en el celular) */
+  const todosCache = () => { const c = readCache(); return c && c.items ? c.items.map(leer).filter(x => x && x.nombre) : []; };
+  function info(nombre){
+    const norm = t => limpio(t).replace(/[^a-z0-9 ]/g, " ").replace(/\s+/g, " ").trim().split(" ").map(w => w.replace(/s$/, "")).join(" ");
+    const b = norm(nombre); if(b.length < 3) return null;
+    const lista = todosCache();
+    const conPal = (a, z) => (" " + a + " ").includes(" " + z + " ");
+    const x = lista.find(r => norm(r.nombre) === b) || lista.find(r => { const n = norm(r.nombre); return n.length > 3 && b.length > 3 && (conPal(n, b) || conPal(b, n)); });
+    return x ? { nombre: x.nombre, veces: x.veces || 0, dias: x.dias, hace: hace(x.dias), score: x.score || 0 } : null;
+  }
+  const lista = () => todosCache().map(x => ({ nombre: x.nombre, veces: x.veces || 0, dias: x.dias == null ? 9999 : x.dias })).sort((a, b) => b.veces - a.veces || a.dias - b.dias);
+  return { refresh, preguntar, nueva, info, lista };
 })();
 
 /* ════════════════════════════════════════════════════════════
@@ -7204,6 +7225,8 @@ const Preguntas = (function(){
   const fechaC = f => { try{ return new Date(f + "T12:00:00").toLocaleDateString("es-CO", { day: "numeric", month: "short" }).replace(".", ""); }catch{ return f; } };
   const KD = "armoni.dudas", KS = "armoni.saber";
   let pestana = "dudas", busca = "", tema = "todo";
+  const abiertosMas = new Set();   // los «Más información» abiertos no se cierran cuando la pantalla se repinta
+  let revision = (() => { try{ return JSON.parse(localStorage.getItem("armoni.revision")); }catch{ return null; } })();
   /* temas para ordenar lo que Armoni sabe (se deducen del texto de cada recuerdo) */
   const TEMAS = [
     ["familia", "Familia", /mam[aá]|esposa|aleja|amor|hij[oa]|\bema\b|emanuel|carlos|amig[oa]|juancho|abuel|herman/i],
@@ -7229,6 +7252,7 @@ const Preguntas = (function(){
     if(j.ajustes){ try{ localStorage.setItem(KA, JSON.stringify(j.ajustes)); }catch{} }
     if(Array.isArray(j.abiertas)){ dudas = { abiertas: j.abiertas, hechas: j.hechas || [] }; try{ localStorage.setItem(KD, JSON.stringify(dudas)); }catch{} }
     if(Array.isArray(j.saber)){ saber = j.saber; try{ localStorage.setItem(KS, JSON.stringify(saber)); }catch{} }
+    if(j.revision){ revision = j.revision; try{ localStorage.setItem("armoni.revision", JSON.stringify(revision)); }catch{} }
     insignia(); if(document.body.classList.contains("mode-dudas")) pinta();
     document.dispatchEvent(new CustomEvent("armoni:preguntas"));
   }
@@ -7363,6 +7387,23 @@ const Preguntas = (function(){
     const cuerpo = document.getElementById("ddCuerpo"); if(!cuerpo) return;
     const A = dudas.abiertas, H = dudas.hechas;
     const movs = q => (q.movs || []).length ? '<div class="prMovs">' + q.movs.map(m => '<div><span>' + esc(m.concepto) + '<small>' + esc(fechaC(m.fecha)) + ' · ' + esc(m.cat) + '</small></span><b class="' + (m.tipo === "Ingreso" ? 'mas' : 'menos') + '">' + (m.tipo === "Ingreso" ? '+' : '−') + peso(m.monto) + '</b></div>').join("") + '</div>' : '';
+    const fechaLarga = f => { try{ return new Date(f + "T12:00:00").toLocaleDateString("es-CO", { weekday: "long", day: "numeric", month: "long" }); }catch{ return f; } };
+    const masInfo = q => {
+      if(q.tipo !== "lugar" && q.tipo !== "par") return "";
+      const filas = (q.movs || []).map(m => '<div class="ddInfoM"><b>' + esc(m.concepto) + '</b>' +
+        '<span>Pagaste <b>' + peso(m.monto) + '</b> · ' + esc(fechaLarga(m.fecha)) + '</span><span>Categoría: ' + esc(m.cat) + '</span>' +
+        '<span>' + (String(m.notas || "").trim() ? 'Tus notas: «' + esc(String(m.notas).trim()) + '»' : 'No escribiste notas en este gasto.') + '</span>' +
+        (/\bpareja\b/i.test(m.concepto) ? '<span>Está marcado como cita en pareja.</span>' : '') + '</div>').join("");
+      let lugar = "";
+      if(q.sug && q.sug.nombre){ let i = null; try{ i = Restaurantes.info(q.sug.nombre); }catch{} lugar = '<div class="ddInfoM"><b>Posible lugar: ' + esc(q.sug.nombre) + '</b><span>' + (q.sug.por === "dia" ? "Otro gasto de ese mismo día ya está en ese lugar." : q.sug.por === "alias" ? "Una vez dijiste que este gasto fue ahí." : "El gasto menciona ese lugar.") + '</span>' + (i ? '<span>Ya han ido ' + i.veces + (i.veces === 1 ? ' vez' : ' veces') + (i.hace ? ' · última ' + esc(i.hace) : '') + '.</span>' : '') + '</div>'; }
+      return '<details class="ddMas" data-k="' + esc(q.id) + '"' + (abiertosMas.has(q.id) ? ' open' : '') + '><summary>Más información</summary><div class="ddInfo">' + filas + lugar + '</div></details>';
+    };
+    const revisionHTML = () => {
+      if(!revision || !Array.isArray(revision.items)) return "";
+      const hace = (() => { const h = Math.round((Date.now() - (revision.t || 0)) / 36e5); return h < 1 ? "hace un momento" : h < 24 ? "hace " + h + " h" : "hace " + Math.round(h / 24) + " días"; })();
+      return '<details class="ddMas ddRev" data-k="rev"' + (abiertosMas.has("rev") ? ' open' : '') + '><summary>Lo último que revisé</summary><div class="ddInfo"><span>Revisado ' + hace + ': ' + (revision.total || 0) + ' gastos de salidas en los últimos 75 días, ' + (revision.sinLugar || 0) + ' sin lugar.</span>' +
+        revision.items.map(x => '<div class="ddInfoM"><b>' + esc(x.c) + '</b><span>' + esc(fechaC(x.f)) + ' · ' + peso(x.m) + ' · ' + esc(x.cat) + '</span><span class="ddEst">' + esc(x.e) + '</span></div>').join("") + '</div></details>';
+    };
     const cuentaTema = k => k === "todo" ? saber.length : saber.filter(t => temasDe(t).includes(k)).length;
     const chips = [["todo", "Todo"]].concat(TEMAS.map(x => [x[0], x[1]]), [["otros", "Otros"]]).filter(([k]) => k === "todo" || cuentaTema(k) > 0)
       .map(([k, n]) => '<button type="button" class="ddChip' + (tema === k ? ' on' : '') + '" data-tm="' + k + '">' + n + ' <b>' + cuentaTema(k) + '</b></button>').join("");
@@ -7373,12 +7414,13 @@ const Preguntas = (function(){
     const tabs = '<div class="ddTabs" role="tablist"><button type="button" role="tab" data-t="dudas" aria-selected="' + (pestana === "dudas") + '">Dudas' + (A.length ? ' <b>' + A.length + '</b>' : '') + '</button><button type="button" role="tab" data-t="aprendizaje" aria-selected="' + (pestana === "aprendizaje") + '">Aprendizaje' + (saber.length ? ' <b>' + saber.length + '</b>' : '') + '</button></div>';
     cuerpo.innerHTML = tabs + (pestana === "dudas" ?
       '<div class="ddResumen' + (A.length ? '' : ' ok') + '"><span class="ddNum">' + (A.length || "✓") + '</span><div><b>' + (A.length ? (A.length === 1 ? "Tienes 1 duda por resolver" : "Tienes " + A.length + " dudas por resolver") : "Todo en orden") + '</b><span class="t">' + (A.length ? "Responderlas hace que tus cuentas queden más exactas." : "Armoni no tiene preguntas pendientes por ahora.") + '</span></div></div>' +
-      (A.length ? '<div class="ddLista">' + A.map((q, i) => '<article class="ddCard" style="--i:' + Math.min(i, 8) + '">' + (q.tipo === "par" ? '<span class="ddTag">Dos registros parecidos</span>' : q.tipo === "lugar" ? '<span class="ddTag">Falta el lugar</span>' : q.tipo === "caso" ? '<span class="ddTag">Caso abierto</span>' : q.saltada ? '<span class="ddTag dif">La dejaste para después</span>' : '<span class="ddTag">Por resolver</span>') + ((q.hilo || []).length > 1 ? ' <span class="ddTag dif">En conversación</span>' : '') + '<h3>' + esc(limpia(q)) + '</h3>' + movs(q) + '<button type="button" class="ddBtn" data-id="' + esc(q.id) + '">' + (q.tipo === "lugar" || q.tipo === "par" ? "Completar" : q.tipo === "caso" || (q.hilo || []).length > 1 ? "Hablar con Armoni" : "Responder") + '</button></article>').join("") + '</div>' : '') +
-      '<button type="button" class="ddBuscar" id="ddBuscar">Buscar dudas nuevas</button>'
+      (A.length ? '<div class="ddLista">' + A.map((q, i) => '<article class="ddCard" style="--i:' + Math.min(i, 8) + '">' + (q.tipo === "par" ? '<span class="ddTag">Dos registros parecidos</span>' : q.tipo === "lugar" ? '<span class="ddTag">Falta el lugar</span>' : q.tipo === "caso" ? '<span class="ddTag">Caso abierto</span>' : q.saltada ? '<span class="ddTag dif">La dejaste para después</span>' : '<span class="ddTag">Por resolver</span>') + ((q.hilo || []).length > 1 ? ' <span class="ddTag dif">En conversación</span>' : '') + '<h3>' + esc(limpia(q)) + '</h3>' + movs(q) + masInfo(q) + '<button type="button" class="ddBtn" data-id="' + esc(q.id) + '">' + (q.tipo === "lugar" || q.tipo === "par" ? "Completar" : q.tipo === "caso" || (q.hilo || []).length > 1 ? "Hablar con Armoni" : "Responder") + '</button></article>').join("") + '</div>' : '') +
+      '<button type="button" class="ddBuscar" id="ddBuscar">Buscar dudas nuevas</button>' + revisionHTML()
       :
       '<p class="ddNota">Lo que Armoni ha aprendido de tus respuestas. Si algo ya no es cierto, olvídalo con la ✕ o corrige una respuesta.</p>' +
       desp("Lo que Armoni sabe", saber.length, saber.length ? sab : '<p class="ddVacio">Todavía no ha aprendido nada.</p>', true) +
       desp("Tus respuestas", H.length, H.length ? hec : '<p class="ddVacio">Aún no has respondido ninguna duda.</p>', false));
+    cuerpo.querySelectorAll(".ddMas[data-k]").forEach(d => d.addEventListener("toggle", () => { if(d.open) abiertosMas.add(d.dataset.k); else abiertosMas.delete(d.dataset.k); }));
     cuerpo.querySelectorAll("[data-t]").forEach(b => b.addEventListener("click", () => { pestana = b.dataset.t; pinta(); }));
     cuerpo.querySelectorAll(".ddCorr").forEach(b => b.addEventListener("click", () => abre(b.dataset.c)));
     cuerpo.querySelectorAll(".ddBtn").forEach(b => b.addEventListener("click", () => { const q = A.find(x => x.id === b.dataset.id); if(q && q.tipo === "lugar") abreLugar(q); else if(q && q.tipo === "par") abrePar(q); else abre(b.dataset.id); }));
@@ -7509,6 +7551,7 @@ const Preguntas = (function(){
     let coment = resto && OPINA.test(resto) ? resto : "";   // solo se usa si de verdad es una opinión (rico, caro, barato, la comida…)
     const nombres = (() => { try{ return SalidasEma.nombres(); }catch{ return []; } })();
     const sugeridos = (() => { try{ return SalidasEma.lugares().filter(l => l.visitas).sort((a, b) => b.visitas - a.visitas).slice(0, 4).map(l => l.nombre); }catch{ return []; } })();
+    const conocidos = (() => { try{ return Restaurantes.lista(); }catch{ return []; } })();
     const PASOS = ["lugar", "personas", "nota", "comentario"];
     let paso = "lugar", editando = false, guardando = false; const historia = [];
     const scrim = document.createElement("div"); scrim.className = "pgScrim seScrim lgScrim";
@@ -7539,17 +7582,23 @@ const Preguntas = (function(){
         vista.innerHTML = '<span class="inLbl seLbl1">Así va a aparecer en Restaurantes</span>' +
           '<div class="lgNombre"><b id="lgN">' + esc(lugar) + '</b><button type="button" class="lgCambia" id="lgCambia">Cambiar</button></div>' +
           (q.sug && q.sug.nombre ? '<p class="fmAyuda">Ya está en Restaurantes (' + (q.sug.por === "dia" ? "otro gasto de ese mismo día está ahí" : "el gasto lo menciona") + '). Solo confirma.</p>' : '<p class="fmAyuda">Sale del gasto «' + esc(m.concepto) + '». Si ya existe un lugar con ese nombre, se une a él.</p>') +
-          '<div class="inFrecs lgOpc">' + otros.concat(sugeridos).filter((x, i, a) => a.findIndex(y => y.toLowerCase() === x.toLowerCase()) === i).slice(0, 6).map(n => '<button type="button" class="recChip' + (n.toLowerCase() === lugar.toLowerCase() ? " on" : "") + '" data-l="' + esc(n) + '" aria-pressed="' + (n.toLowerCase() === lugar.toLowerCase()) + '">' + esc(n) + '</button>').join("") + '</div>' +
+          '<p class="fmAyuda" id="lgVisitas"></p>' +
+          '<div class="inFrecs lgOpc">' + otros.filter(x => !conocidos.some(c => c.nombre.toLowerCase() === x.toLowerCase())).map(n => '<button type="button" class="recChip" data-l="' + esc(n) + '" aria-pressed="false">' + esc(n) + '</button>').join("") + '</div>' +
+          (conocidos.length ? '<span class="inLbl" style="margin-top:12px">¿O fue en un lugar donde ya han ido?</span>' + (conocidos.length > 8 ? '<input id="lgBusca" class="seLugarIn" type="search" placeholder="Buscar entre ' + conocidos.length + ' lugares" autocomplete="off">' : '') + '<div class="inFrecs lgOpc lgConoc" id="lgConoc"></div>' : '') +
           '<datalist id="lgLista">' + nombres.map(n => '<option value="' + esc(n) + '">').join("") + '</datalist>' +
           '<input id="lgIn" class="seLugarIn" type="text" list="lgLista" maxlength="60" autocomplete="off" placeholder="Nombre del lugar" value="' + esc(lugar) + '" hidden>' +
           '<button type="button" class="ddBuscar" id="lgNada" style="margin-top:14px">No fue en un restaurante</button><p class="inErr" id="lgErr" role="alert"></p>';
         botones.innerHTML = '<button type="button" class="pgSi" id="lgSig">Siguiente</button>';
         const nom = $("lgN"), inp = $("lgIn");
-        const pon = v => { lugar = v; nom.textContent = v; inp.value = v; vista.querySelectorAll(".lgOpc [data-l]").forEach(b => { const on = b.dataset.l.toLowerCase() === v.toLowerCase(); b.classList.toggle("on", on); b.setAttribute("aria-pressed", String(on)); }); };
+        const visitas = () => { let i = null; try{ i = Restaurantes.info(lugar); }catch{} const el = $("lgVisitas"); if(!el) return; el.textContent = i ? "✓ Ya está en Restaurantes: han ido " + i.veces + (i.veces === 1 ? " vez" : " veces") + (i.hace ? " · última " + i.hace : "") + ". Esta será una más." : (lugar.trim().length >= 3 ? "Es un lugar nuevo: se va a crear en Restaurantes." : ""); };
+        const pintaConoc = () => { const c = $("lgConoc"); if(!c) return; const f = ($("lgBusca") ? $("lgBusca").value : "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""); const L = conocidos.filter(x => !f || x.nombre.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").includes(f)).slice(0, f ? 30 : 8); c.innerHTML = L.map(x => '<button type="button" class="recChip' + (x.nombre.toLowerCase() === lugar.toLowerCase() ? " on" : "") + '" data-l="' + esc(x.nombre) + '" aria-pressed="' + (x.nombre.toLowerCase() === lugar.toLowerCase()) + '">' + esc(x.nombre) + (x.veces ? ' · ' + x.veces : '') + '</button>').join("") || '<span class="fmAyuda">No encontré ese lugar: si es nuevo, escríbelo con «Cambiar».</span>'; c.querySelectorAll("[data-l]").forEach(b => b.addEventListener("click", () => pon(b.dataset.l))); };
+        const pon = v => { lugar = v; nom.textContent = v; inp.value = v; vista.querySelectorAll(".lgOpc [data-l]").forEach(b => { const on = b.dataset.l.toLowerCase() === v.toLowerCase(); b.classList.toggle("on", on); b.setAttribute("aria-pressed", String(on)); }); visitas(); };
         vista.querySelectorAll(".lgOpc [data-l]").forEach(b => b.addEventListener("click", () => pon(b.dataset.l)));
         $("lgCambia").addEventListener("click", () => { inp.hidden = false; $("lgCambia").hidden = true; inp.focus(); inp.select(); });
-        inp.addEventListener("input", () => { lugar = inp.value; nom.textContent = inp.value || "…"; });
+        inp.addEventListener("input", () => { lugar = inp.value; nom.textContent = inp.value || "…"; visitas(); });
         inp.addEventListener("keydown", e => { if(e.key === "Enter"){ e.preventDefault(); $("lgSig").click(); } });
+        if($("lgBusca")) $("lgBusca").addEventListener("input", pintaConoc);
+        pintaConoc(); visitas();
         $("lgNada").addEventListener("click", async () => {
           const b = $("lgNada"); b.disabled = true; b.textContent = "Guardando…";
           try{ await pide({ accion: "completar", id: q.id, respuesta: "No fue en un restaurante" }); cierra(); }
@@ -7606,7 +7655,7 @@ const Preguntas = (function(){
           const r = await fetch(MOVIMIENTO_COMPLETAR_URL, { method: "POST", body: JSON.stringify({ token: MERCADO_TOKEN, id: m.id, lugar: lugar.trim(), personas, puntuacion: puntos || undefined, comentario: coment || undefined }) });
           const j = await r.json().catch(() => ({}));
           if(!r.ok || j.ok === false) throw new Error(j.error === "lugar" ? "Escribe el nombre del lugar." : "");
-          await pide({ accion: "completar", id: q.id, respuesta: "Fue en " + lugar.trim() + " · " + personas + (personas === 1 ? " persona" : " personas") + (puntos ? " · nota " + puntos : "") });
+          await pide({ accion: "completar", id: q.id, alias: { concepto: m.concepto, lugar: lugar.trim() }, respuesta: "Fue en " + lugar.trim() + " · " + personas + (personas === 1 ? " persona" : " personas") + (puntos ? " · nota " + puntos : "") });
           cierra();
           if(typeof avisoOk === "function") avisoOk("Guardado en Restaurantes", lugar.trim() + " · " + personas + (personas === 1 ? " persona" : " personas"));
         }catch(e){ guardando = false; btn.disabled = false; btn.textContent = "Guardar en Restaurantes"; err.textContent = (e && e.message) || "No pude guardarlo. Revisa que el flujo «movimiento-completar» esté activo en n8n."; }
