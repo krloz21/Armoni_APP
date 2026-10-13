@@ -1147,6 +1147,17 @@ body.mode-gmail footer, body.mode-glim footer{ display:none; }
 .seAro circle{ fill:none; stroke-width:5; }
 .seAroBg{ stroke:rgba(var(--ink),.1); }
 .seAroFg{ stroke:#ff9a5c; stroke-linecap:round; transform:rotate(-90deg); transform-origin:40px 40px; transition:stroke-dashoffset .5s var(--ease-out); }
+.recBar{ display:block; height:12px; border-radius:6px; background:linear-gradient(100deg,rgba(var(--ink),.08) 30%,rgba(var(--ink),.2) 50%,rgba(var(--ink),.08) 70%); background-size:200% 100%; animation:recBrilla 1.3s linear infinite; }
+.recBar.w20{ width:20%; } .recBar.w40{ width:40%; } .recBar.w60{ width:60%; height:34px; border-radius:10px; } .recBar.w70{ width:70%; margin-bottom:6px; }
+.gIco.recBar{ width:38px; height:38px; border-radius:12px; }
+.recSke .gSaldo{ display:block; margin:8px 0; }
+.recSpin{ display:inline-block; width:14px; height:14px; margin-right:8px; vertical-align:-2px; border-radius:50%; border:2px solid rgba(var(--ink),.2); border-top-color:#ffb066; animation:recGira .8s linear infinite; }
+@keyframes recBrilla{ to{ background-position:-200% 0; } }
+@keyframes recGira{ to{ transform:rotate(360deg); } }
+@media (prefers-reduced-motion:reduce){ .recBar,.recSpin{ animation:none; } }
+.seAroN{ fill:var(--strong); font-size:20px; font-weight:700; transition:opacity .25s; animation:seAroLate 1.2s ease-in-out infinite; }
+.seGuardando.listo .seAroN{ opacity:0; animation:none; }
+@keyframes seAroLate{ 50%{ opacity:.45; } }
 .seCheck{ fill:none; stroke:#ffb066; stroke-width:5; stroke-linecap:round; stroke-linejoin:round; stroke-dasharray:40; stroke-dashoffset:40; }
 .seGuardando.listo .seCheck{ transition:stroke-dashoffset .45s var(--ease-out) .1s; stroke-dashoffset:0; }
 .seGuardando.listo .seAro{ animation:sePulso .5s var(--ease-out); }
@@ -3148,7 +3159,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-13.176";
+const APP_VERSION = "2026-10-13.178";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -6157,7 +6168,7 @@ const SalidaEmaForm = (function(){
       const n = lista.length; let k = 0;
       paso = "fin";
       vista.className = "sePaso deDer entra";
-      vista.innerHTML = '<div class="seGuardando"><svg class="seAro" viewBox="0 0 80 80" aria-hidden="true"><circle cx="40" cy="40" r="34" class="seAroBg"/><circle cx="40" cy="40" r="34" class="seAroFg" id="seAroFg" stroke-dasharray="213.6" stroke-dashoffset="213.6"/><path class="seCheck" d="M27 41 L36 50 L54 31"/></svg><b id="seGuardTxt">Guardando…</b><small id="seGuardSub">' + n + (n === 1 ? ' gasto' : ' gastos') + ' · ' + peso(total()) + '</small></div>';
+      vista.innerHTML = '<div class="seGuardando"><svg class="seAro" viewBox="0 0 80 80" aria-hidden="true"><circle cx="40" cy="40" r="34" class="seAroBg"/><circle cx="40" cy="40" r="34" class="seAroFg" id="seAroFg" stroke-dasharray="213.6" stroke-dashoffset="192"/><text class="seAroN" id="seAroN" x="40" y="41" text-anchor="middle" dominant-baseline="central">0/' + n + '</text><path class="seCheck" d="M27 41 L36 50 L54 31"/></svg><b id="seGuardTxt">Guardando…</b><small id="seGuardSub">' + n + (n === 1 ? ' gasto' : ' gastos') + ' · ' + peso(total()) + '</small></div>';
       botones.innerHTML = "";
       const aro = $("seAroFg");
       let sinConexion = false;
@@ -6176,7 +6187,8 @@ const SalidaEmaForm = (function(){
           if(j.enCola) sinConexion = true;
           if(l && !conocido(l)) p.nuevoEnviado = true;
           g.hecho = true; k++;
-          aro.style.strokeDashoffset = String(213.6 * (1 - k / n));
+          aro.style.strokeDashoffset = String(213.6 * (1 - Math.max(k / n, .1)));
+          const nTxt = $("seAroN"); if(nTxt) nTxt.textContent = k + "/" + n;
         }
         scrim.querySelector(".seGuardando").classList.add("listo");
         $("seGuardTxt").textContent = "¡Salida guardada!";
@@ -8699,6 +8711,19 @@ const Recuerda = (function(){
     totalAnterior = total;
   }
 
+  /* mientras llegan los pagos se ve la forma de la pantalla (barras que brillan) y no un vacío */
+  const esqueleto = () => '<div class="glimHero recSke"><span class="gLbl">Pagado…</span><b class="gSaldo"><i class="recBar w60"></i></b><div class="gMeta"><i class="recBar w40"></i></div></div><div class="gHead">Pagos</div><div class="gList">' +
+    [0, 1, 2].map(() => '<div class="gRow recSkeRow"><span class="gIco recBar"></span><span class="gTx"><i class="recBar w70"></i><i class="recBar w40"></i></span><i class="recBar w20"></i></div>').join("") + '</div>';
+  /* al abrir la app trae hoy y ayer en segundo plano: cuando entras a Recuerda ya está listo */
+  async function precarga(){
+    for(const f of [hoy(), ayer()]){
+      try{
+        const res = await fetch(RECUERDA_URL + "?fecha=" + encodeURIComponent(f), { cache: "no-store" });
+        if(!res.ok) continue;
+        const data = await res.json(); guardaDisco(f, data); cache[f] = data;
+      }catch{}
+    }
+  }
   /* muestra al instante lo último guardado de ese día y SIEMPRE le pregunta a n8n por si cambió algo */
   async function cargar(f){
     fecha = f;
@@ -8707,15 +8732,18 @@ const Recuerda = (function(){
     if(!cache[f]){ const guardado = leeDisco()[f]; if(guardado) cache[f] = guardado; }
     if(cache[f]) render(cache[f]);
     else if(cardEl.innerHTML){ cardEl.classList.add("cargando"); }
-    else statusEl.innerHTML = '<span class="dot" aria-hidden="true"></span>Buscando los pagos…';
+    else { cardEl.innerHTML = esqueleto(); statusEl.innerHTML = '<span class="recSpin" aria-hidden="true"></span>Buscando los pagos…'; }
+    const lento = !cache[f] ? setTimeout(() => { if(n === pedido && !cache[f]) statusEl.innerHTML = '<span class="recSpin" aria-hidden="true"></span>Sigue buscando… el computador de la casa está tardando'; }, 6000) : 0;
     try{
       const res = await fetch(RECUERDA_URL + "?fecha=" + encodeURIComponent(f), { cache: "no-store" });
+      clearTimeout(lento);
       if(!res.ok) throw new Error("http " + res.status);
       const data = await res.json();
       guardaDisco(f, data);
       if(n !== pedido) return;          // el usuario ya cambió de fecha: no pisar con una respuesta vieja
       if(JSON.stringify(data) !== JSON.stringify(cache[f])){ cache[f] = data; render(data); }   // sin cambios: no repinta ni parpadea
     }catch{
+      clearTimeout(lento);
       if(n !== pedido) return;
       cardEl.classList.remove("cargando");
       if(!cache[f]){ cardEl.innerHTML = ""; statusEl.innerHTML = "No se pudo cargar. Revisa tu internet y que Tailscale esté encendido."; }
@@ -8728,7 +8756,8 @@ const Recuerda = (function(){
   /* al entrar desde el menú arranca en hoy; al volver a la app conserva la fecha elegida */
   function refresh(mantener){ if(!mantener) totalAnterior = null; cargar(mantener ? fecha : hoy()); }   // al entrar de verdad, el contador siempre cuenta desde 0
 
-  return { refresh };
+  setTimeout(precarga, 3500);
+  return { refresh, precarga };
 })();
 
 /* ════════════════════════════════════════════════════════════
