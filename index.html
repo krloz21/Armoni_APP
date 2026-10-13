@@ -3120,6 +3120,7 @@ const MERCADO_AGREGAR_URL = N8N + "/webhook/mercado-agregar";
 const MERCADO_EDITAR_URL = N8N + "/webhook/mercado-editar";
 const AVISO_CANASTA_URL = N8N + "/webhook/aviso-canasta";   // qué productos son indispensables y el aviso diario
 const CANASTA_FECHAS_URL = N8N + "/webhook/canasta-fechas";   // desde cuándo está cada cosa en la canasta («Marcado el» en Notion)
+const MOVIMIENTO_COMPLETAR_URL = N8N + "/webhook/movimiento-completar";   // enlaza un gasto de salidas con su restaurante y anota cuántos comieron
 const MOVIMIENTO_URL = N8N + "/webhook/movimiento-nuevo";   // guarda un gasto/ingreso directo en Notion, sin IA
 const MERCADO_TOKEN = "mercado-7d41c2a9e05b";
 const RESUMEN_URL = N8N + "/webhook/resumen-mes";
@@ -3159,7 +3160,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-13.178";
+const APP_VERSION = "2026-10-13.180";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -7226,7 +7227,7 @@ const Preguntas = (function(){
     document.dispatchEvent(new CustomEvent("armoni:preguntas"));
   }
   async function pide(cuerpo){
-    const r = await fetch(PREGUNTAS_URL, { method: "POST", body: JSON.stringify(Object.assign({ token: MERCADO_TOKEN, memoria: saber }, cuerpo)) });
+    const r = await fetch(PREGUNTAS_URL, { method: "POST", body: JSON.stringify(Object.assign({ token: MERCADO_TOKEN, memoria: saber, ajustes: ajustes() }, cuerpo)) });
     const j = await r.json().catch(() => ({}));
     if(!r.ok || j.ok === false) throw new Error(j.error || "http");
     guarda(j); return j;
@@ -7366,7 +7367,7 @@ const Preguntas = (function(){
     const tabs = '<div class="ddTabs" role="tablist"><button type="button" role="tab" data-t="dudas" aria-selected="' + (pestana === "dudas") + '">Dudas' + (A.length ? ' <b>' + A.length + '</b>' : '') + '</button><button type="button" role="tab" data-t="aprendizaje" aria-selected="' + (pestana === "aprendizaje") + '">Aprendizaje' + (saber.length ? ' <b>' + saber.length + '</b>' : '') + '</button></div>';
     cuerpo.innerHTML = tabs + (pestana === "dudas" ?
       '<div class="ddResumen' + (A.length ? '' : ' ok') + '"><span class="ddNum">' + (A.length || "✓") + '</span><div><b>' + (A.length ? (A.length === 1 ? "Tienes 1 duda por resolver" : "Tienes " + A.length + " dudas por resolver") : "Todo en orden") + '</b><span class="t">' + (A.length ? "Responderlas hace que tus cuentas queden más exactas." : "Armoni no tiene preguntas pendientes por ahora.") + '</span></div></div>' +
-      (A.length ? '<div class="ddLista">' + A.map((q, i) => '<article class="ddCard" style="--i:' + Math.min(i, 8) + '">' + (q.tipo === "caso" ? '<span class="ddTag">Caso abierto</span>' : q.saltada ? '<span class="ddTag dif">La dejaste para después</span>' : '<span class="ddTag">Por resolver</span>') + ((q.hilo || []).length > 1 ? ' <span class="ddTag dif">En conversación</span>' : '') + '<h3>' + esc(limpia(q)) + '</h3>' + movs(q) + '<button type="button" class="ddBtn" data-id="' + esc(q.id) + '">' + (q.tipo === "caso" || (q.hilo || []).length > 1 ? "Hablar con Armoni" : "Responder") + '</button></article>').join("") + '</div>' : '') +
+      (A.length ? '<div class="ddLista">' + A.map((q, i) => '<article class="ddCard" style="--i:' + Math.min(i, 8) + '">' + (q.tipo === "lugar" ? '<span class="ddTag">Falta el lugar</span>' : q.tipo === "caso" ? '<span class="ddTag">Caso abierto</span>' : q.saltada ? '<span class="ddTag dif">La dejaste para después</span>' : '<span class="ddTag">Por resolver</span>') + ((q.hilo || []).length > 1 ? ' <span class="ddTag dif">En conversación</span>' : '') + '<h3>' + esc(limpia(q)) + '</h3>' + movs(q) + '<button type="button" class="ddBtn" data-id="' + esc(q.id) + '">' + (q.tipo === "lugar" ? "Completar" : q.tipo === "caso" || (q.hilo || []).length > 1 ? "Hablar con Armoni" : "Responder") + '</button></article>').join("") + '</div>' : '') +
       '<button type="button" class="ddBuscar" id="ddBuscar">Buscar dudas nuevas</button>'
       :
       '<p class="ddNota">Lo que Armoni ha aprendido de tus respuestas. Si algo ya no es cierto, olvídalo con la ✕ o corrige una respuesta.</p>' +
@@ -7374,7 +7375,7 @@ const Preguntas = (function(){
       desp("Tus respuestas", H.length, H.length ? hec : '<p class="ddVacio">Aún no has respondido ninguna duda.</p>', false));
     cuerpo.querySelectorAll("[data-t]").forEach(b => b.addEventListener("click", () => { pestana = b.dataset.t; pinta(); }));
     cuerpo.querySelectorAll(".ddCorr").forEach(b => b.addEventListener("click", () => abre(b.dataset.c)));
-    cuerpo.querySelectorAll(".ddBtn").forEach(b => b.addEventListener("click", () => abre(b.dataset.id)));
+    cuerpo.querySelectorAll(".ddBtn").forEach(b => b.addEventListener("click", () => { const q = A.find(x => x.id === b.dataset.id); if(q && q.tipo === "lugar") abreLugar(q); else abre(b.dataset.id); }));
     /* lista de lo que sabe: se filtra por tema y por lo que escribas, sin repintar todo (el cursor se queda en el buscador) */
     const pintaSaber = () => {
       const L = cuerpo.querySelector("#ddSaberL"); if(!L) return;
@@ -7403,6 +7404,53 @@ const Preguntas = (function(){
       if(!dudas.abiertas.length){ const b2 = document.querySelector("#ddBuscar"); if(b2){ b2.textContent = "No encontré nada nuevo"; setTimeout(() => { if(b2.isConnected) b2.textContent = "Buscar dudas nuevas"; }, 2500); } }
     });
     if(refresca) pide({ accion: "pendientes" }).catch(() => {});
+  }
+    /* una salida a comer que quedó sin lugar: se completa aquí (dónde fue, cuántos comieron, qué nota) y queda en «Restaurantes» */
+  function abreLugar(q){
+    if(document.querySelector(".pgScrim.lgScrim")) return;
+    const m = (q.movs || [])[0]; if(!m || !m.id) return;
+    const adivina = t => { const x = String(t || "").replace(/\bpareja\b/ig, "").replace(/^\s*(almuerzo|cena|comida|desayuno|helado|brunch|domicilio|antojo)s?\b\s*(en|de|del|donde|con)?\s*/i, "").replace(/\s{2,}/g, " ").trim(); return x.replace(/\b\p{L}/gu, c => c.toUpperCase()); };
+    const rx = /(\d{1,2}(?:[.,]5)?)\s*\/\s*10/;
+    const nt = String(m.notas || ""); const mm = nt.match(rx);
+    let lugar = adivina(m.concepto), personas = /\bpareja\b/i.test(m.concepto) ? 2 : 0, puntos = mm ? Math.min(10, Math.max(1, Math.round(parseFloat(mm[1].replace(",", ".")) * 2) / 2)) : 0;
+    let coment = nt.replace(rx, "").replace(/^[\s,.\-–:]+/, "").trim();
+    const scrim = document.createElement("div"); scrim.className = "pgScrim seScrim lgScrim";
+    const nombres = (() => { try{ return SalidasEma.nombres(); }catch{ return []; } })();
+    const chips = (id, n) => '<div class="seNotas" id="' + id + '">' + [1,2,3,4,5,6,7,8,9,10].map(k => '<button type="button" data-n="' + k + '" class="' + (k === n ? "on" : "") + '">' + k + '</button>').join("") + '</div>';
+    scrim.innerHTML = '<div class="inWrap"><div class="pgCard inCard" role="dialog" aria-modal="true" aria-labelledby="lgT"><div class="inBody">' +
+      '<h3 id="lgT" style="margin:0 0 6px">¿Dónde fue?</h3>' +
+      '<div class="prMovs"><div><span>' + esc(m.concepto) + '<small>' + esc(fechaC(m.fecha)) + ' · ' + esc(m.cat) + '</small></span><b class="menos">−' + peso(m.monto) + '</b></div></div>' +
+      '<label class="inLbl" for="lgLugar">Lugar</label><datalist id="lgLista">' + nombres.map(n => '<option value="' + esc(n) + '">').join("") + '</datalist>' +
+      '<input id="lgLugar" class="seLugarIn" type="text" list="lgLista" maxlength="60" autocomplete="off" placeholder="Restaurante, heladería, café…" value="' + esc(lugar) + '">' +
+      '<span class="inLbl">¿Cuántos comieron?</span>' + chips("lgPers", personas) +
+      '<span class="inLbl">¿Qué nota le ponen? <span style="font-weight:400;letter-spacing:0;text-transform:none">(opcional)</span></span>' + chips("lgNota", puntos) +
+      '<input id="lgComent" class="seLugarIn" type="text" maxlength="200" autocomplete="off" placeholder="Un comentario corto (opcional)" value="' + esc(coment) + '">' +
+      '<p class="inErr" id="lgErr" role="alert"></p></div>' +
+      '<div class="pgRow"><button type="button" class="pgNo" id="lgNo">Ahora no</button><button type="button" class="pgSi" id="lgSi">Guardar en Restaurantes</button></div></div></div>';
+    document.body.appendChild(scrim); requestAnimationFrame(() => scrim.classList.add("on"));
+    const $ = id => scrim.querySelector("#" + id);
+    const cierra = () => { scrim.classList.remove("on"); setTimeout(() => scrim.remove(), 340); };
+    scrim.addEventListener("click", e => { if(e.target === scrim) cierra(); });
+    $("lgNo").addEventListener("click", cierra);
+    const marca = (cont, get, set) => $(cont).addEventListener("click", e => { const b = e.target.closest("[data-n]"); if(!b) return; const k = +b.dataset.n; set(get() === k && cont === "lgNota" ? 0 : k); $(cont).querySelectorAll("[data-n]").forEach(x => x.classList.toggle("on", +x.dataset.n === get())); });
+    marca("lgPers", () => personas, v => { personas = v; });
+    marca("lgNota", () => puntos, v => { puntos = v; });
+    $("lgSi").addEventListener("click", async () => {
+      const err = $("lgErr"), btn = $("lgSi");
+      lugar = $("lgLugar").value.trim(); coment = $("lgComent").value.trim();
+      if(lugar.length < 2){ err.textContent = "Escribe el nombre del lugar."; $("lgLugar").focus(); return; }
+      if(!personas){ err.textContent = "Toca cuántas personas comieron."; return; }
+      err.textContent = ""; btn.disabled = true; btn.textContent = "Guardando…";
+      try{
+        const r = await fetch(MOVIMIENTO_COMPLETAR_URL, { method: "POST", body: JSON.stringify({ token: MERCADO_TOKEN, id: m.id, lugar, personas, puntuacion: puntos || undefined, comentario: coment || undefined }) });
+        const j = await r.json().catch(() => ({}));
+        if(!r.ok || j.ok === false) throw new Error(j.error === "lugar" ? "Escribe el nombre del lugar." : "");
+        await pide({ accion: "completar", id: q.id, respuesta: "Fue en " + lugar + " · " + personas + (personas === 1 ? " persona" : " personas") + (puntos ? " · nota " + puntos : "") });
+        cierra();
+        if(typeof avisoOk === "function") avisoOk("Guardado en Restaurantes", lugar + " · " + personas + (personas === 1 ? " persona" : " personas"));
+      }catch(e){ btn.disabled = false; btn.textContent = "Guardar en Restaurantes"; err.textContent = (e && e.message) || "No pude guardarlo. Revisa que el flujo «movimiento-completar» esté activo en n8n."; }
+    });
+    setTimeout(() => { const i = $("lgLugar"); if(i && !i.value) i.focus(); }, 360);
   }
   insignia();
   return { revisar, abre, aplica, pinta, cuantas: () => pendientes.length, ajustes };

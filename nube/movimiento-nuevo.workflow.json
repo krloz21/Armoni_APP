@@ -180,7 +180,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// Lee una propiedad venga como página completa de Notion (properties) o simplificada de n8n (property_xxx)\nconst clave = (n) => 'property_' + String(n).toLowerCase().replace(/\\s+/g, '_');\nconst txt = (a) => ((a || []).map(t => t.plain_text).join('') || '').trim();\nconst leer = (it, nombre, tipo) => {\n  const pr = it.properties && it.properties[nombre];\n  if (pr) {\n    if (tipo === 'titulo') return txt(pr.title);\n    if (tipo === 'texto') return txt(pr.rich_text);\n    if (tipo === 'numero') return pr.number != null ? pr.number : null;\n    if (tipo === 'fecha') return pr.date && pr.date.start ? pr.date.start.slice(0, 10) : null;\n    if (tipo === 'select') return pr.select ? pr.select.name : (pr.status ? pr.status.name : null);\n    if (tipo === 'relacion') return pr.relation && pr.relation[0] ? pr.relation[0].id : null;\n  }\n  let v = it[clave(nombre)];\n  if (v === undefined && tipo === 'titulo') v = it.name;\n  if (v === undefined || v === null || v === '') return null;\n  if (tipo === 'fecha') { const s = typeof v === 'object' ? (v.start || '') : String(v); return s ? s.slice(0, 10) : null; }\n  if (tipo === 'relacion') { const r = Array.isArray(v) ? v[0] : v; return r ? (typeof r === 'object' ? r.id : String(r)) : null; }\n  if (tipo === 'numero') return typeof v === 'number' ? v : (Number(v) || null);\n  return String(v);\n};\n\nconst v = $('Validar movimiento').first().json;\nconst lugs = $input.all().map(i => i.json).filter(x => x && x.id);\nconst norm = (t) => String(t || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9 ]/g, ' ').replace(/\\s+/g, ' ').trim().split(' ').map(w => w.replace(/s$/, '')).join(' ');\nconst buscado = norm(v.lugar);\n// primero el nombre exacto; si no, que uno contenga al otro como palabras completas (así «Pan» no se confunde con «Pandebono»)\nconst conPalabras = (a, b) => (' ' + a + ' ').includes(' ' + b + ' ');\nconst nombres = lugs.map(l => ({ id: l.id, n: norm(leer(l, 'Nombre', 'titulo')) })).filter(x => x.n);\nlet lugarId = (nombres.find(x => x.n === buscado) || {}).id || null;\nif (!lugarId && buscado.length > 3) {\n  const m = nombres.find(x => x.n.length > 3 && (conPalabras(x.n, buscado) || conPalabras(buscado, x.n)));\n  if (m) lugarId = m.id;\n}\nreturn [{ json: { lugarId, crear: !lugarId, nombre: v.lugar, puntuacion: v.puntuacion, tienePuntuacion: v.puntuacion != null, comentario: v.comentario || '' } }];\n"
+        "jsCode": "// Lee una propiedad venga como página completa de Notion (properties) o simplificada de n8n (property_xxx)\nconst clave = (n) => 'property_' + String(n).toLowerCase().replace(/\\s+/g, '_');\nconst txt = (a) => ((a || []).map(t => t.plain_text).join('') || '').trim();\nconst leer = (it, nombre, tipo) => {\n  const pr = it.properties && it.properties[nombre];\n  if (pr) {\n    if (tipo === 'titulo') return txt(pr.title);\n    if (tipo === 'texto') return txt(pr.rich_text);\n    if (tipo === 'numero') return pr.number != null ? pr.number : null;\n    if (tipo === 'fecha') return pr.date && pr.date.start ? pr.date.start.slice(0, 10) : null;\n    if (tipo === 'select') return pr.select ? pr.select.name : (pr.status ? pr.status.name : null);\n    if (tipo === 'relacion') return pr.relation && pr.relation[0] ? pr.relation[0].id : null;\n  }\n  let v = it[clave(nombre)];\n  if (v === undefined && tipo === 'titulo') v = it.name;\n  if (v === undefined || v === null || v === '') return null;\n  if (tipo === 'fecha') { const s = typeof v === 'object' ? (v.start || '') : String(v); return s ? s.slice(0, 10) : null; }\n  if (tipo === 'relacion') { const r = Array.isArray(v) ? v[0] : v; return r ? (typeof r === 'object' ? r.id : String(r)) : null; }\n  if (tipo === 'numero') return typeof v === 'number' ? v : (Number(v) || null);\n  return String(v);\n};\n\nconst v = $('Validar movimiento').first().json;\nconst lugs = $input.all().map(i => i.json).filter(x => x && x.id);\nconst norm = (t) => String(t || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9 ]/g, ' ').replace(/\\s+/g, ' ').trim().split(' ').map(w => w.replace(/s$/, '')).join(' ');\nconst buscado = norm(v.lugar);\n// primero el nombre exacto; si no, que uno contenga al otro como palabras completas (así «Pan» no se confunde con «Pandebono»)\nconst conPalabras = (a, b) => (' ' + a + ' ').includes(' ' + b + ' ');\nconst nombres = lugs.map(l => ({ id: l.id, n: norm(leer(l, 'Nombre', 'titulo')) })).filter(x => x.n);\nlet lugarId = (nombres.find(x => x.n === buscado) || {}).id || null;\nif (!lugarId && buscado.length > 3) {\n  const m = nombres.find(x => x.n.length > 3 && (conPalabras(x.n, buscado) || conPalabras(buscado, x.n)));\n  if (m) lugarId = m.id;\n}\nreturn [{ json: { lugarId, crear: !lugarId, esEma: v.salida === 'Con Ema' || v.categoria === 'Salidas Ema', nombre: v.lugar, puntuacion: v.puntuacion, tienePuntuacion: v.puntuacion != null, comentario: v.comentario || '' } }];\n"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -254,7 +254,7 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        1920,
+        2160,
         -280
       ],
       "id": "a1000000-0000-4000-8000-000000000018",
@@ -292,7 +292,7 @@
       "type": "n8n-nodes-base.notion",
       "typeVersion": 3,
       "position": [
-        2160,
+        2400,
         -380
       ],
       "id": "a1000000-0000-4000-8000-000000000019",
@@ -332,7 +332,7 @@
       "type": "n8n-nodes-base.notion",
       "typeVersion": 3,
       "position": [
-        2160,
+        2400,
         -200
       ],
       "id": "a1000000-0000-4000-8000-000000000020",
@@ -346,7 +346,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const v = $('Validar movimiento').first().json;\nlet lugarId = null;\nfor (const n of ['Crear lugar con puntuación', 'Crear lugar sin puntuación']) {\n  try { const c = $(n).first(); if (c && c.json && c.json.id) { lugarId = c.json.id; break; } } catch (e) {}\n}\nif (!lugarId) { try { const d = $('Decidir lugar').first(); if (d && d.json && d.json.lugarId) lugarId = d.json.lugarId; } catch (e) {} }\nreturn [{ json: { concepto: v.concepto, monto: v.monto, tipo: v.tipo, categoria: v.categoria, fecha: v.fecha, notas: v.notas || '',\n  personas: v.personas != null ? v.personas : (v.categoria === 'Salidas Ema' ? 0 : null), lugarId, tieneLugar: !!lugarId, fechaSalida: v.fechaSalida || '', salida: v.salida || '' } }];\n"
+        "jsCode": "const v = $('Validar movimiento').first().json;\nlet lugarId = null;\nfor (const n of ['Crear lugar con puntuación', 'Crear lugar sin puntuación', 'Crear restaurante con puntuación', 'Crear restaurante sin puntuación']) {\n  try { const c = $(n).first(); if (c && c.json && c.json.id) { lugarId = c.json.id; break; } } catch (e) {}\n}\nif (!lugarId) { try { const d = $('Decidir lugar').first(); if (d && d.json && d.json.lugarId) lugarId = d.json.lugarId; } catch (e) {} }\nreturn [{ json: { concepto: v.concepto, monto: v.monto, tipo: v.tipo, categoria: v.categoria, fecha: v.fecha, notas: v.notas || '',\n  personas: v.personas != null ? v.personas : (v.categoria === 'Salidas Ema' ? 0 : null), lugarId, tieneLugar: !!lugarId, fechaSalida: v.fechaSalida || '', salida: v.salida || '' } }];\n"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -757,6 +757,146 @@
       ],
       "id": "a7000000-0000-4000-8000-000000000004",
       "name": "Responder ya estaba"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c5",
+              "leftValue": "={{ $json.esEma }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1920,
+        -180
+      ],
+      "name": "¿Lugar de Ema?"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c4",
+              "leftValue": "={{ $json.tienePuntuacion }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2160,
+        40
+      ],
+      "name": "¿Trae puntuación? (restaurante)"
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "dataSourceId": {
+          "__rl": true,
+          "value": "2449dcb1-f56e-4263-acea-f4b307273e86",
+          "mode": "list",
+          "cachedResultName": "Restaurantes",
+          "cachedResultUrl": "https://app.notion.com/p/4912f5c4e91d41598e49bb8e97d02f31"
+        },
+        "title": "={{ $('Decidir lugar').first().json.nombre }}",
+        "propertiesUi": {
+          "propertyValues": [
+            {
+              "key": "Puntuación|number",
+              "numberValue": "={{ $('Decidir lugar').first().json.puntuacion }}"
+            },
+            {
+              "key": "Notas|rich_text",
+              "textContent": "={{ $('Decidir lugar').first().json.comentario }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 3,
+      "position": [
+        2400,
+        -20
+      ],
+      "name": "Crear restaurante con puntuación",
+      "credentials": {
+        "notionApi": {
+          "id": "pgk4uKXwaEEnuyRO",
+          "name": "Notion account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "dataSourceId": {
+          "__rl": true,
+          "value": "2449dcb1-f56e-4263-acea-f4b307273e86",
+          "mode": "list",
+          "cachedResultName": "Restaurantes",
+          "cachedResultUrl": "https://app.notion.com/p/4912f5c4e91d41598e49bb8e97d02f31"
+        },
+        "title": "={{ $('Decidir lugar').first().json.nombre }}",
+        "propertiesUi": {
+          "propertyValues": [
+            {
+              "key": "Notas|rich_text",
+              "textContent": "={{ $('Decidir lugar').first().json.comentario }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 3,
+      "position": [
+        2400,
+        160
+      ],
+      "name": "Crear restaurante sin puntuación",
+      "credentials": {
+        "notionApi": {
+          "id": "pgk4uKXwaEEnuyRO",
+          "name": "Notion account"
+        }
+      }
     }
   ],
   "connections": {
@@ -855,7 +995,7 @@
       "main": [
         [
           {
-            "node": "¿Trae puntuación?",
+            "node": "¿Lugar de Ema?",
             "type": "main",
             "index": 0
           }
@@ -1052,6 +1192,64 @@
         [
           {
             "node": "Hay lugar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Lugar de Ema?": {
+      "main": [
+        [
+          {
+            "node": "¿Trae puntuación?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "¿Trae puntuación? (restaurante)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Trae puntuación? (restaurante)": {
+      "main": [
+        [
+          {
+            "node": "Crear restaurante con puntuación",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Crear restaurante sin puntuación",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Crear restaurante con puntuación": {
+      "main": [
+        [
+          {
+            "node": "Armar datos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Crear restaurante sin puntuación": {
+      "main": [
+        [
+          {
+            "node": "Armar datos",
             "type": "main",
             "index": 0
           }
