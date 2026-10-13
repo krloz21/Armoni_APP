@@ -1147,6 +1147,12 @@ body.mode-gmail footer, body.mode-glim footer{ display:none; }
 .seAro circle{ fill:none; stroke-width:5; }
 .seAroBg{ stroke:rgba(var(--ink),.1); }
 .seAroFg{ stroke:#ff9a5c; stroke-linecap:round; transform:rotate(-90deg); transform-origin:40px 40px; transition:stroke-dashoffset .5s var(--ease-out); }
+.lgNombre{ display:flex; align-items:center; justify-content:space-between; gap:12px; padding:16px 16px; margin:4px 0 8px; border-radius:18px; border:1px solid rgba(255,176,102,.4); background:linear-gradient(160deg,rgba(255,176,102,.14),rgba(255,120,80,.05)); }
+.lgNombre b{ font-size:1.25rem; line-height:1.2; color:var(--strong); min-width:0; overflow-wrap:anywhere; }
+.lgCambia{ flex:none; padding:7px 13px; border-radius:12px; border:1px solid var(--line); background:rgba(var(--ink),.06); color:#ffb066; font:inherit; font-size:.8rem; font-weight:700; cursor:pointer; }
+.lgOpc .recChip.on, .lgTags .recChip[aria-pressed="true"]{ color:#1a1208; border-color:transparent; background:linear-gradient(140deg,#ffb066,#ff8a50); }
+.fmCuantos, .fmNota{ gap:8px; margin-top:6px; }
+.fmCuantos button, .fmNota button{ padding:16px 0; font-size:1.05rem; border-radius:14px; }
 .recBar{ display:block; height:12px; border-radius:6px; background:linear-gradient(100deg,rgba(var(--ink),.08) 30%,rgba(var(--ink),.2) 50%,rgba(var(--ink),.08) 70%); background-size:200% 100%; animation:recBrilla 1.3s linear infinite; }
 .recBar.w20{ width:20%; } .recBar.w40{ width:40%; } .recBar.w60{ width:60%; height:34px; border-radius:10px; } .recBar.w70{ width:70%; margin-bottom:6px; }
 .gIco.recBar{ width:38px; height:38px; border-radius:12px; }
@@ -3160,7 +3166,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-13.182";
+const APP_VERSION = "2026-10-13.183";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -7485,59 +7491,128 @@ const Preguntas = (function(){
     }
     pinta();
   }
-  /* una salida a comer que quedó sin lugar: se completa aquí (dónde fue, cuántos comieron, qué nota) y queda en «Restaurantes» */
+  /* una salida a comer que quedó sin lugar: se completa paso a paso, como un gasto (lugar → cuántos comieron → nota → comentario)
+     y queda en «Restaurantes». El nombre sale del gasto; la nota y el comentario, de lo que ya está escrito en sus notas. */
   function abreLugar(q){
     if(document.querySelector(".pgScrim.lgScrim")) return;
     const m = (q.movs || [])[0]; if(!m || !m.id) return;
-    const adivina = t => { const x = String(t || "").replace(/\bpareja\b/ig, "").replace(/^\s*(almuerzo|cena|comida|desayuno|helado|brunch|domicilio|antojo)s?\b\s*(en|de|del|donde|con)?\s*/i, "").replace(/\s{2,}/g, " ").trim(); return x.replace(/\b\p{L}/gu, c => c.toUpperCase()); };
-    const rx = /(\d{1,2}(?:[.,]5)?)\s*\/\s*10/;
-    const nt = String(m.notas || ""); const mm = nt.match(rx);
-    let lugar = q.sug && q.sug.nombre ? q.sug.nombre : adivina(m.concepto), personas = /\bpareja\b/i.test(m.concepto) ? 2 : 0, puntos = mm ? Math.min(10, Math.max(1, Math.round(parseFloat(mm[1].replace(",", ".")) * 2) / 2)) : 0;
-    let coment = nt.replace(rx, "").replace(/^[\s,.\-–:]+/, "").trim();
-    const scrim = document.createElement("div"); scrim.className = "pgScrim seScrim lgScrim";
+    const adivina = t => { const x = String(t || "").replace(/\bpareja\b/ig, "").replace(/^\s*(almuerzo|cena|comida|desayuno|helado|brunch|domicilio|antojo)s?\b\s*(en|de|del|donde|con)?\s*/i, "").replace(/\s{2,}/g, " ").trim(); return (x || String(t || "").replace(/\bpareja\b/ig, "").trim()).replace(/\b\p{L}/gu, c => c.toUpperCase()); };
+    const original = String(m.concepto || "").replace(/\bpareja\b/ig, "").replace(/\s{2,}/g, " ").trim();
+    const RATING = /(\d{1,2}(?:[.,]5)?)\s*(?:\/|de|sobre)\s*10|nota\s*[:=]?\s*(\d{1,2}(?:[.,]5)?)/i;
+    const OPINA = /rico|delicios|sabros|caro|barato|econ[oó]mic|buen[oa]s?|mal[oa]s?|excelente|p[eé]sim|lento|r[aá]pid|atenci[oó]n|servicio|comida|porci[oó]n|ambiente|volver|recomend|me gust|fr[ií]o|crudo|salado|pasable|regular/i;
+    const nt = String(m.notas || "");
+    const mm = nt.match(RATING);
+    const nombreIni = q.sug && q.sug.nombre ? q.sug.nombre : adivina(m.concepto);
+    let lugar = nombreIni, personas = /\bpareja\b/i.test(m.concepto) ? 2 : 0;
+    let puntos = mm ? Math.min(10, Math.max(1, Math.round(parseFloat((mm[1] || mm[2]).replace(",", ".")) * 2) / 2)) : 0;
+    const resto = nt.replace(RATING, "").replace(/^[\s,.\-–:;]+|[\s,.\-–:;]+$/g, "").trim();
+    let coment = resto && OPINA.test(resto) ? resto : "";   // solo se usa si de verdad es una opinión (rico, caro, barato, la comida…)
     const nombres = (() => { try{ return SalidasEma.nombres(); }catch{ return []; } })();
-    const chips = (id, n) => '<div class="seNotas" id="' + id + '">' + [1,2,3,4,5,6,7,8,9,10].map(k => '<button type="button" data-n="' + k + '" class="' + (k === n ? "on" : "") + '">' + k + '</button>').join("") + '</div>';
-    scrim.innerHTML = '<div class="inWrap"><div class="pgCard inCard" role="dialog" aria-modal="true" aria-labelledby="lgT"><div class="inBody">' +
-      '<h3 id="lgT" style="margin:0 0 6px">¿Dónde fue?</h3>' +
-      '<div class="prMovs"><div><span>' + esc(m.concepto) + '<small>' + esc(fechaC(m.fecha)) + ' · ' + esc(m.cat) + '</small></span><b class="menos">−' + peso(m.monto) + '</b></div></div>' +
-      (q.sug && q.sug.nombre ? '<p class="fmAyuda" style="margin:10px 0 0">Ya está en Restaurantes: <b>' + esc(q.sug.nombre) + '</b> (' + (q.sug.por === "dia" ? "otro gasto de ese mismo día está en ese lugar" : "el gasto lo menciona") + '). Confirma o cambia el nombre.</p>' : '') +
-      '<label class="inLbl" for="lgLugar">Lugar</label><datalist id="lgLista">' + nombres.map(n => '<option value="' + esc(n) + '">').join("") + '</datalist>' +
-      '<input id="lgLugar" class="seLugarIn" type="text" list="lgLista" maxlength="60" autocomplete="off" placeholder="Restaurante, heladería, café…" value="' + esc(lugar) + '">' +
-      '<span class="inLbl">¿Cuántos comieron?</span>' + chips("lgPers", personas) +
-      '<span class="inLbl">¿Qué nota le ponen? <span style="font-weight:400;letter-spacing:0;text-transform:none">(opcional)</span></span>' + chips("lgNota", puntos) +
-      '<input id="lgComent" class="seLugarIn" type="text" maxlength="200" autocomplete="off" placeholder="Un comentario corto (opcional)" value="' + esc(coment) + '">' +
-      '<button type="button" class="ddBuscar" id="lgNada" style="margin-top:12px">No fue en un restaurante</button>' +
-      '<p class="inErr" id="lgErr" role="alert"></p></div>' +
-      '<div class="pgRow"><button type="button" class="pgNo" id="lgNo">Ahora no</button><button type="button" class="pgSi" id="lgSi">Guardar en Restaurantes</button></div></div></div>';
+    const sugeridos = (() => { try{ return SalidasEma.lugares().filter(l => l.visitas).sort((a, b) => b.visitas - a.visitas).slice(0, 4).map(l => l.nombre); }catch{ return []; } })();
+    const PASOS = ["lugar", "personas", "nota", "comentario"];
+    let paso = "lugar", editando = false, guardando = false; const historia = [];
+    const scrim = document.createElement("div"); scrim.className = "pgScrim seScrim lgScrim";
+    scrim.innerHTML = '<div class="inWrap" id="lgWrap"><div class="pgCard inCard fmCard fm-gasto" role="dialog" aria-modal="true" aria-labelledby="lgT">' +
+      FormArmoni.cabeza("gasto", "lgT", "Completar salida", '<span id="lgSub"></span>', '<div class="sePuntos" id="lgPuntos" aria-hidden="true">' + PASOS.map(() => '<i></i>').join("") + '</div>') +
+      '<div class="inBody seVista"><div class="sePaso" id="lgPaso"></div></div><div class="pgRow fmRow" id="lgBotones"></div></div></div>';
     document.body.appendChild(scrim); requestAnimationFrame(() => scrim.classList.add("on"));
     const $ = id => scrim.querySelector("#" + id);
+    const vista = $("lgPaso"), botones = $("lgBotones");
     const cierra = () => { scrim.classList.remove("on"); setTimeout(() => scrim.remove(), 340); };
-    scrim.addEventListener("click", e => { if(e.target === scrim) cierra(); });
-    $("lgNo").addEventListener("click", cierra);
-    $("lgNada").addEventListener("click", async () => {   // no era un restaurante (heladería, juegos…): la duda se cierra y no vuelve a preguntar
-      const b = $("lgNada"); b.disabled = true; b.textContent = "Guardando…";
-      try{ await pide({ accion: "completar", id: q.id, respuesta: "No fue en un restaurante" }); cierra(); }
-      catch{ b.disabled = false; b.textContent = "No pude guardarlo. Inténtalo de nuevo"; }
-    });
-    const marca = (cont, get, set) => $(cont).addEventListener("click", e => { const b = e.target.closest("[data-n]"); if(!b) return; const k = +b.dataset.n; set(get() === k && cont === "lgNota" ? 0 : k); $(cont).querySelectorAll("[data-n]").forEach(x => x.classList.toggle("on", +x.dataset.n === get())); });
-    marca("lgPers", () => personas, v => { personas = v; });
-    marca("lgNota", () => puntos, v => { puntos = v; });
-    $("lgSi").addEventListener("click", async () => {
-      const err = $("lgErr"), btn = $("lgSi");
-      lugar = $("lgLugar").value.trim(); coment = $("lgComent").value.trim();
-      if(lugar.length < 2){ err.textContent = "Escribe el nombre del lugar."; $("lgLugar").focus(); return; }
-      if(!personas){ err.textContent = "Toca cuántas personas comieron."; return; }
-      err.textContent = ""; btn.disabled = true; btn.textContent = "Guardando…";
-      try{
-        const r = await fetch(MOVIMIENTO_COMPLETAR_URL, { method: "POST", body: JSON.stringify({ token: MERCADO_TOKEN, id: m.id, lugar, personas, puntuacion: puntos || undefined, comentario: coment || undefined }) });
-        const j = await r.json().catch(() => ({}));
-        if(!r.ok || j.ok === false) throw new Error(j.error === "lugar" ? "Escribe el nombre del lugar." : "");
-        await pide({ accion: "completar", id: q.id, respuesta: "Fue en " + lugar + " · " + personas + (personas === 1 ? " persona" : " personas") + (puntos ? " · nota " + puntos : "") });
-        cierra();
-        if(typeof avisoOk === "function") avisoOk("Guardado en Restaurantes", lugar + " · " + personas + (personas === 1 ? " persona" : " personas"));
-      }catch(e){ btn.disabled = false; btn.textContent = "Guardar en Restaurantes"; err.textContent = (e && e.message) || "No pude guardarlo. Revisa que el flujo «movimiento-completar» esté activo en n8n."; }
-    });
-    setTimeout(() => { const i = $("lgLugar"); if(i && !i.value) i.focus(); }, 360);
+    scrim.addEventListener("click", e => { if(e.target === scrim && !guardando) cierra(); });
+    scrim.querySelector(".fmVolver").addEventListener("click", () => { if(guardando) return; if(historia.length) ir(historia.pop(), -1, true); else cierra(); });
+    const ir = (nuevo, dir, atras) => {
+      if(!atras && dir > 0) historia.push(paso);
+      paso = nuevo;
+      vista.className = "sePaso " + (dir < 0 ? "deIzq" : "deDer"); void vista.offsetWidth; vista.classList.add("entra");
+      pinta();
+      const k = PASOS.indexOf(paso);
+      $("lgPuntos").querySelectorAll("i").forEach((d, i) => { d.classList.toggle("on", i === k); d.classList.toggle("ok", i < k); });
+      $("lgSub").textContent = (lugar.trim() || original) + " · " + peso(m.monto);
+      scrim.querySelector(".inBody").scrollTop = 0;
+    };
+    const sigue = () => ir(editando ? "comentario" : PASOS[PASOS.indexOf(paso) + 1], 1);
+    const grilla = (cls, n, max) => '<div class="seNotas ' + cls + '">' + Array.from({ length: max }, (_, i) => i + 1).map(k => '<button type="button" data-n="' + k + '" class="' + (k === n ? "on" : "") + '">' + k + '</button>').join("") + '</div>';
+    function pinta(){
+      if(paso === "lugar"){
+        const otros = [nombreIni, adivina(m.concepto), original].filter((x, i, a) => x && a.findIndex(y => y.toLowerCase() === x.toLowerCase()) === i);
+        vista.innerHTML = '<span class="inLbl seLbl1">Así va a aparecer en Restaurantes</span>' +
+          '<div class="lgNombre"><b id="lgN">' + esc(lugar) + '</b><button type="button" class="lgCambia" id="lgCambia">Cambiar</button></div>' +
+          (q.sug && q.sug.nombre ? '<p class="fmAyuda">Ya está en Restaurantes (' + (q.sug.por === "dia" ? "otro gasto de ese mismo día está ahí" : "el gasto lo menciona") + '). Solo confirma.</p>' : '<p class="fmAyuda">Sale del gasto «' + esc(m.concepto) + '». Si ya existe un lugar con ese nombre, se une a él.</p>') +
+          '<div class="inFrecs lgOpc">' + otros.concat(sugeridos).filter((x, i, a) => a.findIndex(y => y.toLowerCase() === x.toLowerCase()) === i).slice(0, 6).map(n => '<button type="button" class="recChip' + (n.toLowerCase() === lugar.toLowerCase() ? " on" : "") + '" data-l="' + esc(n) + '" aria-pressed="' + (n.toLowerCase() === lugar.toLowerCase()) + '">' + esc(n) + '</button>').join("") + '</div>' +
+          '<datalist id="lgLista">' + nombres.map(n => '<option value="' + esc(n) + '">').join("") + '</datalist>' +
+          '<input id="lgIn" class="seLugarIn" type="text" list="lgLista" maxlength="60" autocomplete="off" placeholder="Nombre del lugar" value="' + esc(lugar) + '" hidden>' +
+          '<button type="button" class="ddBuscar" id="lgNada" style="margin-top:14px">No fue en un restaurante</button><p class="inErr" id="lgErr" role="alert"></p>';
+        botones.innerHTML = '<button type="button" class="pgSi" id="lgSig">Siguiente</button>';
+        const nom = $("lgN"), inp = $("lgIn");
+        const pon = v => { lugar = v; nom.textContent = v; inp.value = v; vista.querySelectorAll(".lgOpc [data-l]").forEach(b => { const on = b.dataset.l.toLowerCase() === v.toLowerCase(); b.classList.toggle("on", on); b.setAttribute("aria-pressed", String(on)); }); };
+        vista.querySelectorAll(".lgOpc [data-l]").forEach(b => b.addEventListener("click", () => pon(b.dataset.l)));
+        $("lgCambia").addEventListener("click", () => { inp.hidden = false; $("lgCambia").hidden = true; inp.focus(); inp.select(); });
+        inp.addEventListener("input", () => { lugar = inp.value; nom.textContent = inp.value || "…"; });
+        inp.addEventListener("keydown", e => { if(e.key === "Enter"){ e.preventDefault(); $("lgSig").click(); } });
+        $("lgNada").addEventListener("click", async () => {
+          const b = $("lgNada"); b.disabled = true; b.textContent = "Guardando…";
+          try{ await pide({ accion: "completar", id: q.id, respuesta: "No fue en un restaurante" }); cierra(); }
+          catch{ b.disabled = false; b.textContent = "No pude guardarlo. Inténtalo de nuevo"; }
+        });
+        $("lgSig").addEventListener("click", () => { if(lugar.trim().length < 2){ $("lgErr").textContent = "Escribe el nombre del lugar."; inp.hidden = false; inp.focus(); return; } sigue(); });
+        return;
+      }
+      if(paso === "personas"){
+        vista.innerHTML = '<span class="inLbl seLbl1">¿Cuántos comieron?</span><p class="fmAyuda">En ' + esc(lugar.trim()) + (/\bpareja\b/i.test(m.concepto) ? " · el gasto dice «pareja»" : "") + '</p>' + grilla("fmCuantos", personas, 10) + '<p class="inErr" id="lgErr" role="alert"></p>';
+        botones.innerHTML = '<button type="button" class="pgSi" id="lgSig">Siguiente</button>';
+        vista.querySelector(".fmCuantos").addEventListener("click", e => { const b = e.target.closest("[data-n]"); if(!b) return; personas = +b.dataset.n; vista.querySelectorAll(".fmCuantos [data-n]").forEach(x => x.classList.toggle("on", x === b)); setTimeout(sigue, 380); });
+        $("lgSig").addEventListener("click", () => { if(!personas){ $("lgErr").textContent = "Toca cuántas personas comieron."; return; } sigue(); });
+        return;
+      }
+      if(paso === "nota"){
+        vista.innerHTML = '<span class="inLbl seLbl1">¿Qué nota le ponen?</span><p class="fmAyuda">' + (mm && puntos ? 'La tomé de tus notas del gasto («' + esc(mm[0]) + '»). Cámbiala si quieres.' : 'De 1 a 10') + '</p>' + grilla("fmNota", puntos, 10) +
+          '<button type="button" class="ddBuscar" id="lgSin" style="margin-top:14px">Sin nota por ahora</button>';
+        botones.innerHTML = '<button type="button" class="pgSi" id="lgSig">Siguiente</button>';
+        vista.querySelector(".fmNota").addEventListener("click", e => { const b = e.target.closest("[data-n]"); if(!b) return; puntos = +b.dataset.n; vista.querySelectorAll(".fmNota [data-n]").forEach(x => x.classList.toggle("on", x === b)); setTimeout(sigue, 380); });
+        $("lgSin").addEventListener("click", () => { puntos = 0; sigue(); });
+        $("lgSig").addEventListener("click", sigue);
+        return;
+      }
+      /* comentario + resumen */
+      const TAGS = ["Rico", "Caro", "Barato", "Buena atención", "Porciones grandes", "Lento", "Buen ambiente", "Volvemos"];
+      vista.innerHTML = '<div class="fmResumen">' +
+        '<button type="button" data-ir="lugar"><small>Lugar</small><b>' + esc(lugar.trim()) + '</b></button>' +
+        '<button type="button" data-ir="personas"><small>Comieron</small><b>' + personas + '</b></button>' +
+        '<button type="button" data-ir="nota"><small>Nota</small><b>' + (puntos ? puntos + ' / 10' : 'Sin nota') + '</b></button></div>' +
+        '<label class="inLbl" for="lgComent">Comentario <span style="font-weight:400;letter-spacing:0;text-transform:none">(opcional)</span></label>' +
+        '<input id="lgComent" class="seLugarIn" type="text" maxlength="200" autocomplete="off" placeholder="Qué tal estuvo" value="' + esc(coment) + '">' +
+        (coment ? '<p class="fmAyuda">Lo saqué de tus notas del gasto.</p>' : '') +
+        '<div class="inFrecs lgTags">' + TAGS.map(t => '<button type="button" class="recChip" data-t="' + esc(t) + '">' + esc(t) + '</button>').join("") + '</div><p class="inErr" id="lgErr" role="alert"></p>';
+      botones.innerHTML = '<button type="button" class="pgSi" id="lgGuardar">Guardar en Restaurantes</button>';
+      const inp = $("lgComent");
+      const marcaTags = () => vista.querySelectorAll(".lgTags [data-t]").forEach(b => b.setAttribute("aria-pressed", String(inp.value.toLowerCase().includes(b.dataset.t.toLowerCase()))));
+      inp.addEventListener("input", () => { coment = inp.value; marcaTags(); }); marcaTags();
+      vista.querySelectorAll(".lgTags [data-t]").forEach(b => b.addEventListener("click", () => {
+        const t = b.dataset.t, i = inp.value.toLowerCase().indexOf(t.toLowerCase());
+        if(i >= 0) inp.value = (inp.value.slice(0, i) + inp.value.slice(i + t.length)).replace(/^[\s,]+|[\s,]+$/g, "").replace(/\s*,\s*,/g, ",");
+        else inp.value = (inp.value.trim() ? inp.value.trim().replace(/[,\s]+$/, "") + ", " : "") + t.toLowerCase();
+        coment = inp.value; marcaTags();
+      }));
+      vista.querySelector(".fmResumen").addEventListener("click", e => { const b = e.target.closest("[data-ir]"); if(b){ editando = true; ir(b.dataset.ir, -1); } });
+      $("lgGuardar").addEventListener("click", async () => {
+        if(guardando) return;
+        const err = $("lgErr"), btn = $("lgGuardar");
+        coment = inp.value.trim();
+        if(lugar.trim().length < 2){ err.textContent = "Falta el nombre del lugar."; return; }
+        if(!personas){ err.textContent = "Falta cuántos comieron."; return; }
+        guardando = true; err.textContent = ""; btn.disabled = true; btn.textContent = "Guardando…";
+        try{
+          const r = await fetch(MOVIMIENTO_COMPLETAR_URL, { method: "POST", body: JSON.stringify({ token: MERCADO_TOKEN, id: m.id, lugar: lugar.trim(), personas, puntuacion: puntos || undefined, comentario: coment || undefined }) });
+          const j = await r.json().catch(() => ({}));
+          if(!r.ok || j.ok === false) throw new Error(j.error === "lugar" ? "Escribe el nombre del lugar." : "");
+          await pide({ accion: "completar", id: q.id, respuesta: "Fue en " + lugar.trim() + " · " + personas + (personas === 1 ? " persona" : " personas") + (puntos ? " · nota " + puntos : "") });
+          cierra();
+          if(typeof avisoOk === "function") avisoOk("Guardado en Restaurantes", lugar.trim() + " · " + personas + (personas === 1 ? " persona" : " personas"));
+        }catch(e){ guardando = false; btn.disabled = false; btn.textContent = "Guardar en Restaurantes"; err.textContent = (e && e.message) || "No pude guardarlo. Revisa que el flujo «movimiento-completar» esté activo en n8n."; }
+      });
+    }
+    ir("lugar", 1, true);
   }
   insignia();
   return { revisar, abre, aplica, pinta, cuantas: () => pendientes.length, ajustes };
