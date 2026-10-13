@@ -3160,7 +3160,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-13.181";
+const APP_VERSION = "2026-10-13.182";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -7367,7 +7367,7 @@ const Preguntas = (function(){
     const tabs = '<div class="ddTabs" role="tablist"><button type="button" role="tab" data-t="dudas" aria-selected="' + (pestana === "dudas") + '">Dudas' + (A.length ? ' <b>' + A.length + '</b>' : '') + '</button><button type="button" role="tab" data-t="aprendizaje" aria-selected="' + (pestana === "aprendizaje") + '">Aprendizaje' + (saber.length ? ' <b>' + saber.length + '</b>' : '') + '</button></div>';
     cuerpo.innerHTML = tabs + (pestana === "dudas" ?
       '<div class="ddResumen' + (A.length ? '' : ' ok') + '"><span class="ddNum">' + (A.length || "✓") + '</span><div><b>' + (A.length ? (A.length === 1 ? "Tienes 1 duda por resolver" : "Tienes " + A.length + " dudas por resolver") : "Todo en orden") + '</b><span class="t">' + (A.length ? "Responderlas hace que tus cuentas queden más exactas." : "Armoni no tiene preguntas pendientes por ahora.") + '</span></div></div>' +
-      (A.length ? '<div class="ddLista">' + A.map((q, i) => '<article class="ddCard" style="--i:' + Math.min(i, 8) + '">' + (q.tipo === "lugar" ? '<span class="ddTag">Falta el lugar</span>' : q.tipo === "caso" ? '<span class="ddTag">Caso abierto</span>' : q.saltada ? '<span class="ddTag dif">La dejaste para después</span>' : '<span class="ddTag">Por resolver</span>') + ((q.hilo || []).length > 1 ? ' <span class="ddTag dif">En conversación</span>' : '') + '<h3>' + esc(limpia(q)) + '</h3>' + movs(q) + '<button type="button" class="ddBtn" data-id="' + esc(q.id) + '">' + (q.tipo === "lugar" ? "Completar" : q.tipo === "caso" || (q.hilo || []).length > 1 ? "Hablar con Armoni" : "Responder") + '</button></article>').join("") + '</div>' : '') +
+      (A.length ? '<div class="ddLista">' + A.map((q, i) => '<article class="ddCard" style="--i:' + Math.min(i, 8) + '">' + (q.tipo === "par" ? '<span class="ddTag">Dos registros parecidos</span>' : q.tipo === "lugar" ? '<span class="ddTag">Falta el lugar</span>' : q.tipo === "caso" ? '<span class="ddTag">Caso abierto</span>' : q.saltada ? '<span class="ddTag dif">La dejaste para después</span>' : '<span class="ddTag">Por resolver</span>') + ((q.hilo || []).length > 1 ? ' <span class="ddTag dif">En conversación</span>' : '') + '<h3>' + esc(limpia(q)) + '</h3>' + movs(q) + '<button type="button" class="ddBtn" data-id="' + esc(q.id) + '">' + (q.tipo === "lugar" || q.tipo === "par" ? "Completar" : q.tipo === "caso" || (q.hilo || []).length > 1 ? "Hablar con Armoni" : "Responder") + '</button></article>').join("") + '</div>' : '') +
       '<button type="button" class="ddBuscar" id="ddBuscar">Buscar dudas nuevas</button>'
       :
       '<p class="ddNota">Lo que Armoni ha aprendido de tus respuestas. Si algo ya no es cierto, olvídalo con la ✕ o corrige una respuesta.</p>' +
@@ -7375,7 +7375,7 @@ const Preguntas = (function(){
       desp("Tus respuestas", H.length, H.length ? hec : '<p class="ddVacio">Aún no has respondido ninguna duda.</p>', false));
     cuerpo.querySelectorAll("[data-t]").forEach(b => b.addEventListener("click", () => { pestana = b.dataset.t; pinta(); }));
     cuerpo.querySelectorAll(".ddCorr").forEach(b => b.addEventListener("click", () => abre(b.dataset.c)));
-    cuerpo.querySelectorAll(".ddBtn").forEach(b => b.addEventListener("click", () => { const q = A.find(x => x.id === b.dataset.id); if(q && q.tipo === "lugar") abreLugar(q); else abre(b.dataset.id); }));
+    cuerpo.querySelectorAll(".ddBtn").forEach(b => b.addEventListener("click", () => { const q = A.find(x => x.id === b.dataset.id); if(q && q.tipo === "lugar") abreLugar(q); else if(q && q.tipo === "par") abrePar(q); else abre(b.dataset.id); }));
     /* lista de lo que sabe: se filtra por tema y por lo que escribas, sin repintar todo (el cursor se queda en el buscador) */
     const pintaSaber = () => {
       const L = cuerpo.querySelector("#ddSaberL"); if(!L) return;
@@ -7405,7 +7405,87 @@ const Preguntas = (function(){
     });
     if(refresca) pide({ accion: "pendientes" }).catch(() => {});
   }
-    /* una salida a comer que quedó sin lugar: se completa aquí (dónde fue, cuántos comieron, qué nota) y queda en «Restaurantes» */
+    /* dos registros iguales (por ejemplo dos «Helado» el mismo día): ¿fueron al mismo lugar? Si sí, los dos quedan en ese lugar;
+     si no, cada uno va a su lugar y se le cambia el nombre en Movimientos («Helado · Crepes») para distinguirlos */
+  function abrePar(q){
+    if(document.querySelector(".pgScrim.lgScrim")) return;
+    const ms = (q.movs || []).filter(x => x && x.id); if(ms.length < 2) return;
+    const scrim = document.createElement("div"); scrim.className = "pgScrim seScrim lgScrim";
+    let modo = "", mismoL = "", mismoP = /\bpareja\b/i.test(ms[0].concepto) ? 2 : 0;
+    const L = ms.map(() => ""), P = ms.map(m => /\bpareja\b/i.test(m.concepto) ? 2 : 0);
+    const nombres = (() => { try{ return SalidasEma.nombres(); }catch{ return []; } })();
+    const lista = '<div class="prMovs">' + ms.map(m => '<div><span>' + esc(m.concepto) + '<small>' + esc(fechaC(m.fecha)) + ' · ' + esc(m.cat) + '</small></span><b class="menos">−' + peso(m.monto) + '</b></div>').join("") + '</div>';
+    const chips = (id, n) => '<div class="seNotas" id="' + id + '">' + [1,2,3,4,5,6,7,8,9,10].map(k => '<button type="button" data-n="' + k + '" class="' + (k === n ? "on" : "") + '">' + k + '</button>').join("") + '</div>';
+    const datalist = '<datalist id="lgLista">' + nombres.map(n => '<option value="' + esc(n) + '">').join("") + '</datalist>';
+    const caja = () => scrim.querySelector(".inBody");
+    const $ = id => scrim.querySelector("#" + id);
+    const cierra = () => { scrim.classList.remove("on"); setTimeout(() => scrim.remove(), 340); };
+    scrim.innerHTML = '<div class="inWrap"><div class="pgCard inCard" role="dialog" aria-modal="true" aria-labelledby="lgT"><div class="inBody"></div><div class="pgRow" id="lgFila"></div></div></div>';
+    document.body.appendChild(scrim); requestAnimationFrame(() => scrim.classList.add("on"));
+    scrim.addEventListener("click", e => { if(e.target === scrim) cierra(); });
+    const renombra = (m, lugar) => {
+      const pareja = /\bpareja\b/i.test(m.concepto), base = m.concepto.replace(/\s*\bpareja\b\s*$/i, "").trim();
+      const sin = t => String(t).toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+      if(sin(base).includes(sin(lugar))) return "";   // ya dice el lugar: no se toca
+      return (base + " · " + lugar + (pareja ? " pareja" : "")).slice(0, 80);
+    };
+    const guarda = async lotes => {
+      const err = $("lgErr"), btn = $("lgSi"); err.textContent = ""; btn.disabled = true; btn.textContent = "Guardando…";
+      try{
+        for(const d of lotes){
+          const r = await fetch(MOVIMIENTO_COMPLETAR_URL, { method: "POST", body: JSON.stringify(Object.assign({ token: MERCADO_TOKEN }, d)) });
+          const j = await r.json().catch(() => ({}));
+          if(!r.ok || j.ok === false) throw new Error("");
+        }
+        const res = modo === "mismo" ? "Los dos fueron a " + mismoL : lotes.map(d => d.lugar).join(" y ");
+        await pide({ accion: "completar", id: q.id, respuesta: res });
+        cierra();
+        if(typeof avisoOk === "function") avisoOk("Guardado en Restaurantes", res);
+      }catch(e){ btn.disabled = false; btn.textContent = "Guardar"; err.textContent = (e && e.message) || "No pude guardarlo. Revisa que el flujo «movimiento-completar» esté activo en n8n."; }
+    };
+    const marcaChips = (id, get, set) => { const c = $(id); if(c) c.addEventListener("click", e => { const b = e.target.closest("[data-n]"); if(!b) return; set(+b.dataset.n); c.querySelectorAll("[data-n]").forEach(x => x.classList.toggle("on", +x.dataset.n === get())); }); };
+    function pinta(){
+      const fila = $("lgFila");
+      if(!modo){
+        caja().innerHTML = '<h3 id="lgT" style="margin:0 0 6px">¿Fueron al mismo lugar?</h3>' + lista + '<p class="fmAyuda" style="margin:10px 0 0">Si fueron a lugares distintos, Armoni cambia el nombre en Movimientos para que se distingan.</p>';
+        fila.innerHTML = '<button type="button" class="pgNo" id="lgDist">No, distintos</button><button type="button" class="pgSi" id="lgMismo">Sí, el mismo</button>';
+        $("lgMismo").addEventListener("click", () => { modo = "mismo"; pinta(); });
+        $("lgDist").addEventListener("click", () => { modo = "distintos"; pinta(); });
+        return;
+      }
+      if(modo === "mismo"){
+        caja().innerHTML = '<h3 id="lgT" style="margin:0 0 6px">¿A cuál lugar?</h3>' + lista + datalist +
+          '<label class="inLbl" for="lgLugar">Lugar</label><input id="lgLugar" class="seLugarIn" type="text" list="lgLista" maxlength="60" autocomplete="off" placeholder="Heladería, café…" value="' + esc(mismoL) + '">' +
+          '<span class="inLbl">¿Cuántos comieron?</span>' + chips("lgPers", mismoP) + '<p class="inErr" id="lgErr" role="alert"></p>';
+        fila.innerHTML = '<button type="button" class="pgNo" id="lgAtras">Atrás</button><button type="button" class="pgSi" id="lgSi">Guardar</button>';
+        $("lgAtras").addEventListener("click", () => { modo = ""; pinta(); });
+        marcaChips("lgPers", () => mismoP, v => { mismoP = v; });
+        $("lgSi").addEventListener("click", () => {
+          mismoL = $("lgLugar").value.trim();
+          if(mismoL.length < 2){ $("lgErr").textContent = "Escribe el nombre del lugar."; return; }
+          if(!mismoP){ $("lgErr").textContent = "Toca cuántas personas comieron."; return; }
+          guarda(ms.map(m => ({ id: m.id, lugar: mismoL, personas: mismoP })));
+        });
+        return;
+      }
+      caja().innerHTML = '<h3 id="lgT" style="margin:0 0 6px">¿Cuál fue cada uno?</h3>' + datalist + ms.map((m, i) =>
+        '<div class="prMovs"><div><span>' + esc(m.concepto) + '<small>' + esc(fechaC(m.fecha)) + '</small></span><b class="menos">−' + peso(m.monto) + '</b></div></div>' +
+        '<input class="seLugarIn lgL" data-i="' + i + '" type="text" list="lgLista" maxlength="60" autocomplete="off" placeholder="¿Dónde fue este?" value="' + esc(L[i]) + '">' +
+        '<div class="seNotas lgP" data-i="' + i + '">' + [1,2,3,4,5,6].map(k => '<button type="button" data-n="' + k + '" class="' + (k === P[i] ? "on" : "") + '">' + k + '</button>').join("") + '</div>').join("") +
+        '<p class="inErr" id="lgErr" role="alert"></p>';
+      fila.innerHTML = '<button type="button" class="pgNo" id="lgAtras">Atrás</button><button type="button" class="pgSi" id="lgSi">Guardar</button>';
+      $("lgAtras").addEventListener("click", () => { modo = ""; pinta(); });
+      scrim.querySelectorAll(".lgL").forEach(inp => inp.addEventListener("input", () => { L[+inp.dataset.i] = inp.value; }));
+      scrim.querySelectorAll(".lgP").forEach(c => c.addEventListener("click", e => { const b = e.target.closest("[data-n]"); if(!b) return; P[+c.dataset.i] = +b.dataset.n; c.querySelectorAll("[data-n]").forEach(x => x.classList.toggle("on", +x.dataset.n === P[+c.dataset.i])); }));
+      $("lgSi").addEventListener("click", () => {
+        if(L.some(x => x.trim().length < 2)){ $("lgErr").textContent = "Escribe el lugar de cada uno."; return; }
+        if(P.some(x => !x)){ $("lgErr").textContent = "Toca cuántos comieron en cada uno."; return; }
+        guarda(ms.map((m, i) => { const l = L[i].trim(), c = renombra(m, l); return Object.assign({ id: m.id, lugar: l, personas: P[i] }, c ? { concepto: c } : {}); }));
+      });
+    }
+    pinta();
+  }
+  /* una salida a comer que quedó sin lugar: se completa aquí (dónde fue, cuántos comieron, qué nota) y queda en «Restaurantes» */
   function abreLugar(q){
     if(document.querySelector(".pgScrim.lgScrim")) return;
     const m = (q.movs || [])[0]; if(!m || !m.id) return;

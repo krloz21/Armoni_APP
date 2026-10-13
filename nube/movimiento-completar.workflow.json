@@ -20,7 +20,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// Completa un gasto de salidas que quedó sin restaurante: lo enlaza a su lugar (lo crea si es nuevo) y anota cuántos comieron\nconst TOKEN = 'mercado-7d41c2a9e05b';\nlet b = $input.first().json.body;\nif (typeof b === 'string') { try { b = JSON.parse(b); } catch (e) { b = {}; } }\nb = b || {};\nconst falla = (error) => [{ json: { ok: false, error } }];\nif (b.token !== TOKEN) return falla('token');\nconst id = String(b.id || '').trim();\nif (!/^[0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12}$/i.test(id)) return falla('id');\nconst lugar = String(b.lugar || '').replace(/[<>{}\\[\\]]/g, ' ').replace(/\\s+/g, ' ').trim().slice(0, 80);\nif (lugar.length < 2) return falla('lugar');\nconst pers = Math.round(Number(b.personas));\nconst personas = pers >= 1 && pers <= 30 ? pers : null;\nconst punt = Number(b.puntuacion);\nconst puntuacion = punt >= 1 && punt <= 10 ? Math.round(punt * 2) / 2 : null;\nconst comentario = String(b.comentario || '').trim().slice(0, 200);\nreturn [{ json: { ok: true, id, lugar, personas, puntuacion, comentario, categoria: 'Salidas', salida: '' } }];\n"
+        "jsCode": "// Completa un gasto de salidas que quedó sin restaurante: lo enlaza a su lugar (lo crea si es nuevo) y anota cuántos comieron\nconst TOKEN = 'mercado-7d41c2a9e05b';\nlet b = $input.first().json.body;\nif (typeof b === 'string') { try { b = JSON.parse(b); } catch (e) { b = {}; } }\nb = b || {};\nconst falla = (error) => [{ json: { ok: false, error } }];\nif (b.token !== TOKEN) return falla('token');\nconst id = String(b.id || '').trim();\nif (!/^[0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12}$/i.test(id)) return falla('id');\nconst lugar = String(b.lugar || '').replace(/[<>{}\\[\\]]/g, ' ').replace(/\\s+/g, ' ').trim().slice(0, 80);\nif (lugar.length < 2) return falla('lugar');\nconst pers = Math.round(Number(b.personas));\nconst personas = pers >= 1 && pers <= 30 ? pers : null;\nconst punt = Number(b.puntuacion);\nconst puntuacion = punt >= 1 && punt <= 10 ? Math.round(punt * 2) / 2 : null;\nconst comentario = String(b.comentario || '').trim().slice(0, 200);\n// nombre nuevo del gasto (cuando dos registros parecidos fueron a lugares distintos): «Helado · Crepes»\nconst concepto = String(b.concepto || '').replace(/[<>{}\\[\\]]/g, ' ').replace(/\\s+/g, ' ').trim().slice(0, 80);\nreturn [{ json: { ok: true, id, lugar, personas, puntuacion, comentario, concepto, categoria: 'Salidas', salida: '' } }];\n"
       },
       "id": "3813cbf9-bac0-43fd-be7c-d829df0b2243",
       "name": "Validar movimiento",
@@ -336,9 +336,77 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
       "position": [
+        2880,
+        -120
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c9",
+              "leftValue": "={{ $('Validar movimiento').first().json.concepto }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "05ae8e23-cee9-4d49-8964-a9489cf0fbda",
+      "name": "¿Renombrar?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
         2400,
         -120
       ]
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "operation": "update",
+        "pageId": {
+          "__rl": true,
+          "value": "={{ $('Armar datos').first().json.id }}",
+          "mode": "id"
+        },
+        "propertiesUi": {
+          "propertyValues": [
+            {
+              "key": "Concepto|title",
+              "title": "={{ $('Validar movimiento').first().json.concepto }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 3,
+      "position": [
+        2640,
+        -220
+      ],
+      "id": "5f1d7a99-ad26-44bc-a161-d7a145877b0f",
+      "name": "Renombrar movimiento",
+      "credentials": {
+        "notionApi": {
+          "id": "pgk4uKXwaEEnuyRO",
+          "name": "Notion account"
+        }
+      }
     }
   ],
   "pinData": {},
@@ -475,6 +543,35 @@
       ]
     },
     "Actualizar movimiento": {
+      "main": [
+        [
+          {
+            "node": "¿Renombrar?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Renombrar?": {
+      "main": [
+        [
+          {
+            "node": "Renombrar movimiento",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Responder bien",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Renombrar movimiento": {
       "main": [
         [
           {
