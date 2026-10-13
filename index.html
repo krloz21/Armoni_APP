@@ -3160,7 +3160,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-13.180";
+const APP_VERSION = "2026-10-13.181";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -7412,7 +7412,7 @@ const Preguntas = (function(){
     const adivina = t => { const x = String(t || "").replace(/\bpareja\b/ig, "").replace(/^\s*(almuerzo|cena|comida|desayuno|helado|brunch|domicilio|antojo)s?\b\s*(en|de|del|donde|con)?\s*/i, "").replace(/\s{2,}/g, " ").trim(); return x.replace(/\b\p{L}/gu, c => c.toUpperCase()); };
     const rx = /(\d{1,2}(?:[.,]5)?)\s*\/\s*10/;
     const nt = String(m.notas || ""); const mm = nt.match(rx);
-    let lugar = adivina(m.concepto), personas = /\bpareja\b/i.test(m.concepto) ? 2 : 0, puntos = mm ? Math.min(10, Math.max(1, Math.round(parseFloat(mm[1].replace(",", ".")) * 2) / 2)) : 0;
+    let lugar = q.sug && q.sug.nombre ? q.sug.nombre : adivina(m.concepto), personas = /\bpareja\b/i.test(m.concepto) ? 2 : 0, puntos = mm ? Math.min(10, Math.max(1, Math.round(parseFloat(mm[1].replace(",", ".")) * 2) / 2)) : 0;
     let coment = nt.replace(rx, "").replace(/^[\s,.\-–:]+/, "").trim();
     const scrim = document.createElement("div"); scrim.className = "pgScrim seScrim lgScrim";
     const nombres = (() => { try{ return SalidasEma.nombres(); }catch{ return []; } })();
@@ -7420,11 +7420,13 @@ const Preguntas = (function(){
     scrim.innerHTML = '<div class="inWrap"><div class="pgCard inCard" role="dialog" aria-modal="true" aria-labelledby="lgT"><div class="inBody">' +
       '<h3 id="lgT" style="margin:0 0 6px">¿Dónde fue?</h3>' +
       '<div class="prMovs"><div><span>' + esc(m.concepto) + '<small>' + esc(fechaC(m.fecha)) + ' · ' + esc(m.cat) + '</small></span><b class="menos">−' + peso(m.monto) + '</b></div></div>' +
+      (q.sug && q.sug.nombre ? '<p class="fmAyuda" style="margin:10px 0 0">Ya está en Restaurantes: <b>' + esc(q.sug.nombre) + '</b> (' + (q.sug.por === "dia" ? "otro gasto de ese mismo día está en ese lugar" : "el gasto lo menciona") + '). Confirma o cambia el nombre.</p>' : '') +
       '<label class="inLbl" for="lgLugar">Lugar</label><datalist id="lgLista">' + nombres.map(n => '<option value="' + esc(n) + '">').join("") + '</datalist>' +
       '<input id="lgLugar" class="seLugarIn" type="text" list="lgLista" maxlength="60" autocomplete="off" placeholder="Restaurante, heladería, café…" value="' + esc(lugar) + '">' +
       '<span class="inLbl">¿Cuántos comieron?</span>' + chips("lgPers", personas) +
       '<span class="inLbl">¿Qué nota le ponen? <span style="font-weight:400;letter-spacing:0;text-transform:none">(opcional)</span></span>' + chips("lgNota", puntos) +
       '<input id="lgComent" class="seLugarIn" type="text" maxlength="200" autocomplete="off" placeholder="Un comentario corto (opcional)" value="' + esc(coment) + '">' +
+      '<button type="button" class="ddBuscar" id="lgNada" style="margin-top:12px">No fue en un restaurante</button>' +
       '<p class="inErr" id="lgErr" role="alert"></p></div>' +
       '<div class="pgRow"><button type="button" class="pgNo" id="lgNo">Ahora no</button><button type="button" class="pgSi" id="lgSi">Guardar en Restaurantes</button></div></div></div>';
     document.body.appendChild(scrim); requestAnimationFrame(() => scrim.classList.add("on"));
@@ -7432,6 +7434,11 @@ const Preguntas = (function(){
     const cierra = () => { scrim.classList.remove("on"); setTimeout(() => scrim.remove(), 340); };
     scrim.addEventListener("click", e => { if(e.target === scrim) cierra(); });
     $("lgNo").addEventListener("click", cierra);
+    $("lgNada").addEventListener("click", async () => {   // no era un restaurante (heladería, juegos…): la duda se cierra y no vuelve a preguntar
+      const b = $("lgNada"); b.disabled = true; b.textContent = "Guardando…";
+      try{ await pide({ accion: "completar", id: q.id, respuesta: "No fue en un restaurante" }); cierra(); }
+      catch{ b.disabled = false; b.textContent = "No pude guardarlo. Inténtalo de nuevo"; }
+    });
     const marca = (cont, get, set) => $(cont).addEventListener("click", e => { const b = e.target.closest("[data-n]"); if(!b) return; const k = +b.dataset.n; set(get() === k && cont === "lgNota" ? 0 : k); $(cont).querySelectorAll("[data-n]").forEach(x => x.classList.toggle("on", +x.dataset.n === get())); });
     marca("lgPers", () => personas, v => { personas = v; });
     marca("lgNota", () => puntos, v => { puntos = v; });
