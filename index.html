@@ -3209,7 +3209,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-16.205";
+const APP_VERSION = "2026-10-16.206";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -8681,7 +8681,7 @@ const Pagos = (function(){
       if(ce){
         const x = PERSONAS.find(z => z.id === ce.dataset.cel), n = leeC()[x.id];
         if(!n){ pideNumero(x); return; }
-        Uso.accion("+pagar_cel"); cierra(false); setTimeout(() => Servicios.abrirPago("Pagar " + x.t, PAGO_CLARO_URL, n, true), 220); return;
+        Uso.accion("+pagar_cel"); cierra(false); setTimeout(() => Servicios.abrirPago("Pagar " + x.t, PAGO_CLARO_URL, n, false), 220); return;
       }
       const b = e.target.closest("button[data-id]"); if(!b) return;
       const id = b.dataset.id, f = FIJOS.find(x => x.id === id);
