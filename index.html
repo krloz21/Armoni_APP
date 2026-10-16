@@ -3176,7 +3176,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-16.192";
+const APP_VERSION = "2026-10-16.193";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -6232,7 +6232,8 @@ const SalidaEmaForm = (function(){
           if(g.fp && g.fp !== fecha) dato.fechaSalida = fecha;   // pagado antes: el gasto queda en el día en que se pagó, pero hace parte de esta salida
           const l = p.lugar.trim();
           if(l){ const c = conocido(l); if(c) dato.lugar = c; else { dato.lugar = l; if(!p.nuevoEnviado){ dato.puntuacion = p.puntuacion || null; dato.comentario = p.comentario.trim(); } } }
-          const r = await Cola.post(MOVIMIENTO_URL, { method: "POST", body: JSON.stringify(Object.assign({ token: MERCADO_TOKEN, forzar: true }, dato)) });
+          if(!g.cid) g.cid = Date.now().toString(36) + Math.random().toString(36).slice(2, 8);   // el mismo en cada reintento: n8n no lo duplica
+          const r = await Cola.post(MOVIMIENTO_URL, { method: "POST", body: JSON.stringify(Object.assign({ token: MERCADO_TOKEN, forzar: true, colaId: g.cid }, dato)) }, true);
           const j = await r.json().catch(() => ({}));
           if(!r.ok || j.ok === false) throw new Error(j.error || "No se pudo guardar");
           if(j.enCola) sinConexion = true;
@@ -6978,11 +6979,13 @@ const Cola = (function(){
   const nuevoId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
   let enviando = false;
   /* como fetch: si no hay conexión guarda el registro y responde «ok, en cola» para que la app siga normal */
-  async function post(url, opts){
+  /* enOrden: si ya hay algo esperando, este va detrás (así una salida con varios gastos no se desordena) */
+  async function post(url, opts, enOrden){
     let cuerpo = {}; try{ cuerpo = JSON.parse(opts.body || "{}"); }catch{}
     if(!cuerpo.colaId) cuerpo.colaId = nuevoId();
     const body = JSON.stringify(cuerpo);
     try{
+      if(enOrden && lee().length) throw new Error("en orden");
       return await fetch(url, Object.assign({}, opts, { body, signal: AbortSignal.timeout ? AbortSignal.timeout(15000) : undefined }));
     }catch(e){
       const c = lee(); c.push({ url, body, t: Date.now(), resumen: (cuerpo.concepto || "Registro") + (cuerpo.monto ? " · $" + Math.round(cuerpo.monto).toLocaleString("es-CO") : "") }); escribe(c);
