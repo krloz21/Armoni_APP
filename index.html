@@ -2701,7 +2701,6 @@ body[class*="mode-"] #masIngreso{ display:none; }
 .fmMontoIn b{ font-size:1.5rem; font-weight:600; color:var(--dim); }
 .inCard .fmMontoIn input[type="text"]{ width:2.2ch; max-width:none; padding:0 !important; border:0 !important; background:none !important; box-shadow:none !important; font-size:2.5rem; font-weight:700; letter-spacing:-.02em; text-align:center; font-variant-numeric:tabular-nums; color:var(--white); caret-color:var(--fa1); }
 .inCard .fmMontoIn input::placeholder{ color:rgba(var(--ink),.25); opacity:1; transition:opacity .45s ease, color .45s ease; }
-.inCard .fmMontoIn input:focus::placeholder{ color:transparent; opacity:0; }   /* al tocar, el 0 se va y queda solo el cursor */
 .fmLinea{ display:block; height:2px; width:70px; margin:6px auto 0; border-radius:2px; background:linear-gradient(90deg, transparent, var(--fa1), var(--fa2), transparent); opacity:.45; transition:width .45s var(--ease-out), opacity .3s; }
 .fmMonto:focus-within .fmLinea{ width:190px; opacity:1; }
 /* recurrentes: lista desplegable */
@@ -3177,7 +3176,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-13.188";
+const APP_VERSION = "2026-10-16.189";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -5283,6 +5282,7 @@ const Restaurantes = (function(){
       prom: numero(r.property_promedio_de_gasto ?? r.property_gasto_promedio),
       porPersona: numero(r.property_gasto_por_persona),
       personasTot: numero(r.property_total_personas),
+      visitasP: numero(r.property_visitas_con_personas),
       totalGastado: numero(r.property_total_gastado),
       dias,
       ciudad: String((v => Array.isArray(v) ? v[0] : v)(r.property_ciudad) || "Cali"),
@@ -5454,11 +5454,9 @@ const Restaurantes = (function(){
       ];
       /* promedio de gasto y, debajo, con cuántas personas se come en promedio (entre paréntesis) */
       const prom = r.prom || (r.totalGastado && r.veces ? r.totalGastado / r.veces : 0);
-      const gente = r.personasTot && r.veces ? Math.max(1, Math.round(r.personasTot / r.veces)) : 0;
-      const porP = r.porPersona || (r.totalGastado && r.personasTot ? Math.round(r.totalGastado / r.personasTot) : 0);
+      const gente = r.personasTot && (r.visitasP || r.veces) ? Math.max(1, Math.round(r.personasTot / (r.visitasP || r.veces))) : 0;   // adultos que suelen comer (Ema no cuenta)
       if(prom) stats.push({ v: plata(prom), l: "Promedio", s: gente ? "(" + gente + (gente === 1 ? " persona" : " personas") + ")" : "" });
       else if(r.precio) stats.push({ v: esc(r.precio), l: "Precio", s: "" });
-      if(porP) stats.push({ v: plata(porP), l: "Por persona", s: "" });
       const cols = stats.length <= 3 ? stats.length : stats.length === 4 ? 2 : 3;
       const c = Math.PI * 2 * 32;
       body.innerHTML =
@@ -5529,7 +5527,7 @@ const Restaurantes = (function(){
       if(g.length === 1) return g[0];
       const base = g.slice().sort((a, b) => (b.score > 0) - (a.score > 0) || b.veces - a.veces)[0];
       const dias = g.map(x => x.dias).filter(d => d != null);
-      return Object.assign({}, base, { personasTot: g.reduce((t, x) => t + (x.personasTot || 0), 0), totalGastado: g.reduce((t, x) => t + (x.totalGastado || 0), 0), veces: g.reduce((t, x) => t + (x.veces || 0), 0), dias: dias.length ? Math.min(...dias) : base.dias, nota: base.nota || (g.find(x => x.nota) || {}).nota || "" });
+      return Object.assign({}, base, { visitasP: g.reduce((t, x) => t + (x.visitasP || 0), 0), personasTot: g.reduce((t, x) => t + (x.personasTot || 0), 0), totalGastado: g.reduce((t, x) => t + (x.totalGastado || 0), 0), veces: g.reduce((t, x) => t + (x.veces || 0), 0), dias: dias.length ? Math.min(...dias) : base.dias, nota: base.nota || (g.find(x => x.nota) || {}).nota || "" });
     });
   };
   const cargar = raw => { todosItems = unePorNombre((raw || []).filter(r => String(r.property_clase || "") !== "Plan Ema").map(leer)); statusEl.innerHTML = ""; paint(); };
@@ -6190,7 +6188,7 @@ const SalidaEmaForm = (function(){
         bSi.addEventListener("click", () => {
           if(si.hidden){ si.hidden = false; si.classList.add("seAparece"); bSi.textContent = "Agregar"; listoSi(); setTimeout(() => inp.focus(), 200); return; }
           if(!(monto > 0)) return;
-          p.gastos.push({ c: "Parqueadero", m: monto, hecho: false }); recuerdaParq(monto); p.preguntado = true;
+          p.gastos.unshift({ c: "Parqueadero", m: monto, hecho: false });   // va primero en ese lugar: así quedan en el orden en que pasaron recuerdaParq(monto); p.preguntado = true;
           ir("resumen", 1);
         });
         return;
@@ -7483,8 +7481,8 @@ const Preguntas = (function(){
     if(document.querySelector(".pgScrim.lgScrim")) return;
     const ms = (q.movs || []).filter(x => x && x.id); if(ms.length < 2) return;
     const scrim = document.createElement("div"); scrim.className = "pgScrim seScrim lgScrim";
-    let modo = "", mismoL = "", mismoP = /\bpareja\b/i.test(ms[0].concepto) ? 2 : 0;
-    const L = ms.map(() => ""), P = ms.map(m => /\bpareja\b/i.test(m.concepto) ? 2 : 0);
+    let modo = "", mismoL = "", mismoP = 2;   // adultos (Ema no cuenta)
+    const L = ms.map(() => ""), P = ms.map(() => 2);
     const nombres = (() => { try{ return SalidasEma.nombres(); }catch{ return []; } })();
     const lista = '<div class="prMovs">' + ms.map(m => '<div><span>' + esc(m.concepto) + '<small>' + esc(fechaC(m.fecha)) + ' · ' + esc(m.cat) + '</small></span><b class="menos">−' + peso(m.monto) + '</b></div>').join("") + '</div>';
     const chips = (id, n) => '<div class="seNotas" id="' + id + '">' + [1,2,3,4,5,6,7,8,9,10].map(k => '<button type="button" data-n="' + k + '" class="' + (k === n ? "on" : "") + '">' + k + '</button>').join("") + '</div>';
@@ -7528,7 +7526,7 @@ const Preguntas = (function(){
       if(modo === "mismo"){
         caja().innerHTML = '<h3 id="lgT" style="margin:0 0 6px">¿A cuál lugar?</h3>' + lista + datalist +
           '<label class="inLbl" for="lgLugar">Lugar</label><input id="lgLugar" class="seLugarIn" type="text" list="lgLista" maxlength="60" autocomplete="off" placeholder="Heladería, café…" value="' + esc(mismoL) + '">' +
-          '<span class="inLbl">¿Cuántos comieron?</span>' + chips("lgPers", mismoP) + '<p class="inErr" id="lgErr" role="alert"></p>';
+          '<span class="inLbl">¿Cuántos adultos comieron?</span><p class="fmAyuda">Ema no cuenta</p>' + chips("lgPers", mismoP) + '<p class="inErr" id="lgErr" role="alert"></p>';
         fila.innerHTML = '<button type="button" class="pgNo" id="lgAtras">Atrás</button><button type="button" class="pgSi" id="lgSi">Guardar</button>';
         $("lgAtras").addEventListener("click", () => { modo = ""; pinta(); });
         marcaChips("lgPers", () => mismoP, v => { mismoP = v; });
@@ -7569,7 +7567,7 @@ const Preguntas = (function(){
     const nt = String(m.notas || "");
     const mm = nt.match(RATING);
     const nombreIni = q.sug && q.sug.nombre ? q.sug.nombre : adivina(m.concepto);
-    let lugar = nombreIni, personas = /\bpareja\b/i.test(m.concepto) ? 2 : 0;
+    let lugar = nombreIni, personas = 2;   // casi siempre son los dos (Ema no cuenta)
     const existente = () => { try{ return Restaurantes.info(lugar); }catch{ return null; } };   // el lugar ya está en Restaurantes
     const yaCalificado = () => { const e = existente(); return !!(e && e.score > 0); };         // y ya tiene nota: no se vuelve a puntuar
     let puntos = mm ? Math.min(10, Math.max(1, Math.round(parseFloat((mm[1] || mm[2]).replace(",", ".")) * 2) / 2)) : 0;
@@ -7634,7 +7632,7 @@ const Preguntas = (function(){
         return;
       }
       if(paso === "personas"){
-        vista.innerHTML = '<span class="inLbl seLbl1">¿Cuántos comieron?</span><p class="fmAyuda">En ' + esc(lugar.trim()) + (/\bpareja\b/i.test(m.concepto) ? " · el gasto dice «pareja»" : "") + '</p>' + grilla("fmCuantos", personas, 10) + '<p class="inErr" id="lgErr" role="alert"></p>';
+        vista.innerHTML = '<span class="inLbl seLbl1">¿Cuántos adultos comieron?</span><p class="fmAyuda">En ' + esc(lugar.trim()) + ' · Ema no cuenta (comparte con ustedes)</p>' + grilla("fmCuantos", personas, 10) + '<p class="inErr" id="lgErr" role="alert"></p>';
         botones.innerHTML = '<button type="button" class="pgSi" id="lgSig">Siguiente</button>';
         vista.querySelector(".fmCuantos").addEventListener("click", e => { const b = e.target.closest("[data-n]"); if(!b) return; personas = +b.dataset.n; vista.querySelectorAll(".fmCuantos [data-n]").forEach(x => x.classList.toggle("on", x === b)); setTimeout(sigue, 380); });
         $("lgSig").addEventListener("click", () => { if(!personas){ $("lgErr").textContent = "Toca cuántas personas comieron."; return; } sigue(); });
@@ -7651,7 +7649,7 @@ const Preguntas = (function(){
       }
       if(yaCalificado()){
         const e = existente();
-        vista.innerHTML = '<div class="fmResumen"><button type="button" data-ir="lugar"><small>Lugar</small><b>' + esc(e.nombre) + '</b></button><button type="button" data-ir="personas"><small>Comieron</small><b>' + personas + '</b></button><button type="button" disabled><small>Visita</small><b>#' + ((e.veces || 0) + 1) + '</b></button></div>' +
+        vista.innerHTML = '<div class="fmResumen"><button type="button" data-ir="lugar"><small>Lugar</small><b>' + esc(e.nombre) + '</b></button><button type="button" data-ir="personas"><small>Adultos</small><b>' + personas + '</b></button><button type="button" disabled><small>Visita</small><b>#' + ((e.veces || 0) + 1) + '</b></button></div>' +
           '<p class="fmAyuda" style="margin-top:14px">Solo se suma una visita a <b>' + esc(e.nombre) + '</b> (nota ' + (Math.round(e.score * 10) / 10) + ' · han ido ' + e.veces + (e.veces === 1 ? ' vez' : ' veces') + '). No se vuelve a puntuar ni se cambia el nombre.</p><p class="inErr" id="lgErr" role="alert"></p>';
         botones.innerHTML = '<button type="button" class="pgSi" id="lgGuardar">Sumar la visita</button>';
         vista.querySelector(".fmResumen").addEventListener("click", ev => { const b = ev.target.closest("[data-ir]"); if(b){ editando = true; ir(b.dataset.ir, -1); } });
@@ -7662,7 +7660,7 @@ const Preguntas = (function(){
       const TAGS = ["Rico", "Caro", "Barato", "Buena atención", "Porciones grandes", "Lento", "Buen ambiente", "Volvemos"];
       vista.innerHTML = '<div class="fmResumen">' +
         '<button type="button" data-ir="lugar"><small>Lugar</small><b>' + esc(lugar.trim()) + '</b></button>' +
-        '<button type="button" data-ir="personas"><small>Comieron</small><b>' + personas + '</b></button>' +
+        '<button type="button" data-ir="personas"><small>Adultos</small><b>' + personas + '</b></button>' +
         '<button type="button" data-ir="nota"><small>Nota</small><b>' + (puntos ? puntos + ' / 10' : 'Sin nota') + '</b></button></div>' +
         '<label class="inLbl" for="lgComent">Comentario <span style="font-weight:400;letter-spacing:0;text-transform:none">(opcional)</span></label>' +
         '<input id="lgComent" class="seLugarIn" type="text" maxlength="200" autocomplete="off" placeholder="Qué tal estuvo" value="' + esc(coment) + '">' +
@@ -8403,9 +8401,9 @@ const GastoManual = (function(){
         return;
       }
       if(paso === "personas"){
-        if(!personas) personas = pareja ? 2 : 0;
+        if(!personas) personas = 2;   // los dos adultos (Ema no cuenta)
         vista.innerHTML =
-          '<span class="inLbl seLbl1">¿Cuántos comieron?</span><p class="fmAyuda">En ' + escH(lugar.trim()) + '</p>' +
+          '<span class="inLbl seLbl1">¿Cuántos adultos comieron?</span><p class="fmAyuda">En ' + escH(lugar.trim()) + ' · Ema no cuenta (comparte con ustedes)</p>' +
           '<div class="seNotas fmCuantos">' + [1,2,3,4,5,6,7,8,9,10].map(n => '<button type="button" data-n="' + n + '" class="' + (personas === n ? 'on' : '') + '" aria-label="' + n + (n === 1 ? ' persona' : ' personas') + '">' + n + '</button>').join("") + '</div>' +
           '<p class="inErr" id="inErr" role="alert"></p>';
         botones.innerHTML = '<button type="button" class="pgSi" id="inSig">Siguiente</button>';
@@ -8433,7 +8431,7 @@ const GastoManual = (function(){
             '<button type="button" data-ir="cuanto"><small>Valor</small><b>' + pesoG(monto) + '</b></button>' +
             '<button type="button" data-ir="categoria"><small>Categoría</small><b>' + escH(categoria) + (pareja ? ' 💑' : '') + '</b></button>' +
             '<button type="button" data-ir="fecha"><small>Fecha</small><b>' + escH(fechaBonita(fecha)) + '</b></button>' +
-            (lugar.trim() ? '<button type="button" data-ir="lugar"><small>Lugar</small><b>' + escH(lugar.trim()) + '</b></button><button type="button" data-ir="personas"><small>Comieron</small><b>' + personas + '</b></button><button type="button" data-ir="puntos"><small>Nota</small><b>' + (yaCalif() ? 'Ya tiene' : puntos ? puntos + ' / 10' : 'Sin nota') + '</b></button>' : '') +
+            (lugar.trim() ? '<button type="button" data-ir="lugar"><small>Lugar</small><b>' + escH(lugar.trim()) + '</b></button><button type="button" data-ir="personas"><small>Adultos</small><b>' + personas + '</b></button><button type="button" data-ir="puntos"><small>Nota</small><b>' + (yaCalif() ? 'Ya tiene' : puntos ? puntos + ' / 10' : 'Sin nota') + '</b></button>' : '') +
           '</div>' +
           '<label class="inLbl" for="inNota">Nota <span style="font-weight:400;letter-spacing:0;text-transform:none">(opcional)</span></label>' +
           '<textarea id="inNota" rows="2" placeholder="Algo que quieras recordar" maxlength="300">' + escH(nota) + '</textarea>' +
