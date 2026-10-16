@@ -3176,7 +3176,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-16.191";
+const APP_VERSION = "2026-10-16.192";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -7304,6 +7304,8 @@ const Preguntas = (function(){
     const q = desdeLista ? (dudas.abiertas.find(x => x.id === id) || dudas.hechas.find(x => x.id === id)) : pendientes[0];
     const corrige = desdeLista && !dudas.abiertas.some(x => x.id === id);
     if(!q || document.querySelector(".pgScrim.prScrim")) return;
+    if(q.tipo === "lugar"){ abreLugar(q); return; }   // esas dudas tienen su propia ventana: en el chat de IA se perdería la respuesta y costaría
+    if(q.tipo === "par"){ abrePar(q); return; }
     const hilo = (q.hilo && q.hilo.length) ? q.hilo : [{ r: "a", t: q.pregunta }];
     const burbuja = h => '<div class="prB ' + (h.r === "u" ? "yo" : "ar") + '">' + esc(limpia(q, h.t)) + '</div>' + ((h.reg || []).map(r => regHtml(q.id, r)).join(""));
     const regHtml = (qid, r) => {
