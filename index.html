@@ -791,7 +791,7 @@ body.no-gl #drawer{ background:var(--drawer-solid); }
 }
 
 /* ───────── vista de restaurantes (ocupa el lugar del chat) ───────── */
-#restView, #emaView, #creditoView, #gmailView, #glimView, #recuerdaView, #mercarView, #duraView, #mesView, #balanceView, #ahorroView, #dudasView, #ajustesView{ display:none; padding-bottom:10px; }
+#restView, #emaView, #creditoView, #gmailView, #glimView, #recuerdaView, #mercarView, #duraView, #mesView, #balanceView, #ahorroView, #dudasView, #ajustesView, #tempView{ display:none; padding-bottom:10px; }
 body.mode-rest #restView{ display:block; }
 body.mode-ema #emaView{ display:block; }
 body.mode-ema #welcome, body.mode-ema #messages, body.mode-ema #pending, body.mode-ema #servicioBanner, body.mode-ema #glimBanner{ display:none !important; }
@@ -822,6 +822,10 @@ body.mode-mes #welcome, body.mode-mes #messages, body.mode-mes #pending, body.mo
 body.mode-mes #reset{ visibility:hidden; }
 body.mode-mes footer{ display:none; }
 body.mode-dudas #dudasView{ display:block; }
+body.mode-temp #tempView{ display:block; }
+body.mode-temp #welcome, body.mode-temp #messages, body.mode-temp #pending, body.mode-temp #servicioBanner, body.mode-temp #glimBanner{ display:none !important; }
+body.mode-temp #reset{ visibility:hidden; }
+body.mode-temp footer{ display:none; }
 body.mode-dudas #welcome, body.mode-dudas #messages, body.mode-dudas #pending, body.mode-dudas #servicioBanner, body.mode-dudas #glimBanner{ display:none !important; }
 body.mode-dudas #reset{ visibility:hidden; }
 body.mode-dudas footer{ display:none; }
@@ -2482,6 +2486,14 @@ button{ transition:transform var(--t-tap) var(--ease-out); }
 .tpSeguro span{ display:flex; gap:8px; }
 .tpSeguro i{ font-style:normal; padding:8px 14px; border-radius:12px; background:rgba(255,255,255,.12); }
 .tpSeguro i.si{ background:#ff6b6b; }
+.tpIntro{ margin:-4px 4px 14px; color:var(--dim); font-size:.86rem; line-height:1.45; text-align:center; }
+.tpGrupo{ margin:18px 4px 8px; font-size:.72rem; color:var(--dim); letter-spacing:.08em; text-transform:uppercase; }
+.tpGrid{ display:grid; gap:12px; }
+.tpGrid .tpCard{ width:auto; min-height:170px; padding:18px; border-radius:24px; }
+.tpGrid .tpCard b{ font-size:1.12rem; } .tpGrid .tpCard small{ font-size:.8rem; }
+.tpGrid .tpEmo{ font-size:3.4rem; top:12px; right:14px; }
+.tpGrid .tpNota{ font-size:.78rem; opacity:.9; font-weight:500; }
+.tpAddBig{ width:100%; margin-top:14px; min-height:52px; border-radius:18px; border:1px dashed var(--line); background:rgba(var(--ink),.04); color:var(--white); font:inherit; font-weight:650; cursor:pointer; }
 .tpVacio{ margin:0 4px 6px; padding:14px; border-radius:18px; border:1px dashed var(--line); color:var(--dim); font-size:.84rem; }
 @keyframes tpFlota{ 0%,100%{ transform:translateY(0) rotate(-4deg); } 50%{ transform:translateY(-6px) rotate(5deg); } }
 @keyframes tpLatido{ 0%,100%{ transform:scale(1); } 50%{ transform:scale(1.08); } }
@@ -2964,7 +2976,7 @@ body[class*="mode-"] #masIngreso{ display:none; }
       <div class="navGrupo" id="navSalidasG">
         <button type="button" id="navSalidasBtn" aria-expanded="false" aria-controls="navSalidasSub">
           <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9a2.2 2.2 0 0 0 0 4.4V17a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1v-3.6a2.2 2.2 0 0 0 0-4.4V6.5a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1z"/><path d="M14.5 5.5v2.3M14.5 10.9v2.2M14.5 16.2V18"/></svg></span>
-          <span class="txt"><b>Salidas</b><span>Restaurantes y salidas con Ema</span></span>
+          <span class="txt"><b>Salidas</b><span>Restaurantes, Ema y temporada</span></span>
           <span class="chev" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
         </button>
         <div class="navSub" id="navSalidasSub"><div class="navSubIn">
@@ -2975,6 +2987,10 @@ body[class*="mode-"] #masIngreso{ display:none; }
       <button type="button" id="navEma">
         <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8.5 14.2c.9 1.5 2.1 2.2 3.5 2.2s2.6-.7 3.5-2.2"/><path d="M9 9.6h.01M15 9.6h.01"/></svg></span>
         <span class="txt"><b>Salidas Ema</b><span>Planes, gastos y a dónde ir</span></span>
+      </button>
+      <button type="button" id="navTemp">
+        <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2.2 4.6 5 .7-3.6 3.5.9 5-4.5-2.4-4.5 2.4.9-5L4.8 8.3l5-.7z"/></svg></span>
+        <span class="txt"><b>Temporada</b><span>Festivales y planes de la ciudad</span></span>
       </button>
         </div></div>
       </div>
@@ -3146,6 +3162,12 @@ body[class*="mode-"] #masIngreso{ display:none; }
         <div class="ajCard usoCard" id="usoCard"></div>
       </section>
 
+      <section id="tempView" aria-label="Temporada">
+        <div class="restIntro"><h2>De temporada en Cali</h2></div>
+        <p class="tpIntro">Festivales, ferias y planes que solo pasan unos días. Anota lo que veas en Instagram y Armoni les avisa cuando se acerque.</p>
+        <div id="tempLista"></div>
+      </section>
+
       <section id="dudasView" aria-label="Dudas">
         <div class="restIntro"><h2>Dudas</h2></div>
         <p class="tmSub">Lo que Armoni no entendió de tus cuentas y quiere preguntarte</p>
@@ -3288,7 +3310,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-16.211";
+const APP_VERSION = "2026-10-16.212";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -6129,9 +6151,9 @@ const Temporada = (function(){
   }
 
   /* ── el pop-up: una vez cuando se acerca (7 días antes) y otra cuando ya empezó ── */
-  function anuncia(intentos){
-    if(!document.body.classList.contains("mode-ema")) return;
-    if(document.querySelector(".pgScrim, .cfAn, .tpAn")){ if((intentos || 0) < 15) setTimeout(() => anuncia((intentos || 0) + 1), 1500); return; }   // espera a que cierren el de Comfandi
+  function anuncia(intentos, alAbrir){
+    if(!alAbrir && !document.body.classList.contains("mode-ema")) return;
+    if(document.querySelector(".pgScrim, .cfAn, .tpAn, .sheetScrim, body.drawer-open") || document.body.classList.contains("drawer-open")){ if((intentos || 0) < 20) setTimeout(() => anuncia((intentos || 0) + 1, alAbrir), 1500); return; }   // espera a que cierren otra ventana
     let ya = []; try{ ya = JSON.parse(localStorage.getItem(KA)) || []; }catch{}
     const x = vigentes().find(({ p, e }) => e.cerca && !ya.includes(p.id + "@" + e.fase));
     if(!x) return;
@@ -6187,26 +6209,54 @@ const Temporada = (function(){
       if(!/^\d{4}-\d{2}-\d{2}$/.test(desde)){ $("tpErr").textContent = "Elige la fecha en que empieza."; return; }
       if(hasta < desde){ $("tpErr").textContent = "«Hasta» no puede ser antes de «Desde»."; return; }
       const plan = { id: "tp" + Date.now().toString(36), nombre, desde, hasta, lugar: $("tpL").value.trim(), nota: $("tpO").value.trim(), para: paraSel };
-      planes = planes.concat(plan); guarda(); pinta(); cierra();
+      planes = planes.concat(plan); guarda(); pintaTodo(); cierra();
       exito("Plan anotado", nombre + " · " + rango(plan));
-      try{ await pide({ accion: "agregar", plan }); pinta(); }catch{}
+      try{ await pide({ accion: "agregar", plan }); pintaTodo(); }catch{}
     });
     setTimeout(() => $("tpN").focus({ preventScroll: true }), 300);
   }
-  if(box) box.addEventListener("click", ev => {
+  /* la pantalla «Temporada» (Salidas → Temporada): todo lo que viene, en grande */
+  const vistaEl = document.getElementById("tempLista");
+  function pintaVista(){
+    if(!vistaEl) return;
+    const v = vigentes(), ya = v.filter(x => x.e.ahora), luego = v.filter(x => !x.e.ahora);
+    const tarjeta = ({ p, e }, i) => { const t = tema(p);
+      return '<div class="tpCard' + (e.ahora ? ' ahora' : '') + '" role="button" tabindex="0" data-id="' + esc(p.id) + '" style="--h:' + t.h + ';--i:' + Math.min(i, 6) + '">' +
+        '<span class="tpX" data-quitar="' + esc(p.id) + '" role="button" aria-label="Quitar este plan">✕</span><span class="tpEmo" aria-hidden="true">' + t.emo + '</span>' +
+        '<span class="tpChip">' + esc(e.txt) + '</span><b>' + esc(p.nombre) + '</b><small>' + esc(rango(p)) + (p.lugar ? ' · ' + esc(p.lugar) : '') + ' · ' + esc(para(p)) + '</small>' +
+        (p.nota ? '<span class="tpNota">' + esc(p.nota) + '</span>' : '') + '</div>'; };
+    vistaEl.innerHTML = (v.length ? (ya.length ? '<div class="tpGrupo">Está pasando</div><div class="tpGrid">' + ya.map(tarjeta).join("") + '</div>' : '') +
+      (luego.length ? '<div class="tpGrupo">Lo que viene</div><div class="tpGrid">' + luego.map((x, i) => tarjeta(x, i + ya.length)).join("") + '</div>' : '')
+      : '<p class="tpVacio">Todavía no hay planes anotados. Cuando veas uno en Instagram, anótalo aquí.</p>') +
+      '<button type="button" class="tpAddBig" data-tp="nuevo">+ Anotar un plan de temporada</button>';
+  }
+  async function vista(){
+    pintaVista();
+    try{
+      const r = await fetch(TEMPORADA_URL, { method: "POST", body: JSON.stringify({ token: MERCADO_TOKEN, accion: "ver" }), signal: AbortSignal.timeout ? AbortSignal.timeout(8000) : undefined });
+      const j = await r.json();
+      if(j && j.ok && Array.isArray(j.planes)){ const antes = JSON.stringify(planes); planes = j.planes; guarda(); if(JSON.stringify(planes) !== antes){ pintaVista(); pinta(); } }
+    }catch{}
+  }
+  const pintaTodo = () => { pinta(); pintaVista(); };
+  const clic = ev => {
     if(ev.target.closest("[data-tp='nuevo']")){ nuevo(); return; }
     const card = ev.target.closest(".tpCard"); if(!card) return;
     const q = ev.target.closest("[data-quitar]");
     const seg = card.querySelector(".tpSeguro");
     if(seg){
-      if(ev.target.closest(".si")){ const id = card.dataset.id; planes = planes.filter(p => p.id !== id); guarda(); pinta(); pide({ accion: "quitar", id }).catch(() => {}); }
+      if(ev.target.closest(".si")){ const id = card.dataset.id; planes = planes.filter(p => p.id !== id); guarda(); pintaTodo(); pide({ accion: "quitar", id }).catch(() => {}); }
       else seg.remove();
       return;
     }
     if(q){ card.insertAdjacentHTML("beforeend", '<div class="tpSeguro">¿Quitar este plan?<span><i class="si">Sí, quitar</i><i>No</i></span></div>'); return; }
     const p = planes.find(x => x.id === card.dataset.id); if(p) muestra(p);
-  });
-  return { refresh, muestra };
+  };
+  if(box) box.addEventListener("click", clic);
+  if(vistaEl) vistaEl.addEventListener("click", clic);
+  /* al abrir Armoni también: si hay algo que está por empezar o pasando, sale el pop-up (una vez por fase) */
+  TrasIntro.hacer(() => setTimeout(() => anuncia(0, true), 3200));
+  return { refresh, muestra, vista };
 })();
 
 const PlanesComfandi = (function(){
@@ -8082,6 +8132,7 @@ const Drawer = (function(){
   const navSalidasG = document.getElementById("navSalidasG");
   const navSalidasBtn = document.getElementById("navSalidasBtn");
   const navEma = document.getElementById("navEma");
+  const navTemp = document.getElementById("navTemp");
   const setSalidasG = on => { navSalidasG.classList.toggle("abierto", on); navSalidasBtn.setAttribute("aria-expanded", String(on)); };
   navSalidasBtn.addEventListener("click", () => setSalidasG(!navSalidasG.classList.contains("abierto")));
   const navMercarG = document.getElementById("navMercarG");
@@ -8089,9 +8140,9 @@ const Drawer = (function(){
   const navDura = document.getElementById("navDura");
   const setMercarG = on => { navMercarG.classList.toggle("abierto", on); navMercarBtn.setAttribute("aria-expanded", String(on)); };
   navMercarBtn.addEventListener("click", () => setMercarG(!navMercarG.classList.contains("abierto")));
-  const NAV = { chat: navChat, rest: navRest, ema: navEma, credito: navCredito, gmail: navGmail, glim: navGlim, recuerda: navRecuerda, mercar: navMercar, dura: navDura, mes: navMes, balance: navBalance, ahorro: navAhorro, dudas: navDudas, ajustes: navAjustes };
-  const SUB = { chat: "Presupuesto de la casa", rest: "Restaurantes", ema: "Salidas Ema", credito: "Crédito Carro", gmail: "AT Gmail", glim: "Glim", recuerda: "Recuerda", mercar: "A mercar", dura: "Duración", mes: "Tu mes", balance: "Balance", ahorro: "Ahorro", dudas: "Dudas", ajustes: "Ajustes" };
-  const PLACEHOLDER = { chat: "Escribe aquí…", rest: "¿Qué se te antoja?", ema: "¿A dónde llevamos a Ema?", credito: "Pregúntale sobre el crédito…", gmail: "", glim: "", recuerda: "", mercar: "", dura: "", mes: "", balance: "", ahorro: "", dudas: "", ajustes: "" };
+  const NAV = { chat: navChat, rest: navRest, ema: navEma, credito: navCredito, gmail: navGmail, glim: navGlim, recuerda: navRecuerda, mercar: navMercar, dura: navDura, mes: navMes, balance: navBalance, ahorro: navAhorro, dudas: navDudas, ajustes: navAjustes, temp: navTemp };
+  const SUB = { chat: "Presupuesto de la casa", rest: "Restaurantes", ema: "Salidas Ema", credito: "Crédito Carro", gmail: "AT Gmail", glim: "Glim", recuerda: "Recuerda", mercar: "A mercar", dura: "Duración", mes: "Tu mes", balance: "Balance", ahorro: "Ahorro", dudas: "Dudas", ajustes: "Ajustes", temp: "Temporada" };
+  const PLACEHOLDER = { chat: "Escribe aquí…", rest: "¿Qué se te antoja?", ema: "¿A dónde llevamos a Ema?", credito: "Pregúntale sobre el crédito…", gmail: "", glim: "", recuerda: "", mercar: "", dura: "", mes: "", balance: "", ahorro: "", dudas: "", ajustes: "", temp: "" };
 
   /* marca del menú */
   const m2 = document.getElementById("mark2");
@@ -8150,11 +8201,12 @@ const Drawer = (function(){
     document.body.classList.toggle("mode-ahorro", mode === "ahorro");
     document.body.classList.toggle("mode-dudas", mode === "dudas");
     document.body.classList.toggle("mode-ajustes", mode === "ajustes");
+    document.body.classList.toggle("mode-temp", mode === "temp");
     Object.entries(NAV).forEach(([m, b]) => { if(m === mode) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current"); });
     const enControl = mode === "mes" || mode === "recuerda" || mode === "balance" || mode === "ahorro";
     navControl.classList.toggle("activo", enControl);
     if(enControl) setControl(true);
-    const enSalidas = mode === "rest" || mode === "ema";
+    const enSalidas = mode === "rest" || mode === "ema" || mode === "temp";
     navSalidasG.classList.toggle("activo", enSalidas);
     if(enSalidas) setSalidasG(true);
     const enMercar = mode === "mercar" || mode === "dura";
@@ -8179,6 +8231,7 @@ const Drawer = (function(){
       if(mode === "balance") Balance.refresh();
       if(mode === "ahorro") Ahorro.refresh();
       if(mode === "dudas") Preguntas.pinta(true);
+      if(mode === "temp") Temporada.vista();
     }
     close(0, 1, true);   // al navegar, el menú se cierra rápido: el contenido ya está listo, no hay que esperarlo
   }
@@ -8199,6 +8252,7 @@ const Drawer = (function(){
   navBalance.addEventListener("click", () => go("balance"));
   navAhorro.addEventListener("click", () => go("ahorro"));
   navDudas.addEventListener("click", () => go("dudas"));
+  navTemp.addEventListener("click", () => go("temp"));
   navAjustes.addEventListener("click", () => go("ajustes"));
 
   /* deslizar el menú hacia la izquierda lo cierra: sigue el dedo 1:1 y suelta con su velocidad */
