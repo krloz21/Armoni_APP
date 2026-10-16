@@ -2744,6 +2744,12 @@ body[class*="mode-"] #masIngreso{ display:none; }
 .fmRecTx{ flex:1; min-width:0; }
 .fmRecTx b{ display:block; font-size:.9rem; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .fmRecTx small{ display:block; font-size:.72rem; color:var(--dim); }
+.pgEdit{ flex:none; margin-left:6px; width:30px; height:30px; display:grid; place-items:center; border-radius:50%; color:var(--dim); font-size:.95rem; }
+.pgForm{ display:flex; flex-direction:column; gap:10px; }
+.pgForm small{ color:var(--dim); font-size:.78rem; }
+.pgForm label{ display:flex; flex-direction:column; gap:6px; font-size:.78rem; color:var(--ghost); }
+.pgForm input{ min-height:46px; padding:0 12px; border-radius:14px; border:1px solid var(--line); background:rgba(var(--ink),.04); color:var(--white); font:inherit; font-size:.92rem; }
+.pgAcc{ display:flex; gap:8px; } .pgAcc button{ flex:1; min-height:46px; border-radius:14px; border:1px solid var(--line); background:none; color:var(--white); font:inherit; font-weight:600; cursor:pointer; }
 .fmRecM{ flex:none; font-size:.84rem; font-weight:700; color:var(--ghost); font-variant-numeric:tabular-nums; }
 /* categoría: cuadrícula que entra en cascada; la elegida crece y las demás se apagan */
 .fmCatGrid{ display:grid; grid-template-columns:1fr 1fr; gap:8px; }
@@ -3196,7 +3202,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-16.202";
+const APP_VERSION = "2026-10-16.203";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -8580,35 +8586,80 @@ const GastoManual = (function(){
   return { abrir };
 })();
 
-/* «Pagar»: todo lo que Armoni ya sabe que pagan seguido (celular de Aleja, celular de Carlos, psicóloga…) a un toque */
+/* «Pagar»: lleva a la página de pago de cada cosa que pagamos seguido (energía, agua, gas, internet, carro y los dos celulares).
+   La referencia se copia sola, igual que con los avisos de vencimiento. Los celulares piden su link una sola vez. */
 const Pagos = (function(){
+  const KC = "armoni.pagos.celulares";
   const P = 'fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"';
   const esc = t => String(t == null ? "" : t).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
-  const ICON = c => /celular|movil|móvil|plan/i.test(c) ? '<rect x="7" y="3" width="10" height="18" rx="2.2"/><path d="M11 18h2"/>' :
-    /psic|medic|salud|droguer/i.test(c) ? '<path d="M12 5v14M5 12h14"/>' : /netflix|spotify|stream|suscrip/i.test(c) ? '<rect x="3" y="5" width="18" height="12" rx="2"/><path d="M8 20h8"/>' :
-    /gasolina|carro|peaje|parque/i.test(c) ? '<path d="M5 16V12l1.8-4.5A2 2 0 0 1 8.7 6h6.6a2 2 0 0 1 1.9 1.5L19 12v4"/><path d="M4 12h16v4H4z"/><circle cx="7.5" cy="18" r="1.5"/><circle cx="16.5" cy="18" r="1.5"/>' :
-    /pañal|ema|hijo/i.test(c) ? '<path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/>' : '<path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/>';
+  const ICO = {
+    energia: '<path d="M13 3 5 13h6l-1 8 8-10h-6z"/>', agua: '<path d="M12 3s6 6.4 6 11a6 6 0 0 1-12 0c0-4.6 6-11 6-11z"/>',
+    gas: '<path d="M12 3c1 3.5 5 5 5 10a5 5 0 0 1-10 0c0-2 1-3 2-4 0 2 1 3 2 3 0-3-1-5 1-9z"/>', internet: '<path d="M4 9a12 12 0 0 1 16 0M7 12.5a8 8 0 0 1 10 0M10 16a4 4 0 0 1 4 0"/><circle cx="12" cy="19" r=".8"/>',
+    carro: '<path d="M5 16V12l1.8-4.5A2 2 0 0 1 8.7 6h6.6a2 2 0 0 1 1.9 1.5L19 12v4"/><path d="M4 12h16v4H4z"/><circle cx="7.5" cy="18" r="1.5"/><circle cx="16.5" cy="18" r="1.5"/>',
+    cel: '<rect x="7" y="3" width="10" height="18" rx="2.2"/><path d="M11 18h2"/>'
+  };
+  const FIJOS = [
+    { id: "energia", t: "Energía", sub: "Enertotal", titulo: "Pagar energía", url: PAGO_ENERGIA_URL, ref: PAGO_ENERGIA_REFERENCIA },
+    { id: "agua", t: "Agua", sub: "Emcali", titulo: "Pagar agua", url: PAGO_AGUA_URL, ref: PAGO_AGUA_REFERENCIA, directo: true },
+    { id: "gas", t: "Gas", sub: "Gases de Occidente", titulo: "Pagar gas", url: PAGO_GAS_URL, ref: PAGO_GAS_REFERENCIA },
+    { id: "internet", t: "Internet", sub: "Movistar", titulo: "Pagar internet", url: PAGO_INTERNET_URL, ref: PAGO_INTERNET_REFERENCIA, directo: true },
+    { id: "carro", t: "Crédito del carro", sub: "Banco", icono: "carro", titulo: "Pagar crédito del carro", url: PAGO_CARRO_URL }
+  ];
+  const CELS = [{ id: "cel_aleja", t: "Celular Aleja" }, { id: "cel_carlos", t: "Celular Carlos" }];
+  const leeC = () => { try{ return JSON.parse(localStorage.getItem(KC)) || {}; }catch{ return {}; } };
+  const guardaC = m => { try{ localStorage.setItem(KC, JSON.stringify(m)); }catch{} };
+  const segura = u => /^https:\/\/[^\s"'<>]+$/i.test(String(u || "").trim()) ? String(u).trim() : "";
+  const montoDe = c => { try{ const f = Frecuentes.pagos().find(x => x.concepto.toLowerCase() === c.toLowerCase()); return f && f.monto ? "$" + Math.round(f.monto).toLocaleString("es-CO") : ""; }catch{ return ""; } };
+
   function abrir(){
     if(document.querySelector(".pgScrim.pagosScrim")) return;
-    const lista = Frecuentes.pagos();
     const scrim = document.createElement("div");
     scrim.className = "pgScrim seScrim pagosScrim";
     scrim.innerHTML = '<div class="inWrap"><div class="pgCard inCard fmCard fm-gasto" role="dialog" aria-modal="true" aria-labelledby="pgT">' +
-      FormArmoni.cabeza("pagos", "pgT", "Pagar", "Lo que pagamos seguido", "") +
-      '<div class="inBody"><div class="fmRecs" id="pgLista">' + (lista.length ? lista.map((f, i) =>
-        '<button type="button" data-i="' + i + '"><span class="fmRecIco"><svg viewBox="0 0 24 24" ' + P + '>' + ICON(f.concepto) + '</svg></span><span class="fmRecTx"><b>' + esc(f.concepto) + '</b><small>' + esc(f.categoria) + '</small></span>' +
-        (f.monto ? '<span class="fmRecM">$' + Math.round(f.monto).toLocaleString("es-CO") + '</span>' : '') + '</button>').join("") : '<p class="gEmpty">Todavía no hay pagos conocidos. Registra un gasto y aparecerá aquí.</p>') + '</div></div></div></div>';
+      FormArmoni.cabeza("pagos", "pgT", "Pagar", "Te llevo a la página de pago", "") +
+      '<div class="inBody"><div class="fmRecs" id="pgLista"></div></div></div></div>';
     document.body.appendChild(scrim);
     requestAnimationFrame(() => scrim.classList.add("on"));
-    const cierra = (vuelve) => { scrim.classList.remove("on"); setTimeout(() => scrim.remove(), 340); document.removeEventListener("keydown", tecla); if(vuelve) setTimeout(() => MenuMas.abre(), 260); };
+    const lista = scrim.querySelector("#pgLista");
+    const fila = (id, ico, t, sub, extra, editar) => '<button type="button" data-id="' + id + '"><span class="fmRecIco"><svg viewBox="0 0 24 24" ' + P + '>' + ICO[ico] + '</svg></span><span class="fmRecTx"><b>' + esc(t) + '</b><small>' + esc(sub) + '</small></span>' +
+      (extra ? '<span class="fmRecM">' + esc(extra) + '</span>' : '') + (editar ? '<span class="pgEdit" data-edit="' + id + '" role="button" aria-label="Cambiar el link">✎</span>' : '') + '</button>';
+    const pinta = () => {
+      const c = leeC();
+      lista.innerHTML = FIJOS.map(f => fila(f.id, f.icono || f.id, f.t, f.sub, "", false)).join("") +
+        CELS.map(x => { const d = c[x.id]; return fila(x.id, "cel", x.t, d && d.url ? "Pagar en su portal" : "Falta el link de pago · tócalo para ponerlo", montoDe(x.t), !!(d && d.url)); }).join("");
+    };
+    pinta();
+    const cierra = vuelve => { scrim.classList.remove("on"); setTimeout(() => scrim.remove(), 340); document.removeEventListener("keydown", tecla); if(vuelve) setTimeout(() => MenuMas.abre(), 260); };
     const tecla = e => { if(e.key === "Escape") cierra(false); };
     document.addEventListener("keydown", tecla);
     scrim.addEventListener("click", e => { if(e.target === scrim) cierra(false); });
     scrim.querySelector(".fmVolver").addEventListener("click", () => cierra(true));
-    scrim.querySelector("#pgLista").addEventListener("click", e => {
-      const b = e.target.closest("[data-i]"); if(!b) return;
-      const f = lista[+b.dataset.i]; cierra(false); Uso.accion("+pagar");
-      setTimeout(() => GastoManual.abrir({ tipo: "Gasto", pago: f }), 200);
+
+    function pideLink(x){
+      const c = leeC(), d = c[x.id] || {};
+      lista.innerHTML = '<div class="pgForm"><b>' + esc(x.t) + '</b><small>Pega el link de la página donde se paga (empieza con https://). Se guarda en este celular, una sola vez.</small>' +
+        '<label>Link de pago<input id="pgUrl" type="url" inputmode="url" autocomplete="off" placeholder="https://…" value="' + esc(d.url || "") + '"></label>' +
+        '<label>Número o referencia (opcional, se copia al abrir)<input id="pgRef" type="text" autocomplete="off" maxlength="40" value="' + esc(d.ref || "") + '"></label>' +
+        '<p class="inErr" id="pgErr" role="alert"></p><div class="pgAcc"><button type="button" class="pgSi" id="pgOk">Guardar</button><button type="button" id="pgNo">Cancelar</button></div></div>';
+      const url = lista.querySelector("#pgUrl"), ref = lista.querySelector("#pgRef");
+      lista.querySelector("#pgNo").addEventListener("click", pinta);
+      lista.querySelector("#pgOk").addEventListener("click", () => {
+        const u = segura(url.value);
+        if(!u){ lista.querySelector("#pgErr").textContent = "Pega un link que empiece con https://"; return; }
+        c[x.id] = { url: u, ref: ref.value.trim().slice(0, 40) }; guardaC(c); pinta();
+      });
+      setTimeout(() => url.focus({ preventScroll: true }), 120);
+    }
+    lista.addEventListener("click", e => {
+      const ed = e.target.closest("[data-edit]");
+      if(ed){ e.stopPropagation(); pideLink(CELS.find(x => x.id === ed.dataset.edit)); return; }
+      const b = e.target.closest("button[data-id]"); if(!b) return;
+      const id = b.dataset.id, f = FIJOS.find(x => x.id === id);
+      Uso.accion("+pagar_" + id);
+      if(f){ cierra(false); setTimeout(() => Servicios.abrirPago(f.titulo, f.url, f.ref, f.directo), 220); return; }
+      const x = CELS.find(z => z.id === id), d = leeC()[id];
+      if(!d || !segura(d.url)){ pideLink(x); return; }
+      cierra(false); setTimeout(() => Servicios.abrirPago("Pagar " + x.t, d.url, d.ref || "", true), 220);
     });
   }
   return { abrir };
