@@ -2749,6 +2749,7 @@ body[class*="mode-"] #masIngreso{ display:none; }
 .pgForm small{ color:var(--dim); font-size:.78rem; }
 .pgForm label{ display:flex; flex-direction:column; gap:6px; font-size:.78rem; color:var(--ghost); }
 .pgForm input{ min-height:46px; padding:0 12px; border-radius:14px; border:1px solid var(--line); background:rgba(var(--ink),.04); color:var(--white); font:inherit; font-size:.92rem; }
+.pgCel{ display:flex; flex-direction:column; gap:10px; } .pgCel small{ color:var(--dim); font-size:.8rem; }
 .pgAcc{ display:flex; gap:8px; } .pgAcc button{ flex:1; min-height:46px; border-radius:14px; border:1px solid var(--line); background:none; color:var(--white); font:inherit; font-weight:600; cursor:pointer; }
 .fmRecM{ flex:none; font-size:.84rem; font-weight:700; color:var(--ghost); font-variant-numeric:tabular-nums; }
 /* categoría: cuadrícula que entra en cascada; la elegida crece y las demás se apagan */
@@ -3146,6 +3147,7 @@ const PAGO_AGUA_URL = "https://pagos.emcali.com.co/pagosweb/checkout";
 const PAGO_AGUA_REFERENCIA = "2004716";   // contrato Emcali
 const PAGO_GAS_URL = "https://portalrecaudos.gdo.com.co/pagorecaudo.aspx";
 const PAGO_GAS_REFERENCIA = "604711";   // contrato gas
+const PAGO_CLARO_URL = "https://portalpagos.claro.com.co/index.php?view=vistas/personal/claro/newclaro/inicio.php&id_objeto=20003";   // portal único de Claro: los dos celulares se pagan ahí
 const PAGO_INTERNET_URL = "https://payment.movistar.co/";
 const PAGO_INTERNET_REFERENCIA = "60436399841";   // fija: no cambia cada mes
 const CREDITO_CARRO_URL = N8N + "/webhook/credito-carro";
@@ -3202,7 +3204,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-16.203";
+const APP_VERSION = "2026-10-16.204";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -8605,10 +8607,10 @@ const Pagos = (function(){
     { id: "internet", t: "Internet", sub: "Movistar", titulo: "Pagar internet", url: PAGO_INTERNET_URL, ref: PAGO_INTERNET_REFERENCIA, directo: true },
     { id: "carro", t: "Crédito del carro", sub: "Banco", icono: "carro", titulo: "Pagar crédito del carro", url: PAGO_CARRO_URL }
   ];
-  const CELS = [{ id: "cel_aleja", t: "Celular Aleja" }, { id: "cel_carlos", t: "Celular Carlos" }];
+  /* los dos celulares son de Claro y se pagan en el mismo portal; el número de cada uno se guarda solo en este celular (no va en el código) */
+  const PERSONAS = [{ id: "carlos", t: "Celular Carlos" }, { id: "aleja", t: "Celular Aleja" }];
   const leeC = () => { try{ return JSON.parse(localStorage.getItem(KC)) || {}; }catch{ return {}; } };
   const guardaC = m => { try{ localStorage.setItem(KC, JSON.stringify(m)); }catch{} };
-  const segura = u => /^https:\/\/[^\s"'<>]+$/i.test(String(u || "").trim()) ? String(u).trim() : "";
   const montoDe = c => { try{ const f = Frecuentes.pagos().find(x => x.concepto.toLowerCase() === c.toLowerCase()); return f && f.monto ? "$" + Math.round(f.monto).toLocaleString("es-CO") : ""; }catch{ return ""; } };
 
   function abrir(){
@@ -8624,42 +8626,48 @@ const Pagos = (function(){
     const fila = (id, ico, t, sub, extra, editar) => '<button type="button" data-id="' + id + '"><span class="fmRecIco"><svg viewBox="0 0 24 24" ' + P + '>' + ICO[ico] + '</svg></span><span class="fmRecTx"><b>' + esc(t) + '</b><small>' + esc(sub) + '</small></span>' +
       (extra ? '<span class="fmRecM">' + esc(extra) + '</span>' : '') + (editar ? '<span class="pgEdit" data-edit="' + id + '" role="button" aria-label="Cambiar el link">✎</span>' : '') + '</button>';
     const pinta = () => {
-      const c = leeC();
       lista.innerHTML = FIJOS.map(f => fila(f.id, f.icono || f.id, f.t, f.sub, "", false)).join("") +
-        CELS.map(x => { const d = c[x.id]; return fila(x.id, "cel", x.t, d && d.url ? "Pagar en su portal" : "Falta el link de pago · tócalo para ponerlo", montoDe(x.t), !!(d && d.url)); }).join("");
+        fila("celulares", "cel", "Celulares", "Claro · Carlos y Aleja", "", false);
     };
     pinta();
     const cierra = vuelve => { scrim.classList.remove("on"); setTimeout(() => scrim.remove(), 340); document.removeEventListener("keydown", tecla); if(vuelve) setTimeout(() => MenuMas.abre(), 260); };
     const tecla = e => { if(e.key === "Escape") cierra(false); };
     document.addEventListener("keydown", tecla);
     scrim.addEventListener("click", e => { if(e.target === scrim) cierra(false); });
-    scrim.querySelector(".fmVolver").addEventListener("click", () => cierra(true));
+    scrim.querySelector(".fmVolver").addEventListener("click", () => { if(lista.querySelector(".pgForm, .pgCel")) pinta(); else cierra(true); });
 
-    function pideLink(x){
-      const c = leeC(), d = c[x.id] || {};
-      lista.innerHTML = '<div class="pgForm"><b>' + esc(x.t) + '</b><small>Pega el link de la página donde se paga (empieza con https://). Se guarda en este celular, una sola vez.</small>' +
-        '<label>Link de pago<input id="pgUrl" type="url" inputmode="url" autocomplete="off" placeholder="https://…" value="' + esc(d.url || "") + '"></label>' +
-        '<label>Número o referencia (opcional, se copia al abrir)<input id="pgRef" type="text" autocomplete="off" maxlength="40" value="' + esc(d.ref || "") + '"></label>' +
+    /* elegir cuál celular: copia su número y abre el portal de Claro (ahí solo hay que pegarlo) */
+    function eligeCelular(){
+      const c = leeC();
+      lista.innerHTML = '<div class="pgCel"><small>Claro cobra los dos celulares en la misma página. Elige cuál vas a pagar: copio el número y abro el portal; allá lo pegas en «Número de celular».</small>' +
+        PERSONAS.map(x => '<button type="button" class="pgSi" data-cel="' + x.id + '">' + esc(x.t) + (c[x.id] ? ' · ' + esc(c[x.id].replace(/(\d{3})(\d{3})(\d{4})/, "$1 $2 $3")) : ' · poner número') + (montoDe(x.t) ? ' · ' + montoDe(x.t) : '') + '</button>').join("") + '</div>';
+    }
+    function pideNumero(x){
+      const c = leeC();
+      lista.innerHTML = '<div class="pgForm"><b>' + esc(x.t) + '</b><small>Escribe el número de celular (10 dígitos). Se guarda solo en este celular, una vez.</small>' +
+        '<label>Número<input id="pgNum" type="tel" inputmode="numeric" autocomplete="off" maxlength="12" placeholder="3001234567" value="' + esc(c[x.id] || "") + '"></label>' +
         '<p class="inErr" id="pgErr" role="alert"></p><div class="pgAcc"><button type="button" class="pgSi" id="pgOk">Guardar</button><button type="button" id="pgNo">Cancelar</button></div></div>';
-      const url = lista.querySelector("#pgUrl"), ref = lista.querySelector("#pgRef");
-      lista.querySelector("#pgNo").addEventListener("click", pinta);
+      const inp = lista.querySelector("#pgNum");
+      lista.querySelector("#pgNo").addEventListener("click", eligeCelular);
       lista.querySelector("#pgOk").addEventListener("click", () => {
-        const u = segura(url.value);
-        if(!u){ lista.querySelector("#pgErr").textContent = "Pega un link que empiece con https://"; return; }
-        c[x.id] = { url: u, ref: ref.value.trim().slice(0, 40) }; guardaC(c); pinta();
+        const n = inp.value.replace(/\D/g, "");
+        if(!/^3\d{9}$/.test(n)){ lista.querySelector("#pgErr").textContent = "Escribe los 10 dígitos del celular (empieza por 3)."; return; }
+        c[x.id] = n; guardaC(c); eligeCelular();
       });
-      setTimeout(() => url.focus({ preventScroll: true }), 120);
+      setTimeout(() => inp.focus({ preventScroll: true }), 120);
     }
     lista.addEventListener("click", e => {
-      const ed = e.target.closest("[data-edit]");
-      if(ed){ e.stopPropagation(); pideLink(CELS.find(x => x.id === ed.dataset.edit)); return; }
+      const ce = e.target.closest("[data-cel]");
+      if(ce){
+        const x = PERSONAS.find(z => z.id === ce.dataset.cel), n = leeC()[x.id];
+        if(!n){ pideNumero(x); return; }
+        Uso.accion("+pagar_cel"); cierra(false); setTimeout(() => Servicios.abrirPago("Pagar " + x.t, PAGO_CLARO_URL, n, true), 220); return;
+      }
       const b = e.target.closest("button[data-id]"); if(!b) return;
       const id = b.dataset.id, f = FIJOS.find(x => x.id === id);
+      if(id === "celulares"){ eligeCelular(); return; }
       Uso.accion("+pagar_" + id);
-      if(f){ cierra(false); setTimeout(() => Servicios.abrirPago(f.titulo, f.url, f.ref, f.directo), 220); return; }
-      const x = CELS.find(z => z.id === id), d = leeC()[id];
-      if(!d || !segura(d.url)){ pideLink(x); return; }
-      cierra(false); setTimeout(() => Servicios.abrirPago("Pagar " + x.t, d.url, d.ref || "", true), 220);
+      if(f){ cierra(false); setTimeout(() => Servicios.abrirPago(f.titulo, f.url, f.ref, f.directo), 220); }
     });
   }
   return { abrir };
