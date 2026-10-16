@@ -3324,7 +3324,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-16.216";
+const APP_VERSION = "2026-10-16.217";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -9035,10 +9035,9 @@ const Pagos = (function(){
   }
   /* abre el portal de Claro con ese número copiado; al volver a Armoni pregunta si ya se pagó para registrarlo */
   function pagarCelular(persona){
-    const x = PERSONAS.find(z => z.id === persona), n = leeC()[persona];
-    if(!n){ abrir(); setTimeout(() => { const b = document.querySelector('#pgLista button[data-id="celulares"]'); if(b) b.click(); }, 450); return; }
+    const x = PERSONAS.find(z => z.id === persona), n = leeC()[persona] || "";
     try{ localStorage.setItem(KE, JSON.stringify({ id: persona, t: Date.now() })); }catch{}
-    Servicios.abrirPago("Pagar " + x.t, PAGO_CLARO_URL, n, false);
+    Servicios.abrirPago("Pagar " + x.t, PAGO_CLARO_URL, n, true);   // directo a Claro; si ya hay un número guardado se copia
   }
   function preguntaSiPago(){
     const e = lee(KE, null); if(!e || Date.now() - e.t < 20000 || document.querySelector(".pgScrim.pagoPreg")) return;
@@ -9073,46 +9072,20 @@ const Pagos = (function(){
       (extra ? '<span class="fmRecM">' + esc(extra) + '</span>' : '') + (editar ? '<span class="pgEdit" data-edit="' + id + '" role="button" aria-label="Cambiar el link">✎</span>' : '') + '</button>';
     const pinta = () => {
       lista.innerHTML = FIJOS.map(f => fila(f.id, f.icono || f.id, f.t, f.sub, "", false)).join("") +
-        fila("celulares", "cel", "Celulares", "Claro · Carlos y Aleja", "", false);
+        fila("celulares", "cel", "Celulares", "Claro", "", false);
     };
     pinta();
     const cierra = vuelve => { scrim.classList.remove("on"); setTimeout(() => scrim.remove(), 340); document.removeEventListener("keydown", tecla); if(vuelve) setTimeout(() => MenuMas.abre(), 260); };
     const tecla = e => { if(e.key === "Escape") cierra(false); };
     document.addEventListener("keydown", tecla);
     scrim.addEventListener("click", e => { if(e.target === scrim) cierra(false); });
-    scrim.querySelector(".fmVolver").addEventListener("click", () => { if(lista.querySelector(".pgForm, .pgCel")) pinta(); else cierra(true); });
+    scrim.querySelector(".fmVolver").addEventListener("click", () => cierra(true));
 
-    /* elegir cuál celular: copia su número y abre el portal de Claro (ahí solo hay que pegarlo) */
-    function eligeCelular(){
-      const c = leeC();
-      lista.innerHTML = '<div class="pgCel"><small>Claro cobra los dos celulares en la misma página. Elige cuál vas a pagar: copio el número y abro el portal; allá lo pegas en «Número de celular».</small>' +
-        PERSONAS.map(x => '<button type="button" class="pgSi" data-cel="' + x.id + '">' + esc(x.t) + (c[x.id] ? ' · ' + esc(c[x.id].replace(/(\d{3})(\d{3})(\d{4})/, "$1 $2 $3")) : ' · poner número') + (montoDe(x.t) ? ' · ' + montoDe(x.t) : '') + '</button>').join("") + '</div>';
-    }
-    function pideNumero(x){
-      const c = leeC();
-      lista.innerHTML = '<div class="pgForm"><b>' + esc(x.t) + '</b><small>Escribe el número de celular (10 dígitos). Se guarda solo en este celular, una vez.</small>' +
-        '<label>Número<input id="pgNum" type="tel" inputmode="numeric" autocomplete="off" maxlength="12" placeholder="3001234567" value="' + esc(c[x.id] || "") + '"></label>' +
-        '<p class="inErr" id="pgErr" role="alert"></p><div class="pgAcc"><button type="button" class="pgSi" id="pgOk">Guardar</button><button type="button" id="pgNo">Cancelar</button></div></div>';
-      const inp = lista.querySelector("#pgNum");
-      lista.querySelector("#pgNo").addEventListener("click", eligeCelular);
-      lista.querySelector("#pgOk").addEventListener("click", () => {
-        const n = inp.value.replace(/\D/g, "");
-        if(!/^3\d{9}$/.test(n)){ lista.querySelector("#pgErr").textContent = "Escribe los 10 dígitos del celular (empieza por 3)."; return; }
-        c[x.id] = n; guardaC(c); eligeCelular();
-      });
-      setTimeout(() => inp.focus({ preventScroll: true }), 120);
-    }
     lista.addEventListener("click", e => {
-      const ce = e.target.closest("[data-cel]");
-      if(ce){
-        const x = PERSONAS.find(z => z.id === ce.dataset.cel), n = leeC()[x.id];
-        if(!n){ pideNumero(x); return; }
-        Uso.accion("+pagar_cel"); cierra(false); setTimeout(() => Servicios.abrirPago("Pagar " + x.t, PAGO_CLARO_URL, n, false), 220); return;
-      }
       const b = e.target.closest("button[data-id]"); if(!b) return;
       const id = b.dataset.id, f = FIJOS.find(x => x.id === id);
-      if(id === "celulares"){ eligeCelular(); return; }
       Uso.accion("+pagar_" + id);
+      if(id === "celulares"){ cierra(false); setTimeout(() => Servicios.abrirPago("Pagar celular", PAGO_CLARO_URL, "", true), 220); return; }
       if(f){ cierra(false); setTimeout(() => Servicios.abrirPago(f.titulo, f.url, f.ref, f.directo), 220); }
     });
   }
@@ -9137,6 +9110,7 @@ const Servicios = (function(){
     if(referencia){
       copiarReferencia(referencia);
     }
+    directo = true;   // los portales de pago bloquean que los muestren dentro de Armoni: siempre se abren afuera, en el navegador
     /* bancos y operadores grandes casi siempre bloquean que los carguen dentro de otra
        página, y esa pantalla de bloqueo "carga" igual desde el punto de vista del navegador
        (no hay forma de distinguirla de una carga real), así que ahí ni lo intentamos: vamos
