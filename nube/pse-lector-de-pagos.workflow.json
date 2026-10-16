@@ -1,0 +1,447 @@
+{
+  "name": "PSE - Lector de pagos",
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "get",
+        "messageId": "={{ $json.id }}",
+        "simple": false,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        4880,
+        880
+      ],
+      "id": "b3629527-1a5d-421a-9553-6b439e0807c8",
+      "name": "Leer correo",
+      "webhookId": "6ea48b20-38af-4289-afb7-04e862c78cde",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "0emLR80CPABOJCrV",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "function buscarParte(parte, tipo) {\n  if (!parte) return null;\n  if (parte.mimeType === tipo && parte.body?.data) return parte.body.data;\n  for (const p of (parte.parts || [])) {\n    const r = buscarParte(p, tipo);\n    if (r) return r;\n  }\n  return null;\n}\n\nfunction aTexto(html) {\n  return html\n    .replace(/<style[\\s\\S]*?<\\/style>/gi, ' ')\n    .replace(/<script[\\s\\S]*?<\\/script>/gi, ' ')\n    .replace(/<[^>]+>/g, ' ')\n    .replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&')\n    .replace(/&aacute;/g, 'á').replace(/&eacute;/g, 'é').replace(/&iacute;/g, 'í')\n    .replace(/&oacute;/g, 'ó').replace(/&uacute;/g, 'ú').replace(/&ntilde;/g, 'ñ')\n    .replace(/\\s+/g, ' ').trim();\n}\n\nconst c = $json;\n\nlet cuerpo = '';\nif (typeof c.html === 'string' && c.html) {\n  cuerpo = aTexto(c.html);\n} else if (typeof c.text === 'string' && c.text) {\n  cuerpo = c.text.replace(/\\s+/g, ' ').trim();\n} else {\n  const payload = c.payload || {};\n  const data = buscarParte(payload, 'text/html') || buscarParte(payload, 'text/plain') || payload.body?.data || null;\n  const html = data ? Buffer.from(data.replace(/-/g, '+').replace(/_/g, '/'), 'base64').toString('utf-8') : '';\n  cuerpo = aTexto(html);\n}\n\nconst cab = c.payload?.headers || [];\nconst asunto = c.subject || c.Subject || (cab.find(h => (h.name || '').toLowerCase() === 'subject') || {}).value || '';\n\nlet ms = Number(c.internalDate);\nif (!Number.isFinite(ms)) ms = c.date ? new Date(c.date).getTime() : NaN;\nif (!Number.isFinite(ms)) ms = Date.now();\nconst fecha = new Date(ms - 5 * 60 * 60 * 1000).toISOString().slice(0, 10);   // hora de Colombia (UTC-5)\n\nreturn { json: { messageId: c.id || c.messageId || '', fecha, ms, texto: ('Asunto: ' + asunto + '. ' + cuerpo).slice(0, 4000) } };"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        5104,
+        880
+      ],
+      "id": "a49ac12d-bc2f-4b78-997d-e0c230c5e008",
+      "name": "Limpiar"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "claude-haiku-4-5-20251001",
+          "mode": "list",
+          "cachedResultName": "claude-haiku-4-5-20251001"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=Eres el lector de correos de pagos PSE de una familia en Cali, Colombia. Responde SOLO con JSON, sin texto extra ni comillas invertidas:\n{\"concepto\": texto corto, \"categoria\": una de [Hogar, Hijo, Carro, Alimentación, Servicios, Salud, Salidas, Ahorro, Otros, Tarjetas], \"monto\": número entero en pesos o null, \"fecha\": \"DD/MM/AAAA\" o null}\n\nAsí guarda esta familia sus pagos. Usa EXACTAMENTE estos conceptos cuando la empresa coincida:\n- Pexto Capital SAS / Colombia Telecomunicaciones / Movistar → concepto \"Internet\", categoria \"Servicios\"\n- CONSORCIO EMCALI → \"Recibo agua\", \"Servicios\"\n- PATRIMONIOS AUTONOMOS ... FIDUCIARIA DAVIVIENDA (factura de energía) → \"Recibo energia\", \"Servicios\"\n- GASES DE OCCIDENTE → \"Recibo gas\", \"Servicios\"\n- FINESA S.A. (cuota crédito Finesa) → \"Cuota seguro carro\", \"Carro\"\n- Portal Zona Pagos BBVA / PAGO DE PRESTAMO BBVA → \"Cuota del carro\", \"Carro\"\n- COMUNICACION CELULAR COMCEL (Claro) → \"Celular\", \"Hogar\"\n- Union de Droguistas / Unidrogas → mira el producto de la descripción: fórmula o leche infantil → \"Leche Ema\" con categoria \"Hijo\"; pañales → \"Pañales Ema\" con \"Hijo\"; cualquier otra cosa → \"Drogueria\" con \"Salud\"\n- Cualquier otra empresa: inventa un concepto MUY corto (2 a 4 palabras, como \"Medicamentos Ema\" o \"Psicologa\") y elige la categoría que mejor encaje; si dudas usa \"Otros\".\n\nReglas:\n- monto = el \"Valor\" pagado. Viene como $ 95.990,00, o sea 95990 (sin puntos ni comas).\n- fecha = la \"Fecha de la transacción\", tal cual aparece (DD/MM/AAAA).\n- Nunca inventes montos ni fechas: si no están escritos en el correo, usa null.\n\nCorreo:\n{{ $json.texto }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.anthropic",
+      "typeVersion": 1,
+      "position": [
+        5328,
+        880
+      ],
+      "id": "8f30e847-6bef-4ac6-8a71-511dfa4a4d3e",
+      "name": "Clasificar",
+      "retryOnFail": true,
+      "credentials": {
+        "anthropicApi": {
+          "id": "2q6SbwMSNRb4n1Bf",
+          "name": "Anthropic account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const crudo = $json.content?.[0]?.text || $json.text || '';\nconst base = $('Limpiar').item.json;\n\nlet p = null;\ntry { p = JSON.parse(crudo.replace(/```json|```/g, '').trim()); } catch (e) { p = null; }\n\nconst CATEGORIAS = ['Hogar', 'Hijo', 'Carro', 'Alimentación', 'Servicios', 'Salud', 'Salidas', 'Ahorro', 'Otros', 'Tarjetas'];\nconst fmt = n => String(n).replace(/\\B(?=(\\d{3})+(?!\\d))/g, '.');\nconst cus = (base.texto.match(/CUS:?\\s*(\\d{5,})/i) || [])[1] || null;\n\nlet valido = false, monto = null, fecha = base.fecha;\nlet concepto = String(p?.concepto || '').trim().slice(0, 60);\nlet categoria = CATEGORIAS.includes(p?.categoria) ? p.categoria : 'Otros';\n// los dos celulares se pagan en Claro (COMCEL): se distingue por el nombre del saludo del correo («Hola, Alejandra…» = amor; cualquier otro = Carlos)\n// así Armoni sabe cuál de los dos ya pagó y quita su aviso de arriba\nif (/COMUNICACION CELULAR COMCEL|COMCEL/i.test(base.texto) || /^celular$/i.test(concepto)) {\n  const nom = (base.texto.match(/Hola,?\\s+([^!.]{3,60})/i) || [])[1] || '';\n  concepto = /alejandr/i.test(nom) ? 'Celular Aleja' : 'Celular Carlos';\n  categoria = 'Hogar';\n}\n\nif (p && concepto && Number.isFinite(Number(p.monto)) && Number(p.monto) > 0 && cus) {\n  monto = Math.round(Number(p.monto));\n  valido = base.texto.includes(fmt(monto));          // el monto tiene que estar escrito en el correo\n  const m = String(p.fecha || '').match(/^(\\d{2})\\/(\\d{2})\\/(\\d{4})$/);\n  if (m && base.texto.includes(p.fecha)) fecha = m[3] + '-' + m[2] + '-' + m[1];\n}\n\nreturn { json: { valido, concepto, categoria, monto, fecha, cus, notas: cus ? 'PSE · CUS ' + cus : '', messageId: base.messageId, ms: base.ms } };"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        5696,
+        880
+      ],
+      "id": "95f14c01-0f7e-4db0-8d79-88df32e4e8b5",
+      "name": "Validar"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "89309bf0-719a-4a4c-a3e4-ea8aabdcf10c",
+              "leftValue": "={{ $json.valido }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        5920,
+        880
+      ],
+      "id": "e4be94be-5a1c-46bd-86b7-4266df46631d",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "operation": "getAll",
+        "dataSourceId": {
+          "__rl": true,
+          "value": "6c565ad1-789f-41c7-8ca2-8bcfb9098a68",
+          "mode": "list",
+          "cachedResultName": "Movimientos",
+          "cachedResultUrl": "https://app.notion.com/p/922bb9e4e3d648feab56d6b2d75be29d"
+        },
+        "returnAll": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 3,
+      "position": [
+        6176,
+        752
+      ],
+      "id": "c6e8d9f5-c815-4d6a-8417-b0ac1964608f",
+      "name": "Movimientos recientes",
+      "executeOnce": true,
+      "alwaysOutputData": true,
+      "credentials": {
+        "notionApi": {
+          "id": "pgk4uKXwaEEnuyRO",
+          "name": "Notion account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Pagos que pasaron la validación\nconst nuevos = $('If').all().map(i => i.json);\n// Todo lo que ya está en Movimientos\nconst filas = $input.all().map(i => i.json).filter(f => f && f.property_monto !== undefined);\nconst dias = s => Math.floor(new Date(String(s).slice(0, 10) + 'T00:00:00Z').getTime() / 86400000);\n\nconst usadas = new Set();   // cada pago anotado a mano solo \"cancela\" a un pago del correo\nconst vistos = new Set();   // el mismo pago repetido dentro de esta tanda (por CUS)\nconst salida = [];\n\nfor (const c of nuevos) {\n  const clave = c.cus || c.messageId;\n  if (vistos.has(clave)) continue;\n  vistos.add(clave);\n\n  // 1) este mismo pago (mismo CUS) ya lo registró el flujo\n  if (c.cus && filas.some(f => String(f.property_notas || '').includes(c.cus))) continue;\n\n  // 2) ya lo anotaron a mano: mismo valor en los mismos días (cada fila a mano se usa una sola vez)\n  const idx = filas.findIndex((f, i) =>\n    !usadas.has(i) &&\n    !String(f.property_notas || '').includes('PSE · CUS') &&\n    Number(f.property_monto) === c.monto &&\n    f.property_fecha?.start &&\n    Math.abs(dias(f.property_fecha.start) - dias(c.fecha)) <= 5\n  );\n  if (idx >= 0) { usadas.add(idx); continue; }\n\n  salida.push({ json: c });\n}\n\n// se crean de más antiguo a más nuevo (así \"Creado\" queda en el mismo orden que los pagos)\nsalida.sort((a, b) => String(a.json.fecha).localeCompare(String(b.json.fecha)) || (a.json.ms || 0) - (b.json.ms || 0));\nreturn salida;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        6400,
+        752
+      ],
+      "id": "0850b28c-22df-4fa8-9408-b838d53b6957",
+      "name": "Quitar repetidos"
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "dataSourceId": {
+          "__rl": true,
+          "value": "6c565ad1-789f-41c7-8ca2-8bcfb9098a68",
+          "mode": "list",
+          "cachedResultName": "Movimientos",
+          "cachedResultUrl": "https://app.notion.com/p/922bb9e4e3d648feab56d6b2d75be29d"
+        },
+        "title": "={{ $json.concepto }}",
+        "propertiesUi": {
+          "propertyValues": [
+            {
+              "key": "Fecha|date",
+              "includeTime": false,
+              "date": "={{ $json.fecha }}"
+            },
+            {
+              "key": "Tipo|select",
+              "selectValue": "Gasto"
+            },
+            {
+              "key": "Categoría|select",
+              "selectValue": "={{ $json.categoria }}"
+            },
+            {
+              "key": "Monto|number",
+              "numberValue": "={{ $json.monto }}"
+            },
+            {
+              "key": "Notas|rich_text",
+              "textContent": "={{ $json.notas }}"
+            },
+            {
+              "key": "Resumen financiero|relation",
+              "relationValue": [
+                "39b39f80-d3a5-80fb-9a19-f3198aa16cc7"
+              ]
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 3,
+      "position": [
+        6624,
+        752
+      ],
+      "id": "028973ff-8cfd-4166-aea0-65114ef0c8b1",
+      "name": "Create a database page",
+      "credentials": {
+        "notionApi": {
+          "id": "pgk4uKXwaEEnuyRO",
+          "name": "Notion account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "filters": {
+          "q": "from:serviciopse@achcolombia.com.co subject:\"PSE - Transacción Aprobada\""
+        }
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        4656,
+        880
+      ],
+      "id": "3e015397-cd29-4bf8-97d8-b92f42d96242",
+      "name": "Correo PSE",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "0emLR80CPABOJCrV",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        4480,
+        1104
+      ],
+      "id": "93fe6983-a45f-4af8-97d4-910e48135229",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "limit": 20,
+        "filters": {
+          "q": "from:serviciopse@achcolombia.com.co subject:\"PSE - Transacción Aprobada\" newer_than:7d"
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        4656,
+        1104
+      ],
+      "id": "fb5f8faf-2914-4921-abb3-b2e8ceb60943",
+      "name": "Get many messages",
+      "webhookId": "f90933d9-8de9-4ff1-b692-be75ed921db9",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "0emLR80CPABOJCrV",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "markAsRead",
+        "messageId": "={{ $('Quitar repetidos').all()[$itemIndex].json.messageId }}"
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        6848,
+        752
+      ],
+      "id": "43f6b97f-e489-432e-9f2e-a43f9cf47f03",
+      "name": "Mark a message as read",
+      "webhookId": "ac0477b5-ee1d-48e0-8751-8f7c7f2a96f9",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "0emLR80CPABOJCrV",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Leer correo": {
+      "main": [
+        [
+          {
+            "node": "Limpiar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limpiar": {
+      "main": [
+        [
+          {
+            "node": "Clasificar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Clasificar": {
+      "main": [
+        [
+          {
+            "node": "Validar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validar": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Movimientos recientes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Movimientos recientes": {
+      "main": [
+        [
+          {
+            "node": "Quitar repetidos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Quitar repetidos": {
+      "main": [
+        [
+          {
+            "node": "Create a database page",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Correo PSE": {
+      "main": [
+        [
+          {
+            "node": "Leer correo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Get many messages",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many messages": {
+      "main": [
+        [
+          {
+            "node": "Leer correo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a database page": {
+      "main": [
+        [
+          {
+            "node": "Mark a message as read",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "3456a893-b064-467d-a06d-c12c3fee01e1",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "558d88703fb65b2d0e44613bc35916258b0f0bf983c5d4730c00c424b77ca36a"
+  },
+  "nodeGroups": [],
+  "id": "zsXNcipyB01EZSiE",
+  "tags": []
+}

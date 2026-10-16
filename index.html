@@ -2447,6 +2447,82 @@ button{ transition:transform var(--t-tap) var(--ease-out); }
 .cfAnCard::after{ content:""; position:absolute; inset:0; background:linear-gradient(105deg, transparent 35%, rgba(255,255,255,.22) 50%, transparent 65%); transform:translateX(-120%); pointer-events:none; }
 .cfAn.on .cfAnCard::after{ animation:cfBrilla 1.4s cubic-bezier(.4,0,.2,1) .55s; }
 @keyframes cfBrilla{ to{ transform:translateX(120%); } }
+/* ── sin conexión con la casa: lista de revisión (PC y Tailscale) ── */
+.cxFilas{ display:flex; flex-direction:column; gap:10px; margin:6px 0 14px; }
+.cxFila{ display:flex; align-items:center; gap:12px; padding:12px; border-radius:16px; border:1px solid var(--line); background:rgba(var(--ink),.04); }
+.cxIco{ flex:none; width:34px; height:34px; border-radius:50%; display:grid; place-items:center; font-size:1.05rem; font-weight:800; color:var(--dim); background:rgba(var(--ink),.08); }
+.cxIco.rev{ border:3px solid rgba(var(--ink),.15); border-top-color:var(--cyan, #4aa3ff); background:none; animation:cxGira .8s linear infinite; }
+.cxIco.ok{ color:#06130c; background:#4ade80; animation:tpPop .5s cubic-bezier(.34,1.7,.64,1); }
+.cxIco.mal{ color:#fff; background:#ff5d5d; animation:cxSacude .5s ease; }
+.cxIco.duda{ color:var(--ghost); }
+.cxTx b{ display:block; font-size:.92rem; }
+.cxTx small{ display:block; margin-top:2px; font-size:.76rem; color:var(--dim); line-height:1.35; }
+.cxBtns{ display:flex; flex-direction:column; gap:8px; }
+.cxBtns button{ min-height:48px; border-radius:14px; border:1px solid var(--line); background:none; color:var(--white); font:inherit; font-weight:650; cursor:pointer; }
+.cxBtns .pgSi{ border:0; }
+@keyframes cxGira{ to{ transform:rotate(360deg); } }
+@keyframes cxSacude{ 0%,100%{ transform:translateX(0); } 25%{ transform:translateX(-4px); } 75%{ transform:translateX(4px); } }
+
+/* ── De temporada en Cali: planes que ustedes anotan (festivales, ferias, entradas gratis) ── */
+.tpHead{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
+.tpAdd{ margin:22px 4px 8px; padding:6px 12px; border-radius:999px; border:1px solid var(--line); background:rgba(var(--ink),.05); color:var(--white); font:inherit; font-size:.76rem; font-weight:650; cursor:pointer; }
+.tpLista{ display:flex; gap:10px; overflow-x:auto; margin:0 -16px; padding:2px 16px 10px; scroll-snap-type:x mandatory; scrollbar-width:none; }
+.tpLista::-webkit-scrollbar{ display:none; }
+.tpCard{ --h:28; position:relative; flex:none; width:210px; min-height:150px; scroll-snap-align:start; display:flex; flex-direction:column; justify-content:flex-end; gap:4px; padding:14px; border-radius:20px; overflow:hidden; border:0; text-align:left; font:inherit; color:#fff; cursor:pointer;
+  background:radial-gradient(120% 90% at 85% 10%, hsla(calc(var(--h) + 40), 95%, 62%, .95), transparent 60%), linear-gradient(150deg, hsl(var(--h), 85%, 52%), hsl(calc(var(--h) - 35), 75%, 34%));
+  box-shadow:0 18px 34px -20px hsla(var(--h), 90%, 40%, .9); animation:duSube .5s var(--ease-out) backwards; animation-delay:calc(var(--i) * 70ms); }
+.tpCard:active{ transform:scale(.97); }
+.tpEmo{ position:absolute; top:8px; right:10px; font-size:2.6rem; filter:drop-shadow(0 6px 10px rgba(0,0,0,.3)); animation:tpFlota 3.2s ease-in-out infinite; }
+.tpCard b{ font-size:.98rem; line-height:1.2; letter-spacing:-.01em; text-shadow:0 1px 8px rgba(0,0,0,.25); padding-right:34px; }
+.tpCard small{ font-size:.74rem; opacity:.9; font-weight:600; }
+.tpChip{ align-self:flex-start; margin-bottom:4px; padding:4px 10px; border-radius:999px; font-size:.7rem; font-weight:800; letter-spacing:.02em; color:hsl(var(--h), 80%, 22%); background:rgba(255,255,255,.92); }
+.tpCard.ahora .tpChip{ animation:tpLatido 1.6s ease-in-out infinite; }
+.tpX{ position:absolute; top:8px; left:8px; width:28px; height:28px; border-radius:50%; display:grid; place-items:center; font-size:.8rem; color:#fff; background:rgba(0,0,0,.25); opacity:.75; }
+.tpSeguro{ position:absolute; inset:0; z-index:2; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; padding:12px; background:rgba(10,12,18,.86); font-weight:700; font-size:.86rem; text-align:center; }
+.tpSeguro span{ display:flex; gap:8px; }
+.tpSeguro i{ font-style:normal; padding:8px 14px; border-radius:12px; background:rgba(255,255,255,.12); }
+.tpSeguro i.si{ background:#ff6b6b; }
+.tpVacio{ margin:0 4px 6px; padding:14px; border-radius:18px; border:1px dashed var(--line); color:var(--dim); font-size:.84rem; }
+@keyframes tpFlota{ 0%,100%{ transform:translateY(0) rotate(-4deg); } 50%{ transform:translateY(-6px) rotate(5deg); } }
+@keyframes tpLatido{ 0%,100%{ transform:scale(1); } 50%{ transform:scale(1.08); } }
+/* el pop-up: estalla de color, suben emojis y el plan entra con resorte */
+.tpAn{ position:fixed; inset:0; z-index:121; display:grid; place-items:center; padding:20px; background:rgba(3,5,10,.66); opacity:0; transition:opacity .35s ease; overflow:hidden; }
+.tpAn.on{ opacity:1; }
+.tpAnCard{ --h:28; position:relative; width:min(100%, 360px); border-radius:30px; overflow:hidden; color:#fff; text-align:center; transform:translateY(60px) scale(.8) rotate(-3deg); opacity:0;
+  background:radial-gradient(130% 80% at 50% 0%, hsla(calc(var(--h) + 45), 100%, 65%, 1), transparent 62%), linear-gradient(165deg, hsl(var(--h), 88%, 52%), hsl(calc(var(--h) - 40), 78%, 28%));
+  box-shadow:0 40px 90px -30px rgba(0,0,0,.9); transition:transform .75s cubic-bezier(.34,1.56,.64,1), opacity .4s ease; }
+.tpAn.on .tpAnCard{ transform:none; opacity:1; }
+.tpAn.sale .tpAnCard{ transform:translateY(40px) scale(.9); opacity:0; transition-duration:.35s; }
+.tpAnCard::before{ content:""; position:absolute; inset:-40%; background:conic-gradient(from 0deg, transparent, rgba(255,255,255,.18), transparent 30%, rgba(255,255,255,.12), transparent 60%); animation:tpGira 7s linear infinite; }
+.tpAnTop{ position:relative; height:190px; display:grid; place-items:center; }
+.tpAnEmo{ position:relative; font-size:5.4rem; filter:drop-shadow(0 14px 22px rgba(0,0,0,.35)); transform:scale(0) rotate(-30deg); }
+.tpAn.on .tpAnEmo{ animation:tpPop .9s cubic-bezier(.34,1.7,.64,1) .25s forwards, tpFlota 3s ease-in-out 1.2s infinite; }
+.tpAnAro{ position:absolute; width:120px; height:120px; border-radius:50%; border:3px solid rgba(255,255,255,.7); transform:scale(.3); opacity:0; }
+.tpAn.on .tpAnAro{ animation:tpOnda 1.2s ease-out .3s; } .tpAn.on .tpAnAro.b{ animation-delay:.55s; }
+.tpAnSello{ position:absolute; top:14px; left:50%; padding:6px 14px; border-radius:999px; font-size:.74rem; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:hsl(var(--h), 80%, 22%); background:#fff; transform:translate(-50%, -40px); }
+.tpAn.on .tpAnSello{ animation:tpBaja .6s cubic-bezier(.34,1.56,.64,1) .5s forwards; }
+.tpAnX{ position:absolute; z-index:3; top:12px; right:12px; width:34px; height:34px; border:0; border-radius:50%; display:grid; place-items:center; color:#fff; background:rgba(0,0,0,.3); cursor:pointer; }
+.tpAnX svg{ width:16px; height:16px; }
+.tpAnTx{ position:relative; padding:4px 22px 8px; }
+.tpAnTx > *{ opacity:0; transform:translateY(14px); }
+.tpAn.on .tpAnTx > *{ animation:wsSube .6s cubic-bezier(.16,1,.3,1) forwards; }
+.tpAn.on .tpAnTx > :nth-child(1){ animation-delay:.45s; } .tpAn.on .tpAnTx > :nth-child(2){ animation-delay:.55s; } .tpAn.on .tpAnTx > :nth-child(3){ animation-delay:.65s; } .tpAn.on .tpAnTx > :nth-child(4){ animation-delay:.75s; }
+.tpAnCuenta{ display:inline-block; padding:6px 16px; border-radius:999px; font-size:.9rem; font-weight:800; background:rgba(0,0,0,.22); }
+.tpAnTx h3{ margin:10px 0 6px; font-size:1.35rem; line-height:1.2; letter-spacing:-.015em; text-shadow:0 2px 12px rgba(0,0,0,.25); }
+.tpAnTx p{ margin:0; font-size:.9rem; font-weight:600; opacity:.95; }
+.tpAnTx em{ display:block; margin-top:6px; font-style:normal; font-size:.82rem; opacity:.85; }
+.tpAnBtns{ position:relative; display:flex; gap:10px; padding:16px 20px 20px; }
+.tpAnBtns > *{ flex:1; padding:13px 8px; border-radius:16px; border:0; font:inherit; font-size:.94rem; font-weight:750; cursor:pointer; text-decoration:none; text-align:center; }
+.tpAnSi{ color:hsl(var(--h), 80%, 24%); background:#fff; box-shadow:0 14px 28px -14px rgba(0,0,0,.6); }
+.tpAnNo{ color:#fff; background:rgba(255,255,255,.16); }
+.tpChispa{ position:absolute; bottom:-40px; font-size:1.6rem; opacity:0; pointer-events:none; animation:tpSube 3.6s ease-in forwards; }
+@keyframes tpGira{ to{ transform:rotate(360deg); } }
+@keyframes tpPop{ to{ transform:scale(1) rotate(0); } }
+@keyframes tpOnda{ 0%{ transform:scale(.3); opacity:.9; } 100%{ transform:scale(2.2); opacity:0; } }
+@keyframes tpBaja{ to{ transform:translate(-50%, 0); } }
+@keyframes tpSube{ 0%{ opacity:0; transform:translateY(0) rotate(0); } 15%{ opacity:1; } 100%{ opacity:0; transform:translateY(-105vh) rotate(var(--r, 40deg)); } }
+@media (prefers-reduced-motion:reduce){ .tpCard, .tpEmo, .tpCard.ahora .tpChip, .tpAnCard::before, .tpChispa{ animation:none !important; } .tpAnCard{ transition:opacity .2s; transform:none; } .tpAn.on .tpAnEmo{ animation:none; transform:none; } }
+
 .cfAnImg{ position:relative; height:200px; display:grid; place-items:center; background:linear-gradient(140deg, rgba(255,176,102,.35), rgba(90,63,224,.3)); overflow:hidden; }
 .cfAnImg img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; z-index:1; animation:cfZoom 9s ease-out forwards; }
 .cfAnImg::after{ content:""; position:absolute; inset:0; z-index:2; background:linear-gradient(180deg, transparent 55%, rgba(0,0,0,.45)); }
@@ -2971,6 +3047,7 @@ body[class*="mode-"] #masIngreso{ display:none; }
         <div class="restStatus" id="emaStatus"></div>
         <div id="emaEquilibrio"></div>
         <div id="emaStage"></div>
+        <div id="emaTemporada"></div>
         <div id="emaPlanes"></div>
         <div class="restAskHead" id="emaAskHead">
           <span class="line" aria-hidden="true"></span>Pregúntale al guía de salidas<span class="line" aria-hidden="true"></span>
@@ -3174,6 +3251,7 @@ const MOVIMIENTO_COMPLETAR_URL = N8N + "/webhook/movimiento-completar";   // enl
 const MOVIMIENTO_URL = N8N + "/webhook/movimiento-nuevo";   // guarda un gasto/ingreso directo en Notion, sin IA
 const MERCADO_TOKEN = "mercado-7d41c2a9e05b";
 const RESUMEN_URL = N8N + "/webhook/resumen-mes";
+const TEMPORADA_URL = N8N + "/webhook/temporada";   // planes de temporada en Cali que ustedes anotan (los ven en Instagram)
 const COMFANDI_URL = N8N + "/webhook/comfandi";   // planes nuevos de Comfandi (eventos y hoteles, sin pasadías)
 const EMA_URL = N8N + "/webhook/salidas-ema";
 const AHORRO_URL = N8N + "/webhook/ahorro";   // saldo del ahorro de la casa, meta y movimientos
@@ -3210,7 +3288,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-16.209";
+const APP_VERSION = "2026-10-16.211";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -5790,6 +5868,7 @@ const SalidasEma = (function(){
     if(datos){ pinta(false); equilibrio(); setTimeout(pidePuntaje, 500); } else statusEl.innerHTML = '<span class="dot" aria-hidden="true"></span>Cargando las salidas…';
     cargar();
     PlanesComfandi.refresh();
+    try{ Temporada.refresh(); }catch{}
   }
   /* equilibrio: si en el último mes han salido mucho con Ema y nada solos (o al revés), lo dice con cariño.
      Se puede cerrar y no vuelve en una semana. */
@@ -5925,6 +6004,211 @@ const SalidasEma = (function(){
    PLANES EN COMFANDI: n8n revisa eventos y hoteles dos veces al día (sin pasadías)
    y avisa al celular cuando sale algo nuevo; aquí se ven con «Nuevo» hasta que los abras
    ════════════════════════════════════════════════════════════ */
+/* ════════════════════════════════════════════════════════════
+   SIN CONEXIÓN CON LA CASA: al abrir la app y no poder hablar con la casa, muestra una revisión sencilla:
+   1) ¿el PC está prendido? 2) ¿Tailscale está prendido? (✓ o ✗) y abajo «Seguir sin conexión».
+   Desde el celular no se puede distinguir un PC apagado de un Tailscale apagado, así que se dice qué se sabe y qué no.
+   ════════════════════════════════════════════════════════════ */
+const Conexion = (function(){
+  let abierta = false, ocultoDesde = 0;
+  const sondeo = async (url, ms) => {
+    try{ await fetch(url, { cache: "no-store", mode: "no-cors", signal: AbortSignal.timeout ? AbortSignal.timeout(ms) : undefined }); return true; }catch{ return false; }
+  };
+  /* ¿la casa responde? A: la página de Armoni (la sirve el PC por Tailscale). B: n8n (los datos). */
+  async function mide(){
+    if(!navigator.onLine) return { internet: false, web: false, n8n: false };
+    const web = location.protocol.startsWith("http") ? await sondeo(location.pathname + "?v=ping", 4500) : true;
+    const n8n = await sondeo(N8N + "/webhook/mercado-estado", 5500);
+    return { internet: true, web, n8n };
+  }
+  const ICO = { ok: "✓", mal: "✕", duda: "?" };
+  function abre(r){
+    if(abierta) return; abierta = true;
+    const sc = document.createElement("div");
+    sc.className = "pgScrim seScrim cxScrim";
+    const pend = (() => { try{ return Cola.cuantos(); }catch{ return 0; } })();
+    sc.innerHTML = '<div class="inWrap"><div class="pgCard inCard" role="dialog" aria-modal="true" aria-labelledby="cxT"><h3 id="cxT">No hay conexión con la casa</h3>' +
+      '<p class="gEmpty">Revisemos dos cosas, en este orden:</p><div class="cxFilas" id="cxFilas"></div>' +
+      (pend ? '<p class="gEmpty">Tienes ' + pend + (pend === 1 ? ' registro guardado' : ' registros guardados') + ': se envían solos cuando vuelva la conexión.</p>' : '') +
+      '<div class="cxBtns"><button type="button" class="pgSi" id="cxOtra">Reintentar</button><button type="button" id="cxSigue">Seguir sin conexión</button></div></div></div>';
+    document.body.appendChild(sc); requestAnimationFrame(() => sc.classList.add("on"));
+    const filas = sc.querySelector("#cxFilas");
+    const cierra = () => { sc.classList.remove("on"); setTimeout(() => { sc.remove(); abierta = false; }, 340); };
+    const fila = (id, t, sub, est) => '<div class="cxFila" id="' + id + '"><span class="cxIco ' + (est === "rev" ? "rev" : est) + '" aria-hidden="true">' + (est === "rev" ? "" : ICO[est]) + '</span><span class="cxTx"><b>' + t + '</b><small>' + sub + '</small></span></div>';
+    const pinta = (a, b, sa, sb) => { filas.innerHTML = fila("cxPc", "El PC de la casa está prendido", sa, a) + fila("cxTs", "Tailscale está prendido (en el celular)", sb, b); };
+    async function revisa(){
+      pinta("rev", "rev", "Revisando…", "Revisando…");
+      const m = await mide();
+      await new Promise(ok => setTimeout(ok, REDUCED ? 0 : 700));
+      if(m.web && m.n8n){ cierra(); try{ Cola.vacia(); }catch{} try{ avisoOk("¡Hay conexión!", "Ya hablamos con la casa de nuevo"); }catch{} return; }
+      if(!m.internet){ pinta("duda", "mal", "No se puede saber sin internet.", "El celular no tiene internet: prende el wifi o los datos y reintenta."); return; }
+      if(m.web && !m.n8n){ pinta("mal", "ok", "Responde la página, pero n8n no: revisa que Docker esté abierto y los contenedores en verde.", "Tailscale está conectado: llegamos hasta la casa."); return; }
+      pinta("duda", "mal", "No se puede saber hasta que Tailscale esté prendido. Si ya lo está, revisa que el PC esté prendido y con Docker abierto.", "No llegamos a la casa. Abre Tailscale en el celular y mira que esté conectado.");
+    }
+    sc.querySelector("#cxOtra").addEventListener("click", revisa);
+    sc.querySelector("#cxSigue").addEventListener("click", cierra);
+    revisa();
+  }
+  async function chequea(){
+    if(abierta || document.querySelector(".pgScrim")) return;
+    const m = await mide();
+    if(m.web && m.n8n) return;
+    abre(m);
+  }
+  /* cada vez que se abre la app: al cargar (tras la intro) y al volver después de un rato en segundo plano */
+  TrasIntro.hacer(() => setTimeout(chequea, 800));
+  document.addEventListener("visibilitychange", () => {
+    if(document.visibilityState === "hidden") ocultoDesde = Date.now();
+    else if(ocultoDesde && Date.now() - ocultoDesde > 60000){ ocultoDesde = 0; setTimeout(chequea, 600); }
+  });
+  return { chequea };
+})();
+
+/* ════════════════════════════════════════════════════════════
+   DE TEMPORADA EN CALI: festivales, ferias, entradas gratis… que ustedes ven en Instagram y anotan aquí.
+   No consulta ninguna página: lo anotan ustedes (o yo) y se comparte entre los dos celulares por el flujo «temporada».
+   Cuando un plan está por empezar (7 días antes) o ya empezó, sale un pop-up animado una vez para animarlos a ir.
+   ════════════════════════════════════════════════════════════ */
+const Temporada = (function(){
+  const KEY = "armoni.temporada", KA = "armoni.temporada.anunciados";
+  const box = document.getElementById("emaTemporada");
+  const esc = t => String(t == null ? "" : t).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  /* por si el flujo todavía no está: los planes que ya me contaron */
+  const SEMILLA = [
+    { id: "motor-2026", nombre: "Feria de carros, motos y gastronomía", desde: "2026-10-15", hasta: "2026-10-18", lugar: "", para: "familia" },
+    { id: "zoo-2026", nombre: "Entrada gratis al Zoológico para niños", desde: "2026-10-31", hasta: "2026-10-31", lugar: "Zoológico de Cali", para: "ema" },
+    { id: "cafe-2026", nombre: "Festival del Café", desde: "2026-11-13", hasta: "2026-11-16", lugar: "CC La Estación", para: "familia" }
+  ];
+  const TEMAS = [[/caf[eé]/i, "☕", 28], [/carro|moto|auto|motor/i, "🏎️", 4], [/zool|animal|acuario|granja/i, "🦁", 140], [/m[uú]sica|concierto|salsa|rock/i, "🎶", 280],
+    [/gastron|comida|food|hamburgues|pizza|arepa/i, "🍔", 18], [/feria|parque|atracci/i, "🎡", 330], [/navidad|alumbrado|luces/i, "🎄", 150], [/halloween|disfraz/i, "🎃", 25],
+    [/libro|lectura/i, "📚", 210], [/teatro|t[ií]teres|circo/i, "🎪", 300], [/cine|pel[ií]cula/i, "🎬", 250], [/arte|museo|exposici/i, "🎨", 190]];
+  const tema = p => { const t = TEMAS.find(([re]) => re.test(p.nombre + " " + (p.lugar || ""))); return t ? { emo: t[1], h: t[2] } : { emo: "🎉", h: 265 }; };
+  const iso = d => d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+  const hoy = () => iso(new Date());
+  const dias = (a, b) => Math.round((Date.parse(b + "T12:00:00") - Date.parse(a + "T12:00:00")) / 864e5);
+  const fechaC = f => new Date(f + "T12:00:00").toLocaleDateString("es-CO", { day: "numeric", month: "short" }).replace(".", "");
+  const rango = p => p.hasta && p.hasta !== p.desde ? (p.desde.slice(5, 7) === p.hasta.slice(5, 7) ? new Date(p.desde + "T12:00:00").getDate() + " al " + fechaC(p.hasta) : fechaC(p.desde) + " al " + fechaC(p.hasta)) : fechaC(p.desde);
+  const para = p => p.para === "ema" ? "Para ir con Ema" : p.para === "pareja" ? "Para ustedes dos" : "Para toda la familia";
+  /* en qué va: cuenta regresiva o «¡hoy!» */
+  function estado(p){
+    const h = hoy(), fin = p.hasta || p.desde, a = dias(h, p.desde), z = dias(h, fin);
+    if(z < 0) return null;
+    if(a > 0) return { ahora: false, fase: "pronto", txt: a === 1 ? "¡Empieza mañana!" : a <= 7 ? "Empieza en " + a + " días" : "Desde el " + fechaC(p.desde), cerca: a <= 7 };
+    if(z === 0) return { ahora: true, fase: "hoy", txt: p.desde === fin ? "¡Es hoy!" : "¡Último día!", cerca: true };
+    if(a === 0) return { ahora: true, fase: "hoy", txt: "¡Empieza hoy!", cerca: true };
+    return { ahora: true, fase: "hoy", txt: z === 1 ? "Hasta mañana" : "Quedan " + (z + 1) + " días", cerca: true };
+  }
+  let planes = (() => { try{ const d = JSON.parse(localStorage.getItem(KEY)); return Array.isArray(d) ? d : null; }catch{ return null; } })() || SEMILLA.slice();
+  const guarda = () => { try{ localStorage.setItem(KEY, JSON.stringify(planes)); }catch{} };
+  const vigentes = () => planes.map(p => ({ p, e: estado(p) })).filter(x => x.e).sort((a, b) => (b.e.ahora - a.e.ahora) || a.p.desde.localeCompare(b.p.desde));
+
+  function pinta(){
+    if(!box) return;
+    const v = vigentes();
+    box.innerHTML = '<div class="tpHead"><div class="mkSec">De temporada en Cali</div><button type="button" class="tpAdd" data-tp="nuevo">+ Anotar plan</button></div>' +
+      (v.length ? '<div class="tpLista">' + v.map(({ p, e }, i) => { const t = tema(p);
+        return '<div class="tpCard' + (e.ahora ? ' ahora' : '') + '" role="button" tabindex="0" data-id="' + esc(p.id) + '" style="--h:' + t.h + ';--i:' + Math.min(i, 6) + '">' +
+          '<span class="tpX" data-quitar="' + esc(p.id) + '" role="button" aria-label="Quitar este plan">✕</span><span class="tpEmo" aria-hidden="true">' + t.emo + '</span>' +
+          '<span class="tpChip">' + esc(e.txt) + '</span><b>' + esc(p.nombre) + '</b><small>' + esc(rango(p)) + (p.lugar ? ' · ' + esc(p.lugar) : '') + '</small></div>'; }).join("") + '</div>'
+      : '<p class="tpVacio">¿Viste un plan bonito en Instagram (un festival, una feria, entrada gratis)? Anótalo aquí y Armoni les recuerda cuando se acerque.</p>');
+  }
+  async function pide(cuerpo){
+    const r = await Cola.post(TEMPORADA_URL, { method: "POST", body: JSON.stringify(Object.assign({ token: MERCADO_TOKEN, accion: "ver" }, cuerpo || {})) });
+    const j = await r.json().catch(() => ({}));
+    if(j && j.ok && Array.isArray(j.planes)){ planes = j.planes; guarda(); }
+    return j;
+  }
+  async function refresh(){
+    pinta();
+    setTimeout(anuncia, 1400);
+    try{
+      const r = await fetch(TEMPORADA_URL, { method: "POST", body: JSON.stringify({ token: MERCADO_TOKEN, accion: "ver" }), signal: AbortSignal.timeout ? AbortSignal.timeout(8000) : undefined });
+      const j = await r.json();
+      if(j && j.ok && Array.isArray(j.planes)){ const antes = JSON.stringify(planes); planes = j.planes; guarda(); if(JSON.stringify(planes) !== antes) pinta(); }
+    }catch{}
+  }
+
+  /* ── el pop-up: una vez cuando se acerca (7 días antes) y otra cuando ya empezó ── */
+  function anuncia(intentos){
+    if(!document.body.classList.contains("mode-ema")) return;
+    if(document.querySelector(".pgScrim, .cfAn, .tpAn")){ if((intentos || 0) < 15) setTimeout(() => anuncia((intentos || 0) + 1), 1500); return; }   // espera a que cierren el de Comfandi
+    let ya = []; try{ ya = JSON.parse(localStorage.getItem(KA)) || []; }catch{}
+    const x = vigentes().find(({ p, e }) => e.cerca && !ya.includes(p.id + "@" + e.fase));
+    if(!x) return;
+    try{ localStorage.setItem(KA, JSON.stringify(ya.concat(x.p.id + "@" + x.e.fase).slice(-200))); }catch{}
+    muestra(x.p, x.e);
+  }
+  function muestra(p, e){
+    e = e || estado(p); if(!e) return;
+    const t = tema(p);
+    const an = document.createElement("div");
+    an.className = "tpAn";
+    const chispas = REDUCED ? "" : Array.from({ length: 12 }, (_, i) => '<span class="tpChispa" style="left:' + (4 + Math.random() * 90).toFixed(1) + '%;animation-delay:' + (0.2 + i * 0.22).toFixed(2) + 's;--r:' + Math.round(Math.random() * 120 - 60) + 'deg">' + [t.emo, "✨", "🎉", t.emo][i % 4] + '</span>').join("");
+    const mapa = "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent((p.lugar || p.nombre) + " Cali");
+    an.innerHTML = chispas +
+      '<div class="tpAnCard" role="dialog" aria-modal="true" aria-labelledby="tpAnT" style="--h:' + t.h + '">' +
+        '<div class="tpAnTop"><span class="tpAnAro" aria-hidden="true"></span><span class="tpAnAro b" aria-hidden="true"></span><span class="tpAnEmo" aria-hidden="true">' + t.emo + '</span>' +
+          '<b class="tpAnSello">' + (e.ahora ? '¡Está pasando!' : 'De temporada') + '</b>' +
+          '<button type="button" class="tpAnX" aria-label="Cerrar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>' +
+        '<div class="tpAnTx"><span class="tpAnCuenta">' + esc(e.txt) + '</span><h3 id="tpAnT">' + esc(p.nombre) + '</h3><p>' + esc(rango(p)) + (p.lugar ? ' · ' + esc(p.lugar) : '') + '</p><em>' + esc(para(p)) + (p.nota ? ' · ' + esc(p.nota) : '') + '</em></div>' +
+        '<div class="tpAnBtns"><a class="tpAnSi" href="' + esc(mapa) + '" target="_blank" rel="noopener noreferrer">¡Vamos! 📍</a><button type="button" class="tpAnNo">Después</button></div>' +
+      '</div>';
+    document.body.appendChild(an);
+    requestAnimationFrame(() => an.classList.add("on"));
+    try{ navigator.vibrate && navigator.vibrate([12, 40, 18]); }catch{}
+    const cierra = () => { an.classList.remove("on"); an.classList.add("sale"); setTimeout(() => an.remove(), 420); document.removeEventListener("keydown", tecla); };
+    const tecla = ev => { if(ev.key === "Escape") cierra(); };
+    document.addEventListener("keydown", tecla);
+    an.addEventListener("click", ev => { if(ev.target === an || ev.target.closest(".tpAnX, .tpAnNo")) cierra(); else if(ev.target.closest(".tpAnSi")) setTimeout(cierra, 300); });
+  }
+
+  /* ── anotar un plan ── */
+  function nuevo(){
+    if(document.querySelector(".pgScrim.tpForm")) return;
+    let paraSel = "familia";
+    const sc = document.createElement("div");
+    sc.className = "pgScrim seScrim tpForm";
+    sc.innerHTML = '<div class="inWrap"><div class="pgCard inCard" role="dialog" aria-modal="true" aria-labelledby="tpFT"><h3 id="tpFT">Anotar un plan de temporada</h3><div class="pgForm">' +
+      '<label>¿Qué es?<input id="tpN" type="text" maxlength="80" autocomplete="off" placeholder="Ej: Festival del café"></label>' +
+      '<label>Desde<input id="tpD" type="date" value="' + hoy() + '"></label>' +
+      '<label>Hasta (si dura varios días)<input id="tpH" type="date"></label>' +
+      '<label>¿Dónde?<input id="tpL" type="text" maxlength="60" autocomplete="off" placeholder="Ej: CC La Estación"></label>' +
+      '<label>Nota (opcional)<input id="tpO" type="text" maxlength="140" autocomplete="off" placeholder="Ej: entrada gratis para niños"></label>' +
+      '<div class="pgAcc" id="tpP"><button type="button" data-p="ema">Con Ema</button><button type="button" data-p="familia" class="pgSi">Familia</button><button type="button" data-p="pareja">Los dos</button></div>' +
+      '<p class="inErr" id="tpErr" role="alert"></p><div class="pgAcc"><button type="button" class="pgSi" id="tpOk">Guardar</button><button type="button" id="tpNo">Cancelar</button></div></div></div></div>';
+    document.body.appendChild(sc); requestAnimationFrame(() => sc.classList.add("on"));
+    const $ = id => sc.querySelector("#" + id);
+    const cierra = () => { sc.classList.remove("on"); setTimeout(() => sc.remove(), 340); };
+    $("tpNo").addEventListener("click", cierra);
+    $("tpP").addEventListener("click", ev => { const b = ev.target.closest("[data-p]"); if(!b) return; paraSel = b.dataset.p; $("tpP").querySelectorAll("button").forEach(x => x.classList.toggle("pgSi", x === b)); });
+    $("tpOk").addEventListener("click", async () => {
+      const nombre = $("tpN").value.trim(), desde = $("tpD").value, hasta = $("tpH").value || desde;
+      if(!nombre){ $("tpErr").textContent = "Escribe qué es el plan."; return; }
+      if(!/^\d{4}-\d{2}-\d{2}$/.test(desde)){ $("tpErr").textContent = "Elige la fecha en que empieza."; return; }
+      if(hasta < desde){ $("tpErr").textContent = "«Hasta» no puede ser antes de «Desde»."; return; }
+      const plan = { id: "tp" + Date.now().toString(36), nombre, desde, hasta, lugar: $("tpL").value.trim(), nota: $("tpO").value.trim(), para: paraSel };
+      planes = planes.concat(plan); guarda(); pinta(); cierra();
+      exito("Plan anotado", nombre + " · " + rango(plan));
+      try{ await pide({ accion: "agregar", plan }); pinta(); }catch{}
+    });
+    setTimeout(() => $("tpN").focus({ preventScroll: true }), 300);
+  }
+  if(box) box.addEventListener("click", ev => {
+    if(ev.target.closest("[data-tp='nuevo']")){ nuevo(); return; }
+    const card = ev.target.closest(".tpCard"); if(!card) return;
+    const q = ev.target.closest("[data-quitar]");
+    const seg = card.querySelector(".tpSeguro");
+    if(seg){
+      if(ev.target.closest(".si")){ const id = card.dataset.id; planes = planes.filter(p => p.id !== id); guarda(); pinta(); pide({ accion: "quitar", id }).catch(() => {}); }
+      else seg.remove();
+      return;
+    }
+    if(q){ card.insertAdjacentHTML("beforeend", '<div class="tpSeguro">¿Quitar este plan?<span><i class="si">Sí, quitar</i><i>No</i></span></div>'); return; }
+    const p = planes.find(x => x.id === card.dataset.id); if(p) muestra(p);
+  });
+  return { refresh, muestra };
+})();
+
 const PlanesComfandi = (function(){
   const box = document.getElementById("emaPlanes");
   const KEY = "armoni.comfandi", KV = "armoni.comfandi.vistos";
