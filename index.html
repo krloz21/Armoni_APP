@@ -3162,6 +3162,7 @@ const GLIM_ESTADO_URL = N8N + "/webhook/glim-estado";
 const GLIM_ATENDIDO_URL = N8N + "/webhook/glim-atendido";
 const GLIM_TOKEN = "glim-18b591f040b1c3f897ce331a";
 const RECUERDA_URL = N8N + "/webhook/pagos-dia";
+const CELULARES_ESTADO_URL = N8N + "/webhook/celulares-estado";   // ¿ya se pagaron los celulares este mes? (lo dice Notion)
 const MERCADO_ESTADO_URL = N8N + "/webhook/mercado-estado";
 const MERCADO_MARCAR_URL = N8N + "/webhook/mercado-marcar";
 const MERCADO_COMPRADO_URL = N8N + "/webhook/mercado-comprado";
@@ -3209,7 +3210,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-16.207";
+const APP_VERSION = "2026-10-16.209";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -7966,7 +7967,10 @@ Uso.entra(MODE);   // empieza a medir el apartado con el que abre la app
 /* el aviso de un plan nuevo de Comfandi abre Armoni directo en Salidas Ema */
 try{
   const ver = new URLSearchParams(location.search).get("ver");
-  if(ver === "ema" || ver === "dura" || ver === "mercar"){
+  if(ver === "pagar"){
+    history.replaceState(null, "", location.pathname);
+    setTimeout(() => Pagos.abrir(), 900);
+  } else if(ver === "ema" || ver === "dura" || ver === "mercar"){
     history.replaceState(null, "", location.pathname);
     setTimeout(() => Drawer.go(ver), 250);
   }
@@ -8637,12 +8641,22 @@ const Pagos = (function(){
   const mesDe = () => { const d = new Date(); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0"); };
   const lee = (k, def) => { try{ return JSON.parse(localStorage.getItem(k)) || def; }catch{ return def; } };
   const celPagado = id => lee(KP, {})[id] === mesDe();
-  function marcaPagado(id){ const m = lee(KP, {}); m[id] = mesDe(); try{ localStorage.setItem(KP, JSON.stringify(m)); }catch{} try{ localStorage.removeItem(KE); }catch{} try{ Servicios.check(); }catch{} }
+  function marcaPagado(id, silencioso){ const m = lee(KP, {}); m[id] = mesDe(); try{ localStorage.setItem(KP, JSON.stringify(m)); }catch{} try{ localStorage.removeItem(KE); }catch{} if(!silencioso){ try{ Servicios.check(); }catch{} } }
   const idDeConcepto = c => /celular\s+aleja/i.test(c) ? "aleja" : /celular\s+carlos/i.test(c) ? "carlos" : null;
+  /* cada celular tiene su ventana: el de amor (Aleja) del 1 al 5 (el 5 es el último día) y el de Carlos del 15 al 23 */
+  const VENTANA = { aleja: [1, 5], carlos: [15, 23] };
   function pendientesCelulares(){
     const dia = new Date().getDate();
-    if(dia < 15 || dia > 23) return [];
-    return PERSONAS.filter(x => !celPagado(x.id)).map(x => ({ id: "cel_" + x.id, nombre: "el celular de " + (x.id === "aleja" ? "Aleja" : "Carlos") }));
+    return PERSONAS.filter(x => dia >= VENTANA[x.id][0] && dia <= VENTANA[x.id][1] && !celPagado(x.id)).map(x => ({ id: "cel_" + x.id, nombre: "el celular de " + (x.id === "aleja" ? "amor" : "Carlos") }));
+  }
+  /* Notion dice qué celulares ya se pagaron este mes (por ejemplo, el correo del pago PSE ya lo registró) */
+  async function traePagados(){
+    try{
+      const r = await fetch(CELULARES_ESTADO_URL + "?token=" + encodeURIComponent(MERCADO_TOKEN), { cache: "no-store", signal: AbortSignal.timeout ? AbortSignal.timeout(8000) : undefined });
+      if(!r.ok) return;
+      const j = await r.json();
+      if(j && j.ok && j.pagados) PERSONAS.forEach(x => { if(j.pagados[x.id] && !celPagado(x.id)) marcaPagado(x.id, true); });
+    }catch{}
   }
   /* abre el portal de Claro con ese número copiado; al volver a Armoni pregunta si ya se pagó para registrarlo */
   function pagarCelular(persona){
@@ -8727,7 +8741,7 @@ const Pagos = (function(){
       if(f){ cierra(false); setTimeout(() => Servicios.abrirPago(f.titulo, f.url, f.ref, f.directo), 220); }
     });
   }
-  return { abrir, pendientesCelulares, pagarCelular, marcaPagado, idDeConcepto };
+  return { abrir, pendientesCelulares, traePagados, pagarCelular, marcaPagado, idDeConcepto };
 })();
 
 const Servicios = (function(){
@@ -8859,7 +8873,7 @@ const Servicios = (function(){
     agua:     { desde: 25, hasta: ult => ult },
     gas:      { desde: 25, hasta: ult => ult },
     internet: { desde: 1,  hasta: () => 5 },
-    cel_aleja:  { desde: 15, hasta: () => 23 },
+    cel_aleja:  { desde: 1,  hasta: () => 5 },
     cel_carlos: { desde: 15, hasta: () => 23 },
   };
   function urgencia(id){
@@ -9002,6 +9016,7 @@ const Servicios = (function(){
       const res = await fetch(SERVICIOS_ESTADO_URL, { cache: "no-store" });
       if(res.ok){ const data = await res.json(); pendientes = data.sinPagar || data.pendientes || []; }   // también lo ya vencido, hasta que se pague
     }catch{ /* sin conexión: seguimos solo con lo que se pueda calcular local */ }
+    try{ const dia = new Date().getDate(); if(dia <= 5 || (dia >= 15 && dia <= 23)) await Pagos.traePagados(); }catch{}   // solo en las ventanas de pago
     try{ pendientes = pendientes.concat(Pagos.pendientesCelulares()); }catch{}
     banner(pendientes);
   }
