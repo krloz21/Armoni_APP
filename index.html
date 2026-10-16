@@ -2410,6 +2410,12 @@ button{ transition:transform var(--t-tap) var(--ease-out); }
 .cfTabs i{ font-style:normal; min-width:18px; height:18px; padding:0 5px; border-radius:999px; display:inline-grid; place-items:center; font-size:.68rem; font-weight:700; color:#fff; background:linear-gradient(140deg, #ffb066, #ff7a4d); }
 .cfLista{ display:flex; gap:10px; overflow-x:auto; margin:0 -16px; padding:2px 16px 8px; scroll-snap-type:x mandatory; scrollbar-width:none; }
 .cfLista::-webkit-scrollbar{ display:none; }
+.cfWrap{ position:relative; }
+.cfFlecha{ display:none; position:absolute; top:42%; transform:translateY(-50%); z-index:3; width:38px; height:38px; border-radius:50%; border:1px solid var(--line); background:var(--panel); color:var(--white); cursor:pointer; place-items:center; box-shadow:0 4px 14px rgba(0,0,0,.35); }
+.cfFlecha svg{ width:18px; height:18px; }
+.cfFlecha.ant{ left:-6px; } .cfFlecha.sig{ right:-6px; }
+@media (hover:hover) and (pointer:fine){ .cfFlecha{ display:grid; } .cfLista{ cursor:grab; } .cfLista.arrastra{ cursor:grabbing; scroll-snap-type:none; scroll-behavior:auto; } .cfLista.arrastra .cfPlan{ pointer-events:none; } .cfLista{ scroll-behavior:smooth; } }
+.cfPase{ display:block; margin-top:4px; font-size:.7rem; font-weight:600; color:#7fd8a6; }
 .cfPlan{ flex:none; width:168px; scroll-snap-align:start; display:flex; flex-direction:column; border-radius:18px; border:1px solid var(--line); background:var(--panel); color:var(--white); text-decoration:none; overflow:hidden; animation:duSube .45s var(--ease-out) backwards; animation-delay:calc(var(--i) * 45ms); transition:transform .2s var(--ease-out), border-color .2s; }
 .cfPlan:active{ transform:scale(.97); }
 .cfPlan:hover{ border-color:rgba(255,138,80,.45); }
@@ -3176,7 +3182,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-16.196";
+const APP_VERSION = "2026-10-16.197";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -5906,19 +5912,29 @@ const PlanesComfandi = (function(){
   function pinta(){
     const ps = ((datos && datos.planes) || []).filter(p => urlSegura(p.url));
     if(!ps.length){ box.innerHTML = ""; return; }
-    const G = { ema: ps.filter(p => conEma(p)), dos: ps.filter(p => !conEma(p)) };
+    const G = { ema: ps.filter(p => conEma(p) && p.tipo !== "pasadia"), pasa: ps.filter(p => p.tipo === "pasadia"), dos: ps.filter(p => !conEma(p) && p.tipo !== "pasadia") };
     if(!grupo || !G[grupo].length) grupo = G.ema.length ? "ema" : "dos";
     const nuevos = k => G[k].filter(esNuevo).length;
     box.innerHTML =
       '<div class="cfHead"><div class="mkSec">Planes en Comfandi</div>' + (datos.revisado ? '<small>' + esc(hace(Date.parse(datos.revisado))) + '</small>' : '') + '</div>' +
-      '<div class="cfTabs" role="tablist">' + [["ema", "🎈 Con Ema"], ["dos", "💑 Ustedes dos"]].filter(([k]) => G[k].length).map(([k, t]) =>
+      '<div class="cfTabs" role="tablist">' + [["ema", "🎈 Con Ema"], ["pasa", "🚗 Pasadías"], ["dos", "💑 Ustedes dos"]].filter(([k]) => G[k].length).map(([k, t]) =>
         '<button type="button" role="tab" data-g="' + k + '" aria-selected="' + (k === grupo) + '">' + t + (nuevos(k) ? '<i>' + nuevos(k) + '</i>' : '') + '</button>').join("") + '</div>' +
-      '<div class="cfLista">' + G[grupo].slice().sort((a, b) => esNuevo(b) - esNuevo(a) || (a.fecha || "9999").localeCompare(b.fecha || "9999") || (b.desde || 0) - (a.desde || 0)).map((p, i) =>
+      '<div class="cfWrap"><button type="button" class="cfFlecha ant" data-flecha="-1" aria-label="Anteriores"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></button><button type="button" class="cfFlecha sig" data-flecha="1" aria-label="Siguientes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button><div class="cfLista">' + G[grupo].slice().sort((a, b) => esNuevo(b) - esNuevo(a) || (a.fecha || "9999").localeCompare(b.fecha || "9999") || (b.desde || 0) - (a.desde || 0)).map((p, i) =>
         '<a class="cfPlan" href="' + esc(urlSegura(p.url)) + '" target="_blank" rel="noopener noreferrer" data-id="' + esc(p.id) + '" style="--i:' + Math.min(i, 8) + '">' +
           '<span class="cfImg">' + (/^https:\/\//.test(p.img || "") ? '<img src="' + esc(p.img) + '" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">' : '') + '<span class="cfEmo" aria-hidden="true">' + (p.grupo === "hoteles" ? "🏨" : conEma(p) ? "🎈" : "🎭") + '</span>' + (esNuevo(p) ? '<b class="cfNuevo">' + (p.actualizado ? 'Actualizado' : 'Nuevo') + '</b>' : '') + '</span>' +
-          '<span class="cfTx"><b>' + esc(p.nombre) + '</b>' + ((p.fecha || p.precio) ? '<small>' + (p.fecha ? '<span class="cfFecha">' + esc(cuando(p.fecha)) + '</span>' : '') + esc(p.precio === "$ 0" ? "Subsidiado" : (p.precio || "")) + '</small>' : '') + '</span></a>').join("") + '</div>';
+          '<span class="cfTx"><b>' + esc(p.nombre) + '</b>' + ((p.fecha || p.precio) ? '<small>' + (p.fecha ? '<span class="cfFecha">' + esc(cuando(p.fecha)) + '</span>' : '') + esc(p.precio === "$ 0" ? "Subsidiado" : (p.precio || "")) + '</small>' : '') + (p.tipo === "pasadia" ? '<small class="cfPase">🚗 En carro propio · válido 1 mes</small>' : '') + '</span></a>').join("") + '</div></div>';
   }
+  /* en computador: flechas, rueda del ratón y arrastrar para ver más planes (en el celular se desliza con el dedo) */
+  const lista = () => box.querySelector(".cfLista");
+  let arr = null;
+  box.addEventListener("wheel", e => { const l = e.target.closest(".cfLista"); if(!l || Math.abs(e.deltaX) > Math.abs(e.deltaY)) return; if(l.scrollWidth <= l.clientWidth) return; l.scrollLeft += e.deltaY; e.preventDefault(); }, { passive: false });
+  box.addEventListener("pointerdown", e => { if(e.pointerType !== "mouse" || e.button !== 0) return; const l = e.target.closest(".cfLista"); if(l) arr = { l, x: e.clientX, s: l.scrollLeft, mov: false }; });
+  addEventListener("pointermove", e => { if(!arr) return; const dx = e.clientX - arr.x; if(!arr.mov && Math.abs(dx) > 5){ arr.mov = true; arr.l.classList.add("arrastra"); } if(arr.mov) arr.l.scrollLeft = arr.s - dx; });
+  addEventListener("pointerup", () => { if(!arr) return; const a = arr; arr = null; if(a.mov){ a.l.classList.remove("arrastra"); a.l.dataset.arrastro = "1"; setTimeout(() => delete a.l.dataset.arrastro, 60); } });
   box.addEventListener("click", e => {
+    const fl = e.target.closest("[data-flecha]");
+    if(fl){ const l = lista(); if(l) l.scrollBy({ left: +fl.dataset.flecha * Math.max(180, l.clientWidth * .8), behavior: "smooth" }); return; }
+    if(e.target.closest(".cfLista[data-arrastro]")){ e.preventDefault(); return; }
     const t = e.target.closest("[data-g]");
     if(t){ grupo = t.dataset.g; pinta(); return; }
     const a = e.target.closest(".cfPlan");
@@ -5943,10 +5959,10 @@ const PlanesComfandi = (function(){
           '<span class="cfAnEmo" aria-hidden="true">' + (p.grupo === "hoteles" ? "🏨" : conEma(p) ? "🎈" : "🎭") + '</span>' +
           '<b class="cfAnSello">' + (p.actualizado ? '🔄 Actualizado' : '✨ Nuevo en Comfandi') + '</b>' +
           '<button type="button" class="cfAnX" aria-label="Cerrar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>' +
-        '<div class="cfAnTx"><small>' + (conEma(p) ? '🎈 Para ir con Ema' : '💑 Para ustedes dos') + '</small>' +
+        '<div class="cfAnTx"><small>' + (p.tipo === "pasadia" ? '🚗 Pasadía para ir en carro propio' : conEma(p) ? '🎈 Para ir con Ema' : '💑 Para ustedes dos') + '</small>' +
           '<h3 id="cfAnT">' + esc(p.nombre) + '</h3>' +
           '<p>' + (p.fecha ? '<span>' + esc(cuando(p.fecha)) + '</span>' : '') + (p.precio ? '<span>' + esc(p.precio === "$ 0" ? "Subsidiado" : p.precio) + '</span>' : '') + '</p>' +
-          (mas ? '<em>y ' + mas + (mas === 1 ? ' novedad más' : ' novedades más') + ' abajo</em>' : '') + '</div>' +
+          (p.tipo === "pasadia" ? '<em>Lo compran y tienen 1 mes para reclamarlo</em>' : '') + (mas ? '<em>y ' + mas + (mas === 1 ? ' novedad más' : ' novedades más') + ' abajo</em>' : '') + '</div>' +
         '<div class="cfAnBtns"><a class="cfAnSi" href="' + esc(urlSegura(p.url)) + '" target="_blank" rel="noopener noreferrer">Ver en Comfandi</a><button type="button" class="cfAnNo">Después</button></div>' +
       '</div>';
     document.body.appendChild(an);
