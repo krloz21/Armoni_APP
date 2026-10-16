@@ -3324,7 +3324,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-16.215";
+const APP_VERSION = "2026-10-16.216";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -6182,11 +6182,11 @@ const Temporada = (function(){
     const slide = ({ p, e }) => { const t = tema(p);
       return '<div class="tpSl"><div class="tpAnCard" style="--h:' + t.h + '">' +
         '<div class="tpAnTop"><span class="tpAnAro" aria-hidden="true"></span><span class="tpAnAro b" aria-hidden="true"></span><span class="tpAnEmo" aria-hidden="true">' + t.emo + '</span>' +
-          '<b class="tpAnSello">' + (e.ahora ? '¡Está pasando!' : 'De temporada') + '</b></div>' +
+          '<b class="tpAnSello">' + (e.ahora ? '¡Está pasando!' : 'De temporada') + '</b>' +
+          '<button type="button" class="tpAnX" aria-label="Cerrar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>' +
         '<div class="tpAnTx"><span class="tpAnCuenta">' + esc(e.txt) + '</span><h3>' + esc(p.nombre) + '</h3><p>' + esc(rango(p)) + (p.lugar ? ' · ' + esc(p.lugar) : '') + '</p><em>' + esc(para(p)) + (p.nota ? ' · ' + esc(p.nota) : '') + '</em></div>' +
       '</div></div>'; };
     an.innerHTML = chispas +
-      '<button type="button" class="tpCerrar" aria-label="Cerrar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>' +
       (v.length > 1 ? '<button type="button" class="tpFl a" data-fl="-1" aria-label="Anterior">‹</button><button type="button" class="tpFl s" data-fl="1" aria-label="Siguiente">›</button>' : '') +
       '<div class="tpCar" role="dialog" aria-modal="true" aria-label="Planes de temporada">' + v.map(slide).join("") + '</div>' +
       (v.length > 1 ? '<div class="tpDots" aria-hidden="true">' + v.map(() => '<i></i>').join("") + '</div><p class="tpDesliza">Desliza para ver los ' + v.length + ' planes</p>' : '');
@@ -6211,7 +6211,7 @@ const Temporada = (function(){
     document.addEventListener("keydown", tecla);
     an.addEventListener("click", ev => {
       const fl = ev.target.closest("[data-fl]"); if(fl){ ir(+fl.dataset.fl); return; }
-      if(ev.target.closest(".tpCerrar") || ev.target === an || ev.target.classList.contains("tpSl")) cierra();   // tocar fuera de la tarjeta también cierra
+      if(ev.target.closest(".tpAnX") || ev.target === an || ev.target.classList.contains("tpSl")) cierra();   // tocar fuera de la tarjeta también cierra
     });
   }
 
