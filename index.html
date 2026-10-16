@@ -3196,7 +3196,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-16.201";
+const APP_VERSION = "2026-10-16.202";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -6302,7 +6302,8 @@ const FormArmoni = (function(){
   const ICO = {
     gasto: '<path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/>',
     ingreso: '<circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/>',
-    ema: '<circle cx="12" cy="12" r="9"/><path d="M8.5 14.2c.9 1.5 2.1 2.2 3.5 2.2s2.6-.7 3.5-2.2"/><path d="M9 9.6h.01M15 9.6h.01"/>'
+    ema: '<circle cx="12" cy="12" r="9"/><path d="M8.5 14.2c.9 1.5 2.1 2.2 3.5 2.2s2.6-.7 3.5-2.2"/><path d="M9 9.6h.01M15 9.6h.01"/>',
+    pagos: '<rect x="3" y="6" width="18" height="12" rx="2.3"/><path d="M3 10h18M7 15h3"/>'
   };
   const svg = k => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + ICO[k] + '</svg>';
   function cabeza(k, idT, titulo, sub, derecha){
@@ -6316,7 +6317,7 @@ const MenuMas = (function(){
   const btn = document.getElementById("masIngreso");
   let menu = null;
   const ICO = FormArmoni.ICO;
-  const ITEMS = [["gasto", "Gasto", "Algo que pagaste"], ["ingreso", "Ingreso", "Plata que entró"], ["ema", "Salida con Ema", "Varios gastos y lugares del día"]];
+  const ITEMS = [["gasto", "Gasto", "Algo que pagaste"], ["ingreso", "Ingreso", "Plata que entró"], ["ema", "Salida con Ema", "Varios gastos y lugares del día"], ["pagos", "Pagar", "Lo que pagamos seguido: celulares, psicóloga…"]];
   function cierra(){
     if(!menu) return;
     const m = menu; menu = null;
@@ -6340,7 +6341,7 @@ const MenuMas = (function(){
     menu.addEventListener("click", e => {
       const b = e.target.closest("button[data-k]"); if(!b) return;
       const k = b.dataset.k; cierra(); Uso.accion("+" + k);
-      setTimeout(() => { if(k === "ema") SalidaEmaForm.abrir({ desdeMenu: true }); else GastoManual.abrir({ tipo: k === "ingreso" ? "Ingreso" : "Gasto", desdeMenu: true }); }, 120);
+      setTimeout(() => { if(k === "pagos") Pagos.abrir(); else if(k === "ema") SalidaEmaForm.abrir({ desdeMenu: true }); else GastoManual.abrir({ tipo: k === "ingreso" ? "Ingreso" : "Gasto", desdeMenu: true }); }, 120);
     });
     document.addEventListener("pointerdown", fuera, true); document.addEventListener("keydown", tecla);
   }
@@ -8160,7 +8161,9 @@ const Frecuentes = (function(){
     { tipo:"Gasto",   concepto:"Gasolina carro",categoria:"Carro",    monto:139820,  n:3, fijo:false },
     { tipo:"Gasto",   concepto:"Psicóloga",     categoria:"Salud",    monto:90000,   n:3 },
     { tipo:"Gasto",   concepto:"Pañales Ema",   categoria:"Hijo",     monto:214008,  n:2 },
-    { tipo:"Gasto",   concepto:"Netflix",       categoria:"Hogar",    monto:29900,   n:1 }
+    { tipo:"Gasto",   concepto:"Netflix",       categoria:"Hogar",    monto:29900,   n:1 },
+    { tipo:"Gasto",   concepto:"Celular Aleja", categoria:"Hogar",    monto:49051,   n:2, fijo:false },
+    { tipo:"Gasto",   concepto:"Celular Carlos",categoria:"Hogar",    monto:49051,   n:2, fijo:false }
   ];
   const k = (t, c) => t + "|" + c.trim().toLowerCase();
   /* nada de registros de prueba: se borran si quedaron guardados y nunca se muestran */
@@ -8188,6 +8191,17 @@ const Frecuentes = (function(){
       if(Array.isArray(srv) && srv.some(r => r.tipo === tipo)) return srv.filter(r => r.tipo === tipo && !ES_PRUEBA.test(r.concepto)).slice(0, 12);
       const FUERA = ["Alimentación", "Servicios", "Salidas", "Salidas Ema"];
       return todos().filter(f => f.tipo === tipo && f.concepto && !FUERA.includes(f.categoria) && !ES_PRUEBA.test(f.concepto)).sort((a, b) => (b.n || 0) - (a.n || 0)).slice(0, 8);
+    },
+    /* todo lo que se paga seguido (lo que Armoni ya sabe + lo aprendido), sin repetir, para la pantalla «Pagar» */
+    pagos(){
+      const vistos = new Set(), out = [];
+      const AUT = /arriendo|jard[ií]n|cuota\s+(del\s+)?(carro|cr[eé]dito)/i;
+      this.top("Gasto").concat(todos().filter(f => f.tipo === "Gasto")).forEach(f => {
+        const id = String(f.concepto || "").trim().toLowerCase();
+        if(!id || vistos.has(id) || ES_PRUEBA.test(id) || AUT.test(id)) return;
+        vistos.add(id); out.push(f);
+      });
+      return out;
     },
     aprende(tipo, concepto, categoria, monto){
       try{
@@ -8561,6 +8575,41 @@ const GastoManual = (function(){
         .catch(e => { guardando = false; btn.disabled = false; btn.textContent = "Guardar"; err.textContent = (e && e.message && e.message !== "Failed to fetch") ? e.message : "No pude guardarlo. Revisa la conexión e inténtalo de nuevo."; });
     }
     ir("que", 1, true);
+    if(opts && opts.pago) usarRecurrente(opts.pago);   // viene de «Pagar»: ya trae el concepto, la categoría y el valor
+  }
+  return { abrir };
+})();
+
+/* «Pagar»: todo lo que Armoni ya sabe que pagan seguido (celular de Aleja, celular de Carlos, psicóloga…) a un toque */
+const Pagos = (function(){
+  const P = 'fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"';
+  const esc = t => String(t == null ? "" : t).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const ICON = c => /celular|movil|móvil|plan/i.test(c) ? '<rect x="7" y="3" width="10" height="18" rx="2.2"/><path d="M11 18h2"/>' :
+    /psic|medic|salud|droguer/i.test(c) ? '<path d="M12 5v14M5 12h14"/>' : /netflix|spotify|stream|suscrip/i.test(c) ? '<rect x="3" y="5" width="18" height="12" rx="2"/><path d="M8 20h8"/>' :
+    /gasolina|carro|peaje|parque/i.test(c) ? '<path d="M5 16V12l1.8-4.5A2 2 0 0 1 8.7 6h6.6a2 2 0 0 1 1.9 1.5L19 12v4"/><path d="M4 12h16v4H4z"/><circle cx="7.5" cy="18" r="1.5"/><circle cx="16.5" cy="18" r="1.5"/>' :
+    /pañal|ema|hijo/i.test(c) ? '<path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/>' : '<path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/>';
+  function abrir(){
+    if(document.querySelector(".pgScrim.pagosScrim")) return;
+    const lista = Frecuentes.pagos();
+    const scrim = document.createElement("div");
+    scrim.className = "pgScrim seScrim pagosScrim";
+    scrim.innerHTML = '<div class="inWrap"><div class="pgCard inCard fmCard fm-gasto" role="dialog" aria-modal="true" aria-labelledby="pgT">' +
+      FormArmoni.cabeza("pagos", "pgT", "Pagar", "Lo que pagamos seguido", "") +
+      '<div class="inBody"><div class="fmRecs" id="pgLista">' + (lista.length ? lista.map((f, i) =>
+        '<button type="button" data-i="' + i + '"><span class="fmRecIco"><svg viewBox="0 0 24 24" ' + P + '>' + ICON(f.concepto) + '</svg></span><span class="fmRecTx"><b>' + esc(f.concepto) + '</b><small>' + esc(f.categoria) + '</small></span>' +
+        (f.monto ? '<span class="fmRecM">$' + Math.round(f.monto).toLocaleString("es-CO") + '</span>' : '') + '</button>').join("") : '<p class="gEmpty">Todavía no hay pagos conocidos. Registra un gasto y aparecerá aquí.</p>') + '</div></div></div></div>';
+    document.body.appendChild(scrim);
+    requestAnimationFrame(() => scrim.classList.add("on"));
+    const cierra = (vuelve) => { scrim.classList.remove("on"); setTimeout(() => scrim.remove(), 340); document.removeEventListener("keydown", tecla); if(vuelve) setTimeout(() => MenuMas.abre(), 260); };
+    const tecla = e => { if(e.key === "Escape") cierra(false); };
+    document.addEventListener("keydown", tecla);
+    scrim.addEventListener("click", e => { if(e.target === scrim) cierra(false); });
+    scrim.querySelector(".fmVolver").addEventListener("click", () => cierra(true));
+    scrim.querySelector("#pgLista").addEventListener("click", e => {
+      const b = e.target.closest("[data-i]"); if(!b) return;
+      const f = lista[+b.dataset.i]; cierra(false); Uso.accion("+pagar");
+      setTimeout(() => GastoManual.abrir({ tipo: "Gasto", pago: f }), 200);
+    });
   }
   return { abrir };
 })();
