@@ -3176,7 +3176,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-16.195";
+const APP_VERSION = "2026-10-16.196";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -4552,7 +4552,7 @@ const K_SES = "armoni.sesion", K_ACT = "armoni.actividad";
 const newId = () => (crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random().toString(16).slice(2));
 
 let sessionId = localStorage.getItem(K_SES) || newId();
-localStorage.setItem(K_SES, sessionId);
+try{ localStorage.setItem(K_SES, sessionId); }catch{}
 
 const $ = s => document.querySelector(s);
 const thread = $("#thread"), list = $("#messages"), pending = $("#pending");
@@ -4566,7 +4566,7 @@ const RESET_MS = REINICIO_MINUTOS * 60000;
 
 function newConversation(){
   sessionId = newId();
-  localStorage.setItem(K_SES, sessionId);
+  try{ localStorage.setItem(K_SES, sessionId); }catch{}
   list.innerHTML = "";
   welcome.style.display = "";
   thread.classList.add("sinChat");
@@ -4608,7 +4608,7 @@ function activity(){
   lastTouch = now;
   if(lastAct && now - lastAct > RESET_MS && list.children.length) newConversation();
   lastAct = now;
-  localStorage.setItem(K_ACT, String(now));
+  try{ localStorage.setItem(K_ACT, String(now)); }catch{}
   wakeUp();
   scheduleSleep();
 }
@@ -4627,7 +4627,7 @@ addEventListener("pagehide", () => { clearTimeout(sleepTimer); goToSleep(true); 
 /* al abrir: si pasó mucho tiempo, arrancar limpio */
 if(lastAct && Date.now() - lastAct > RESET_MS){
   sessionId = newId();
-  localStorage.setItem(K_SES, sessionId);
+  try{ localStorage.setItem(K_SES, sessionId); }catch{}
 }
 
 
