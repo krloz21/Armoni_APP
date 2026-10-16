@@ -3209,7 +3209,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-16.206";
+const APP_VERSION = "2026-10-16.207";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -8232,6 +8232,7 @@ const Frecuentes = (function(){
       return out;
     },
     aprende(tipo, concepto, categoria, monto){
+      try{ if(tipo === "Gasto"){ const p = Pagos.idDeConcepto(concepto); if(p) Pagos.marcaPagado(p); } }catch(e){}
       try{
         const m = lee(), id = k(tipo, concepto), previo = m[id] || todos().find(f => k(f.tipo, f.concepto) === id);
         /* «fijo»: siempre ha costado lo mismo (psicóloga, pañales…); si un mes cambia, deja de serlo */
@@ -8631,6 +8632,42 @@ const Pagos = (function(){
   const PERSONAS = [{ id: "carlos", t: "Celular Carlos" }, { id: "aleja", t: "Celular Aleja" }];
   const leeC = () => { try{ return JSON.parse(localStorage.getItem(KC)) || {}; }catch{ return {}; } };
   const guardaC = m => { try{ localStorage.setItem(KC, JSON.stringify(m)); }catch{} };
+  /* ── aviso arriba (como energía y gas): los celulares se pagan entre el 15 y el 23 de cada mes ── */
+  const KP = "armoni.pagos.celPagado", KE = "armoni.pagos.celEsperando";
+  const mesDe = () => { const d = new Date(); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0"); };
+  const lee = (k, def) => { try{ return JSON.parse(localStorage.getItem(k)) || def; }catch{ return def; } };
+  const celPagado = id => lee(KP, {})[id] === mesDe();
+  function marcaPagado(id){ const m = lee(KP, {}); m[id] = mesDe(); try{ localStorage.setItem(KP, JSON.stringify(m)); }catch{} try{ localStorage.removeItem(KE); }catch{} try{ Servicios.check(); }catch{} }
+  const idDeConcepto = c => /celular\s+aleja/i.test(c) ? "aleja" : /celular\s+carlos/i.test(c) ? "carlos" : null;
+  function pendientesCelulares(){
+    const dia = new Date().getDate();
+    if(dia < 15 || dia > 23) return [];
+    return PERSONAS.filter(x => !celPagado(x.id)).map(x => ({ id: "cel_" + x.id, nombre: "el celular de " + (x.id === "aleja" ? "Aleja" : "Carlos") }));
+  }
+  /* abre el portal de Claro con ese número copiado; al volver a Armoni pregunta si ya se pagó para registrarlo */
+  function pagarCelular(persona){
+    const x = PERSONAS.find(z => z.id === persona), n = leeC()[persona];
+    if(!n){ abrir(); setTimeout(() => { const b = document.querySelector('#pgLista button[data-id="celulares"]'); if(b) b.click(); }, 450); return; }
+    try{ localStorage.setItem(KE, JSON.stringify({ id: persona, t: Date.now() })); }catch{}
+    Servicios.abrirPago("Pagar " + x.t, PAGO_CLARO_URL, n, false);
+  }
+  function preguntaSiPago(){
+    const e = lee(KE, null); if(!e || Date.now() - e.t < 20000 || document.querySelector(".pgScrim.pagoPreg")) return;
+    const x = PERSONAS.find(z => z.id === e.id); if(!x) return;
+    const sc = document.createElement("div");
+    sc.className = "pgScrim seScrim pagoPreg";
+    sc.innerHTML = '<div class="inWrap"><div class="pgCard inCard" role="dialog" aria-modal="true"><h3>¿Ya pagaste?</h3><p class="gEmpty">' + esc(x.t) + ' en Claro. Si ya quedó pago, lo registro como gasto y el aviso de arriba se quita.</p>' +
+      '<div class="pgAcc"><button type="button" class="pgSi" id="ppSi">Sí, ya pagué</button><button type="button" id="ppNo">Todavía no</button></div></div></div>';
+    document.body.appendChild(sc); requestAnimationFrame(() => sc.classList.add("on"));
+    const cierra = () => { sc.classList.remove("on"); setTimeout(() => sc.remove(), 340); };
+    sc.querySelector("#ppNo").addEventListener("click", () => { try{ localStorage.removeItem(KE); }catch{} cierra(); });
+    sc.querySelector("#ppSi").addEventListener("click", () => {
+      cierra();
+      const f = Frecuentes.pagos().find(z => z.concepto.toLowerCase() === x.t.toLowerCase()) || { tipo: "Gasto", concepto: x.t, categoria: "Hogar", monto: 49051, fijo: false };
+      setTimeout(() => GastoManual.abrir({ tipo: "Gasto", pago: f }), 250);
+    });
+  }
+  document.addEventListener("visibilitychange", () => { if(document.visibilityState === "visible") setTimeout(preguntaSiPago, 600); });
   const montoDe = c => { try{ const f = Frecuentes.pagos().find(x => x.concepto.toLowerCase() === c.toLowerCase()); return f && f.monto ? "$" + Math.round(f.monto).toLocaleString("es-CO") : ""; }catch{ return ""; } };
 
   function abrir(){
@@ -8690,7 +8727,7 @@ const Pagos = (function(){
       if(f){ cierra(false); setTimeout(() => Servicios.abrirPago(f.titulo, f.url, f.ref, f.directo), 220); }
     });
   }
-  return { abrir };
+  return { abrir, pendientesCelulares, pagarCelular, marcaPagado, idDeConcepto };
 })();
 
 const Servicios = (function(){
@@ -8822,6 +8859,8 @@ const Servicios = (function(){
     agua:     { desde: 25, hasta: ult => ult },
     gas:      { desde: 25, hasta: ult => ult },
     internet: { desde: 1,  hasta: () => 5 },
+    cel_aleja:  { desde: 15, hasta: () => 23 },
+    cel_carlos: { desde: 15, hasta: () => 23 },
   };
   function urgencia(id){
     const hoy = new Date(), dia = hoy.getDate();
@@ -8883,6 +8922,7 @@ const Servicios = (function(){
           return;
         }
         if(esArriendo) document.getElementById("navGmail").click();
+        else if(item.id === "cel_aleja" || item.id === "cel_carlos") Pagos.pagarCelular(item.id.slice(4));
         else { const pi = PAGO_INFO[item.id]; if(pi) abrirPago(pi.titulo, pi.url, pi.referencia, pi.directo); }
       });
       return sl;
@@ -8962,6 +9002,7 @@ const Servicios = (function(){
       const res = await fetch(SERVICIOS_ESTADO_URL, { cache: "no-store" });
       if(res.ok){ const data = await res.json(); pendientes = data.sinPagar || data.pendientes || []; }   // también lo ya vencido, hasta que se pague
     }catch{ /* sin conexión: seguimos solo con lo que se pueda calcular local */ }
+    try{ pendientes = pendientes.concat(Pagos.pendientesCelulares()); }catch{}
     banner(pendientes);
   }
 
