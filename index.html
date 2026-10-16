@@ -3182,7 +3182,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-16.197";
+const APP_VERSION = "2026-10-16.198";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -5922,7 +5922,7 @@ const PlanesComfandi = (function(){
       '<div class="cfWrap"><button type="button" class="cfFlecha ant" data-flecha="-1" aria-label="Anteriores"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></button><button type="button" class="cfFlecha sig" data-flecha="1" aria-label="Siguientes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button><div class="cfLista">' + G[grupo].slice().sort((a, b) => esNuevo(b) - esNuevo(a) || (a.fecha || "9999").localeCompare(b.fecha || "9999") || (b.desde || 0) - (a.desde || 0)).map((p, i) =>
         '<a class="cfPlan" href="' + esc(urlSegura(p.url)) + '" target="_blank" rel="noopener noreferrer" data-id="' + esc(p.id) + '" style="--i:' + Math.min(i, 8) + '">' +
           '<span class="cfImg">' + (/^https:\/\//.test(p.img || "") ? '<img src="' + esc(p.img) + '" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">' : '') + '<span class="cfEmo" aria-hidden="true">' + (p.grupo === "hoteles" ? "🏨" : conEma(p) ? "🎈" : "🎭") + '</span>' + (esNuevo(p) ? '<b class="cfNuevo">' + (p.actualizado ? 'Actualizado' : 'Nuevo') + '</b>' : '') + '</span>' +
-          '<span class="cfTx"><b>' + esc(p.nombre) + '</b>' + ((p.fecha || p.precio) ? '<small>' + (p.fecha ? '<span class="cfFecha">' + esc(cuando(p.fecha)) + '</span>' : '') + esc(p.precio === "$ 0" ? "Subsidiado" : (p.precio || "")) + '</small>' : '') + (p.tipo === "pasadia" ? '<small class="cfPase">🚗 En carro propio · válido 1 mes</small>' : '') + '</span></a>').join("") + '</div></div>';
+          '<span class="cfTx"><b>' + esc(p.nombre) + '</b>' + ((p.fecha || p.precio) ? '<small>' + (p.fecha ? '<span class="cfFecha">' + esc(cuando(p.fecha)) + '</span>' : '') + esc(p.precio === "$ 0" ? "Subsidiado" : (p.precio || "")) + '</small>' : '') + (p.tipo === "pasadia" ? '<small class="cfPase">🚗 Pasadía en Cali · mira la vigencia</small>' : '') + '</span></a>').join("") + '</div></div>';
   }
   /* en computador: flechas, rueda del ratón y arrastrar para ver más planes (en el celular se desliza con el dedo) */
   const lista = () => box.querySelector(".cfLista");
@@ -5959,10 +5959,10 @@ const PlanesComfandi = (function(){
           '<span class="cfAnEmo" aria-hidden="true">' + (p.grupo === "hoteles" ? "🏨" : conEma(p) ? "🎈" : "🎭") + '</span>' +
           '<b class="cfAnSello">' + (p.actualizado ? '🔄 Actualizado' : '✨ Nuevo en Comfandi') + '</b>' +
           '<button type="button" class="cfAnX" aria-label="Cerrar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>' +
-        '<div class="cfAnTx"><small>' + (p.tipo === "pasadia" ? '🚗 Pasadía para ir en carro propio' : conEma(p) ? '🎈 Para ir con Ema' : '💑 Para ustedes dos') + '</small>' +
+        '<div class="cfAnTx"><small>' + (p.tipo === "pasadia" ? '🚗 Pasadía en Cali' : conEma(p) ? '🎈 Para ir con Ema' : '💑 Para ustedes dos') + '</small>' +
           '<h3 id="cfAnT">' + esc(p.nombre) + '</h3>' +
           '<p>' + (p.fecha ? '<span>' + esc(cuando(p.fecha)) + '</span>' : '') + (p.precio ? '<span>' + esc(p.precio === "$ 0" ? "Subsidiado" : p.precio) + '</span>' : '') + '</p>' +
-          (p.tipo === "pasadia" ? '<em>Lo compran y tienen 1 mes para reclamarlo</em>' : '') + (mas ? '<em>y ' + mas + (mas === 1 ? ' novedad más' : ' novedades más') + ' abajo</em>' : '') + '</div>' +
+          (p.tipo === "pasadia" ? '<em>Lo compran y lo reclaman después: mira cuánto tiempo tienen</em>' : '') + (mas ? '<em>y ' + mas + (mas === 1 ? ' novedad más' : ' novedades más') + ' abajo</em>' : '') + '</div>' +
         '<div class="cfAnBtns"><a class="cfAnSi" href="' + esc(urlSegura(p.url)) + '" target="_blank" rel="noopener noreferrer">Ver en Comfandi</a><button type="button" class="cfAnNo">Después</button></div>' +
       '</div>';
     document.body.appendChild(an);
