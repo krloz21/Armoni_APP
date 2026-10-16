@@ -2861,7 +2861,7 @@ body[class*="mode-"] #masIngreso{ display:none; }
       <div class="navGrupo" id="navSalidasG">
         <button type="button" id="navSalidasBtn" aria-expanded="false" aria-controls="navSalidasSub">
           <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9a2.2 2.2 0 0 0 0 4.4V17a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1v-3.6a2.2 2.2 0 0 0 0-4.4V6.5a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1z"/><path d="M14.5 5.5v2.3M14.5 10.9v2.2M14.5 16.2V18"/></svg></span>
-          <span class="txt"><b>Salidas</b><span>Restaurantes, cine y salidas con Ema</span></span>
+          <span class="txt"><b>Salidas</b><span>Restaurantes y salidas con Ema</span></span>
           <span class="chev" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
         </button>
         <div class="navSub" id="navSalidasSub"><div class="navSubIn">
@@ -3176,7 +3176,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-16.193";
+const APP_VERSION = "2026-10-16.194";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -7566,7 +7566,7 @@ const Preguntas = (function(){
   function abreLugar(q){
     if(document.querySelector(".pgScrim.lgScrim")) return;
     const m = (q.movs || [])[0]; if(!m || !m.id) return;
-    const adivina = t => { const x = String(t || "").replace(/\bpareja\b/ig, "").replace(/^\s*(almuerzo|cena|comida|desayuno|helado|brunch|domicilio|antojo)s?\b\s*(en|de|del|donde|con)?\s*/i, "").replace(/\s{2,}/g, " ").trim(); return (x || String(t || "").replace(/\bpareja\b/ig, "").trim()).replace(/\b\p{L}/gu, c => c.toUpperCase()); };
+    const adivina = t => { const x = String(t || "").replace(/\bpareja\b/ig, "").replace(/^\s*(almuerzo|cena|comida|desayuno|helado|brunch|domicilio|antojo)s?\b\s*(en|de|del|donde|con)?\s*/i, "").replace(/\s{2,}/g, " ").trim(); return (x || String(t || "").replace(/\bpareja\b/ig, "").trim()).replace(/(^|[^\p{L}])(\p{L})/gu, (m, p, c) => p + c.toUpperCase()); };
     const original = String(m.concepto || "").replace(/\bpareja\b/ig, "").replace(/\s{2,}/g, " ").trim();
     const RATING = /(\d{1,2}(?:[.,]5)?)\s*(?:\/|de|sobre)\s*10|nota\s*[:=]?\s*(\d{1,2}(?:[.,]5)?)/i;
     const OPINA = /rico|delicios|sabros|caro|barato|econ[oó]mic|buen[oa]s?|mal[oa]s?|excelente|p[eé]sim|lento|r[aá]pid|atenci[oó]n|servicio|comida|porci[oó]n|ambiente|volver|recomend|me gust|fr[ií]o|crudo|salado|pasable|regular/i;
