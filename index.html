@@ -2527,6 +2527,7 @@ button{ transition:transform var(--t-tap) var(--ease-out); }
 .tpAnBtns > *{ flex:1; padding:13px 8px; border-radius:16px; border:0; font:inherit; font-size:.94rem; font-weight:750; cursor:pointer; text-decoration:none; text-align:center; }
 .tpAnSi{ color:hsl(var(--h), 80%, 24%); background:#fff; box-shadow:0 14px 28px -14px rgba(0,0,0,.6); }
 .tpAnNo{ color:#fff; background:rgba(255,255,255,.16); }
+.tpAnNunca{ position:relative; display:block; margin:-8px auto 16px; padding:6px 10px; border:0; background:none; color:rgba(255,255,255,.75); font:inherit; font-size:.76rem; text-decoration:underline; cursor:pointer; }
 .tpChispa{ position:absolute; bottom:-40px; font-size:1.6rem; opacity:0; pointer-events:none; animation:tpSube 3.6s ease-in forwards; }
 @keyframes tpGira{ to{ transform:rotate(360deg); } }
 @keyframes tpPop{ to{ transform:scale(1) rotate(0); } }
@@ -3310,7 +3311,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-16.212";
+const APP_VERSION = "2026-10-16.213";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -6154,10 +6155,12 @@ const Temporada = (function(){
   function anuncia(intentos, alAbrir){
     if(!alAbrir && !document.body.classList.contains("mode-ema")) return;
     if(document.querySelector(".pgScrim, .cfAn, .tpAn, .sheetScrim, body.drawer-open") || document.body.classList.contains("drawer-open")){ if((intentos || 0) < 20) setTimeout(() => anuncia((intentos || 0) + 1, alAbrir), 1500); return; }   // espera a que cierren otra ventana
+    /* una vez al día por plan (mientras falte una semana o esté pasando), salvo que digan «No me lo recuerdes más» */
     let ya = []; try{ ya = JSON.parse(localStorage.getItem(KA)) || []; }catch{}
-    const x = vigentes().find(({ p, e }) => e.cerca && !ya.includes(p.id + "@" + e.fase));
+    const clave = p => p.id + "@" + hoy();
+    const x = vigentes().find(({ p, e }) => e.cerca && !ya.includes(clave(p)) && !ya.includes(p.id + "@nunca"));
     if(!x) return;
-    try{ localStorage.setItem(KA, JSON.stringify(ya.concat(x.p.id + "@" + x.e.fase).slice(-200))); }catch{}
+    try{ localStorage.setItem(KA, JSON.stringify(ya.concat(clave(x.p)).slice(-200))); }catch{}
     muestra(x.p, x.e);
   }
   function muestra(p, e){
@@ -6174,6 +6177,7 @@ const Temporada = (function(){
           '<button type="button" class="tpAnX" aria-label="Cerrar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>' +
         '<div class="tpAnTx"><span class="tpAnCuenta">' + esc(e.txt) + '</span><h3 id="tpAnT">' + esc(p.nombre) + '</h3><p>' + esc(rango(p)) + (p.lugar ? ' · ' + esc(p.lugar) : '') + '</p><em>' + esc(para(p)) + (p.nota ? ' · ' + esc(p.nota) : '') + '</em></div>' +
         '<div class="tpAnBtns"><a class="tpAnSi" href="' + esc(mapa) + '" target="_blank" rel="noopener noreferrer">¡Vamos! 📍</a><button type="button" class="tpAnNo">Después</button></div>' +
+        '<button type="button" class="tpAnNunca">No me recuerdes más este plan</button>' +
       '</div>';
     document.body.appendChild(an);
     requestAnimationFrame(() => an.classList.add("on"));
@@ -6181,7 +6185,9 @@ const Temporada = (function(){
     const cierra = () => { an.classList.remove("on"); an.classList.add("sale"); setTimeout(() => an.remove(), 420); document.removeEventListener("keydown", tecla); };
     const tecla = ev => { if(ev.key === "Escape") cierra(); };
     document.addEventListener("keydown", tecla);
-    an.addEventListener("click", ev => { if(ev.target === an || ev.target.closest(".tpAnX, .tpAnNo")) cierra(); else if(ev.target.closest(".tpAnSi")) setTimeout(cierra, 300); });
+    an.addEventListener("click", ev => {
+      if(ev.target.closest(".tpAnNunca")){ try{ const ya = JSON.parse(localStorage.getItem(KA)) || []; localStorage.setItem(KA, JSON.stringify(ya.concat(p.id + "@nunca").slice(-200))); }catch{} cierra(); return; }
+      if(ev.target === an || ev.target.closest(".tpAnX, .tpAnNo")) cierra(); else if(ev.target.closest(".tpAnSi")) setTimeout(cierra, 300); });
   }
 
   /* ── anotar un plan ── */
@@ -6255,7 +6261,7 @@ const Temporada = (function(){
   if(box) box.addEventListener("click", clic);
   if(vistaEl) vistaEl.addEventListener("click", clic);
   /* al abrir Armoni también: si hay algo que está por empezar o pasando, sale el pop-up (una vez por fase) */
-  TrasIntro.hacer(() => setTimeout(() => anuncia(0, true), 3200));
+  TrasIntro.hacer(() => setTimeout(() => anuncia(0, true), 350));   // apenas termina la intro
   return { refresh, muestra, vista };
 })();
 
