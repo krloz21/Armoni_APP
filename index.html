@@ -3176,7 +3176,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-16.189";
+const APP_VERSION = "2026-10-16.190";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -7006,7 +7006,7 @@ const Cola = (function(){
     } finally { enviando = false; }
     if(enviados) avisoOk("Ya se enviaron", enviados + (enviados === 1 ? " registro que esperaba conexión" : " registros que esperaban conexión"));
     if(fallidos) avisoOk("Ojo", fallidos + (fallidos === 1 ? " registro no se pudo guardar" : " registros no se pudieron guardar") + ". Revísalos en Notion.");
-    if(enviados){ try{ SalidasEma.precarga(); }catch{} }
+    if(enviados){ try{ SalidasEma.precarga(); }catch{} try{ document.dispatchEvent(new Event("cola-enviada")); }catch{} }
   }
   function pinta(){
     const n = lee().length; let el = document.getElementById("colaPill");
@@ -7018,7 +7018,7 @@ const Cola = (function(){
   document.addEventListener("visibilitychange", () => { if(document.visibilityState === "visible") setTimeout(vacia, 1200); });
   setInterval(() => { if(lee().length && !document.hidden) vacia(); }, 60000);
   TrasIntro.hacer(() => { pinta(); vacia(); });
-  return { post, vacia, cuantos: () => lee().length };
+  return { post, vacia, cuantos: () => lee().length, pendientes: sub => lee().filter(x => x.url.includes(sub)).length };
 })();
 /* lo último que se supo del ahorro (lo guarda la pantalla Ahorro); lo usan Balance y Tu mes */
 const ahorroGuardado = () => { try{ const d = JSON.parse(localStorage.getItem("armoni.ahorro")); return d && Array.isArray(d.cajas) ? d : null; }catch{ return null; } };
@@ -9133,9 +9133,13 @@ const Mercar = (function(){
   function guarda(){ try{ localStorage.setItem(KEY, JSON.stringify(datos)); }catch{} }
   function post(url, cuerpo){
     /* sin cabecera JSON a propósito: así el navegador no hace la consulta previa (CORS) y n8n lo recibe igual */
-    return fetch(url, { method: "POST", body: JSON.stringify(Object.assign({ token: MERCADO_TOKEN }, cuerpo)) })
-      .then(r => { if(!r.ok) throw new Error("http " + r.status); return r; });
+    /* pasa por la cola de Armoni: sin conexión (o con el PC apagado) queda guardado y se envía solo al volver */
+    return Cola.post(url, { method: "POST", body: JSON.stringify(Object.assign({ token: MERCADO_TOKEN }, cuerpo)) })
+      .then(async r => { if(!r.ok) throw new Error("http " + r.status); const j = await r.clone().json().catch(() => ({})); r.enCola = !!j.enCola; if(r.enCola) ultimoEnCola = true; return r; });
   }
+  let ultimoEnCola = false;
+  const pendiente = () => Cola.pendientes("/webhook/mercado-") > 0;
+  document.addEventListener("cola-enviada", () => { if(!Cola.pendientes("/webhook/mercado-")) cargar(); });
   function textoLista(items){
     const f = new Date().toLocaleDateString("es-CO", { weekday: "short", day: "numeric", month: "short" });
     let t = "🛒 Mercado · " + f + "\n";
@@ -9249,8 +9253,9 @@ const Mercar = (function(){
       const nombre = base + (det.value.trim() ? SEP + det.value.trim() : "");
       si.disabled = true; si.textContent = "Agregando…"; err.textContent = "";
       try{
-        await post(MERCADO_AGREGAR_URL, { nombre, grupo: grp.value });
+        const r = await post(MERCADO_AGREGAR_URL, { nombre, grupo: grp.value });
         cierra();
+        if(r.enCola){ exito("Se agregará al conectar", base + " · " + grp.value); return; }
         exito("Producto agregado", base + " · " + grp.value);
         statusEl.innerHTML = ""; datos = null;
         refresh();                    // trae la lista de nuevo, ya con lo que acabas de agregar
@@ -9341,9 +9346,10 @@ const Mercar = (function(){
         const nombre = base + (det.value.trim() ? SEP + det.value.trim() : "");
         si.disabled = true; si.textContent = "Guardando…"; err.textContent = "";
         try{
-          await post(MERCADO_EDITAR_URL, { id: p.id, nombre, grupo: grp.value });
+          const r = await post(MERCADO_EDITAR_URL, { id: p.id, nombre, grupo: grp.value });
           p.nombre = nombre; p.grupo = grp.value; guarda();
           cierra();
+          if(r.enCola){ exito("Se guardará al conectar", base + " · " + grp.value); refresh(); return; }
           exito("Producto actualizado", base + " · " + grp.value);
           statusEl.innerHTML = ""; datos = null;
           refresh();
@@ -9758,6 +9764,7 @@ const Mercar = (function(){
       stage.innerHTML = '<div class="mkHecho">' + (REDUCED ? '' : confeti()) + iconoCheck() + '<h3>¡Mercado registrado!</h3><p class="gEmpty">Guardé ' + comprados.length +
         (comprados.length === 1 ? ' cosa' : ' cosas') + ' ' + (hoy === hoyISO() ? 'con la fecha de hoy' : 'con fecha del ' + new Date(+hoy.slice(0, 4), +hoy.slice(5, 7) - 1, +hoy.slice(8, 10)).toLocaleDateString('es-CO', { day: 'numeric', month: 'long' })) + '. Así aprendo cuánto te dura cada una.</p><button type="button" class="mkBtn pri full" id="mkListo">Listo</button></div>';
       document.getElementById("mkListo").addEventListener("click", () => { inicio(); cargar(); });
+      if(pendiente()) stage.querySelector(".mkHecho p").insertAdjacentHTML("beforeend", " <b>Se envía al Mercado cuando el PC esté prendido.</b>");
     }catch{
       final(comprados, false, "reintento");   // vuelve a lo que compraste, con la misma fecha, para intentar otra vez
       statusEl.innerHTML = "No se pudo guardar. Revisa tu internet y que Tailscale esté encendido.";
@@ -9770,6 +9777,7 @@ const Mercar = (function(){
     if(enVuelo) return;   // si la anterior sigue pidiendo, no apilar otra
     enVuelo = true;
     try{
+      if(pendiente()){ await Cola.vacia(); if(pendiente()) return; }   // lo que hiciste sin conexión sube primero; mientras espere, manda lo guardado aquí
       const res = await fetch(MERCADO_ESTADO_URL, { cache: "no-store", signal: AbortSignal.timeout ? AbortSignal.timeout(10000) : undefined });
       if(!res.ok) throw new Error("http " + res.status);
       const d = await res.json();
@@ -9903,7 +9911,7 @@ const Mercar = (function(){
           const m = leeAcabo(); m[p.id] = fecha; guardaAcabo(m);
         }
         guarda(); cierra();
-        exito(dentro ? "Quitado de la canasta" : "En tu canasta", nom);
+        exito(dentro ? "Quitado de la canasta" : "En tu canasta", nom + (pendiente() ? " · se envía al conectar" : ""));
         repinta();
       }catch{
         si.disabled = false; si.textContent = dentro ? "Quitar de la canasta" : "Dejar en la canasta";
