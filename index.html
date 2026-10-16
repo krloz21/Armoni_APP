@@ -3176,7 +3176,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-16.194";
+const APP_VERSION = "2026-10-16.195";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -9020,14 +9020,17 @@ const Recuerda = (function(){
   const esqueleto = () => '<div class="glimHero recSke"><span class="gLbl">Pagado…</span><b class="gSaldo"><i class="recBar w60"></i></b><div class="gMeta"><i class="recBar w40"></i></div></div><div class="gHead">Pagos</div><div class="gList">' +
     [0, 1, 2].map(() => '<div class="gRow recSkeRow"><span class="gIco recBar"></span><span class="gTx"><i class="recBar w70"></i><i class="recBar w40"></i></span><i class="recBar w20"></i></div>').join("") + '</div>';
   /* al abrir la app trae hoy y ayer en segundo plano: cuando entras a Recuerda ya está listo */
+  let ultimaPrecarga = 0;
   async function precarga(){
-    for(const f of [hoy(), ayer()]){
+    if(Date.now() - ultimaPrecarga < 30000) return; ultimaPrecarga = Date.now();
+    /* hoy y ayer a la vez (antes uno detrás del otro) y con tiempo límite para que una conexión colgada no se quede esperando */
+    await Promise.all([hoy(), ayer()].map(async f => {
       try{
-        const res = await fetch(RECUERDA_URL + "?fecha=" + encodeURIComponent(f), { cache: "no-store" });
-        if(!res.ok) continue;
+        const res = await fetch(RECUERDA_URL + "?fecha=" + encodeURIComponent(f), { cache: "no-store", signal: AbortSignal.timeout ? AbortSignal.timeout(15000) : undefined });
+        if(!res.ok) return;
         const data = await res.json(); guardaDisco(f, data); cache[f] = data;
       }catch{}
-    }
+    }));
   }
   /* muestra al instante lo último guardado de ese día y SIEMPRE le pregunta a n8n por si cambió algo */
   async function cargar(f){
@@ -9061,7 +9064,8 @@ const Recuerda = (function(){
   /* al entrar desde el menú arranca en hoy; al volver a la app conserva la fecha elegida */
   function refresh(mantener){ if(!mantener) totalAnterior = null; cargar(mantener ? fecha : hoy()); }   // al entrar de verdad, el contador siempre cuenta desde 0
 
-  setTimeout(precarga, 3500);
+  TrasIntro.hacer(precarga);   // apenas termina la intro (antes esperaba 3,5 s más)
+  document.addEventListener("visibilitychange", () => { if(document.visibilityState === "visible") setTimeout(precarga, 800); });   // al volver a la app
   return { refresh, precarga };
 })();
 
