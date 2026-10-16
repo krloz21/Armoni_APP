@@ -2182,7 +2182,21 @@ button{ transition:transform var(--t-tap) var(--ease-out); }
 .ddHecha em{ display:block; font-style:normal; color:#6fe0b5; }
 .ddSaber{ display:grid; gap:8px; }
 .ddHecho{ display:flex; align-items:flex-start; gap:10px; padding:11px 12px 11px 14px; border-radius:16px; background:rgba(var(--ink),.05); font-size:.84rem; line-height:1.4; color:var(--ghost); }
-.ddHecho span{ flex:1; min-width:0; }
+.ddHecho{ flex-wrap:wrap; cursor:pointer; }
+.ddHecho > span{ flex:1; min-width:0; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+.ddHecho.on > span{ display:block; }
+.ddHecho .ddDet{ flex-basis:100%; display:none; margin-top:2px; padding-top:10px; border-top:1px solid var(--line); cursor:default; }
+.ddHecho.on .ddDet{ display:block; }
+.ddDet em{ display:block; font-style:normal; margin-bottom:6px; color:#6fe0b5; }
+.ddDet small{ display:block; margin-bottom:6px; color:var(--dim); }
+.ddDet textarea{ width:100%; min-height:72px; padding:10px; border-radius:12px; border:1px solid var(--line); background:var(--panel); color:var(--white); font:inherit; font-size:.86rem; resize:vertical; box-sizing:border-box; }
+.ddDet .ddAcc{ display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; }
+.ddDet .ddAcc button{ min-height:40px; padding:0 14px; border-radius:12px; border:1px solid var(--line); background:none; font:inherit; font-size:.8rem; font-weight:600; color:var(--white); cursor:pointer; }
+.ddDet .ddAcc .pel{ border-color:rgba(255,99,99,.5); color:#ff8a8a; }
+.ddHecho .ddX{ margin-left:auto; }
+.ddSeg{ flex-basis:100%; display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-top:6px; font-weight:600; color:var(--white); }
+.ddSeg button{ min-height:38px; padding:0 14px; border-radius:12px; border:1px solid var(--line); background:none; font:inherit; font-size:.8rem; font-weight:600; color:var(--white); cursor:pointer; }
+.ddSeg .pel{ border-color:rgba(255,99,99,.55); background:rgba(255,99,99,.12); color:#ff9a9a; }
 .ddHecho button{ flex:none; width:32px; height:32px; margin:-4px -4px -4px 0; border:0; border-radius:50%; background:none; color:var(--dim); font-size:.9rem; cursor:pointer; }
 .ddTabs{ display:grid; grid-template-columns:1fr 1fr; gap:4px; padding:4px; margin-bottom:14px; border-radius:16px; background:rgba(var(--ink),.07); }
 .ddTabs button{ min-height:42px; border:0; border-radius:12px; background:none; font:inherit; font-size:.9rem; font-weight:600; color:var(--dim); cursor:pointer; transition:background .25s ease, color .25s ease; }
@@ -3182,7 +3196,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-16.199";
+const APP_VERSION = "2026-10-16.200";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -7461,9 +7475,8 @@ const Preguntas = (function(){
       (A.length ? '<div class="ddLista">' + A.map((q, i) => '<article class="ddCard" style="--i:' + Math.min(i, 8) + '">' + (q.tipo === "par" ? '<span class="ddTag">Dos registros parecidos</span>' : q.tipo === "lugar" ? '<span class="ddTag">Falta el lugar</span>' : q.tipo === "caso" ? '<span class="ddTag">Caso abierto</span>' : q.saltada ? '<span class="ddTag dif">La dejaste para después</span>' : '<span class="ddTag">Por resolver</span>') + ((q.hilo || []).length > 1 ? ' <span class="ddTag dif">En conversación</span>' : '') + '<h3>' + esc(limpia(q)) + '</h3>' + movs(q) + masInfo(q) + '<button type="button" class="ddBtn" data-id="' + esc(q.id) + '">' + (q.tipo === "lugar" || q.tipo === "par" ? "Completar" : q.tipo === "caso" || (q.hilo || []).length > 1 ? "Hablar con Armoni" : "Responder") + '</button></article>').join("") + '</div>' : '') +
       '<button type="button" class="ddBuscar" id="ddBuscar">Buscar dudas nuevas</button>' + revisionHTML()
       :
-      '<p class="ddNota">Lo que Armoni ha aprendido de tus respuestas. Si algo ya no es cierto, olvídalo con la ✕ o corrige una respuesta.</p>' +
-      desp("Lo que Armoni sabe", saber.length, saber.length ? sab : '<p class="ddVacio">Todavía no ha aprendido nada.</p>', true) +
-      desp("Tus respuestas", H.length, H.length ? hec : '<p class="ddVacio">Aún no has respondido ninguna duda.</p>', false));
+      '<p class="ddNota">Lo que Armoni ha aprendido de tus respuestas. Toca una para ver tu respuesta, cambiarla o borrarla con la ✕.</p>' +
+      (saber.length ? sab : '<p class="ddVacio">Todavía no ha aprendido nada.</p>'));
     cuerpo.querySelectorAll(".ddMas[data-k]").forEach(d => d.addEventListener("toggle", () => { if(d.open) abiertosMas.add(d.dataset.k); else abiertosMas.delete(d.dataset.k); }));
     cuerpo.querySelectorAll("[data-t]").forEach(b => b.addEventListener("click", () => { pestana = b.dataset.t; pinta(); }));
     cuerpo.querySelectorAll(".ddCorr").forEach(b => b.addEventListener("click", () => abre(b.dataset.c)));
@@ -7473,20 +7486,43 @@ const Preguntas = (function(){
       const L = cuerpo.querySelector("#ddSaberL"); if(!L) return;
       const q = sinTilde(busca).trim();
       const v = saber.filter(t => (tema === "todo" || temasDe(t).includes(tema)) && (!q || sinTilde(t).includes(q)));
-      L.innerHTML = v.length ? v.map(t => '<div class="ddHecho"><span>' + esc(t) + '</span><button type="button" data-t="' + esc(t) + '" aria-label="Olvidar esto">✕</button></div>').join("") :
+      const rel = t => { const w = new Set(sinTilde(t).split(/[^a-z0-9ñ]+/).filter(x => x.length >= 4)); return H.filter(h => { const hw = sinTilde((h.respuesta || "") + " " + (h.pregunta || "")).split(/[^a-z0-9ñ]+/).filter(x => x.length >= 4); return hw.filter(x => w.has(x)).length >= 2; }).slice(0, 2); };
+      L.innerHTML = v.length ? v.map(t => { const rs = rel(t); return '<div class="ddHecho" data-s="' + esc(t) + '"><span>' + esc(t) + '</span><button type="button" class="ddX" data-olv="' + esc(t) + '" aria-label="Borrar esto">✕</button>' +
+        '<div class="ddDet">' + (rs.length ? rs.map(h => '<small>Cuando te preguntó: «' + esc(limpia(h)) + '»</small><em>Tú respondiste: ' + esc(h.respuesta) + '</em><button type="button" class="ddCorr" data-c="' + esc(h.id) + '">Corregir esa respuesta</button>').join("") : '<small>Armoni lo aprendió de tus respuestas.</small>') +
+        '<div class="ddEd" hidden><textarea maxlength="240" aria-label="Lo que Armoni sabe">' + esc(t) + '</textarea><div class="ddAcc"><button type="button" data-guarda>Guardar cambio</button><button type="button" data-cancela>Cancelar</button></div></div>' +
+        '<div class="ddAcc"><button type="button" data-edita>Modificar</button></div></div></div>'; }).join("") :
         '<p class="ddVacio">' + (q ? 'No encontré nada con «' + esc(busca.trim()) + '».' : 'No hay nada en este tema.') + '</p>';
+      L.querySelectorAll(".ddCorr").forEach(b => b.addEventListener("click", () => abre(b.dataset.c)));
     };
-    pintaSaber();
+    pintaSaber(); cuerpo._pintaSaber = pintaSaber;
     const inQ = cuerpo.querySelector("#ddQ");
     if(inQ) inQ.addEventListener("input", () => { busca = inQ.value; pintaSaber(); });
     cuerpo.querySelectorAll("[data-tm]").forEach(b => b.addEventListener("click", () => {
       tema = b.dataset.tm; cuerpo.querySelectorAll("[data-tm]").forEach(x => x.classList.toggle("on", x === b)); pintaSaber();
     }));
-    if(!cuerpo._ddOlvida) cuerpo.addEventListener("click", e => {   // olvidar un recuerdo (delegado, se registra una sola vez)
-      const b = e.target.closest("[data-t]"); if(!b || !cuerpo.contains(b)) return;
-      const t = b.dataset.t; b.closest(".ddHecho").remove();
-      saber = saber.filter(x => x !== t); try{ localStorage.setItem(KS, JSON.stringify(saber)); }catch{}
-      pide({ accion: "olvidar", texto: t }).catch(() => {});
+    if(!cuerpo._ddOlvida) cuerpo.addEventListener("click", e => {   // abrir, modificar y borrar un recuerdo (delegado, se registra una sola vez)
+      const fila = e.target.closest(".ddHecho"); if(!fila || !cuerpo.contains(fila)) return;
+      const t = fila.dataset.s;
+      const quita = () => { fila.remove(); saber = saber.filter(x => x !== t); try{ localStorage.setItem(KS, JSON.stringify(saber)); }catch{} };
+      if(e.target.closest(".ddCorr")) return;
+      if(e.target.closest("[data-olv]")){                       // la ✕ pregunta antes de borrar
+        if(fila.querySelector(".ddSeg")) return;
+        fila.insertAdjacentHTML("beforeend", '<div class="ddSeg">¿Seguro que quieres borrarlo?<button type="button" class="pel" data-si>Sí, borrar</button><button type="button" data-no>No</button></div>');
+        return;
+      }
+      if(e.target.closest("[data-no]")){ const g = fila.querySelector(".ddSeg"); if(g) g.remove(); return; }
+      if(e.target.closest("[data-si]")){ quita(); pide({ accion: "olvidar", texto: t }).catch(() => {}); return; }
+      if(e.target.closest("[data-edita]")){ fila.querySelector(".ddEd").hidden = false; const ta = fila.querySelector("textarea"); ta.focus(); return; }
+      if(e.target.closest("[data-cancela]")){ fila.querySelector(".ddEd").hidden = true; fila.querySelector("textarea").value = t; return; }
+      if(e.target.closest("[data-guarda]")){
+        const nuevo = fila.querySelector("textarea").value.trim().slice(0, 240);
+        if(!nuevo || nuevo === t){ fila.querySelector(".ddEd").hidden = true; return; }
+        saber = saber.map(x => x === t ? nuevo : x); try{ localStorage.setItem(KS, JSON.stringify(saber)); }catch{}
+        pide({ accion: "editar", texto: t, nuevo }).catch(() => {});
+        cuerpo._pintaSaber(); return;
+      }
+      if(e.target.closest(".ddDet")) return;
+      fila.classList.toggle("on");
     });
     cuerpo._ddOlvida = true;
     const bu = cuerpo.querySelector("#ddBuscar");
