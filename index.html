@@ -2498,27 +2498,27 @@ button{ transition:transform var(--t-tap) var(--ease-out); }
 @keyframes tpFlota{ 0%,100%{ transform:translateY(0) rotate(-4deg); } 50%{ transform:translateY(-6px) rotate(5deg); } }
 @keyframes tpLatido{ 0%,100%{ transform:scale(1); } 50%{ transform:scale(1.08); } }
 /* el pop-up: estalla de color, suben emojis y el plan entra con resorte */
-.tpAn{ position:fixed; inset:0; z-index:121; display:grid; place-items:center; padding:20px; background:rgba(3,5,10,.66); opacity:0; transition:opacity .35s ease; overflow:hidden; }
+.tpAn{ position:fixed; inset:0; z-index:121; display:flex; flex-direction:column; align-items:stretch; justify-content:center; padding:20px 0; background:rgba(3,5,10,.66); opacity:0; transition:opacity .35s ease; overflow:hidden; }
 .tpAn.on{ opacity:1; }
 .tpAnCard{ --h:28; position:relative; width:min(100%, 360px); border-radius:30px; overflow:hidden; color:#fff; text-align:center; transform:translateY(60px) scale(.8) rotate(-3deg); opacity:0;
   background:radial-gradient(130% 80% at 50% 0%, hsla(calc(var(--h) + 45), 100%, 65%, 1), transparent 62%), linear-gradient(165deg, hsl(var(--h), 88%, 52%), hsl(calc(var(--h) - 40), 78%, 28%));
   box-shadow:0 40px 90px -30px rgba(0,0,0,.9); transition:transform .75s cubic-bezier(.34,1.56,.64,1), opacity .4s ease; }
-.tpAn.on .tpAnCard{ transform:none; opacity:1; }
+.tpSl.vis .tpAnCard{ transform:none; opacity:1; }
 .tpAn.sale .tpAnCard{ transform:translateY(40px) scale(.9); opacity:0; transition-duration:.35s; }
 .tpAnCard::before{ content:""; position:absolute; inset:-40%; background:conic-gradient(from 0deg, transparent, rgba(255,255,255,.18), transparent 30%, rgba(255,255,255,.12), transparent 60%); animation:tpGira 7s linear infinite; }
 .tpAnTop{ position:relative; height:190px; display:grid; place-items:center; }
 .tpAnEmo{ position:relative; font-size:5.4rem; filter:drop-shadow(0 14px 22px rgba(0,0,0,.35)); transform:scale(0) rotate(-30deg); }
-.tpAn.on .tpAnEmo{ animation:tpPop .9s cubic-bezier(.34,1.7,.64,1) .25s forwards, tpFlota 3s ease-in-out 1.2s infinite; }
+.tpSl.vis .tpAnEmo{ animation:tpPop .9s cubic-bezier(.34,1.7,.64,1) .25s forwards, tpFlota 3s ease-in-out 1.2s infinite; }
 .tpAnAro{ position:absolute; width:120px; height:120px; border-radius:50%; border:3px solid rgba(255,255,255,.7); transform:scale(.3); opacity:0; }
-.tpAn.on .tpAnAro{ animation:tpOnda 1.2s ease-out .3s; } .tpAn.on .tpAnAro.b{ animation-delay:.55s; }
+.tpSl.vis .tpAnAro{ animation:tpOnda 1.2s ease-out .3s; } .tpSl.vis .tpAnAro.b{ animation-delay:.55s; }
 .tpAnSello{ position:absolute; top:14px; left:50%; padding:6px 14px; border-radius:999px; font-size:.74rem; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:hsl(var(--h), 80%, 22%); background:#fff; transform:translate(-50%, -40px); }
-.tpAn.on .tpAnSello{ animation:tpBaja .6s cubic-bezier(.34,1.56,.64,1) .5s forwards; }
+.tpSl.vis .tpAnSello{ animation:tpBaja .6s cubic-bezier(.34,1.56,.64,1) .5s forwards; }
 .tpAnX{ position:absolute; z-index:3; top:12px; right:12px; width:34px; height:34px; border:0; border-radius:50%; display:grid; place-items:center; color:#fff; background:rgba(0,0,0,.3); cursor:pointer; }
 .tpAnX svg{ width:16px; height:16px; }
 .tpAnTx{ position:relative; padding:4px 22px 8px; }
 .tpAnTx > *{ opacity:0; transform:translateY(14px); }
-.tpAn.on .tpAnTx > *{ animation:wsSube .6s cubic-bezier(.16,1,.3,1) forwards; }
-.tpAn.on .tpAnTx > :nth-child(1){ animation-delay:.45s; } .tpAn.on .tpAnTx > :nth-child(2){ animation-delay:.55s; } .tpAn.on .tpAnTx > :nth-child(3){ animation-delay:.65s; } .tpAn.on .tpAnTx > :nth-child(4){ animation-delay:.75s; }
+.tpSl.vis .tpAnTx > *{ animation:wsSube .6s cubic-bezier(.16,1,.3,1) forwards; }
+.tpSl.vis .tpAnTx > :nth-child(1){ animation-delay:.45s; } .tpSl.vis .tpAnTx > :nth-child(2){ animation-delay:.55s; } .tpSl.vis .tpAnTx > :nth-child(3){ animation-delay:.65s; } .tpSl.vis .tpAnTx > :nth-child(4){ animation-delay:.75s; }
 .tpAnCuenta{ display:inline-block; padding:6px 16px; border-radius:999px; font-size:.9rem; font-weight:800; background:rgba(0,0,0,.22); }
 .tpAnTx h3{ margin:10px 0 6px; font-size:1.35rem; line-height:1.2; letter-spacing:-.015em; text-shadow:0 2px 12px rgba(0,0,0,.25); }
 .tpAnTx p{ margin:0; font-size:.9rem; font-weight:600; opacity:.95; }
@@ -2527,6 +2527,19 @@ button{ transition:transform var(--t-tap) var(--ease-out); }
 .tpAnBtns > *{ flex:1; padding:13px 8px; border-radius:16px; border:0; font:inherit; font-size:.94rem; font-weight:750; cursor:pointer; text-decoration:none; text-align:center; }
 .tpAnSi{ color:hsl(var(--h), 80%, 24%); background:#fff; box-shadow:0 14px 28px -14px rgba(0,0,0,.6); }
 .tpAnNo{ color:#fff; background:rgba(255,255,255,.16); }
+.tpCar{ position:relative; z-index:1; display:flex; width:100%; overflow-x:auto; scroll-snap-type:x mandatory; scrollbar-width:none; overscroll-behavior-x:contain; }
+.tpCar::-webkit-scrollbar{ display:none; }
+.tpSl{ flex:0 0 100%; box-sizing:border-box; display:grid; place-items:center; padding:8px 20px 4px; scroll-snap-align:center; scroll-snap-stop:always; }
+.tpAnCard{ padding-bottom:18px; }
+.tpDots{ position:relative; z-index:1; display:flex; justify-content:center; gap:7px; margin-top:16px; }
+.tpDots i{ width:7px; height:7px; border-radius:999px; background:rgba(255,255,255,.35); transition:width .35s var(--ease-out), background .35s; }
+.tpDots i.on{ width:22px; background:#fff; }
+.tpDesliza{ position:relative; z-index:1; margin-top:10px; text-align:center; font-size:.78rem; color:rgba(255,255,255,.75); }
+.tpCerrar{ position:fixed; z-index:3; top:calc(14px + env(safe-area-inset-top, 0px)); right:14px; width:42px; height:42px; border:0; border-radius:50%; display:grid; place-items:center; color:#fff; background:rgba(255,255,255,.16); cursor:pointer; }
+.tpCerrar svg{ width:18px; height:18px; }
+.tpFl{ display:none; position:fixed; z-index:3; top:50%; width:44px; height:44px; margin-top:-22px; border:0; border-radius:50%; color:#fff; background:rgba(255,255,255,.16); font-size:1.3rem; cursor:pointer; }
+.tpFl.a{ left:14px; } .tpFl.s{ right:14px; }
+@media (hover:hover) and (pointer:fine){ .tpFl{ display:grid; place-items:center; } }
 .tpAnNunca{ position:relative; display:block; margin:-8px auto 16px; padding:6px 10px; border:0; background:none; color:rgba(255,255,255,.75); font:inherit; font-size:.76rem; text-decoration:underline; cursor:pointer; }
 .tpChispa{ position:absolute; bottom:-40px; font-size:1.6rem; opacity:0; pointer-events:none; animation:tpSube 3.6s ease-in forwards; }
 @keyframes tpGira{ to{ transform:rotate(360deg); } }
@@ -2534,7 +2547,7 @@ button{ transition:transform var(--t-tap) var(--ease-out); }
 @keyframes tpOnda{ 0%{ transform:scale(.3); opacity:.9; } 100%{ transform:scale(2.2); opacity:0; } }
 @keyframes tpBaja{ to{ transform:translate(-50%, 0); } }
 @keyframes tpSube{ 0%{ opacity:0; transform:translateY(0) rotate(0); } 15%{ opacity:1; } 100%{ opacity:0; transform:translateY(-105vh) rotate(var(--r, 40deg)); } }
-@media (prefers-reduced-motion:reduce){ .tpCard, .tpEmo, .tpCard.ahora .tpChip, .tpAnCard::before, .tpChispa{ animation:none !important; } .tpAnCard{ transition:opacity .2s; transform:none; } .tpAn.on .tpAnEmo{ animation:none; transform:none; } }
+@media (prefers-reduced-motion:reduce){ .tpCard, .tpEmo, .tpCard.ahora .tpChip, .tpAnCard::before, .tpChispa{ animation:none !important; } .tpAnCard{ transition:opacity .2s; transform:none; } .tpSl.vis .tpAnEmo{ animation:none; transform:none; } }
 
 .cfAnImg{ position:relative; height:200px; display:grid; place-items:center; background:linear-gradient(140deg, rgba(255,176,102,.35), rgba(90,63,224,.3)); overflow:hidden; }
 .cfAnImg img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; z-index:1; animation:cfZoom 9s ease-out forwards; }
@@ -3311,7 +3324,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-16.213";
+const APP_VERSION = "2026-10-16.214";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -6151,43 +6164,58 @@ const Temporada = (function(){
     }catch{}
   }
 
-  /* ── el pop-up: una vez cuando se acerca (7 días antes) y otra cuando ya empezó ── */
+  /* ── el pop-up: al abrir Armoni (una vez al día si hay algo que está pasando o empieza en la semana) muestra TODOS los planes; se desliza para verlos ── */
   function anuncia(intentos, alAbrir){
     if(!alAbrir && !document.body.classList.contains("mode-ema")) return;
-    if(document.querySelector(".pgScrim, .cfAn, .tpAn, .sheetScrim, body.drawer-open") || document.body.classList.contains("drawer-open")){ if((intentos || 0) < 20) setTimeout(() => anuncia((intentos || 0) + 1, alAbrir), 1500); return; }   // espera a que cierren otra ventana
-    /* una vez al día por plan (mientras falte una semana o esté pasando), salvo que digan «No me lo recuerdes más» */
-    let ya = []; try{ ya = JSON.parse(localStorage.getItem(KA)) || []; }catch{}
-    const clave = p => p.id + "@" + hoy();
-    const x = vigentes().find(({ p, e }) => e.cerca && !ya.includes(clave(p)) && !ya.includes(p.id + "@nunca"));
-    if(!x) return;
-    try{ localStorage.setItem(KA, JSON.stringify(ya.concat(clave(x.p)).slice(-200))); }catch{}
-    muestra(x.p, x.e);
+    if(document.querySelector(".pgScrim, .cfAn, .tpAn, .sheetScrim") || document.body.classList.contains("drawer-open")){ if((intentos || 0) < 20) setTimeout(() => anuncia((intentos || 0) + 1, alAbrir), 1500); return; }   // espera a que cierren otra ventana
+    const v = vigentes();
+    if(!v.some(x => x.e.cerca)) return;
+    let ya = ""; try{ ya = localStorage.getItem(KA + ".dia") || ""; }catch{}
+    if(ya === hoy()) return;                                   // una vez al día
+    try{ localStorage.setItem(KA + ".dia", hoy()); }catch{}
+    muestra();
   }
-  function muestra(p, e){
-    e = e || estado(p); if(!e) return;
-    const t = tema(p);
+  function muestra(desde){
+    const v = vigentes(); if(!v.length) return;
+    const ini = Math.max(0, v.findIndex(x => desde && x.p.id === desde.id));
     const an = document.createElement("div");
     an.className = "tpAn";
-    const chispas = REDUCED ? "" : Array.from({ length: 12 }, (_, i) => '<span class="tpChispa" style="left:' + (4 + Math.random() * 90).toFixed(1) + '%;animation-delay:' + (0.2 + i * 0.22).toFixed(2) + 's;--r:' + Math.round(Math.random() * 120 - 60) + 'deg">' + [t.emo, "✨", "🎉", t.emo][i % 4] + '</span>').join("");
-    const mapa = "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent((p.lugar || p.nombre) + " Cali");
-    an.innerHTML = chispas +
-      '<div class="tpAnCard" role="dialog" aria-modal="true" aria-labelledby="tpAnT" style="--h:' + t.h + '">' +
+    const t0 = tema(v[ini].p);
+    const chispas = REDUCED ? "" : Array.from({ length: 12 }, (_, i) => '<span class="tpChispa" style="left:' + (4 + Math.random() * 90).toFixed(1) + '%;animation-delay:' + (0.2 + i * 0.22).toFixed(2) + 's;--r:' + Math.round(Math.random() * 120 - 60) + 'deg">' + [t0.emo, "✨", "🎉", t0.emo][i % 4] + '</span>').join("");
+    const slide = ({ p, e }) => { const t = tema(p);
+      return '<div class="tpSl"><div class="tpAnCard" style="--h:' + t.h + '">' +
         '<div class="tpAnTop"><span class="tpAnAro" aria-hidden="true"></span><span class="tpAnAro b" aria-hidden="true"></span><span class="tpAnEmo" aria-hidden="true">' + t.emo + '</span>' +
-          '<b class="tpAnSello">' + (e.ahora ? '¡Está pasando!' : 'De temporada') + '</b>' +
-          '<button type="button" class="tpAnX" aria-label="Cerrar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>' +
-        '<div class="tpAnTx"><span class="tpAnCuenta">' + esc(e.txt) + '</span><h3 id="tpAnT">' + esc(p.nombre) + '</h3><p>' + esc(rango(p)) + (p.lugar ? ' · ' + esc(p.lugar) : '') + '</p><em>' + esc(para(p)) + (p.nota ? ' · ' + esc(p.nota) : '') + '</em></div>' +
-        '<div class="tpAnBtns"><a class="tpAnSi" href="' + esc(mapa) + '" target="_blank" rel="noopener noreferrer">¡Vamos! 📍</a><button type="button" class="tpAnNo">Después</button></div>' +
-        '<button type="button" class="tpAnNunca">No me recuerdes más este plan</button>' +
-      '</div>';
+          '<b class="tpAnSello">' + (e.ahora ? '¡Está pasando!' : 'De temporada') + '</b></div>' +
+        '<div class="tpAnTx"><span class="tpAnCuenta">' + esc(e.txt) + '</span><h3>' + esc(p.nombre) + '</h3><p>' + esc(rango(p)) + (p.lugar ? ' · ' + esc(p.lugar) : '') + '</p><em>' + esc(para(p)) + (p.nota ? ' · ' + esc(p.nota) : '') + '</em></div>' +
+      '</div></div>'; };
+    an.innerHTML = chispas +
+      '<button type="button" class="tpCerrar" aria-label="Cerrar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>' +
+      (v.length > 1 ? '<button type="button" class="tpFl a" data-fl="-1" aria-label="Anterior">‹</button><button type="button" class="tpFl s" data-fl="1" aria-label="Siguiente">›</button>' : '') +
+      '<div class="tpCar" role="dialog" aria-modal="true" aria-label="Planes de temporada">' + v.map(slide).join("") + '</div>' +
+      (v.length > 1 ? '<div class="tpDots" aria-hidden="true">' + v.map(() => '<i></i>').join("") + '</div><p class="tpDesliza">Desliza para ver los ' + v.length + ' planes</p>' : '');
     document.body.appendChild(an);
-    requestAnimationFrame(() => an.classList.add("on"));
+    const car = an.querySelector(".tpCar"), sls = [...an.querySelectorAll(".tpSl")], dots = [...an.querySelectorAll(".tpDots i")];
+    const ancho = () => car.clientWidth || 1;
+    let actual = -1;
+    const marca = () => {
+      const k = Math.max(0, Math.min(sls.length - 1, Math.round(car.scrollLeft / ancho())));
+      if(k === actual) return; actual = k;
+      sls[k].classList.add("vis");                                 // cada plan anima la primera vez que llegas a él
+      dots.forEach((d, i) => d.classList.toggle("on", i === k));
+    };
+    car.addEventListener("scroll", () => requestAnimationFrame(marca), { passive: true });
+    car.scrollLeft = ini * ancho();
+    requestAnimationFrame(() => { an.classList.add("on"); car.scrollLeft = ini * ancho(); marca(); });
+    const ir = d => car.scrollTo({ left: Math.max(0, actual + d) * ancho(), behavior: REDUCED ? "auto" : "smooth" });
+    an.addEventListener("wheel", ev => { if(Math.abs(ev.deltaY) > Math.abs(ev.deltaX) && Math.abs(ev.deltaY) > 20){ ev.preventDefault(); ir(ev.deltaY > 0 ? 1 : -1); } }, { passive: false });
     try{ navigator.vibrate && navigator.vibrate([12, 40, 18]); }catch{}
     const cierra = () => { an.classList.remove("on"); an.classList.add("sale"); setTimeout(() => an.remove(), 420); document.removeEventListener("keydown", tecla); };
-    const tecla = ev => { if(ev.key === "Escape") cierra(); };
+    const tecla = ev => { if(ev.key === "Escape") cierra(); else if(ev.key === "ArrowRight") ir(1); else if(ev.key === "ArrowLeft") ir(-1); };
     document.addEventListener("keydown", tecla);
     an.addEventListener("click", ev => {
-      if(ev.target.closest(".tpAnNunca")){ try{ const ya = JSON.parse(localStorage.getItem(KA)) || []; localStorage.setItem(KA, JSON.stringify(ya.concat(p.id + "@nunca").slice(-200))); }catch{} cierra(); return; }
-      if(ev.target === an || ev.target.closest(".tpAnX, .tpAnNo")) cierra(); else if(ev.target.closest(".tpAnSi")) setTimeout(cierra, 300); });
+      const fl = ev.target.closest("[data-fl]"); if(fl){ ir(+fl.dataset.fl); return; }
+      if(ev.target.closest(".tpCerrar") || ev.target === an || ev.target.classList.contains("tpSl")) cierra();   // tocar fuera de la tarjeta también cierra
+    });
   }
 
   /* ── anotar un plan ── */
