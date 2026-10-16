@@ -3059,6 +3059,11 @@ body[class*="mode-"] #masIngreso{ display:none; }
         <div class="ajGrupo">Acerca de</div>
         <div class="ajCard">
           <div class="setRow"><span class="setTxt"><b>Versión</b><span id="ajVersion"></span></span></div>
+          <div class="setRow">
+            <span class="setIco" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 0 0-14.5-4M4 4v4h4"/><path d="M4 13a8 8 0 0 0 14.5 4M20 20v-4h-4"/></svg></span>
+            <span class="setTxt"><b>Forzar actualización</b><span id="ajForzarTxt">Borra la copia guardada y baja la versión nueva</span></span>
+            <button type="button" id="ajForzar" class="notifBtn">Actualizar</button>
+          </div>
         </div>
         <div class="ajGrupo">Uso de Armoni · últimos 30 días</div>
         <div class="ajCard usoCard" id="usoCard"></div>
@@ -3204,7 +3209,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-16.204";
+const APP_VERSION = "2026-10-16.205";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -8102,6 +8107,21 @@ const Notificaciones = (function(){
     probar.disabled = false;
   });
   document.getElementById("ajVersion").textContent = APP_VERSION;
+  /* «Forzar actualización»: borra solo la copia guardada de la app (index, fotos) y el service worker; los registros sin enviar y los ajustes no se tocan */
+  const bForzar = document.getElementById("ajForzar"), tForzar = document.getElementById("ajForzarTxt");
+  if(bForzar) bForzar.addEventListener("click", async () => {
+    if(bForzar.disabled) return;
+    bForzar.disabled = true; bForzar.textContent = "Actualizando…"; tForzar.textContent = "Un momento…";
+    try{
+      const r = await fetch(location.pathname + "?v=check", { cache: "no-store" }), txt = await r.text();
+      const m = txt.match(new RegExp("const APP_" + "VERSION = \"([^\"]+)\""));
+      tForzar.textContent = m && m[1] === APP_VERSION ? "Ya tienes la última (" + APP_VERSION + "). Reinicio igual…" : "Bajando la versión " + (m ? m[1] : "nueva") + "…";
+    }catch{ tForzar.textContent = "Sin conexión con la casa: reinicio con lo que hay…"; }
+    try{ if(navigator.serviceWorker){ const rs = await navigator.serviceWorker.getRegistrations(); for(const x of rs) await x.unregister(); } }catch{}
+    try{ if(window.caches){ for(const k of await caches.keys()) await caches.delete(k); } }catch{}
+    try{ sessionStorage.clear(); }catch{}
+    setTimeout(() => location.replace(location.pathname + "?v=" + Date.now()), 700);
+  });
   return { activar };
 })();
 
