@@ -3182,7 +3182,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-16.198";
+const APP_VERSION = "2026-10-16.199";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -7916,7 +7916,7 @@ Uso.entra(MODE);   // empieza a medir el apartado con el que abre la app
 /* el aviso de un plan nuevo de Comfandi abre Armoni directo en Salidas Ema */
 try{
   const ver = new URLSearchParams(location.search).get("ver");
-  if(ver === "ema" || ver === "dura"){
+  if(ver === "ema" || ver === "dura" || ver === "mercar"){
     history.replaceState(null, "", location.pathname);
     setTimeout(() => Drawer.go(ver), 250);
   }
