@@ -3176,7 +3176,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-16.190";
+const APP_VERSION = "2026-10-16.191";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -6188,7 +6188,8 @@ const SalidaEmaForm = (function(){
         bSi.addEventListener("click", () => {
           if(si.hidden){ si.hidden = false; si.classList.add("seAparece"); bSi.textContent = "Agregar"; listoSi(); setTimeout(() => inp.focus(), 200); return; }
           if(!(monto > 0)) return;
-          p.gastos.unshift({ c: "Parqueadero", m: monto, hecho: false });   // va primero en ese lugar: así quedan en el orden en que pasaron recuerdaParq(monto); p.preguntado = true;
+          p.gastos.unshift({ c: "Parqueadero", m: monto, hecho: false });   // va primero en ese lugar: así quedan en el orden en que pasaron
+          recuerdaParq(monto); p.preguntado = true;
           ir("resumen", 1);
         });
         return;
