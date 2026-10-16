@@ -3324,7 +3324,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-16.214";
+const APP_VERSION = "2026-10-16.215";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -6164,15 +6164,12 @@ const Temporada = (function(){
     }catch{}
   }
 
-  /* ── el pop-up: al abrir Armoni (una vez al día si hay algo que está pasando o empieza en la semana) muestra TODOS los planes; se desliza para verlos ── */
+  /* ── el pop-up: cada vez que abres Armoni (si hay algo pasando o que empieza en la semana) muestra TODOS los planes; se desliza para verlos ── */
   function anuncia(intentos, alAbrir){
     if(!alAbrir && !document.body.classList.contains("mode-ema")) return;
     if(document.querySelector(".pgScrim, .cfAn, .tpAn, .sheetScrim") || document.body.classList.contains("drawer-open")){ if((intentos || 0) < 20) setTimeout(() => anuncia((intentos || 0) + 1, alAbrir), 1500); return; }   // espera a que cierren otra ventana
     const v = vigentes();
     if(!v.some(x => x.e.cerca)) return;
-    let ya = ""; try{ ya = localStorage.getItem(KA + ".dia") || ""; }catch{}
-    if(ya === hoy()) return;                                   // una vez al día
-    try{ localStorage.setItem(KA + ".dia", hoy()); }catch{}
     muestra();
   }
   function muestra(desde){
@@ -6289,7 +6286,13 @@ const Temporada = (function(){
   if(box) box.addEventListener("click", clic);
   if(vistaEl) vistaEl.addEventListener("click", clic);
   /* al abrir Armoni también: si hay algo que está por empezar o pasando, sale el pop-up (una vez por fase) */
-  TrasIntro.hacer(() => setTimeout(() => anuncia(0, true), 350));   // apenas termina la intro
+  /* cada vez que abres Armoni: sale mientras la presentación se va (no espera a que termine) y otra vez si vuelves después de un rato */
+  setTimeout(() => anuncia(0, true), 1900);
+  let fuera = 0;
+  document.addEventListener("visibilitychange", () => {
+    if(document.visibilityState === "hidden") fuera = Date.now();
+    else if(fuera && Date.now() - fuera > 60000){ fuera = 0; setTimeout(() => anuncia(0, true), 500); }
+  });
   return { refresh, muestra, vista };
 })();
 
