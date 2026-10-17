@@ -3330,7 +3330,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-17.221";
+const APP_VERSION = "2026-10-17.222";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -8605,7 +8605,7 @@ const Frecuentes = (function(){
     { tipo:"Gasto",   concepto:"Pañales Ema",   categoria:"Hijo",     monto:214008,  n:2 },
     { tipo:"Gasto",   concepto:"Netflix",       categoria:"Hogar",    monto:29900,   n:1 },
     { tipo:"Gasto",   concepto:"Celular Aleja", categoria:"Hogar",    monto:49051,   n:2, fijo:false },
-    { tipo:"Gasto",   concepto:"Celular Carlos",categoria:"Hogar",    monto:49051,   n:2, fijo:false }
+    { tipo:"Gasto",   concepto:"Celular amor",  categoria:"Hogar",    monto:48000,   n:2, fijo:false }
   ];
   const k = (t, c) => t + "|" + c.trim().toLowerCase();
   /* nada de registros de prueba: se borran si quedaron guardados y nunca se muestran */
@@ -9043,7 +9043,7 @@ const Pagos = (function(){
     { id: "carro", t: "Crédito del carro", sub: "Banco", icono: "carro", titulo: "Pagar crédito del carro", url: PAGO_CARRO_URL }
   ];
   /* los dos celulares son de Claro y se pagan en el mismo portal; el número de cada uno se guarda solo en este celular (no va en el código) */
-  const PERSONAS = [{ id: "carlos", t: "Celular Carlos" }, { id: "aleja", t: "Celular Aleja" }];
+  const PERSONAS = [{ id: "carlos", t: "Celular amor" }, { id: "aleja", t: "Celular Aleja" }];
   const leeC = () => { try{ return JSON.parse(localStorage.getItem(KC)) || {}; }catch{ return {}; } };
   const guardaC = m => { try{ localStorage.setItem(KC, JSON.stringify(m)); }catch{} };
   /* ── aviso arriba (como energía y gas): los celulares se pagan entre el 15 y el 23 de cada mes ── */
@@ -9052,12 +9052,12 @@ const Pagos = (function(){
   const lee = (k, def) => { try{ return JSON.parse(localStorage.getItem(k)) || def; }catch{ return def; } };
   const celPagado = id => lee(KP, {})[id] === mesDe();
   function marcaPagado(id, silencioso){ const m = lee(KP, {}); m[id] = mesDe(); try{ localStorage.setItem(KP, JSON.stringify(m)); }catch{} try{ localStorage.removeItem(KE); }catch{} if(!silencioso){ try{ Servicios.check(); }catch{} } }
-  const idDeConcepto = c => /celular\s+aleja/i.test(c) ? "aleja" : /celular\s+carlos/i.test(c) ? "carlos" : null;
-  /* cada celular tiene su ventana: el de amor (Aleja) del 1 al 5 (el 5 es el último día) y el de Carlos del 15 al 23 */
+  const idDeConcepto = c => /celular\s+aleja/i.test(c) ? "aleja" : /celular\s+(carlos|amor)/i.test(c) ? "carlos" : null;   // «celular amor» es el de Carlos
+  /* cada celular tiene su ventana: el de Aleja del 1 al 5 (el 5 es el último día) y el de Carlos, «celular amor», del 15 al 23 */
   const VENTANA = { aleja: [1, 5], carlos: [15, 23] };
   function pendientesCelulares(){
     const dia = new Date().getDate();
-    return PERSONAS.filter(x => dia >= VENTANA[x.id][0] && dia <= VENTANA[x.id][1] && !celPagado(x.id)).map(x => ({ id: "cel_" + x.id, nombre: "el celular de " + (x.id === "aleja" ? "amor" : "Carlos") }));
+    return PERSONAS.filter(x => dia >= VENTANA[x.id][0] && dia <= VENTANA[x.id][1] && !celPagado(x.id)).map(x => ({ id: "cel_" + x.id, nombre: x.id === "aleja" ? "el celular de Aleja" : "el celular amor (Carlos)" }));
   }
   /* Notion dice qué celulares ya se pagaron este mes (por ejemplo, el correo del pago PSE ya lo registró) */
   async function traePagados(){
