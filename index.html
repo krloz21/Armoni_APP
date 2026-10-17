@@ -2482,6 +2482,10 @@ button{ transition:transform var(--t-tap) var(--ease-out); }
 .tpChip{ align-self:flex-start; margin-bottom:4px; padding:4px 10px; border-radius:999px; font-size:.7rem; font-weight:800; letter-spacing:.02em; color:hsl(var(--h), 80%, 22%); background:rgba(255,255,255,.92); }
 .tpCard.ahora .tpChip{ animation:tpLatido 1.6s ease-in-out infinite; }
 .tpX{ position:absolute; top:8px; left:8px; width:28px; height:28px; border-radius:50%; display:grid; place-items:center; font-size:.8rem; color:#fff; background:rgba(0,0,0,.25); opacity:.75; }
+.tpEd{ position:absolute; top:8px; left:42px; width:28px; height:28px; border-radius:50%; display:grid; place-items:center; font-size:.85rem; color:#fff; background:rgba(0,0,0,.25); opacity:.85; }
+.tpGrid .tpEd{ left:46px; }
+.tpBorrar{ display:block; width:100%; min-height:44px; margin-top:8px; border:0; border-radius:14px; background:none; color:#ff9b9b; font:inherit; font-size:.88rem; font-weight:650; cursor:pointer; }
+.tpBorrar.seguro{ background:rgba(255,99,99,.14); color:#ff6b6b; }
 .tpSeguro{ position:absolute; inset:0; z-index:2; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; padding:12px; background:rgba(10,12,18,.86); font-weight:700; font-size:.86rem; text-align:center; }
 .tpSeguro span{ display:flex; gap:8px; }
 .tpSeguro i{ font-style:normal; padding:8px 14px; border-radius:12px; background:rgba(255,255,255,.12); }
@@ -2702,6 +2706,8 @@ button{ transition:transform var(--t-tap) var(--ease-out); }
 .emaDiaChip.on{ background:linear-gradient(160deg, #ffb066, #ff7a4d); border-color:transparent; color:#1a0f08; box-shadow:0 10px 24px -12px rgba(255,138,80,.7); }
 .emaDiaChip.on small{ color:rgba(26,15,8,.75); }
 .emaDetalle{ margin-top:14px; padding:12px 14px; border-radius:16px; border:1px solid rgba(255,138,80,.28); background:rgba(255,138,80,.07); }
+.emaAgregar{ display:block; width:100%; min-height:44px; margin-top:10px; border-radius:14px; border:1px dashed rgba(255,138,80,.5); background:none; color:#ffb066; font:inherit; font-size:.86rem; font-weight:650; cursor:pointer; }
+.emaAgregar:active{ transform:scale(.98); }
 .emaDetalle.cambia{ animation:emaSube .4s var(--ease-out); }
 .emaDetCab{ display:flex; justify-content:space-between; align-items:baseline; gap:10px; font-size:.9rem; }
 .emaDetCab span{ font-weight:600; }
@@ -3414,7 +3420,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-17.225";
+const APP_VERSION = "2026-10-17.226";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -5933,7 +5939,8 @@ const SalidasEma = (function(){
       if(!q) return "";
       const f = new Date(q.fecha + "T12:00:00"), largo = f.toLocaleDateString("es-CO", { weekday: "long", day: "numeric", month: "long" });
       return '<div class="emaDetCab"><span>' + esc(largo) + '</span><b>' + peso(q.total) + '</b></div>' +
-        '<div class="emaGastos">' + q.gastos.map(gastoHTML).join("") + '</div>';
+        '<div class="emaGastos">' + q.gastos.map(gastoHTML).join("") + '</div>' +
+        '<button type="button" class="emaAgregar" data-agregar="' + esc(q.fecha) + '">+ Agregar algo que faltó en esta salida</button>';
     };
     const promSalida = act.veces ? act.total / act.veces : 0;
     const lug = lugares().sort((a, b) => (a.ultima ? diasDesde(a.ultima) : 9999) - (b.ultima ? diasDesde(b.ultima) : 9999));
@@ -5957,6 +5964,8 @@ const SalidasEma = (function(){
         : '<p class="gEmpty" style="margin-top:18px">Cuando registres una salida con su lugar (por ejemplo Pance), aparece aquí con cuánto gastan y qué tal les fue.</p>');
   }
   stage.addEventListener("click", e => {
+    const ag = e.target.closest("[data-agregar]");
+    if(ag){ SalidaEmaForm.abrir({ fecha: ag.dataset.agregar, agregar: true }); return; }   // se guarda con esa fecha y entra a la misma salida
     const c = e.target.closest(".emaDiaChip"); if(!c || c.classList.contains("on")) return;
     abierta = c.dataset.f;
     stage.querySelectorAll(".emaDiaChip").forEach(x => { const on = x === c; x.classList.toggle("on", on); x.setAttribute("aria-pressed", String(on)); });
@@ -5965,7 +5974,8 @@ const SalidasEma = (function(){
     if(box && q){
       const f = new Date(q.fecha + "T12:00:00"), largo = f.toLocaleDateString("es-CO", { weekday: "long", day: "numeric", month: "long" });
       box.innerHTML = '<div class="emaDetCab"><span>' + esc(largo) + '</span><b>' + peso(q.total) + '</b></div>' +
-        '<div class="emaGastos">' + q.gastos.map(gastoHTML).join("") + '</div>';
+        '<div class="emaGastos">' + q.gastos.map(gastoHTML).join("") + '</div>' +
+        '<button type="button" class="emaAgregar" data-agregar="' + esc(q.fecha) + '">+ Agregar algo que faltó en esta salida</button>';
       box.classList.remove("cambia"); void box.offsetWidth; box.classList.add("cambia");
     }
   });
@@ -6256,7 +6266,7 @@ const Temporada = (function(){
     box.innerHTML = '<div class="tpHead"><div class="mkSec">De temporada en Cali</div><button type="button" class="tpAdd" data-tp="nuevo">+ Anotar plan</button></div>' +
       (v.length ? '<div class="tpLista">' + v.map(({ p, e }, i) => { const t = tema(p);
         return '<div class="tpCard' + (e.ahora ? ' ahora' : '') + '" role="button" tabindex="0" data-id="' + esc(p.id) + '" style="--h:' + t.h + ';--i:' + Math.min(i, 6) + '">' +
-          '<span class="tpX" data-quitar="' + esc(p.id) + '" role="button" aria-label="Quitar este plan">✕</span><span class="tpEmo" aria-hidden="true">' + t.emo + '</span>' +
+          '<span class="tpX" data-quitar="' + esc(p.id) + '" role="button" aria-label="Quitar este plan">✕</span><span class="tpEd" data-editar="' + esc(p.id) + '" role="button" aria-label="Editar este plan">✎</span><span class="tpEmo" aria-hidden="true">' + t.emo + '</span>' +
           '<span class="tpChip">' + esc(e.txt) + '</span><b>' + esc(p.nombre) + '</b><small>' + esc(rango(p)) + (p.lugar ? ' · ' + esc(p.lugar) : '') + '</small></div>'; }).join("") + '</div>'
       : '<p class="tpVacio">¿Viste un plan bonito en Instagram (un festival, una feria, entrada gratis)? Anótalo aquí y Armoni les recuerda cuando se acerque.</p>');
   }
@@ -6335,7 +6345,7 @@ const Temporada = (function(){
 
   /* ── anotar un plan: la misma línea de «Nuevo gasto» (Volver, orbe, botón grande),
         teñida con el color del plan y con su tarjeta en vivo arriba ── */
-  function nuevo(){
+  function nuevo(ed){   // ed = un plan ya anotado para editarlo (o borrarlo)
     if(document.querySelector(".pgScrim.tpForm")) return;
     const SVG = 'viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"';
     const CAL = '<svg ' + SVG + '><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>';
@@ -6353,7 +6363,7 @@ const Temporada = (function(){
     const sc = document.createElement("div");
     sc.className = "pgScrim seScrim tpForm";
     sc.innerHTML = '<div class="inWrap"><div class="pgCard inCard fmCard tpF" role="dialog" aria-modal="true" aria-labelledby="tpFT">' +
-      FormArmoni.cabeza("ema", "tpFT", "Anotar un plan", "Festivales, ferias, entradas gratis") +
+      FormArmoni.cabeza("ema", "tpFT", ed ? "Editar el plan" : "Anotar un plan", ed ? "Cambia lo que necesites o bórralo" : "Festivales, ferias, entradas gratis") +
       '<div class="inBody">' +
         '<div class="tpCard tpPrev vacio" aria-hidden="true"><span class="tpEmo"></span><span class="tpChip"></span><b></b><small></small></div>' +
         '<label class="inLbl" for="tpN">¿Qué es?</label>' +
@@ -6373,7 +6383,8 @@ const Temporada = (function(){
         '<button type="button" class="tpMasNota" id="tpMasNota">+ Agregar una nota <small>(opcional)</small></button>' +
         '<div id="tpNotaBox" hidden><label class="inLbl" for="tpO">Nota</label><input id="tpO" type="text" maxlength="140" autocomplete="off" autocapitalize="sentences" enterkeyhint="done" placeholder="Ej: entrada gratis para niños"></div>' +
       '</div>' +
-      '<div class="pgRow fmRow"><button type="button" class="pgSi apagado" id="tpOk">Anotar plan</button></div>' +
+      '<div class="pgRow fmRow"><button type="button" class="pgSi apagado" id="tpOk">' + (ed ? 'Guardar cambios' : 'Anotar plan') + '</button></div>' +
+      (ed ? '<button type="button" class="tpBorrar" id="tpDel">Borrar este plan</button>' : '') +
     '</div></div>';
     document.body.appendChild(sc); requestAnimationFrame(() => sc.classList.add("on"));
     const $ = id => sc.querySelector("#" + id);
@@ -6435,7 +6446,7 @@ const Temporada = (function(){
       $("tpOk").classList.toggle("apagado", !nombre);
     }
     /* lo escrito queda como borrador (si iOS cierra la app mientras copian de Instagram, no se pierde) */
-    const guardaB = () => { try{ localStorage.setItem(KB, JSON.stringify({ n: $("tpN").value, l: $("tpL").value, o: $("tpO").value })); }catch{} };
+    const guardaB = () => { if(ed) return; try{ localStorage.setItem(KB, JSON.stringify({ n: $("tpN").value, l: $("tpL").value, o: $("tpO").value })); }catch{} };
     /* «para quién» se sugiere por el nombre (zoológico, niños, títeres… → con Ema) hasta que lo elijan a mano */
     const sugierePara = () => { if(paraTocado) return; const t = ($("tpN").value + " " + $("tpO").value).toLowerCase(); marcaPara(/ni[ñn]os|infantil|zool|t[ií]teres|granja|parque|ema\b/.test(t) ? "ema" : /pareja|rom[aá]ntic|vino|concierto|adultos/.test(t) ? "pareja" : "familia"); };
     $("tpN").addEventListener("input", () => { if($("tpN").value.trim()){ $("tpNErr").textContent = ""; $("tpN").removeAttribute("aria-invalid"); } sugierePara(); vivo(); guardaB(); });
@@ -6475,15 +6486,30 @@ const Temporada = (function(){
       if(varios && !hasta){ marcaError(sc.querySelector(".tpHasta"), "tpFErr", "Elige hasta qué día dura, o marca «Un solo día»."); return; }
       if(fin < desde){ marcaError(sc.querySelector(".tpHasta"), "tpFErr", "«Hasta» no puede ser antes de «Desde»."); return; }
       guardando = true;
-      const plan = { id: "tp" + Date.now().toString(36), nombre, desde, hasta: fin, lugar: $("tpL").value.trim(), nota: $("tpO").value.trim(), para: paraSel };
+      const plan = { id: ed ? ed.id : "tp" + Date.now().toString(36), nombre, desde, hasta: fin, lugar: $("tpL").value.trim(), nota: $("tpO").value.trim(), para: paraSel };
       if(emoSel) plan.emo = emoSel;
-      planes = planes.concat(plan); guarda(); pintaTodo(); cierra();
+      planes = planes.filter(x => !ed || x.id !== ed.id).concat(plan); guarda(); pintaTodo(); cierra();
       try{ localStorage.removeItem(KB); }catch{}
-      exito("Plan anotado", nombre + " · " + rango(plan));
+      exito(ed ? "Plan actualizado" : "Plan anotado", nombre + " · " + rango(plan));
       try{ await pide({ accion: "agregar", plan }); pintaTodo(); }catch{}
     });
 
-    { const b = leeB(); if(b.n || b.l || b.o){ $("tpN").value = b.n || ""; $("tpL").value = b.l || ""; if(b.o){ $("tpO").value = b.o; $("tpMasNota").hidden = true; $("tpNotaBox").hidden = false; } sugierePara(); } }
+    /* editar: llena el formulario con el plan */
+    if(ed){
+      $("tpN").value = ed.nombre || ""; $("tpL").value = ed.lugar || "";
+      if(ed.nota){ $("tpO").value = ed.nota; $("tpMasNota").hidden = true; $("tpNotaBox").hidden = false; }
+      desde = ed.desde; hasta = ed.hasta && ed.hasta !== ed.desde ? ed.hasta : ""; varios = !!hasta;
+      paraTocado = true; marcaPara(ed.para || "familia");
+      emoSel = ed.emo || ""; $("tpE").querySelectorAll("[data-e]").forEach(x => x.setAttribute("aria-checked", String(x.dataset.e === emoSel)));
+      let seguro = false;
+      $("tpDel").addEventListener("click", () => {
+        if(!seguro){ seguro = true; $("tpDel").textContent = "¿Seguro? Toca otra vez para borrarlo"; $("tpDel").classList.add("seguro"); setTimeout(() => { seguro = false; const b = $("tpDel"); if(b){ b.textContent = "Borrar este plan"; b.classList.remove("seguro"); } }, 4000); return; }
+        planes = planes.filter(x => x.id !== ed.id); guarda(); pintaTodo(); cierra();
+        exito("Plan borrado", ed.nombre);
+        pide({ accion: "quitar", id: ed.id }).catch(() => {});
+      });
+    }
+    else { const b = leeB(); if(b.n || b.l || b.o){ $("tpN").value = b.n || ""; $("tpL").value = b.l || ""; if(b.o){ $("tpO").value = b.o; $("tpMasNota").hidden = true; $("tpNotaBox").hidden = false; } sugierePara(); } }
     pintaFechas(); vivo();
     if(matchMedia("(pointer:fine)").matches) setTimeout(() => $("tpN").focus({ preventScroll: true }), 300);   // en el celular no: que vean la tarjeta antes de que suba el teclado
   }
@@ -6494,7 +6520,7 @@ const Temporada = (function(){
     const v = vigentes(), ya = v.filter(x => x.e.ahora), luego = v.filter(x => !x.e.ahora);
     const tarjeta = ({ p, e }, i) => { const t = tema(p);
       return '<div class="tpCard' + (e.ahora ? ' ahora' : '') + '" role="button" tabindex="0" data-id="' + esc(p.id) + '" style="--h:' + t.h + ';--i:' + Math.min(i, 6) + '">' +
-        '<span class="tpX" data-quitar="' + esc(p.id) + '" role="button" aria-label="Quitar este plan">✕</span><span class="tpEmo" aria-hidden="true">' + t.emo + '</span>' +
+        '<span class="tpX" data-quitar="' + esc(p.id) + '" role="button" aria-label="Quitar este plan">✕</span><span class="tpEd" data-editar="' + esc(p.id) + '" role="button" aria-label="Editar este plan">✎</span><span class="tpEmo" aria-hidden="true">' + t.emo + '</span>' +
         '<span class="tpChip">' + esc(e.txt) + '</span><b>' + esc(p.nombre) + '</b><small>' + esc(rango(p)) + (p.lugar ? ' · ' + esc(p.lugar) : '') + ' · ' + esc(para(p)) + '</small>' +
         (p.nota ? '<span class="tpNota">' + esc(p.nota) + '</span>' : '') + '</div>'; };
     vistaEl.innerHTML = (v.length ? (ya.length ? '<div class="tpGrupo">Está pasando</div><div class="tpGrid">' + ya.map(tarjeta).join("") + '</div>' : '') +
@@ -6521,6 +6547,8 @@ const Temporada = (function(){
       else seg.remove();
       return;
     }
+    const ed = ev.target.closest("[data-editar]");
+    if(ed){ const p = planes.find(x => x.id === ed.dataset.editar); if(p) nuevo(p); return; }
     if(q){ card.insertAdjacentHTML("beforeend", '<div class="tpSeguro">¿Quitar este plan?<span><i class="si">Sí, quitar</i><i>No</i></span></div>'); return; }
     const p = planes.find(x => x.id === card.dataset.id); if(p) muestra(p);
   };
@@ -6658,7 +6686,7 @@ const SalidaEmaForm = (function(){
   function abrir(opts){
     if(abierta) return; abierta = true;
     SalidasEma.precarga();
-    let fecha = hoyISO(), paradas = [], idx = 0, paso = "lugar", guardando = false;
+    let fecha = (opts && /^\d{4}-\d{2}-\d{2}$/.test(opts.fecha || "")) ? opts.fecha : hoyISO(), paradas = [], idx = 0, paso = "lugar", guardando = false;   // «agregar a una salida»: viene con su fecha
     const nuevaParada = () => ({ lugar: "", puntuacion: 0, comentario: "", gastos: [], preguntado: false });
     paradas.push(nuevaParada());
     if(opts && opts.pre && opts.pre.c && opts.pre.m > 0) paradas[0].gastos.push({ c: opts.pre.c, m: opts.pre.m, hecho: false });
