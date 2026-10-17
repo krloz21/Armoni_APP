@@ -2484,8 +2484,17 @@ button{ transition:transform var(--t-tap) var(--ease-out); }
 .tpX{ position:absolute; top:8px; left:8px; width:28px; height:28px; border-radius:50%; display:grid; place-items:center; font-size:.8rem; color:#fff; background:rgba(0,0,0,.25); opacity:.75; }
 .tpEd{ position:absolute; top:8px; left:42px; width:28px; height:28px; border-radius:50%; display:grid; place-items:center; font-size:.85rem; color:#fff; background:rgba(0,0,0,.25); opacity:.85; }
 .tpGrid .tpEd{ left:46px; }
-.tpBorrar{ display:block; width:100%; min-height:44px; margin-top:8px; border:0; border-radius:14px; background:none; color:#ff9b9b; font:inherit; font-size:.88rem; font-weight:650; cursor:pointer; }
-.tpBorrar.seguro{ background:rgba(255,99,99,.14); color:#ff6b6b; }
+.tpBorrar{ display:flex; align-items:center; justify-content:center; gap:8px; width:100%; min-height:46px; margin-top:16px; padding:10px 14px; border:1px solid rgba(255,107,107,.32); border-radius:14px; background:rgba(255,107,107,.07); color:#ff8a8a; font:inherit; font-size:.9rem; font-weight:650; cursor:pointer; transition:background .2s, transform .15s var(--ease-spring); }
+.tpBorrar svg{ width:18px; height:18px; flex:none; }
+.tpBorrar:active{ transform:scale(.97); background:rgba(255,107,107,.16); }
+/* confirmar borrado: tarjeta centrada con explicación y dos botones claros */
+.pgScrim.bdScrim{ z-index:130; }
+.bdCard{ padding-top:24px; }
+.bdIco{ display:grid; place-items:center; width:62px; height:62px; margin:0 auto 14px; border-radius:50%; color:#ff6b6b; background:rgba(255,107,107,.13); box-shadow:0 0 0 8px rgba(255,107,107,.06); }
+.bdIco svg{ width:28px; height:28px; }
+.bdCard .pgQ{ line-height:1.45; }
+.bdCard .pgRow .pgSi.bdSi{ background:linear-gradient(140deg, #ff7a6b, #e5484d); color:#fff; box-shadow:0 12px 26px -14px rgba(229,72,77,.95); }
+.bdCard .inErr{ margin-top:12px; }
 .tpSeguro{ position:absolute; inset:0; z-index:2; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; padding:12px; background:rgba(10,12,18,.86); font-weight:700; font-size:.86rem; text-align:center; }
 .tpSeguro span{ display:flex; gap:8px; }
 .tpSeguro i{ font-style:normal; padding:8px 14px; border-radius:12px; background:rgba(255,255,255,.12); }
@@ -3420,7 +3429,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-17.227";
+const APP_VERSION = "2026-10-17.228";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -6141,6 +6150,40 @@ const SalidasEma = (function(){
    y avisa al celular cuando sale algo nuevo; aquí se ven con «Nuevo» hasta que los abras
    ════════════════════════════════════════════════════════════ */
 /* ── los pop-ups no se cierran por un toque accidental: mientras hacen su animación de entrada se ignoran los toques en ellos (y fuera de ellos) ── */
+/* ════════════════════════════════════════════════════════════
+   CONFIRMAR BORRADO (para todos los «Borrar»): tarjeta centrada con icono de caneca, qué se borra,
+   qué pasa después y dos botones: «Cancelar» y «Borrar» (rojo). accion() hace el borrado:
+   mientras corre dice «Borrando…»; si falla, avisa en la misma tarjeta y deja reintentar.
+   ════════════════════════════════════════════════════════════ */
+const ICO_CANECA = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>';
+function confirmaBorrar({ titulo, detalle, boton = "Borrar", accion }){
+  return new Promise(listo => {
+    const capa = document.createElement("div");
+    capa.className = "pgScrim bdScrim";
+    capa.innerHTML = '<div class="pgCard bdCard" role="alertdialog" aria-modal="true" aria-labelledby="bdT" aria-describedby="bdQ">' +
+      '<div class="bdIco">' + ICO_CANECA + '</div><h3 id="bdT"></h3><p class="pgQ" id="bdQ"></p><p class="inErr" role="alert"></p>' +
+      '<div class="pgRow"><button type="button" class="pgNo">Cancelar</button><button type="button" class="pgSi bdSi"></button></div></div>';
+    capa.querySelector("#bdT").textContent = titulo;
+    capa.querySelector("#bdQ").textContent = detalle || "";
+    const si = capa.querySelector(".bdSi"), no = capa.querySelector(".pgNo"), err = capa.querySelector(".inErr");
+    si.textContent = boton;
+    let ocupado = false;
+    const fin = ok => { document.removeEventListener("keydown", tecla, true); capa.classList.remove("on"); setTimeout(() => capa.remove(), 300); listo(ok); };
+    const tecla = e => { if(e.key === "Escape" && !ocupado){ e.stopPropagation(); fin(false); } };
+    no.addEventListener("click", () => { if(!ocupado) fin(false); });
+    capa.addEventListener("click", e => { if(e.target === capa && !ocupado) fin(false); });
+    si.addEventListener("click", async () => {
+      if(ocupado) return;
+      ocupado = true; si.disabled = no.disabled = true; si.textContent = "Borrando…"; err.textContent = "";
+      try{ if(accion) await accion(); fin(true); }
+      catch(e){ ocupado = false; si.disabled = no.disabled = false; si.textContent = "Reintentar"; err.textContent = (e && e.aviso) || "No se pudo borrar. Revisa tu internet y que Tailscale esté encendido."; }
+    });
+    document.addEventListener("keydown", tecla, true);
+    document.body.appendChild(capa);
+    requestAnimationFrame(() => requestAnimationFrame(() => { capa.classList.add("on"); no.focus({ preventScroll: true }); }));
+  });
+}
+
 (function protegePopups(){
   const SEL = ".pgScrim, .cfAn, .tpAn, .sheetScrim, .payScrim, .paySheet, .cxScrim";
   const DUR = el => el.classList.contains("tpAn") ? 1400 : el.classList.contains("cfAn") ? 1100 : el.classList.contains("cxScrim") ? 900 : 700;
@@ -6384,7 +6427,7 @@ const Temporada = (function(){
         '<div id="tpNotaBox" hidden><label class="inLbl" for="tpO">Nota</label><input id="tpO" type="text" maxlength="140" autocomplete="off" autocapitalize="sentences" enterkeyhint="done" placeholder="Ej: entrada gratis para niños"></div>' +
       '</div>' +
       '<div class="pgRow fmRow"><button type="button" class="pgSi apagado" id="tpOk">' + (ed ? 'Guardar cambios' : 'Anotar plan') + '</button></div>' +
-      (ed ? '<button type="button" class="tpBorrar" id="tpDel">Borrar este plan</button>' : '') +
+      (ed ? '<button type="button" class="tpBorrar" id="tpDel">' + ICO_CANECA + 'Borrar este plan</button>' : '') +
     '</div></div>';
     document.body.appendChild(sc); requestAnimationFrame(() => sc.classList.add("on"));
     const $ = id => sc.querySelector("#" + id);
@@ -6501,9 +6544,9 @@ const Temporada = (function(){
       desde = ed.desde; hasta = ed.hasta && ed.hasta !== ed.desde ? ed.hasta : ""; varios = !!hasta;
       paraTocado = true; marcaPara(ed.para || "familia");
       emoSel = ed.emo || ""; $("tpE").querySelectorAll("[data-e]").forEach(x => x.setAttribute("aria-checked", String(x.dataset.e === emoSel)));
-      let seguro = false;
-      $("tpDel").addEventListener("click", () => {
-        if(!seguro){ seguro = true; $("tpDel").textContent = "¿Seguro? Toca otra vez para borrarlo"; $("tpDel").classList.add("seguro"); setTimeout(() => { seguro = false; const b = $("tpDel"); if(b){ b.textContent = "Borrar este plan"; b.classList.remove("seguro"); } }, 4000); return; }
+      $("tpDel").addEventListener("click", async () => {
+        const ok = await confirmaBorrar({ titulo: "¿Borrar «" + ed.nombre + "»?", detalle: "Se quita de «De temporada» y ya no saldrá en el aviso. Esto no se puede deshacer.", boton: "Borrar plan" });
+        if(!ok) return;
         planes = planes.filter(x => x.id !== ed.id); guarda(); pintaTodo(); cierra();
         exito("Plan borrado", ed.nombre);
         pide({ accion: "quitar", id: ed.id }).catch(() => {});
@@ -10208,30 +10251,28 @@ const Mercar = (function(){
         '<button type="button" class="duCanasta' + (p.falta ? ' dentro' : '') + '" id="mkEdCanasta" style="margin-top:14px"><span aria-hidden="true">🧺</span>' + (p.falta ? 'En la canasta · ver o quitar' : 'Se acabó · dejar en la canasta') + '</button>' +
         '<p class="inErr" id="mkEdErr" role="alert"></p>' +
         '<div class="pgRow"><button type="button" class="pgNo" id="mkEdAtras">Volver</button><button type="button" class="pgSi" id="mkEdSi">Guardar</button></div>' +
-        '<button type="button" class="tpBorrar" id="mkEdBorrar">Borrar este producto</button>');
+        '<button type="button" class="tpBorrar" id="mkEdBorrar">' + ICO_CANECA + 'Borrar este producto</button>');
       const nom = cuerpo.querySelector("#mkEdNom"), det = cuerpo.querySelector("#mkEdDet"), grp = cuerpo.querySelector("#mkEdGrp"), si = cuerpo.querySelector("#mkEdSi"), err = cuerpo.querySelector("#mkEdErr");
       nom.addEventListener("input", () => { si.disabled = !nom.value.trim(); });
       cuerpo.querySelector("#mkEdAtras").addEventListener("click", () => lista(true));
       cuerpo.querySelector("#mkEdCanasta").addEventListener("click", () => { cierra(); setTimeout(() => abrirCanasta(p), 120); });
-      /* borrar: pide confirmar con un segundo toque; en Notion queda en la papelera (se puede recuperar) */
-      let seguro = false;
-      const bBorrar = cuerpo.querySelector("#mkEdBorrar");
-      bBorrar.addEventListener("click", async () => {
-        if(!seguro){ seguro = true; bBorrar.textContent = "¿Seguro? Toca otra vez para borrar «" + baseDe(p) + "»"; bBorrar.classList.add("seguro"); setTimeout(() => { if(bBorrar.isConnected && !bBorrar.disabled){ seguro = false; bBorrar.textContent = "Borrar este producto"; bBorrar.classList.remove("seguro"); } }, 4000); return; }
-        bBorrar.disabled = true; bBorrar.textContent = "Borrando…";
-        try{
-          const r = await post(MERCADO_EDITAR_URL, { id: p.id, accion: "borrar" });
-          if(datos && datos.productos) datos.productos = datos.productos.filter(x => x.id !== p.id);
-          limpiaAcabo([p.id]); anotaDejado([p.id], null); guarda();
-          cierra();
-          exito(r.enCola ? "Se borrará al conectar" : "Producto borrado", baseDe(p));
-          statusEl.innerHTML = "";
-          if(estado === "inicio") inicio(true);
-          if(document.body.classList.contains("mode-dura")) pintaDura(false);
-        }catch{
-          bBorrar.disabled = false; seguro = false; bBorrar.textContent = "Borrar este producto"; bBorrar.classList.remove("seguro");
-          err.textContent = "No se pudo borrar. Revisa tu internet y que Tailscale esté encendido.";
-        }
+      /* borrar: tarjeta de confirmación; en Notion queda en la papelera (se puede recuperar) */
+      cuerpo.querySelector("#mkEdBorrar").addEventListener("click", async () => {
+        let r = {};
+        const ok = await confirmaBorrar({
+          titulo: "¿Borrar «" + baseDe(p) + "»?",
+          detalle: "Se quita de tu lista de productos" + (p.falta ? " y de la canasta" : "") + ". En Notion queda en la papelera por si lo necesitas.",
+          boton: "Borrar producto",
+          accion: async () => { r = await post(MERCADO_EDITAR_URL, { id: p.id, accion: "borrar" }); }
+        });
+        if(!ok) return;
+        if(datos && datos.productos) datos.productos = datos.productos.filter(x => x.id !== p.id);
+        limpiaAcabo([p.id]); anotaDejado([p.id], null); guarda();
+        cierra();
+        exito(r && r.enCola ? "Se borrará al conectar" : "Producto borrado", baseDe(p));
+        statusEl.innerHTML = "";
+        if(estado === "inicio") inicio(true);
+        if(document.body.classList.contains("mode-dura")) pintaDura(false);
       });
       si.addEventListener("click", async () => {
         const base = nom.value.trim(); if(!base) return;
