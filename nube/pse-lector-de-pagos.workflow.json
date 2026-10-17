@@ -312,7 +312,7 @@
           "interval": [
             {
               "field": "minutes",
-              "minutesInterval": 30
+              "minutesInterval": 10
             }
           ]
         }
@@ -324,7 +324,7 @@
         520
       ],
       "id": "a7000000-0000-4000-8000-000000000001",
-      "name": "Cada 30 minutos"
+      "name": "Cada 10 minutos"
     },
     {
       "parameters": {
@@ -362,6 +362,17 @@
       ],
       "id": "a7000000-0000-4000-8000-000000000003",
       "name": "Saltar ya intentados"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -760,
+        700
+      ],
+      "id": "a7000000-0000-4000-8000-000000000004",
+      "name": "Revisar ahora (sin leer)"
     }
   ],
   "pinData": {},
@@ -487,17 +498,6 @@
         ]
       ]
     },
-    "Cada 30 minutos": {
-      "main": [
-        [
-          {
-            "node": "Correos PSE sin leer",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Correos PSE sin leer": {
       "main": [
         [
@@ -514,6 +514,28 @@
         [
           {
             "node": "Leer correo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cada 10 minutos": {
+      "main": [
+        [
+          {
+            "node": "Correos PSE sin leer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Revisar ahora (sin leer)": {
+      "main": [
+        [
+          {
+            "node": "Correos PSE sin leer",
             "type": "main",
             "index": 0
           }
