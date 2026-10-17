@@ -2486,6 +2486,10 @@ button{ transition:transform var(--t-tap) var(--ease-out); }
 .tpSeguro span{ display:flex; gap:8px; }
 .tpSeguro i{ font-style:normal; padding:8px 14px; border-radius:12px; background:rgba(255,255,255,.12); }
 .tpSeguro i.si{ background:#ff6b6b; }
+.navNuevo{ position:relative; border-radius:16px; animation:navLuz 1.9s ease-in-out infinite; background-image:linear-gradient(100deg, transparent 20%, rgba(150,190,255,.18) 50%, transparent 80%); background-size:220% 100%; }
+#navTemp.navNuevo .txt b::after{ content:"NUEVO"; margin-left:8px; padding:2px 7px; border-radius:999px; font-size:.62rem; font-weight:800; letter-spacing:.06em; color:#06121f; background:#8ec5ff; vertical-align:2px; }
+@keyframes navLuz{ 0%,100%{ box-shadow:0 0 0 0 rgba(142,197,255,.0), inset 0 0 0 1px rgba(142,197,255,.25); background-position:120% 0; } 50%{ box-shadow:0 0 22px 2px rgba(142,197,255,.35), inset 0 0 0 1px rgba(142,197,255,.7); background-position:-20% 0; } }
+@media (prefers-reduced-motion:reduce){ .navNuevo{ animation:none; box-shadow:inset 0 0 0 1px rgba(142,197,255,.6); } }
 .tpIntro{ margin:-4px 4px 14px; color:var(--dim); font-size:.86rem; line-height:1.45; text-align:center; }
 .tpGrupo{ margin:18px 4px 8px; font-size:.72rem; color:var(--dim); letter-spacing:.08em; text-transform:uppercase; }
 .tpGrid{ display:grid; gap:12px; }
@@ -3324,7 +3328,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-16.218";
+const APP_VERSION = "2026-10-17.219";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -6180,12 +6184,16 @@ const Temporada = (function(){
     }catch{}
   }
 
-  /* ── el pop-up: cada vez que abres Armoni (si hay algo pasando o que empieza en la semana) muestra TODOS los planes; se desliza para verlos ── */
+  /* ── el pop-up: la primera vez (y cuando anotan un plan nuevo) muestra TODOS los planes; se desliza para verlos ── */
   function anuncia(intentos, alAbrir){
     if(!alAbrir && !document.body.classList.contains("mode-ema")) return;
     if(document.querySelector(".pgScrim, .cfAn, .tpAn, .sheetScrim") || document.body.classList.contains("drawer-open")){ if((intentos || 0) < 20) setTimeout(() => anuncia((intentos || 0) + 1, alAbrir), 1500); return; }   // espera a que cierren otra ventana
     const v = vigentes();
     if(!v.some(x => x.e.cerca)) return;
+    /* solo una vez: no vuelve a salir hasta que anoten un plan nuevo */
+    let vistos = []; try{ vistos = JSON.parse(localStorage.getItem(KA + ".vistos")) || []; }catch{}
+    if(!v.some(x => !vistos.includes(x.p.id))) return;
+    try{ localStorage.setItem(KA + ".vistos", JSON.stringify(vistos.concat(v.map(x => x.p.id)).slice(-200))); }catch{}
     muestra();
   }
   function muestra(desde){
@@ -6302,13 +6310,8 @@ const Temporada = (function(){
   if(box) box.addEventListener("click", clic);
   if(vistaEl) vistaEl.addEventListener("click", clic);
   /* al abrir Armoni también: si hay algo que está por empezar o pasando, sale el pop-up (una vez por fase) */
-  /* cada vez que abres Armoni: sale mientras la presentación se va (no espera a que termine) y otra vez si vuelves después de un rato */
+  /* sale al abrir Armoni, mientras la presentación se va, una sola vez (los planes se ven siempre en Salidas → Temporada) */
   setTimeout(() => anuncia(0, true), 1900);
-  let fuera = 0;
-  document.addEventListener("visibilitychange", () => {
-    if(document.visibilityState === "hidden") fuera = Date.now();
-    else if(fuera && Date.now() - fuera > 60000){ fuera = 0; setTimeout(() => anuncia(0, true), 500); }
-  });
   return { refresh, muestra, vista };
 })();
 
@@ -8193,6 +8196,17 @@ const Drawer = (function(){
   const navDura = document.getElementById("navDura");
   const setMercarG = on => { navMercarG.classList.toggle("abierto", on); navMercarBtn.setAttribute("aria-expanded", String(on)); };
   navMercarBtn.addEventListener("click", () => setMercarG(!navMercarG.classList.contains("abierto")));
+  /* la primera vez, «Salidas» y «Temporada» alumbran en el menú para que descubran el apartado nuevo; al tocarlos dejan de alumbrar */
+  const FL = k => { try{ return localStorage.getItem(k) === "1"; }catch{ return false; } };
+  const setFL = k => { try{ localStorage.setItem(k, "1"); }catch{} };
+  const luz = () => {
+    const visto = FL("armoni.nav.tempVisto");
+    navTemp.classList.toggle("navNuevo", !visto);
+    navSalidasBtn.classList.toggle("navNuevo", !visto && !FL("armoni.nav.salidasTocado"));
+  };
+  luz();
+  navSalidasBtn.addEventListener("click", () => { setFL("armoni.nav.salidasTocado"); luz(); });
+  navTemp.addEventListener("click", () => { setFL("armoni.nav.tempVisto"); luz(); });
   const NAV = { chat: navChat, rest: navRest, ema: navEma, credito: navCredito, gmail: navGmail, glim: navGlim, recuerda: navRecuerda, mercar: navMercar, dura: navDura, mes: navMes, balance: navBalance, ahorro: navAhorro, dudas: navDudas, ajustes: navAjustes, temp: navTemp };
   const SUB = { chat: "Presupuesto de la casa", rest: "Restaurantes", ema: "Salidas Ema", credito: "Crédito Carro", gmail: "AT Gmail", glim: "Glim", recuerda: "Recuerda", mercar: "A mercar", dura: "Duración", mes: "Tu mes", balance: "Balance", ahorro: "Ahorro", dudas: "Dudas", ajustes: "Ajustes", temp: "Temporada" };
   const PLACEHOLDER = { chat: "Escribe aquí…", rest: "¿Qué se te antoja?", ema: "¿A dónde llevamos a Ema?", credito: "Pregúntale sobre el crédito…", gmail: "", glim: "", recuerda: "", mercar: "", dura: "", mes: "", balance: "", ahorro: "", dudas: "", ajustes: "", temp: "" };
@@ -8255,6 +8269,7 @@ const Drawer = (function(){
     document.body.classList.toggle("mode-dudas", mode === "dudas");
     document.body.classList.toggle("mode-ajustes", mode === "ajustes");
     document.body.classList.toggle("mode-temp", mode === "temp");
+    if(mode === "temp"){ setFL("armoni.nav.tempVisto"); luz(); }
     Object.entries(NAV).forEach(([m, b]) => { if(m === mode) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current"); });
     const enControl = mode === "mes" || mode === "recuerda" || mode === "balance" || mode === "ahorro";
     navControl.classList.toggle("activo", enControl);
