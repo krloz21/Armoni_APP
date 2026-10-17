@@ -305,6 +305,63 @@
           "name": "Gmail account"
         }
       }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 30
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -760,
+        520
+      ],
+      "id": "a7000000-0000-4000-8000-000000000001",
+      "name": "Cada 30 minutos"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "limit": 10,
+        "filters": {
+          "q": "from:serviciopse@achcolombia.com.co subject:\"PSE - Transacción Aprobada\" is:unread newer_than:2d"
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        -540,
+        520
+      ],
+      "id": "a7000000-0000-4000-8000-000000000002",
+      "name": "Correos PSE sin leer",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "0emLR80CPABOJCrV",
+          "name": "Gmail account"
+        }
+      },
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "jsCode": "// Red de seguridad: si el disparador de Gmail no alcanzó a ver un correo (flujo apagado, PC apagado…), esta revisión cada 30 minutos lo recupera.\n// Solo mira correos SIN LEER de los últimos 2 días. Para no gastar IA de más, un mismo correo se intenta como máximo 2 veces.\nconst sd = $getWorkflowStaticData('global');\nsd.pseIntentos = sd.pseIntentos || {};\nconst salida = [];\nfor (const it of $input.all()) {\n  const id = String((it.json && (it.json.id || it.json.messageId)) || '');\n  if (!id) continue;\n  const n = sd.pseIntentos[id] || 0;\n  if (n >= 2) continue;\n  sd.pseIntentos[id] = n + 1;\n  salida.push(it);\n}\nconst ks = Object.keys(sd.pseIntentos);\nif (ks.length > 200) ks.slice(0, ks.length - 200).forEach(k => delete sd.pseIntentos[k]);\nreturn salida;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -320,
+        520
+      ],
+      "id": "a7000000-0000-4000-8000-000000000003",
+      "name": "Saltar ya intentados"
     }
   ],
   "pinData": {},
@@ -424,6 +481,39 @@
         [
           {
             "node": "Mark a message as read",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cada 30 minutos": {
+      "main": [
+        [
+          {
+            "node": "Correos PSE sin leer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Correos PSE sin leer": {
+      "main": [
+        [
+          {
+            "node": "Saltar ya intentados",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Saltar ya intentados": {
+      "main": [
+        [
+          {
+            "node": "Leer correo",
             "type": "main",
             "index": 0
           }
