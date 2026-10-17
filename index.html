@@ -3420,7 +3420,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-17.226";
+const APP_VERSION = "2026-10-17.227";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -10207,11 +10207,32 @@ const Mercar = (function(){
         '<label class="inLbl" for="mkEdGrp">Apartado</label><div class="inSel"><select id="mkEdGrp">' + grupos.map(g => '<option value="' + g + '"' + (g === (grupos.includes(p.grupo) ? p.grupo : "Otros") ? " selected" : "") + '>' + g + '</option>').join("") + '</select></div>' +
         '<button type="button" class="duCanasta' + (p.falta ? ' dentro' : '') + '" id="mkEdCanasta" style="margin-top:14px"><span aria-hidden="true">🧺</span>' + (p.falta ? 'En la canasta · ver o quitar' : 'Se acabó · dejar en la canasta') + '</button>' +
         '<p class="inErr" id="mkEdErr" role="alert"></p>' +
-        '<div class="pgRow"><button type="button" class="pgNo" id="mkEdAtras">Volver</button><button type="button" class="pgSi" id="mkEdSi">Guardar</button></div>');
+        '<div class="pgRow"><button type="button" class="pgNo" id="mkEdAtras">Volver</button><button type="button" class="pgSi" id="mkEdSi">Guardar</button></div>' +
+        '<button type="button" class="tpBorrar" id="mkEdBorrar">Borrar este producto</button>');
       const nom = cuerpo.querySelector("#mkEdNom"), det = cuerpo.querySelector("#mkEdDet"), grp = cuerpo.querySelector("#mkEdGrp"), si = cuerpo.querySelector("#mkEdSi"), err = cuerpo.querySelector("#mkEdErr");
       nom.addEventListener("input", () => { si.disabled = !nom.value.trim(); });
       cuerpo.querySelector("#mkEdAtras").addEventListener("click", () => lista(true));
       cuerpo.querySelector("#mkEdCanasta").addEventListener("click", () => { cierra(); setTimeout(() => abrirCanasta(p), 120); });
+      /* borrar: pide confirmar con un segundo toque; en Notion queda en la papelera (se puede recuperar) */
+      let seguro = false;
+      const bBorrar = cuerpo.querySelector("#mkEdBorrar");
+      bBorrar.addEventListener("click", async () => {
+        if(!seguro){ seguro = true; bBorrar.textContent = "¿Seguro? Toca otra vez para borrar «" + baseDe(p) + "»"; bBorrar.classList.add("seguro"); setTimeout(() => { if(bBorrar.isConnected && !bBorrar.disabled){ seguro = false; bBorrar.textContent = "Borrar este producto"; bBorrar.classList.remove("seguro"); } }, 4000); return; }
+        bBorrar.disabled = true; bBorrar.textContent = "Borrando…";
+        try{
+          const r = await post(MERCADO_EDITAR_URL, { id: p.id, accion: "borrar" });
+          if(datos && datos.productos) datos.productos = datos.productos.filter(x => x.id !== p.id);
+          limpiaAcabo([p.id]); anotaDejado([p.id], null); guarda();
+          cierra();
+          exito(r.enCola ? "Se borrará al conectar" : "Producto borrado", baseDe(p));
+          statusEl.innerHTML = "";
+          if(estado === "inicio") inicio(true);
+          if(document.body.classList.contains("mode-dura")) pintaDura(false);
+        }catch{
+          bBorrar.disabled = false; seguro = false; bBorrar.textContent = "Borrar este producto"; bBorrar.classList.remove("seguro");
+          err.textContent = "No se pudo borrar. Revisa tu internet y que Tailscale esté encendido.";
+        }
+      });
       si.addEventListener("click", async () => {
         const base = nom.value.trim(); if(!base) return;
         const nombre = base + (det.value.trim() ? SEP + det.value.trim() : "");
