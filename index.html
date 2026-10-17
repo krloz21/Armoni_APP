@@ -2492,6 +2492,74 @@ button{ transition:transform var(--t-tap) var(--ease-out); }
 #navTemp.navNuevo .txt b::after{ content:"NUEVO"; margin-left:8px; padding:2px 7px; border-radius:999px; font-size:.62rem; font-weight:800; letter-spacing:.06em; color:#06121f; background:#8ec5ff; vertical-align:2px; }
 @keyframes navLuz{ 0%,100%{ box-shadow:0 0 0 0 rgba(142,197,255,.0), inset 0 0 0 1px rgba(142,197,255,.25); background-position:120% 0; } 50%{ box-shadow:0 0 22px 2px rgba(142,197,255,.35), inset 0 0 0 1px rgba(142,197,255,.7); background-position:-20% 0; } }
 @media (prefers-reduced-motion:reduce){ .navNuevo, .navNuevo .ico{ animation:none; } .navNuevo{ box-shadow:inset 0 0 0 1px rgba(142,197,255,.6); } .navNuevo .ico{ color:#8ec5ff; } }
+/* ── «Anotar un plan»: la línea de «Nuevo gasto» teñida con el color del plan ── */
+@property --tpH{ syntax:"<number>"; inherits:true; initial-value:265; }
+.pgScrim.tpForm{ top:var(--app-top, 0px); bottom:auto; height:var(--app-h, 100dvh); padding:12px 16px; }
+.tpForm .inWrap{ width:min(100%, 400px); max-height:calc(var(--app-h, 100dvh) - 24px); }
+.tpForm .inCard{ max-height:calc(var(--app-h, 100dvh) - 24px); }
+.inCard.tpF{ --h:var(--tpH); --fa1:hsl(calc(var(--h) + 40), 95%, 64%); --fa2:hsl(var(--h), 85%, 50%); padding:22px 18px 14px;
+  transition:transform .38s cubic-bezier(.16,1,.3,1), box-shadow .6s ease, border-color .6s ease, --tpH .7s ease; }
+.tpF .fmOrb{ background:linear-gradient(140deg, hsl(calc(var(--h) + 40), 95%, 62%), hsl(calc(var(--h) - 20), 80%, 46%)); box-shadow:0 12px 28px -12px hsla(var(--h), 90%, 50%, .9), inset 0 1px 0 rgba(255,255,255,.4); }
+.tpF .fmOrb::after{ border-color:hsla(var(--h), 90%, 62%, .4); }
+.tpF .fmOrb .fmEmo{ display:inline-block; font-size:1.6rem; }
+.tpF .inBody{ margin-top:6px; padding:12px 6px 8px; }
+.tpF .inLbl{ margin-top:16px; }
+/* tarjeta en vivo: la misma .tpCard de la pantalla Temporada */
+.tpF .tpPrev{ --h:var(--tpH); width:auto; min-height:132px; padding:14px 16px; border-radius:20px; cursor:default; animation:fmCatEntra .5s var(--ease-spring) backwards; transition:min-height .35s var(--ease-out), padding .35s var(--ease-out); }
+.tpF .tpPrev:active{ transform:none; }
+.tpF .tpPrev b{ display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; padding-right:56px; font-size:1.08rem; }
+.tpF .tpPrev.vacio b{ opacity:.72; font-weight:600; }
+.tpF .tpPrev .tpEmo{ top:10px; right:12px; font-size:2.8rem; transition:font-size .35s var(--ease-out); }
+.tpForm.escribe .tpPrev{ position:sticky; top:0; z-index:2; min-height:88px; padding:10px 14px; }
+.tpForm.escribe .tpPrev .tpEmo{ font-size:2.1rem; }
+.tpPrev .tpEmo.tpSalta{ animation:tpSalta .55s var(--ease-spring), tpFlota 3.2s ease-in-out .55s infinite; }
+.fmOrb .fmEmo.tpSalta{ animation:tpSalta .55s var(--ease-spring); }
+@keyframes tpSalta{ 0%{ opacity:0; transform:scale(.3) rotate(-25deg); } 60%{ opacity:1; transform:scale(1.18) rotate(6deg); } 100%{ transform:none; } }
+/* campos */
+.tpF input[type="text"]{ min-height:50px; }
+.fmCard.tpF input:focus{ border-color:hsla(var(--h), 90%, 64%, .7); box-shadow:0 0 0 3px hsla(var(--h), 90%, 60%, .2); }
+.tpCampo{ position:relative; }
+.tpCampo svg{ position:absolute; left:14px; top:50%; width:18px; height:18px; transform:translateY(-50%); color:var(--dim); pointer-events:none; transition:color .25s; }
+.inCard .tpCampo input[type="text"]{ padding-left:42px; }
+.tpCampo:focus-within svg{ color:hsl(calc(var(--h) + 30), 90%, 66%); }
+/* fechas: 2×2 (Hoy · Mañana · Este finde · Otra fecha) */
+.tpF .fmDias button, .tpF .fmOtraFecha{ min-height:62px; padding:11px 13px; justify-content:center; }
+.tpF .fmOtraFecha{ grid-column:auto; flex-direction:row; align-items:center; gap:10px; }
+.tpF .fmOtraFecha span{ display:flex; flex-direction:column; min-width:0; }
+.tpF .fmOtraFecha b{ font-size:1rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.tpF .fmOtraFecha small{ font-size:.74rem; color:var(--dim); font-weight:500; }
+.tpF .fmOtraFecha svg{ flex:none; width:20px; height:20px; opacity:.85; }
+.tpF .tpHasta{ width:100%; margin-top:8px; animation:fmCatEntra .4s var(--ease-spring) backwards; }
+.tpSeg{ display:grid; grid-template-columns:1fr 1fr; gap:4px; margin-top:8px; padding:4px; border-radius:16px; border:1px solid var(--line); background:rgba(var(--ink),.04); }
+.tpSeg button{ min-height:44px; border:0; border-radius:12px; background:none; color:var(--ghost); font:inherit; font-size:.9rem; font-weight:650; cursor:pointer; transition:background .25s, color .25s, transform .15s var(--ease-spring); }
+.tpSeg button:active{ transform:scale(.96); }
+/* para quién: las fichas de «¿Fue en pareja?», con la elegida pintada */
+.tpF .fmQuien{ margin-top:0; }
+.tpF .fmQuien button{ min-height:96px; justify-content:center; }
+.tpF .fmQuien small{ font-size:.7rem; }
+/* elegido = el gradiente de la tarjeta del plan, letra blanca como en .tpCard */
+.tpF .fmDias button[aria-pressed="true"], .tpF .fmOtraFecha[aria-pressed="true"], .tpF .tpSeg button[aria-pressed="true"], .tpF .fmQuien button[aria-checked="true"]{
+  color:#fff; border-color:transparent; text-shadow:0 1px 6px rgba(0,0,0,.22);
+  background:radial-gradient(120% 90% at 85% 10%, hsla(calc(var(--h) + 40), 95%, 62%, .7), transparent 60%), linear-gradient(150deg, hsl(var(--h), 85%, 52%), hsl(calc(var(--h) - 35), 75%, 36%));
+  box-shadow:0 10px 22px -14px hsla(var(--h), 90%, 45%, .95); }
+.tpF [aria-pressed="true"] small, .tpF [aria-checked="true"] small{ color:inherit; opacity:.85; }
+.tpF .fmQuien button[aria-checked="true"] span{ animation:fmIcoSalta .5s var(--ease-spring); }
+@media (hover:hover){ .tpF .fmDias button:hover, .tpF .fmOtraFecha:hover, .tpF .fmQuien button:hover, .tpSeg button:hover{ border-color:hsla(var(--h), 90%, 62%, .45); color:var(--white); } }
+/* nota: escondida hasta que la pidan (menos alto = menos scroll con el teclado) */
+.tpMasNota{ display:flex; align-items:center; justify-content:center; gap:6px; width:100%; min-height:46px; margin-top:16px; border-radius:14px; border:1px dashed rgba(var(--ink),.22); background:none; color:var(--ghost); font:inherit; font-size:.88rem; font-weight:600; cursor:pointer; }
+.tpMasNota small{ color:var(--dim); font-weight:500; }
+.tpMasNota[hidden], #tpNotaBox[hidden]{ display:none; }
+/* errores junto al campo */
+.tpErr{ margin:6px 4px 0; font-size:.8rem; color:#ff9b9b; }
+.tpErr:empty{ display:none; }
+.tpF [aria-invalid="true"]{ border-color:#ff8a8a !important; box-shadow:0 0 0 3px rgba(255,107,107,.18) !important; border-radius:16px; }
+.tpMal{ animation:cxSacude .3s ease 2; }
+/* botón principal: grande, con el color del plan */
+.tpF .fmRow{ margin-top:10px; }
+.fmCard.tpF .fmRow .pgSi{ min-height:52px; color:#fff; font-size:1rem; text-shadow:0 1px 6px rgba(0,0,0,.25); background:linear-gradient(150deg, hsl(var(--h), 80%, 46%), hsl(calc(var(--h) - 35), 75%, 34%)); box-shadow:0 14px 28px -14px hsla(var(--h), 90%, 45%, .95); transition:opacity .3s, filter .3s, transform .15s var(--ease-spring); }
+.fmCard.tpF .fmRow .pgSi.apagado{ opacity:.5; filter:saturate(.5); }
+@media (min-width:720px){ .tpForm .inWrap{ width:440px; } .tpF .tpPrev{ min-height:150px; } }
+@media (prefers-reduced-motion:reduce){ .inCard.tpF{ transition:none; } .tpF .tpPrev, .tpF .tpHasta, .tpPrev .tpEmo.tpSalta, .fmOrb .fmEmo.tpSalta, .tpMal, .tpF .fmQuien button[aria-checked="true"] span{ animation:none !important; } }
 .tpIntro{ margin:-4px 4px 14px; color:var(--dim); font-size:.86rem; line-height:1.45; text-align:center; }
 .tpGrupo{ margin:18px 4px 8px; font-size:.72rem; color:var(--dim); letter-spacing:.08em; text-transform:uppercase; }
 .tpGrid{ display:grid; gap:12px; }
@@ -3330,7 +3398,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-17.223";
+const APP_VERSION = "2026-10-17.224";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -6243,36 +6311,160 @@ const Temporada = (function(){
     });
   }
 
-  /* ── anotar un plan ── */
+  /* ── anotar un plan: la misma línea de «Nuevo gasto» (Volver, orbe, botón grande),
+        teñida con el color del plan y con su tarjeta en vivo arriba ── */
   function nuevo(){
     if(document.querySelector(".pgScrim.tpForm")) return;
-    let paraSel = "familia";
+    const SVG = 'viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"';
+    const CAL = '<svg ' + SVG + '><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>';
+    const PIN = '<svg ' + SVG + '><path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.4"/></svg>';
+    const mas = (f, n) => { const d = new Date(f + "T12:00:00"); d.setDate(d.getDate() + n); return iso(d); };
+    const dia = f => new Date(f + "T12:00:00").toLocaleDateString("es-CO", { weekday: "short", day: "numeric", month: "short" }).replace(/\./g, "").replace(",", "");
+    const corto = f => new Date(f + "T12:00:00").toLocaleDateString("es-CO", { weekday: "short", day: "numeric" }).replace(/\./g, "").replace(",", "");
+    const h0 = hoy(), dow = new Date(h0 + "T12:00:00").getDay();
+    const sab = dow === 0 ? h0 : mas(h0, 6 - dow), dom = dow === 0 ? h0 : mas(sab, 1);   // domingo: «este finde» es hoy
+    const PARA = [["ema", "👧", "Con Ema", "Plan para ella"], ["familia", "👨‍👩‍👧", "Familia", "Todos juntos"], ["pareja", "💑", "Los dos", "Plan de pareja"]];
+    let desde = h0, hasta = "", varios = false, rapida = "hoy", finde = false, paraSel = "familia", guardando = false, emoAntes = "", paraTocado = false;
+    const KB = "armoni.temporada.borrador";
+    const leeB = () => { try{ return JSON.parse(localStorage.getItem(KB)) || {}; }catch{ return {}; } };
+
     const sc = document.createElement("div");
     sc.className = "pgScrim seScrim tpForm";
-    sc.innerHTML = '<div class="inWrap"><div class="pgCard inCard" role="dialog" aria-modal="true" aria-labelledby="tpFT"><h3 id="tpFT">Anotar un plan de temporada</h3><div class="pgForm">' +
-      '<label>¿Qué es?<input id="tpN" type="text" maxlength="80" autocomplete="off" placeholder="Ej: Festival del café"></label>' +
-      '<label>Desde<input id="tpD" type="date" value="' + hoy() + '"></label>' +
-      '<label>Hasta (si dura varios días)<input id="tpH" type="date"></label>' +
-      '<label>¿Dónde?<input id="tpL" type="text" maxlength="60" autocomplete="off" placeholder="Ej: CC La Estación"></label>' +
-      '<label>Nota (opcional)<input id="tpO" type="text" maxlength="140" autocomplete="off" placeholder="Ej: entrada gratis para niños"></label>' +
-      '<div class="pgAcc" id="tpP"><button type="button" data-p="ema">Con Ema</button><button type="button" data-p="familia" class="pgSi">Familia</button><button type="button" data-p="pareja">Los dos</button></div>' +
-      '<p class="inErr" id="tpErr" role="alert"></p><div class="pgAcc"><button type="button" class="pgSi" id="tpOk">Guardar</button><button type="button" id="tpNo">Cancelar</button></div></div></div></div>';
+    sc.innerHTML = '<div class="inWrap"><div class="pgCard inCard fmCard tpF" role="dialog" aria-modal="true" aria-labelledby="tpFT">' +
+      FormArmoni.cabeza("ema", "tpFT", "Anotar un plan", "Festivales, ferias, entradas gratis") +
+      '<div class="inBody">' +
+        '<div class="tpCard tpPrev vacio" aria-hidden="true"><span class="tpEmo"></span><span class="tpChip"></span><b></b><small></small></div>' +
+        '<label class="inLbl" for="tpN">¿Qué es?</label>' +
+        '<input id="tpN" type="text" maxlength="80" autocomplete="off" autocapitalize="sentences" enterkeyhint="next" placeholder="Ej: Festival del café" aria-describedby="tpNErr">' +
+        '<p class="tpErr" id="tpNErr" role="alert"></p>' +
+        '<span class="inLbl" id="tpCuandoL">¿Cuándo empieza?</span>' +
+        '<div class="fmDias tpDias" id="tpDias" role="group" aria-labelledby="tpCuandoL"></div>' +
+        '<div class="tpSeg" id="tpSeg" role="group" aria-label="¿Cuántos días dura?"><button type="button" data-v="0">Un solo día</button><button type="button" data-v="1">Varios días</button></div>' +
+        '<div id="tpHastaBox"></div>' +
+        '<p class="tpErr" id="tpFErr" role="alert"></p>' +
+        '<label class="inLbl" for="tpL">¿Dónde?</label>' +
+        '<div class="tpCampo">' + PIN + '<input id="tpL" type="text" maxlength="60" autocomplete="off" autocapitalize="words" enterkeyhint="done" placeholder="Ej: CC La Estación"></div>' +
+        '<span class="inLbl" id="tpParaL">¿Para quién?</span>' +
+        '<div class="fmQuien" id="tpP" role="radiogroup" aria-labelledby="tpParaL">' + PARA.map(([k, e, t, s]) =>
+          '<button type="button" role="radio" data-p="' + k + '" aria-checked="' + (k === paraSel) + '"><span aria-hidden="true">' + e + '</span><b>' + t + '</b><small>' + s + '</small></button>').join("") + '</div>' +
+        '<button type="button" class="tpMasNota" id="tpMasNota">+ Agregar una nota <small>(opcional)</small></button>' +
+        '<div id="tpNotaBox" hidden><label class="inLbl" for="tpO">Nota</label><input id="tpO" type="text" maxlength="140" autocomplete="off" autocapitalize="sentences" enterkeyhint="done" placeholder="Ej: entrada gratis para niños"></div>' +
+      '</div>' +
+      '<div class="pgRow fmRow"><button type="button" class="pgSi apagado" id="tpOk">Anotar plan</button></div>' +
+    '</div></div>';
     document.body.appendChild(sc); requestAnimationFrame(() => sc.classList.add("on"));
     const $ = id => sc.querySelector("#" + id);
-    const cierra = () => { sc.classList.remove("on"); setTimeout(() => sc.remove(), 340); };
-    $("tpNo").addEventListener("click", cierra);
-    $("tpP").addEventListener("click", ev => { const b = ev.target.closest("[data-p]"); if(!b) return; paraSel = b.dataset.p; $("tpP").querySelectorAll("button").forEach(x => x.classList.toggle("pgSi", x === b)); });
+    const card = sc.querySelector(".tpF"), prev = sc.querySelector(".tpPrev"), body = sc.querySelector(".inBody");
+    sc.querySelector(".fmOrb").innerHTML = '<span class="fmEmo"></span>';   // el orbe lleva el emoji del plan, no un ícono fijo
+
+    /* fechas: tres atajos + calendario; «Varios días» abre el «hasta» */
+    const fechaIn = (inp, fn) => { if(!inp) return; alElegirFecha(inp, fn); inp.addEventListener("click", () => { try{ inp.showPicker && inp.showPicker(); }catch{} }); };
+    const opcion = (k, titulo, sub) => '<button type="button" data-r="' + k + '" aria-pressed="' + (rapida === k) + '"><b>' + titulo + '</b><small>' + sub + '</small></button>';
+    function pintaFechas(){
+      const otra = rapida === "otra";
+      $("tpDias").innerHTML =
+        opcion("hoy", "Hoy", corto(h0)) + opcion("manana", "Mañana", corto(mas(h0, 1))) +
+        opcion("finde", "Este finde", sab === dom ? corto(sab) : corto(sab) + " y " + corto(dom)) +
+        '<label class="fmOtraFecha" aria-pressed="' + otra + '">' + CAL + '<span><b>' + (otra ? dia(desde) : "Otra fecha") + '</b><small>' + (otra ? "Tocar para cambiar" : "Calendario") + '</small></span>' +
+          '<input type="date" id="tpD" min="' + h0 + '" value="' + desde + '" aria-label="Elegir la fecha en que empieza"></label>';
+      $("tpSeg").querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", String((b.dataset.v === "1") === varios)));
+      $("tpHastaBox").innerHTML = !varios ? "" :
+        '<label class="fmOtraFecha tpHasta" aria-pressed="' + !!hasta + '">' + CAL + '<span><b>' + (hasta ? "Hasta el " + dia(hasta) : "¿Hasta cuándo?") + '</b><small>' + (hasta ? (dias(desde, hasta) + 1) + " días en total · tocar para cambiar" : "Elige el último día") + '</small></span>' +
+          '<input type="date" id="tpH" min="' + mas(desde, 1) + '" value="' + (hasta || mas(desde, 1)) + '" aria-label="Elegir el último día"></label>';
+      fechaIn($("tpD"), v => { desde = v < h0 ? h0 : v; rapida = desde === h0 ? "hoy" : desde === mas(h0, 1) ? "manana" : "otra"; finde = false; if(hasta && hasta <= desde) hasta = ""; listoFechas(); });
+      fechaIn($("tpH"), v => { hasta = v > desde ? v : ""; listoFechas(); });
+    }
+    const listoFechas = () => { $("tpFErr").textContent = ""; pintaFechas(); vivo(); };
+    $("tpDias").addEventListener("click", ev => {
+      const b = ev.target.closest("button[data-r]"); if(!b) return;
+      rapida = b.dataset.r;
+      if(rapida === "finde"){ desde = sab; varios = dom !== sab; hasta = varios ? dom : ""; finde = true; }
+      else{ desde = rapida === "hoy" ? h0 : mas(h0, 1); if(finde){ varios = false; hasta = ""; finde = false; } if(hasta && hasta <= desde) hasta = ""; }
+      listoFechas();
+    });
+    $("tpSeg").addEventListener("click", ev => {
+      const b = ev.target.closest("[data-v]"); if(!b) return;
+      varios = b.dataset.v === "1"; if(!varios) hasta = "";
+      listoFechas();
+    });
+
+    /* para quién: tres fichas grandes (una sola elegida) */
+    const marcaPara = k => { paraSel = k; $("tpP").querySelectorAll("[data-p]").forEach(x => x.setAttribute("aria-checked", String(x.dataset.p === k))); };
+    $("tpP").addEventListener("click", ev => {
+      const b = ev.target.closest("[data-p]"); if(!b) return;
+      paraSel = b.dataset.p; paraTocado = true;
+      $("tpP").querySelectorAll("[data-p]").forEach(x => x.setAttribute("aria-checked", String(x === b)));
+      vivo(); try{ navigator.vibrate && navigator.vibrate(8); }catch{}
+    });
+    $("tpMasNota").addEventListener("click", () => { $("tpMasNota").hidden = true; $("tpNotaBox").hidden = false; $("tpO").focus(); });
+
+    /* la tarjeta de arriba es la misma que verán en Temporada: color, emoji y cuenta regresiva en vivo */
+    function vivo(){
+      const nombre = $("tpN").value.trim(), lugar = $("tpL").value.trim();
+      const p = { nombre: nombre || "Tu plan aparece aquí", desde, hasta: varios && hasta ? hasta : desde, lugar, para: paraSel };
+      const t = tema({ nombre, lugar }), e = estado(p);
+      card.style.setProperty("--tpH", t.h);
+      if(t.emo !== emoAntes){
+        emoAntes = t.emo;
+        [prev.querySelector(".tpEmo"), sc.querySelector(".fmEmo")].forEach(x => { x.textContent = t.emo; x.classList.remove("tpSalta"); void x.offsetWidth; x.classList.add("tpSalta"); });
+      }
+      prev.querySelector(".tpChip").textContent = e ? e.txt : "Fecha pasada";
+      prev.querySelector("b").textContent = p.nombre;
+      prev.querySelector("small").textContent = rango(p) + (lugar ? " · " + lugar : "") + " · " + para(p);
+      prev.classList.toggle("vacio", !nombre);
+      $("tpOk").classList.toggle("apagado", !nombre);
+    }
+    /* lo escrito queda como borrador (si iOS cierra la app mientras copian de Instagram, no se pierde) */
+    const guardaB = () => { try{ localStorage.setItem(KB, JSON.stringify({ n: $("tpN").value, l: $("tpL").value, o: $("tpO").value })); }catch{} };
+    /* «para quién» se sugiere por el nombre (zoológico, niños, títeres… → con Ema) hasta que lo elijan a mano */
+    const sugierePara = () => { if(paraTocado) return; const t = ($("tpN").value + " " + $("tpO").value).toLowerCase(); marcaPara(/ni[ñn]os|infantil|zool|t[ií]teres|granja|parque|ema\b/.test(t) ? "ema" : /pareja|rom[aá]ntic|vino|concierto|adultos/.test(t) ? "pareja" : "familia"); };
+    $("tpN").addEventListener("input", () => { if($("tpN").value.trim()){ $("tpNErr").textContent = ""; $("tpN").removeAttribute("aria-invalid"); } sugierePara(); vivo(); guardaB(); });
+    $("tpL").addEventListener("input", () => { vivo(); guardaB(); });
+    $("tpO").addEventListener("input", () => { sugierePara(); vivo(); guardaB(); });
+
+    /* teclado del iPhone: «siguiente» salta a ¿Dónde?, «listo» lo cierra, y el campo activo queda a la vista */
+    $("tpN").addEventListener("keydown", ev => { if(ev.key === "Enter"){ ev.preventDefault(); $("tpL").focus(); } });
+    ["tpL", "tpO"].forEach(id => $(id).addEventListener("keydown", ev => { if(ev.key === "Enter"){ ev.preventDefault(); ev.target.blur(); } }));
+    const aLaVista = el => {   // con el teclado arriba la tarjeta queda fija (sticky): el campo se acomoda justo debajo de ella
+      const r = el.getBoundingClientRect(), rb = body.getBoundingClientRect();
+      const tope = sc.classList.contains("escribe") ? prev.offsetHeight + 18 : rb.height * 0.3;
+      body.scrollBy({ top: r.top - rb.top - tope, behavior: REDUCED ? "auto" : "smooth" });
+    };
+    sc.addEventListener("focusin", ev => { if(!ev.target.matches('input[type="text"]')) return; sc.classList.add("escribe"); setTimeout(() => aLaVista(ev.target), 320); });
+    sc.addEventListener("focusout", () => setTimeout(() => { const a = document.activeElement; if(!a || !sc.contains(a) || !a.matches('input[type="text"]')) sc.classList.remove("escribe"); }, 80));
+
+    /* cerrar: Volver siempre; Escape o tocar afuera solo si no han escrito nada */
+    const hayDatos = () => !!($("tpN").value.trim() || $("tpL").value.trim() || $("tpO").value.trim());
+    const tecla = ev => { if(ev.key === "Escape" && !hayDatos()) cierra(); };
+    const cierra = () => { document.removeEventListener("keydown", tecla); sc.classList.remove("on"); setTimeout(() => sc.remove(), 340); };
+    document.addEventListener("keydown", tecla);
+    sc.addEventListener("click", ev => { if(ev.target === sc && !hayDatos()) cierra(); });
+    sc.querySelector(".fmVolver").addEventListener("click", cierra);
+
+    /* guardar: misma lógica de siempre; los errores salen junto al campo, con un temblor corto */
+    const marcaError = (el, caja, msg) => {
+      $(caja).textContent = msg;
+      if(el){ el.setAttribute("aria-invalid", "true"); el.classList.remove("tpMal"); void el.offsetWidth; el.classList.add("tpMal"); aLaVista(el); }
+      try{ navigator.vibrate && navigator.vibrate([10, 30, 10]); }catch{}
+    };
     $("tpOk").addEventListener("click", async () => {
-      const nombre = $("tpN").value.trim(), desde = $("tpD").value, hasta = $("tpH").value || desde;
-      if(!nombre){ $("tpErr").textContent = "Escribe qué es el plan."; return; }
-      if(!/^\d{4}-\d{2}-\d{2}$/.test(desde)){ $("tpErr").textContent = "Elige la fecha en que empieza."; return; }
-      if(hasta < desde){ $("tpErr").textContent = "«Hasta» no puede ser antes de «Desde»."; return; }
-      const plan = { id: "tp" + Date.now().toString(36), nombre, desde, hasta, lugar: $("tpL").value.trim(), nota: $("tpO").value.trim(), para: paraSel };
+      if(guardando) return;   // un doble toque no lo anota dos veces
+      const nombre = $("tpN").value.trim(), fin = varios ? hasta : desde;
+      if(!nombre){ marcaError($("tpN"), "tpNErr", "Escribe qué es el plan."); $("tpN").focus({ preventScroll: true }); return; }
+      if(!/^\d{4}-\d{2}-\d{2}$/.test(desde)){ marcaError($("tpDias"), "tpFErr", "Elige la fecha en que empieza."); return; }
+      if(varios && !hasta){ marcaError(sc.querySelector(".tpHasta"), "tpFErr", "Elige hasta qué día dura, o marca «Un solo día»."); return; }
+      if(fin < desde){ marcaError(sc.querySelector(".tpHasta"), "tpFErr", "«Hasta» no puede ser antes de «Desde»."); return; }
+      guardando = true;
+      const plan = { id: "tp" + Date.now().toString(36), nombre, desde, hasta: fin, lugar: $("tpL").value.trim(), nota: $("tpO").value.trim(), para: paraSel };
       planes = planes.concat(plan); guarda(); pintaTodo(); cierra();
+      try{ localStorage.removeItem(KB); }catch{}
       exito("Plan anotado", nombre + " · " + rango(plan));
       try{ await pide({ accion: "agregar", plan }); pintaTodo(); }catch{}
     });
-    setTimeout(() => $("tpN").focus({ preventScroll: true }), 300);
+
+    { const b = leeB(); if(b.n || b.l || b.o){ $("tpN").value = b.n || ""; $("tpL").value = b.l || ""; if(b.o){ $("tpO").value = b.o; $("tpMasNota").hidden = true; $("tpNotaBox").hidden = false; } sugierePara(); } }
+    pintaFechas(); vivo();
+    if(matchMedia("(pointer:fine)").matches) setTimeout(() => $("tpN").focus({ preventScroll: true }), 300);   // en el celular no: que vean la tarjeta antes de que suba el teclado
   }
   /* la pantalla «Temporada» (Salidas → Temporada): todo lo que viene, en grande */
   const vistaEl = document.getElementById("tempLista");
