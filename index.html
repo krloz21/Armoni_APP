@@ -3330,7 +3330,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-17.222";
+const APP_VERSION = "2026-10-17.223";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -9057,12 +9057,12 @@ const Pagos = (function(){
   const VENTANA = { aleja: [1, 5], carlos: [15, 23] };
   function pendientesCelulares(){
     const dia = new Date().getDate();
-    return PERSONAS.filter(x => dia >= VENTANA[x.id][0] && dia <= VENTANA[x.id][1] && !celPagado(x.id)).map(x => ({ id: "cel_" + x.id, nombre: x.id === "aleja" ? "el celular de Aleja" : "el celular amor (Carlos)" }));
+    return PERSONAS.filter(x => dia >= VENTANA[x.id][0] && dia <= VENTANA[x.id][1] && !celPagado(x.id)).map(x => ({ id: "cel_" + x.id, nombre: x.id === "aleja" ? "el celular de Aleja" : "el celular de Carlos (amor)" }));
   }
   /* Notion dice qué celulares ya se pagaron este mes (por ejemplo, el correo del pago PSE ya lo registró) */
   async function traePagados(){
     try{
-      const r = await fetch(CELULARES_ESTADO_URL + "?token=" + encodeURIComponent(MERCADO_TOKEN), { cache: "no-store", signal: AbortSignal.timeout ? AbortSignal.timeout(8000) : undefined });
+      const r = await fetch(CELULARES_ESTADO_URL + "?token=" + encodeURIComponent(MERCADO_TOKEN), { cache: "no-store", signal: AbortSignal.timeout ? AbortSignal.timeout(15000) : undefined });
       if(!r.ok) return;
       const j = await r.json();
       if(j && j.ok && j.pagados) PERSONAS.forEach(x => { if(j.pagados[x.id] && !celPagado(x.id)) marcaPagado(x.id, true); });
