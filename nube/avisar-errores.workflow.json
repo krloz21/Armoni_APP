@@ -1,0 +1,48 @@
+{
+  "name": "Armoni - Avisar si un flujo falla",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "b8000000-0000-4000-8000-000000000001",
+      "name": "Si un flujo falla"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Cuando CUALQUIER flujo falla (por ejemplo, Gmail pide reconectarse), manda un aviso al celular para que no pase días sin enterarse.\n// Máximo un aviso cada 6 horas por flujo, para no llenar de notificaciones si se repite cada minuto.\nconst e = $input.first().json || {};\nconst flujo = (e.workflow && e.workflow.name) || 'un flujo';\nconst err = (e.execution && e.execution.error) || {};\nconst msg = String(err.message || 'error').slice(0, 140);\nconst nodo = (e.execution && e.execution.lastNodeExecuted) || (err.node && err.node.name) || '';\nconst sd = $getWorkflowStaticData('global');\nsd.avisosError = sd.avisosError || {};\nconst ahora = Date.now();\nif (sd.avisosError[flujo] && ahora - sd.avisosError[flujo] < 6 * 3600 * 1000) return [{ json: { ok: true, enviado: false, motivo: 'ya avisado' } }];\nconst gmail = /reconnect|credential|token|invalid_grant|unauthorized|401/i.test(msg);\nconst titulo = gmail ? '⚠️ Hay que reconectar una cuenta en n8n' : '⚠️ Falló un flujo de Armoni';\nconst cuerpo = (gmail ? 'Gmail o Notion necesita reconectarse. ' : '') + flujo + (nodo ? ' · ' + nodo : '') + ': ' + msg;\ntry {\n  await this.helpers.httpRequest({ method: 'POST', url: 'http://localhost:5678/webhook/push-enviar', body: { token: 'mercado-7d41c2a9e05b', title: titulo, body: cuerpo, url: './', tag: 'error-flujo' }, json: true, timeout: 15000 });\n  sd.avisosError[flujo] = ahora;\n  Object.keys(sd.avisosError).forEach(k => { if (ahora - sd.avisosError[k] > 7 * 864e5) delete sd.avisosError[k]; });\n  return [{ json: { ok: true, enviado: true, titulo, cuerpo } }];\n} catch (x) {\n  return [{ json: { ok: false, enviado: false, error: String((x && x.message) || x).slice(0, 120) } }];\n}\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        240,
+        0
+      ],
+      "id": "b8000000-0000-4000-8000-000000000002",
+      "name": "Avisar al celular"
+    }
+  ],
+  "connections": {
+    "Si un flujo falla": {
+      "main": [
+        [
+          {
+            "node": "Avisar al celular",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": []
+}
