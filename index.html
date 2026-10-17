@@ -3330,7 +3330,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-17.220";
+const APP_VERSION = "2026-10-17.221";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -6133,7 +6133,7 @@ const Temporada = (function(){
   const esc = t => String(t == null ? "" : t).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
   /* por si el flujo todavía no está: los planes que ya me contaron */
   const SEMILLA = [
-    { id: "motor-2026", nombre: "Feria de carros, motos y gastronomía", desde: "2026-10-15", hasta: "2026-10-18", lugar: "", para: "familia" },
+    { id: "motor-2026", nombre: "Feria de carros, motos y gastronomía", desde: "2026-10-15", hasta: "2026-10-18", lugar: "Mall Plaza", para: "familia" },
     { id: "zoo-2026", nombre: "Entrada gratis al Zoológico para niños", desde: "2026-10-31", hasta: "2026-10-31", lugar: "Zoológico de Cali", para: "ema" },
     { id: "cafe-2026", nombre: "Festival del Café", desde: "2026-11-13", hasta: "2026-11-16", lugar: "CC La Estación", para: "familia" }
   ];
@@ -6157,6 +6157,7 @@ const Temporada = (function(){
     return { ahora: true, fase: "hoy", txt: z === 1 ? "Hasta mañana" : "Quedan " + (z + 1) + " días", cerca: true };
   }
   let planes = (() => { try{ const d = JSON.parse(localStorage.getItem(KEY)); return Array.isArray(d) ? d : null; }catch{ return null; } })() || SEMILLA.slice();
+  planes.forEach(p => { if(p.id === "motor-2026" && !p.lugar) p.lugar = "Mall Plaza"; });   // la feria de carros es en Mall Plaza
   const guarda = () => { try{ localStorage.setItem(KEY, JSON.stringify(planes)); }catch{} };
   const vigentes = () => planes.map(p => ({ p, e: estado(p) })).filter(x => x.e).sort((a, b) => (b.e.ahora - a.e.ahora) || a.p.desde.localeCompare(b.p.desde));
 
