@@ -3324,7 +3324,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-16.217";
+const APP_VERSION = "2026-10-16.218";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -6040,6 +6040,22 @@ const SalidasEma = (function(){
    PLANES EN COMFANDI: n8n revisa eventos y hoteles dos veces al día (sin pasadías)
    y avisa al celular cuando sale algo nuevo; aquí se ven con «Nuevo» hasta que los abras
    ════════════════════════════════════════════════════════════ */
+/* ── los pop-ups no se cierran por un toque accidental: mientras hacen su animación de entrada se ignoran los toques en ellos (y fuera de ellos) ── */
+(function protegePopups(){
+  const SEL = ".pgScrim, .cfAn, .tpAn, .sheetScrim, .payScrim, .paySheet, .cxScrim";
+  const DUR = el => el.classList.contains("tpAn") ? 1400 : el.classList.contains("cfAn") ? 1100 : el.classList.contains("cxScrim") ? 900 : 700;
+  const nace = new WeakMap();
+  const marca = n => { if(n.nodeType !== 1) return; const t = performance.now(); if(n.matches(SEL)) nace.set(n, t); if(n.querySelectorAll) n.querySelectorAll(SEL).forEach(x => nace.set(x, t)); };
+  new MutationObserver(ms => ms.forEach(m => m.addedNodes.forEach(marca))).observe(document.body, { childList: true });
+  const frena = e => {
+    const t = e.target && e.target.closest ? e.target.closest(SEL) : null;
+    if(!t) return;
+    const t0 = nace.get(t);
+    if(t0 && performance.now() - t0 < DUR(t)){ e.stopPropagation(); e.preventDefault(); }
+  };
+  ["pointerdown", "mousedown", "click"].forEach(ev => document.addEventListener(ev, frena, true));
+})();
+
 /* ════════════════════════════════════════════════════════════
    SIN CONEXIÓN CON LA CASA: al abrir la app y no poder hablar con la casa, muestra una revisión sencilla:
    1) ¿el PC está prendido? 2) ¿Tailscale está prendido? (✓ o ✗) y abajo «Seguir sin conexión».
