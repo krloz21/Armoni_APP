@@ -3274,6 +3274,91 @@ body.mode-mercar:has(#mkStage .mcTop) #thread{ -webkit-mask-image:none; mask-ima
   .mkBtns .mkOpc{ transition:none; }
 }
 
+/* juegoB: game feel encima de juegoA (reparto con giro, impacto, canasta que atrapa, racha con fuego, barra con brillo, final con confeti).
+   Todo lo que se mueve es transform/opacity; nada queda animando en reposo (las animaciones son de una vez o con pocas vueltas). */
+:root{ --fxSi:74,222,128; --fxNo:255,146,60; --fxOro:253,224,71; }
+:root[data-theme="light"]{ --fxSi:110,231,160; --fxNo:255,171,112; --fxOro:250,214,110; }
+/* «No hay» pasa de rojo a naranja: va a la canasta, no es un error */
+.mkBtns .mkNo{ background:rgba(var(--fxNo),.13); color:rgb(var(--fxNo)); box-shadow:inset 0 0 0 2px rgba(var(--fxNo),.5); }
+.mkBtns .mkNo.listo{ background:rgba(var(--fxNo),.26); box-shadow:inset 0 0 0 2px rgb(var(--fxNo)), 0 0 24px -4px rgba(var(--fxNo),.75); }
+.mkBtns .mkSi{ color:rgb(var(--fxSi)); }
+.mkNo .mkOpcN{ background:#f97316; } .mkSi .mkOpcN{ background:#16a34a; }
+.mkNo .mkMas{ color:rgb(var(--fxNo)); } .mkSi .mkMas{ color:rgb(var(--fxSi)); }
+.mkStamp.no{ color:rgb(var(--fxNo)); border-color:rgb(var(--fxNo)); }
+.mkStamp.si{ color:rgb(var(--fxSi)); border-color:rgb(var(--fxSi)); }
+.mkDeck[data-lado="no"]::before{ background:radial-gradient(55% 50% at 22% 52%, rgba(var(--fxNo),.55), transparent 72%); }
+.mkStat.canasta{ border-color:rgba(var(--fxNo),.45); } .mkStat.canasta b{ color:rgb(var(--fxNo)); }
+/* el tema «claro» de Armoni es grafito (fondo oscuro): los rojos/verdes oscuros de juegoA no se leían; aquí van claros */
+:root[data-theme="light"] .mkBtns .mkNo{ color:rgb(var(--fxNo)); } :root[data-theme="light"] .mkBtns .mkSi{ color:rgb(var(--fxSi)); }
+:root[data-theme="light"] .mkNo .mkMas, :root[data-theme="light"] .mkStat.canasta b{ color:rgb(var(--fxNo)); }
+:root[data-theme="light"] .mkSi .mkMas, :root[data-theme="light"] .mkStat.casa b{ color:rgb(var(--fxSi)); }
+:root[data-theme="light"] .mkStat.combo b{ color:#ffc285; }
+:root[data-theme="light"] .mkPts{ color:#fde68a; background:rgba(250,214,110,.12); border-color:rgba(250,214,110,.4); }
+:root[data-theme="light"] .mkNivelFin .estrellas i.on{ color:#fde68a; text-shadow:0 0 16px rgba(250,214,110,.55); }
+
+/* las entradas de las cartas las hace juegoB con Web Animations (no se repiten al soltar un arrastre) */
+.mkDeck.fxOn .mkCard.nueva, .mkDeck.fxOn .mkCard.llega, .mkDeck.fxOn.reparte .mkCard:not(.atras){ animation:none; }
+
+/* barra de nivel: se llena con scaleX (no width) y lleva una punta brillante y un destello que la recorre */
+.mkHud .mkBar{ position:relative; overflow:hidden; isolation:isolate; }
+.mkHud .mkBar.fxBar i{ width:100% !important; transform-origin:0 50%; transform:scaleX(var(--fxw, 0)); transition:transform .6s cubic-bezier(.34,1.3,.64,1); }
+.mkHud .mkBar.fxBar i::after{ display:none; }
+.fxPunta{ position:absolute; inset:0; pointer-events:none; overflow:hidden; transform:translateX(calc((var(--fxw, 0) - 1) * 100%)); transition:transform .6s cubic-bezier(.34,1.3,.64,1); }
+.fxPunta::after{ content:""; position:absolute; right:0; top:50%; width:10px; height:10px; margin-top:-5px; border-radius:50%; background:#fff; box-shadow:0 0 10px 3px rgba(var(--cyan-rgb),.9); opacity:calc(var(--fxw, 0) * 40); }
+/* el destello va dentro de la parte llena (no cruza la pista vacía) */
+.fxBrillo{ position:absolute; inset:0; pointer-events:none; }
+.fxBrillo::before{ content:""; position:absolute; top:0; bottom:0; left:0; width:30%; background:linear-gradient(90deg, transparent, rgba(255,255,255,.85), transparent); transform:translateX(-120%); opacity:0; }
+.mkBar.fxPasa .fxBrillo::before{ animation:fxPasa .7s cubic-bezier(.4,0,.2,1); }
+@keyframes fxPasa{ 0%{ transform:translateX(-120%); opacity:0; } 15%{ opacity:1; } 100%{ transform:translateX(340%); opacity:0; } }
+.mkBar.fxLleno{ animation:fxLleno 1s ease-out 2; }
+@keyframes fxLleno{ 0%,100%{ box-shadow:0 0 0 0 rgba(var(--cyan-rgb),0); } 40%{ box-shadow:0 0 16px 2px rgba(var(--cyan-rgb),.7); } }
+
+/* «+20» y «¡COMBO x2!» de juegoA quedaban debajo de la carta que vuela: van encima */
+.mkDeck .mkFlota, .mkDeck .mkCombo{ z-index:25; }
+/* racha: el chip «🔥 xN» chisporrotea un rato (3 vueltas) y luego queda quieto */
+.mkRacha{ position:relative; }
+.mkRacha::after{ content:""; position:absolute; inset:0; border-radius:inherit; pointer-events:none; opacity:0; box-shadow:0 0 12px 1px rgba(255,140,40,.7), inset 0 0 8px rgba(255,190,90,.45); }
+.mkRacha.pop::after{ animation:fxFuego .5s ease-in-out 3 alternate; }
+@keyframes fxFuego{ 0%{ opacity:.25; transform:scale(1); } 50%{ opacity:1; transform:scale(1.06, 1.12); } 100%{ opacity:.4; transform:scale(.98, 1.04); } }
+
+/* XP: el chip brilla cuando le llegan las chispas doradas */
+.mkPts{ position:relative; }
+.mkPts.fxCome{ animation:fxCome .4s cubic-bezier(.34,1.56,.64,1); }
+@keyframes fxCome{ 0%{ transform:scale(1); } 40%{ transform:scale(1.18); box-shadow:0 0 18px 2px rgba(var(--fxOro),.6); } 100%{ transform:scale(1); } }
+
+/* sonido: interruptor en el marcador (apagado por defecto) */
+.fxSon{ flex:none; width:32px; height:32px; border-radius:50%; border:1px solid var(--line); background:rgba(var(--ink),.05); color:var(--ghost); font-size:.95rem; line-height:1; display:grid; place-items:center; cursor:pointer; padding:0; position:relative; transition:transform .3s cubic-bezier(.34,1.56,.64,1), background .2s; }
+.fxSon::before{ content:""; position:absolute; inset:-6px; }
+.fxSon:active{ transform:scale(.88); }
+.fxSon[aria-pressed="true"]{ background:rgba(var(--cyan-rgb),.14); border-color:rgba(var(--cyan-rgb),.4); color:var(--white); }
+
+/* capa de efectos: encima del juego, debajo de cajones y ventanas; vacía cuando no pasa nada */
+#mkFx{ position:fixed; inset:0; z-index:38; pointer-events:none; overflow:hidden; contain:strict; }
+#mkFx > *{ position:absolute; left:0; top:0; will-change:transform, opacity; }
+#mkFx .fxP{ width:8px; height:8px; margin:-4px 0 0 -4px; border-radius:50%; }
+#mkFx .fxP.cua{ border-radius:2px; width:7px; height:10px; }
+#mkFx .fxP.est{ width:auto; height:auto; margin:-.6em 0 0 -.5em; background:none !important; font-size:15px; line-height:1; font-style:normal; }
+#mkFx .fxAro{ width:200px; height:200px; margin:-100px 0 0 -100px; border-radius:50%; }
+#mkFx .fxBorde{ position:absolute; inset:0; left:0; top:0; width:100%; height:100%; box-shadow:inset 0 0 60px 8px rgba(255,150,50,.55); }
+#mkFx canvas{ width:100%; height:100%; }
+/* el confeti de antes (DOM) cede su lugar al de juegoB cuando hay pantalla de nivel */
+.mkFin:has(.mkNivelFin) > .mkConfeti, .mkHecho:has(.mkNivelFin) > .mkConfeti{ display:none; }
+/* final: el panel se enciende una vez y el XP brilla */
+.mkNivelFin{ overflow:hidden; }
+.mkNivelFin::after{ content:""; position:absolute; top:0; bottom:0; left:0; width:45%; pointer-events:none; background:linear-gradient(100deg, transparent, rgba(255,255,255,.22), transparent); transform:translateX(-130%) skewX(-18deg); animation:fxPanel 1.1s cubic-bezier(.4,0,.2,1) .25s 1 both; }
+@keyframes fxPanel{ to{ transform:translateX(330%) skewX(-18deg); } }
+.mkNivelFin .estrellas i{ display:inline-block; }
+.mkXpFin b{ display:inline-block; }
+.mkXpFin.fxListo b{ animation:fxXp .55s cubic-bezier(.34,1.56,.64,1); }
+@keyframes fxXp{ 0%{ transform:scale(1); } 40%{ transform:scale(1.22) rotate(-3deg); } 100%{ transform:scale(1); } }
+.mkStat{ animation:mkSube .5s cubic-bezier(.34,1.56,.64,1) backwards; }
+.mkStat:nth-child(1){ animation-delay:.35s; } .mkStat:nth-child(2){ animation-delay:.49s; } .mkStat:nth-child(3){ animation-delay:.63s; }
+body.asleep #mkFx{ display:none; }
+@media (prefers-reduced-motion: reduce){
+  #mkFx{ display:none; }
+  .mkHud .mkBar.fxBar i, .fxPunta{ transition:none; }
+  .mkRacha.pop::after, .mkBar.fxPasa .fxBrillo::before, .mkBar.fxLleno, .mkPts.fxCome, .mkNivelFin::after, .mkXpFin.fxListo b, .mkStat{ animation:none; }
+}
 /* entrada común de las pantallas: mismo tiempo y mismo ritmo en todas; al ocultarse y volver a mostrarse la animación arranca de cero */
 #restView > *, #creditoView > *, #gmailView > *, #glimView > *, #recuerdaView > *, #ajustesView > *{ animation:vEntra .5s cubic-bezier(.32,.72,0,1) backwards; }
 #restView > :nth-child(2), #creditoView > :nth-child(2), #gmailView > :nth-child(2), #glimView > :nth-child(2), #recuerdaView > :nth-child(2), #ajustesView > :nth-child(2){ animation-delay:0.05s; }
@@ -3480,6 +3565,24 @@ body[class*="mode-"] #masIngreso{ display:none; }
 .fmCard .recChip[aria-pressed="true"], .fmCard .inFechaBtn[aria-pressed="true"]{ background:linear-gradient(140deg, var(--fa1), var(--fa2)); color:var(--on-accent); border-color:transparent; }
 .fmCard input:focus, .fmCard textarea:focus{ border-color:rgba(var(--fa-rgb),.6); box-shadow:0 0 0 3px rgba(var(--fa-rgb),.15); }
 @media (prefers-reduced-motion:reduce){ .fmOrb, .fmOrb::after, .fmCatGrid button, .fmCatIco, .fmDias button, .fmRecs button{ animation:none !important; } }
+/* ══ ux-b ══ «‹ Volver» arriba-izquierda en las subpantallas de A mercar (mismo dibujo que Ajustes, toque de 44 px) */
+.vVolver::before{ content:""; position:absolute; inset:-5px -3px; }
+.vVolver{ margin:0 0 10px 0; }
+#mercarView:has(#mkStage .mkSub) .restIntro{ display:none; }   /* en una subpantalla el título es el de la subpantalla, no «A mercar» dos veces */
+.mcTopFila .vVolver{ margin:0; flex:none; }
+.mcTopFila h3{ min-width:0; }
+/* ✕ de la ventana Editar / ¿Qué se acabó? (arriba-derecha, como las hojas) */
+.inCard .mkEdX{ top:16px; right:16px; }
+.inCard:has(.mkEdX) > h3{ padding:0 38px; }
+/* chips de fecha (Recuerda y Registrar compra) a 44 px de alto */
+#recDia .recChip, #rgDia .recChip, #recFecha{ min-height:44px; }
+/* «Reintentar» en los errores de carga */
+.restStatus:has(.uxReint){ flex-wrap:wrap; }
+.uxReint{ min-height:44px; padding:0 18px; border-radius:999px; border:1px solid var(--line); background:var(--panel); color:var(--white); font:inherit; font-size:.85rem; font-weight:600; cursor:pointer; }
+.uxReint:active{ transform:scale(.96); }
+/* copiar del chat: el dibujo sigue de 26 px, el toque llega a 44 */
+.tools button{ position:relative; }
+.tools button::before{ content:""; position:absolute; inset:-9px; }
 </style>
 </head>
 <body>
@@ -3785,7 +3888,7 @@ body[class*="mode-"] #masIngreso{ display:none; }
         <button type="button" class="gmDrop" id="gmDrop">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></svg>
           <b>Subir el comprobante</b>
-          <span>Antes de enviarlo te vamos a pedir confirmar</span>
+          <span>Se envía por correo a la inmobiliaria · antes te pedimos confirmar</span>
         </button>
         <div class="restStatus" id="gmStatus" aria-live="polite"></div>
         <button type="button" class="gmBtn" id="gmAgain" hidden>Enviar otro comprobante</button>
@@ -3898,7 +4001,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-18.238";
+const APP_VERSION = "2026-10-18.239";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -7914,7 +8017,7 @@ const CreditoCarro = (function(){
     pidiendo = true;
     fetchLive(cache && JSON.stringify(cache.datos))
       .catch(() => {
-        if(!datos) statusEl.innerHTML = 'No se pudo cargar. Revisa tu internet y que Tailscale esté encendido.';
+        if(!datos) statusEl.innerHTML = 'No se pudo cargar. Revisa tu internet y que Tailscale esté encendido.<button type="button" class="uxReint" onclick="CreditoCarro.refresh()">Reintentar</button>';
       })
       .finally(() => { pidiendo = false; });
   }
@@ -8123,6 +8226,7 @@ const AtGmail = (function(){
       msg.className = "err";
       msg.textContent = "Revisa la conexión e inténtalo de nuevo. La imagen sigue elegida.";
       row.hidden = false;   // se puede reintentar sin subirla otra vez
+      scrim.querySelector("#gmSend").textContent = "Reintentar";
     }
   }
 
@@ -9603,7 +9707,7 @@ const AtrasSistema = (function(){
     const c = capaArriba();
     if(c) cierraCapa(c);
     else if(document.body.classList.contains("drawer-open")) Drawer.close();
-    else if(MODE !== "chat"){ const v = document.querySelector("#tpVolver, #ajVolver"); if(v && visible(v)) v.click(); else Drawer.go("chat"); }
+    else if(MODE !== "chat"){ const v = [...document.querySelectorAll("#tpVolver, #ajVolver, .vVolver")].find(visible); if(v) v.click(); else Drawer.go("chat"); }
     else { history.back(); return; }      // nada que cerrar: atrás sale de la app (o vuelve a la página anterior)
     setTimeout(arma, 500);                 // si aún queda algo abierto (p. ej. un formulario de pasos), se vuelve a reservar
   });
@@ -10786,7 +10890,7 @@ const Glim = (function(){
     }
     if(datos) render(); else statusEl.innerHTML = '<span class="dot" aria-hidden="true"></span>Cargando Glim…';
     fetchLive().catch(() => {
-      if(!datos) statusEl.innerHTML = "No se pudo cargar. Revisa tu internet y que Tailscale esté encendido.";
+      if(!datos) statusEl.innerHTML = 'No se pudo cargar. Revisa tu internet y que Tailscale esté encendido.<button type="button" class="uxReint" onclick="Glim.refresh(true)">Reintentar</button>';
     });
   }
 
@@ -10917,7 +11021,7 @@ const Recuerda = (function(){
       clearTimeout(lento);
       if(n !== pedido) return;
       cardEl.classList.remove("cargando");
-      if(!cache[f]){ cardEl.innerHTML = ""; statusEl.innerHTML = "No se pudo cargar. Revisa tu internet y que Tailscale esté encendido."; }
+      if(!cache[f]){ cardEl.innerHTML = ""; statusEl.innerHTML = 'No se pudo cargar. Revisa tu internet y que Tailscale esté encendido.<button type="button" class="uxReint" onclick="Recuerda.refresh(true)">Reintentar</button>'; }
     }
   }
 
@@ -10962,6 +11066,334 @@ function emojiMercado(n, grupo){
   for(const [re, e] of EMOJIS_RE) if(re.test(s)) return e;
   return EMOJI_GRUPO[grupo] || "🛒";
 }
+
+/* Sonido del juego: sintetizado con WebAudio (sin archivos). Apagado por defecto; se enciende con el interruptor 🔇/🔊.
+   El AudioContext solo se crea al primer sonido con el interruptor encendido, y se suspende a los 4 s sin sonar (nada gasta en reposo). */
+const MkSonido = (function(){
+  const K = "armoni.mercar.sonido";
+  let on = false; try{ on = localStorage.getItem(K) === "1"; }catch{}
+  let ac = null, master = null, dormir = 0;
+  function ctx(){
+    if(!on) return null;
+    try{
+      if(!ac){ const A = window.AudioContext || window.webkitAudioContext; if(!A) return null; ac = new A(); master = ac.createGain(); master.gain.value = .32; master.connect(ac.destination); }
+      if(ac.state === "suspended") ac.resume().catch(() => {});
+      clearTimeout(dormir); dormir = setTimeout(() => { try{ ac && ac.suspend(); }catch{} }, 4000);
+      return ac;
+    }catch{ return null; }
+  }
+  /* una nota: oscilador + envolvente corta (ataque 6 ms, caída exponencial) */
+  function nota(f, t, dur, tipo, vol, f2){
+    const o = ac.createOscillator(), g = ac.createGain();
+    o.type = tipo || "triangle"; o.frequency.setValueAtTime(f, t);
+    if(f2) o.frequency.exponentialRampToValueAtTime(f2, t + dur);
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol || .5, t + .006); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g); g.connect(master); o.start(t); o.stop(t + dur + .02);
+  }
+  function ruido(t, dur, vol, desde, hasta){
+    const n = Math.floor(ac.sampleRate * dur), b = ac.createBuffer(1, n, ac.sampleRate), d = b.getChannelData(0);
+    for(let i = 0; i < n; i++) d[i] = Math.random() * 2 - 1;
+    const s = ac.createBufferSource(), f = ac.createBiquadFilter(), g = ac.createGain();
+    s.buffer = b; f.type = "bandpass"; f.Q.value = 1.2; f.frequency.setValueAtTime(desde, t); f.frequency.exponentialRampToValueAtTime(hasta, t + dur);
+    g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    s.connect(f); f.connect(g); g.connect(master); s.start(t); s.stop(t + dur);
+  }
+  const SON = {
+    si(n){ const t = ac.currentTime, k = Math.pow(2, Math.min(n || 0, 12) / 12); nota(660 * k, t, .12, "triangle", .45); nota(990 * k, t + .07, .18, "triangle", .4); ruido(t, .16, .12, 2400, 5200); },
+    no(){ const t = ac.currentTime; nota(300, t, .2, "sine", .55, 150); nota(520, t + .05, .16, "triangle", .25, 420); ruido(t, .22, .14, 1800, 500); },
+    cesta(){ const t = ac.currentTime; nota(180, t, .14, "sine", .5, 90); nota(880, t + .04, .09, "square", .08); },
+    racha(n){ const t = ac.currentTime, base = n >= 10 ? 784 : n >= 6 ? 659 : 523; [0, 4, 7, 12].forEach((s, i) => nota(base * Math.pow(2, s / 12), t + i * .055, .16, "square", .12)); },
+    nivel(){ const t = ac.currentTime; [0, 7, 12, 16, 19].forEach((s, i) => nota(523 * Math.pow(2, s / 12), t + i * .07, .32, "triangle", .32)); },
+    deshacer(){ const t = ac.currentTime; nota(600, t, .14, "sine", .3, 380); },
+    cuenta(ultimo){ const t = ac.currentTime; nota(ultimo ? 1046 : 523, t, ultimo ? .35 : .12, "square", .14); },
+    tic(){ const t = ac.currentTime; nota(1400, t, .03, "square", .05); },
+    fin(){ const t = ac.currentTime; [[0, 0], [4, .12], [7, .24], [12, .36], [7, .5], [12, .62]].forEach(([s, d], i) => nota(523 * Math.pow(2, s / 12), t + d, i === 5 ? .7 : .2, "triangle", .38)); ruido(t + .62, .6, .08, 6000, 9000); },
+    estrella(k){ const t = ac.currentTime; nota(880 * Math.pow(2, (k * 4) / 12), t, .3, "triangle", .3); nota(1760 * Math.pow(2, (k * 4) / 12), t + .02, .2, "sine", .1); }
+  };
+  function toca(nombre, arg){ if(!on || document.hidden || document.body.classList.contains("asleep")) return; const c = ctx(); if(!c || !SON[nombre]) return; try{ SON[nombre](arg); }catch{} }
+  function set(v){ on = !!v; try{ localStorage.setItem(K, on ? "1" : "0"); }catch{} if(!on && ac){ try{ ac.suspend(); }catch{} } else if(on){ ctx(); toca("si", 0); } }
+  return { toca, set, get on(){ return on; } };
+})();
+
+/* ════════════════════════════════════════════════════════════
+   juegoB · game feel del juego de revisión de Mercar (encima de juegoA).
+   Escucha los avisos «mk-juego» de juegoA y mira el DOM de #mkStage; no cambia la lógica ni los datos.
+   Partículas/destellos en una capa fija (#mkFx) que solo existe mientras algo se mueve; todo con transform/opacity.
+   Con reduced-motion no hay efectos visuales; en reposo (body.asleep) o con la app oculta no se lanza nada.
+   ════════════════════════════════════════════════════════════ */
+const MkFX = (function(){
+  const stage = document.getElementById("mkStage");
+  if(!stage || !Element.prototype.animate) return {};
+  const quieto = () => REDUCED || document.hidden || document.body.classList.contains("asleep");
+  const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim() || "255,255,255";
+  const rgb = (v, a) => "rgba(" + v + "," + (a == null ? 1 : a) + ")";
+  const rnd = (a, b) => a + Math.random() * (b - a);
+
+  /* ── capa de efectos ── */
+  let capa = null;
+  const capaFx = () => { if(!capa || !capa.isConnected){ capa = document.createElement("div"); capa.id = "mkFx"; capa.setAttribute("aria-hidden", "true"); document.body.appendChild(capa); } return capa; };
+  const limpia = () => { if(capa && !capa.firstChild){ capa.remove(); capa = null; } };
+  const centro = el => { const r = el.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2, w: r.width, h: r.height }; };
+  function pieza(tag, cls, estilo, kf, op, txt){
+    const el = document.createElement(tag); el.className = cls; if(estilo) el.style.cssText = estilo; if(txt) el.textContent = txt;
+    capaFx().appendChild(el);
+    const a = el.animate(kf, Object.assign({ fill: "both" }, op));
+    const fin = () => { el.remove(); limpia(); }; a.onfinish = fin; a.oncancel = fin;
+    return a;
+  }
+  /* chispas: n piezas desde (x,y) hacia «ang» (radianes) con abertura «abre»; algunas son estrellas ✦ */
+  function chispas(x, y, n, colores, o){
+    o = o || {};
+    for(let i = 0; i < n; i++){
+      const ang = (o.ang || 0) + (Math.random() - .5) * (o.abre == null ? Math.PI * 2 : o.abre);
+      const d = rnd(o.dmin || 50, o.dmax || 130), dx = Math.cos(ang) * d, dy = Math.sin(ang) * d, g = o.grav == null ? 30 : o.grav;
+      const est = o.estrellas && i % o.estrellas === 0, col = colores[i % colores.length];
+      const cls = "fxP" + (est ? " est" : i % 3 === 1 ? " cua" : ""), r = rnd(-200, 200) | 0, s = rnd(.7, 1.25);
+      const estilo = est ? "color:" + col + ";text-shadow:0 0 8px " + col : "background:" + col + ";box-shadow:0 0 6px " + col;
+      pieza("i", cls, estilo, [
+        { transform: "translate(" + x + "px," + y + "px) scale(" + (s * .4) + ") rotate(0deg)", opacity: 1 },
+        { transform: "translate(" + (x + dx * .72) + "px," + (y + dy * .72) + "px) scale(" + s + ") rotate(" + r * .6 + "deg)", opacity: 1, offset: .45 },
+        { transform: "translate(" + (x + dx) + "px," + (y + dy + g) + "px) scale(.15) rotate(" + r + "deg)", opacity: 0 }
+      ], { duration: rnd(o.dur || 560, (o.dur || 560) + 220), delay: (o.delay || 0) + rnd(0, 50), easing: "cubic-bezier(.15,.75,.35,1)" }, est ? (i % 2 ? "✦" : "★") : "");
+    }
+  }
+  /* aro que se abre y destello lleno, del color de la decisión */
+  function aro(x, y, c, esc, dur, grueso){
+    pieza("i", "fxAro", "border:" + (grueso || 3) + "px solid " + rgb(c, .85) + ";box-shadow:0 0 18px " + rgb(c, .6) + ", inset 0 0 14px " + rgb(c, .4), [
+      { transform: "translate(" + x + "px," + y + "px) scale(.15)", opacity: .95 },
+      { transform: "translate(" + x + "px," + y + "px) scale(" + (esc || 1) + ")", opacity: 0 }
+    ], { duration: dur || 460, easing: "cubic-bezier(.2,.8,.3,1)" });
+  }
+  function destello(x, y, c, esc){
+    pieza("i", "fxAro", "background:radial-gradient(circle, " + rgb(c, .55) + " 0%, " + rgb(c, .18) + " 40%, transparent 68%)", [
+      { transform: "translate(" + x + "px," + y + "px) scale(.4)", opacity: 1 },
+      { transform: "translate(" + x + "px," + y + "px) scale(" + (esc || 1.6) + ")", opacity: 0 }
+    ], { duration: 380, easing: "ease-out" });
+  }
+  /* chispas doradas que viajan en arco hasta un elemento (el XP); al llegar, el elemento «come» */
+  function viaja(x, y, dest, n, color){
+    if(!dest) return;
+    const t = centro(dest);
+    for(let i = 0; i < n; i++){
+      const mx = (x + t.x) / 2 + rnd(-60, 60), my = Math.min(y, t.y) - rnd(30, 80);
+      const a = pieza("i", "fxP", "background:" + color + ";box-shadow:0 0 10px 2px " + color, [
+        { transform: "translate(" + x + "px," + y + "px) scale(.6)", opacity: 0 },
+        { transform: "translate(" + x + "px," + y + "px) scale(1.3)", opacity: 1, offset: .1 },
+        { transform: "translate(" + mx + "px," + my + "px) scale(1)", opacity: 1, offset: .55 },
+        { transform: "translate(" + t.x + "px," + t.y + "px) scale(.5)", opacity: .2 }
+      ], { duration: 560, delay: i * 70, easing: "cubic-bezier(.45,.05,.4,1)" });
+      if(i === 0) a.finished.then(() => { if(dest.isConnected){ dest.classList.remove("fxCome"); void dest.offsetWidth; dest.classList.add("fxCome"); } }, () => {});
+    }
+  }
+  function sacude(el, fuerte, vertical){
+    if(!el) return;
+    const k = fuerte || 5, f = vertical ? v => "translateY(" + v + "px)" : v => "translateX(" + v + "px)";
+    el.animate([0, -k, k * .8, -k * .55, k * .3, 0].map(v => ({ transform: f(v) })), { duration: 300, easing: "ease-out" });
+  }
+  function borde(){
+    pieza("i", "fxBorde", "", [{ opacity: 0 }, { opacity: 1, offset: .25 }, { opacity: 0 }], { duration: 650, easing: "ease-out" });
+  }
+
+  /* ── cartas: entradas hechas con Web Animations (una sola vez; si el dedo las agarra, terminan al instante) ── */
+  const anims = new WeakMap();
+  const guardaAn = (el, a) => { const l = anims.get(el) || []; l.push(a); anims.set(el, l); a.finished.then(() => anims.delete(el), () => {}); return a; };
+  const terminaAn = el => { (anims.get(el) || []).forEach(a => { try{ a.finish(); }catch{} }); anims.delete(el); };
+  let vuelveDe = "";          // al deshacer, la carta vuelve desde el botón al que se fue
+  const pila = [];            // lados elegidos (para saber de dónde vuelve)
+  function entraCarta(card){
+    const em = card.querySelector(".mkEmoji"), nom = card.querySelector(".mkName"), resto = card.querySelectorAll(".mkHint, .mkFlag, .mkGrupo");
+    let kf;
+    if(vuelveDe){
+      const b = document.querySelector((vuelveDe === "si" ? "#mkSi" : "#mkNo") + " .mkOpcIco"), c = centro(card), t = b ? centro(b) : { x: c.x, y: c.y + 300 };
+      const dx = t.x - c.x, dy = t.y - c.y, g = vuelveDe === "si" ? 1 : -1;
+      kf = [{ transform: "translate(" + dx + "px," + dy + "px) rotate(" + g * 28 + "deg) scale(.12)", opacity: .3 },
+            { transform: "translate(" + dx * .3 + "px," + (dy * .1 - 40) + "px) rotate(" + g * 8 + "deg) scale(.8)", opacity: 1, offset: .55 },
+            { transform: "none", opacity: 1 }];
+      vuelveDe = "";
+    } else {
+      /* reparto: cae girando desde el mazo, se da vuelta (rotateY) y aterriza con un pequeño aplastón */
+      kf = [{ transform: "perspective(800px) translate(70px,-90px) rotate(10deg) rotateY(-100deg) scale(.7)", opacity: 0 },
+            { transform: "perspective(800px) translate(8px,-14px) rotate(2deg) rotateY(-30deg) scale(.95)", opacity: 1, offset: .45 },
+            { transform: "perspective(800px) translateY(4px) rotateY(6deg) scale(1.03,.97)", opacity: 1, offset: .75 },
+            { transform: "none", opacity: 1 }];
+    }
+    guardaAn(card, card.animate(kf, { duration: 560, easing: "cubic-bezier(.2,.85,.3,1)" }));
+    if(em) guardaAn(card, em.animate([{ transform: "scale(.2)", opacity: 0 }, { transform: "scale(1.3,.78)", opacity: 1, offset: .55 }, { transform: "scale(.9,1.12)", offset: .78 }, { transform: "none", opacity: 1 }], { duration: 520, delay: 200, easing: "ease-out", fill: "backwards" }));
+    if(nom) guardaAn(card, nom.animate([{ transform: "translateY(10px)", opacity: 0 }, { transform: "none", opacity: 1 }], { duration: 360, delay: 300, easing: "cubic-bezier(.2,.8,.3,1)", fill: "backwards" }));
+    resto.forEach((r, k) => guardaAn(card, r.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 300, delay: 360 + k * 50, fill: "backwards" })));
+  }
+  function llegaAtras(card){
+    guardaAn(card, card.animate([{ transform: "scale(.8) translateY(46px)", opacity: 0 }, { transform: "scale(.94) translateY(14px)", opacity: 1 }], { duration: 420, delay: 120, easing: "cubic-bezier(.2,.85,.3,1)", fill: "backwards" }));
+  }
+  function sube(card){       // la carta de atrás pasa al frente con un saltito
+    guardaAn(card, card.animate([{ transform: "scale(.94) translateY(14px)" }, { transform: "scale(1.035,.985) translateY(-9px)", offset: .5 }, { transform: "scale(.995,1.01) translateY(1px)", offset: .78 }, { transform: "none" }], { duration: 460, easing: "cubic-bezier(.3,.7,.4,1)" }));
+  }
+
+  /* ── preparar cada partida ── */
+  let obsDeck = null, obsBar = null, obsCuenta = null;
+  function preparar(){
+    const deck = document.getElementById("mkDeck");
+    if(!deck || deck.dataset.fx) return;
+    deck.dataset.fx = "1"; pila.length = 0; vuelveDe = "";
+    if(!REDUCED) deck.classList.add("fxOn");
+    [obsDeck, obsBar, obsCuenta].forEach(o => o && o.disconnect());
+    /* cartas nuevas */
+    obsDeck = new MutationObserver(ms => {
+      if(REDUCED) return;
+      ms.forEach(m => m.addedNodes.forEach(n => {
+        if(n.nodeType !== 1 || !n.classList.contains("mkCard")) return;
+        if(n.classList.contains("nueva") && !n.classList.contains("atras")) entraCarta(n);
+        else if(n.classList.contains("llega")) llegaAtras(n);
+      }));
+    });
+    obsDeck.observe(deck, { childList: true });
+    deck.addEventListener("pointerdown", e => { const c = e.target.closest(".mkCard"); if(c) terminaAn(c); }, true);
+    /* barra: del ancho que pone juegoA a scaleX, con punta y destello */
+    const bar = document.getElementById("mkBar"), bi = document.getElementById("mkBarI");
+    if(bar && bi){
+      bar.classList.add("fxBar");
+      bar.insertAdjacentHTML("beforeend", '<span class="fxPunta" aria-hidden="true"><span class="fxBrillo"></span></span>');
+      const pon = () => bar.style.setProperty("--fxw", ((parseFloat(bi.style.width) || 0) / 100).toFixed(4));
+      pon(); obsBar = new MutationObserver(pon); obsBar.observe(bi, { attributes: true, attributeFilter: ["style"] });
+    }
+    /* sonido: interruptor en el marcador */
+    const fila = stage.querySelector(".mkHudFila.uno"), pts = document.getElementById("mkPts");
+    if(fila && !document.getElementById("mkSonido")){
+      const b = document.createElement("button"); b.type = "button"; b.className = "fxSon"; b.id = "mkSonido";
+      const pinta = () => { b.setAttribute("aria-pressed", MkSonido.on); b.setAttribute("aria-label", MkSonido.on ? "Sonido encendido" : "Sonido apagado"); b.textContent = MkSonido.on ? "🔊" : "🔇"; };
+      pinta(); b.addEventListener("click", () => { MkSonido.set(!MkSonido.on); pinta(); });
+      fila.insertBefore(b, pts || null);
+    }
+    /* cuenta regresiva: solo el sonido (lo visual ya existe) */
+    const cu = document.querySelector("#mkCuenta b");
+    if(cu){ obsCuenta = new MutationObserver(() => { const t = cu.textContent; if(t) MkSonido.toca("cuenta", !/^\d$/.test(t)); }); obsCuenta.observe(cu, { childList: true, characterData: true, subtree: true }); }
+  }
+  new MutationObserver(() => { if(stage.querySelector(".mkHud")) preparar(); }).observe(stage, { childList: true });
+
+  /* ── reacciones a lo que pasa en el juego ── */
+  function alDecidir(d){
+    const card = document.querySelector("#mkDeck .mkCard:not(.atras):not(.volando)");
+    const deck = document.getElementById("mkDeck");
+    const cual = d.cual, c = card ? centro(card) : null;
+    pila.push(cual);
+    MkSonido.toca(cual, d.combo);
+    const btn = document.getElementById(cual === "si" ? "mkSi" : "mkNo"), ico = btn && btn.querySelector(".mkOpcIco");
+    setTimeout(() => { if(cual === "no") MkSonido.toca("cesta"); }, 420);
+    queueMicrotask(() => {                      // decide() ya quitó «atras» a la de atrás y puso a volar la de adelante
+      const nueva = document.querySelector("#mkDeck .mkCard:not(.atras):not(.volando)");
+      if(!REDUCED && nueva && nueva !== card) sube(nueva);
+      if(quieto() || !c) return;
+      const col = css(cual === "si" ? "--fxSi" : "--fxNo"), oro = css("--fxOro");
+      /* impacto: aplastón del emoji, destello, aro y chispas hacia su lado */
+      const em = card.querySelector(".mkEmoji");
+      if(em) em.animate([{ transform: "scale(1)" }, { transform: "scale(1.4,.68)", offset: .3 }, { transform: "scale(.82,1.2)", offset: .65 }, { transform: "scale(1)" }], { duration: 320, easing: "ease-out" });
+      destello(c.x, c.y, col, 1.5); aro(c.x, c.y, col, 1.25);
+      if(cual === "si") chispas(c.x, c.y, 16, [rgb(col), "#d9fbe6", rgb(oro)], { ang: -Math.PI / 3, abre: 2.4, dmin: 60, dmax: 150, estrellas: 4 });
+      else chispas(c.x, c.y, 13, [rgb(col), "#ffd8b8", "#ffb066"], { ang: Math.PI * .85, abre: 1.9, dmin: 50, dmax: 130, grav: 60 });
+      sacude(deck, cual === "si" ? 3 : 5, cual === "si");
+      /* XP: chispas doradas al marcador */
+      viaja(c.x, c.y - c.h * .15, document.getElementById("mkPts"), d.mult > 1 ? 3 : 2, rgb(oro));
+      /* racha: brasas que suben del chip de fuego */
+      const ra = document.getElementById("mkRacha");
+      if(d.combo >= 3 && ra && !ra.hidden){ const r = centro(ra); chispas(r.x, r.y, 6 + Math.min(6, d.combo), ["#ffb347", "#ff7a2f", "#fde047"], { ang: -Math.PI / 2, abre: 1.4, dmin: 18, dmax: 46, grav: -10, dur: 520, estrellas: d.combo >= 6 ? 3 : 0 }); }
+      /* la canasta (o la casa) atrapa la carta: se hunde, rebota y salta un aro */
+      if(ico) setTimeout(() => {
+        if(quieto() || !ico.isConnected) return;
+        const t = centro(ico);
+        ico.animate([{ transform: "none" }, { transform: "translateY(6px) scale(1.28,.72)", offset: .28 }, { transform: "translateY(-7px) scale(.88,1.14)", offset: .62 }, { transform: "translateY(1px) scale(1.03,.97)", offset: .84 }, { transform: "none" }], { duration: 480, easing: "ease-out" });
+        aro(t.x, t.y, col, .55, 420, 2);
+        chispas(t.x, t.y - 6, 9, [rgb(col), "#ffffff", rgb(oro)], { ang: -Math.PI / 2, abre: 1.8, dmin: 22, dmax: 58, grav: 18, dur: 460 });
+      }, 430);
+      /* barra: un destello la recorre cuando avanza; en la mitad y casi al final, chispas en la punta */
+      setTimeout(() => {
+        const bar = document.getElementById("mkBar"); if(!bar || quieto()) return;
+        bar.classList.remove("fxPasa"); void bar.offsetWidth; bar.classList.add("fxPasa");
+        const v = +bar.getAttribute("aria-valuenow"), mx = +bar.getAttribute("aria-valuemax") || 1;
+        const hito = [.5, .75].find(h => v / mx >= h && (v - 1) / mx < h);
+        if(hito){
+          setTimeout(() => { if(!bar.isConnected) return; const r = bar.getBoundingClientRect(), x = r.left + r.width * v / mx, y = r.top + r.height / 2;
+            chispas(x, y, 12, ["#ffffff", rgb(css("--cyan-rgb")), rgb(oro)], { ang: -Math.PI / 2, abre: 3, dmin: 16, dmax: 44, grav: 10, estrellas: 3, dur: 520 });
+            bar.classList.remove("fxLleno"); void bar.offsetWidth; bar.classList.add("fxLleno"); MkSonido.toca("nivel"); }, 380);
+        }
+      }, 300);
+    });
+  }
+  function alCombo(d){
+    MkSonido.toca("racha", d.mult * 3);
+    queueMicrotask(() => {
+      if(quieto()) return;
+      const cb = document.querySelector("#mkDeck .mkCombo"), deck = document.getElementById("mkDeck");
+      if(!cb) return;
+      const c = centro(cb), oro = css("--fxOro");
+      setTimeout(() => {
+        chispas(c.x, c.y, 18, [rgb(oro), "#ffb347", "#ffffff", "#ff7a2f"], { dmin: 50, dmax: 120, grav: 24, estrellas: 2, dur: 640 });
+        aro(c.x, c.y, oro, 1.1, 520);
+      }, 180);
+      borde();
+      if(deck) deck.animate([{ transform: "scale(1)" }, { transform: "scale(1.035)", offset: .3 }, { transform: "scale(1)" }], { duration: 360, easing: "ease-out" });
+    });
+  }
+  function alFin(d){
+    MkSonido.toca("fin");
+    queueMicrotask(() => {
+      const panel = stage.querySelector(".mkNivelFin"); if(!panel) return;
+      if(quieto()) return;
+      confeti();
+      panel.querySelectorAll(".estrellas i.on").forEach(st => {
+        const k = +getComputedStyle(st).getPropertyValue("--k") || 1;
+        setTimeout(() => { if(!st.isConnected || quieto()) return; const c = centro(st); chispas(c.x, c.y, 10, [rgb(css("--fxOro")), "#ffffff", "#ffb347"], { dmin: 22, dmax: 60, grav: 12, estrellas: 2, dur: 520 }); aro(c.x, c.y, css("--fxOro"), .5, 420, 2); MkSonido.toca("estrella", k - 1); }, 300 + k * 220 + 330);
+      });
+      const xp = panel.querySelector(".mkXpFin");
+      if(xp) setTimeout(() => { if(!xp.isConnected) return; xp.classList.add("fxListo");
+        if(/Nuevo récord/.test(xp.textContent) && !quieto()){ const c = centro(xp.querySelector("small") || xp); chispas(c.x, c.y, 22, [rgb(css("--fxOro")), "#ffffff", "#ffb347"], { dmin: 40, dmax: 120, grav: 20, estrellas: 2, dur: 700 }); confeti(true); }
+      }, 1100);
+    });
+  }
+  /* confeti con canvas: dos cañones desde las esquinas de abajo; se apaga solo (≈3 s) y el canvas se quita */
+  function confeti(oro){
+    const W = innerWidth, H = innerHeight, dpr = Math.min(2, devicePixelRatio || 1);
+    const cv = document.createElement("canvas"); cv.width = W * dpr; cv.height = H * dpr; capaFx().appendChild(cv);
+    const g = cv.getContext("2d"); g.scale(dpr, dpr);
+    const cols = oro ? ["#fde047", "#facc15", "#fff7c2", "#ffb347"] : ["#7ee8ff", "#3f7cf6", "#4ade80", "#ff9a3c", "#fde047", "#f0abfc", "#ffffff"];
+    const ps = [];
+    const n = oro ? 50 : 110;
+    for(let i = 0; i < n; i++){
+      const izq = i % 2 === 0, ang = (izq ? -Math.PI / 2 + rnd(.12, .75) : -Math.PI / 2 - rnd(.12, .75)), v = rnd(9, 17) * Math.min(1.25, H / 760);
+      ps.push({ x: izq ? -6 : W + 6, y: H * .78, vx: Math.cos(ang) * v, vy: Math.sin(ang) * v, r: rnd(0, 6.28), vr: rnd(-.3, .3), w: rnd(5, 9), h: rnd(8, 14), c: cols[i % cols.length], f: rnd(0, 6.28), t: rnd(0, 140) });
+    }
+    if(oro) ps.forEach(p => { p.x = rnd(0, W); p.y = -20; p.vx = rnd(-2, 2); p.vy = rnd(2, 5); });
+    let t0 = performance.now(), raf = 0;
+    const paso = t => {
+      const dt = Math.min(2.5, (t - (paso.u || t)) / 16.67); paso.u = t;
+      if(t - t0 > 3400 || !cv.isConnected || document.hidden || document.body.classList.contains("asleep")){ cv.remove(); limpia(); return; }
+      g.clearRect(0, 0, W, H);
+      let vivos = 0;
+      for(const p of ps){
+        if(t - t0 < p.t) { vivos++; continue; }
+        p.vy += .32 * dt; p.vx *= Math.pow(.985, dt); p.vy *= Math.pow(.985, dt);
+        p.x += p.vx * dt + Math.sin(p.f += .1 * dt) * .6; p.y += p.vy * dt; p.r += p.vr * dt;
+        if(p.y > H + 20) continue; vivos++;
+        g.save(); g.translate(p.x, p.y); g.rotate(p.r); g.scale(1, Math.cos(p.f * 1.7));
+        g.fillStyle = p.c; g.globalAlpha = Math.max(0, Math.min(1, (3400 - (t - t0)) / 600)); g.fillRect(-p.w / 2, -p.h / 2, p.w, p.h); g.restore();
+      }
+      if(!vivos){ cv.remove(); limpia(); return; }
+      raf = requestAnimationFrame(paso);
+    };
+    raf = requestAnimationFrame(paso);
+  }
+
+  document.addEventListener("mk-juego", e => {
+    const d = e.detail || {};
+    try{
+      if(d.tipo === "decide") alDecidir(d);
+      else if(d.tipo === "combo") alCombo(d);
+      else if(d.tipo === "fin") alFin(d);
+      else if(d.tipo === "umbral") MkSonido.toca("tic");
+      else if(d.tipo === "deshacer"){ vuelveDe = pila.pop() || ""; MkSonido.toca("deshacer"); }
+    }catch{}
+  });
+  return { chispas, confeti };
+})();
 
 const Mercar = (function(){
   const stage = document.getElementById("mkStage");
@@ -11183,10 +11615,11 @@ const Mercar = (function(){
     const ps = ((datos && datos.productos) || []).filter(p => p.id);
     const scrim = document.createElement("div");
     scrim.className = "pgScrim mkEdita";
-    scrim.innerHTML = '<div class="inWrap"><div class="pgCard inCard" role="dialog" aria-modal="true" aria-labelledby="mkEdT"><h3 id="mkEdT">' + (modo === "canasta" ? "¿Qué se acabó?" : "Editar un producto") + '</h3><div class="inBody" id="mkEdBody"></div></div></div>';
+    scrim.innerHTML = '<div class="inWrap"><div class="pgCard inCard" role="dialog" aria-modal="true" aria-labelledby="mkEdT"><button type="button" class="sheetClose mkEdX" aria-label="Cerrar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button><h3 id="mkEdT">' + (modo === "canasta" ? "¿Qué se acabó?" : "Editar un producto") + '</h3><div class="inBody" id="mkEdBody"></div></div></div>';
     document.body.appendChild(scrim);
     requestAnimationFrame(() => scrim.classList.add("on"));
     const cuerpo = scrim.querySelector("#mkEdBody");
+    scrim.querySelector(".mkEdX").addEventListener("click", () => cierra());
     const cierra = () => { scrim.classList.remove("on"); setTimeout(() => scrim.remove(), 340); document.removeEventListener("keydown", tecla); };
     const tecla = e => { if(e.key === "Escape") cierra(); };
     document.addEventListener("keydown", tecla);
@@ -11200,8 +11633,7 @@ const Mercar = (function(){
         '<label class="mkBusca"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.6-3.6"/></svg>' +
         '<input id="mkEdQ" type="text" inputmode="search" enterkeyhint="search" placeholder="Buscar producto…" autocomplete="off" maxlength="60" aria-label="Buscar producto">' +
         '<button type="button" class="mkBuscaX" aria-label="Borrar búsqueda">×</button></label>' +
-        '<div class="mkEdLista anima" id="mkEdLista"></div>' +
-        '<div class="pgRow"><button type="button" class="pgNo" id="mkEdCerrar" style="flex:1">Cerrar</button></div>', atras);
+        '<div class="mkEdLista anima" id="mkEdLista"></div>', atras);
       const q = cuerpo.querySelector("#mkEdQ"), caja = cuerpo.querySelector("#mkEdLista"), x = cuerpo.querySelector(".mkBuscaX");
       const pinta = () => {
         const t = _quitaTildes(q.value.trim());
@@ -11234,7 +11666,6 @@ const Mercar = (function(){
         const pr = ps.find(p => p.id === b.dataset.id);
         if(modo === "canasta"){ cierra(); setTimeout(() => abrirCanasta(pr), 120); } else formulario(pr);
       });
-      cuerpo.querySelector("#mkEdCerrar").addEventListener("click", cierra);
     }
 
     function formulario(p){
@@ -11680,7 +12111,7 @@ const Mercar = (function(){
     const norm = t => String(t).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
     const CHEV = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>';
     stage.innerHTML =
-      '<div class="mkFin"><h3>¿Qué compraste?</h3><span class="mkCopiado" id="rgCuenta" hidden></span></div>' +
+      '<button type="button" class="ajVolver vVolver mkSub" id="mkCancelar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>Volver</button><div class="mkFin"><h3>¿Qué compraste?</h3><span class="mkCopiado" id="rgCuenta" hidden></span></div>' +
       '<div class="rgFecha"><span class="inLbl" style="margin:0 0 8px">¿Cuándo?</span><div class="recDia" id="rgDia">' +
         '<button type="button" class="recChip" data-d="0" aria-pressed="true">Hoy</button>' +
         '<button type="button" class="recChip" data-d="1" aria-pressed="false">Ayer</button>' +
@@ -11690,8 +12121,7 @@ const Mercar = (function(){
         '<input id="rgBuscar" type="search" placeholder="Buscar algo de la lista" autocomplete="off" autocapitalize="none" spellcheck="false" enterkeyhint="search">' +
         '<button type="button" class="x" id="rgBuscarX" aria-label="Borrar búsqueda" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>' +
       '<div id="rgMain"></div>' +
-      '<div class="mkAcciones"><button type="button" class="mkBtn pri full" id="mkHecho">Guardar lo que compré</button>' +
-      '<button type="button" class="mkBtn sec full" id="mkCancelar">Cancelar</button></div>';
+      '<div class="mkAcciones"><button type="button" class="mkBtn pri full" id="mkHecho">Guardar lo que compré</button></div>';
     fechaCompra = hoyISO();
     const diaFecha = n => { const d = new Date(); d.setDate(d.getDate() - n); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); };
     const chipsDia = [...document.querySelectorAll("#rgDia .recChip[data-d]")], fBtn = document.getElementById("rgFechaBtn"), fIn = document.getElementById("rgFecha");
@@ -11886,9 +12316,9 @@ const Mercar = (function(){
           (x.nuevo ? '<small class="mcNuevo">Nuevo · lo agregaron ahora</small>' : x.fuera && x.tengo ? '<small>Ya no está en la canasta</small>' : '') + '</span>' +
         '<span class="mcEstado">' + (x.tengo ? 'Ya lo tengo' : '') + '</span>' +
         '<span class="mcC" aria-hidden="true">' + ICO_OK + '</span></button>';
-    let html = '<div class="mcTop"><div class="mcTopFila"><h3><span aria-hidden="true">🛒</span>Mercando</h3>' +
+    let html = '<div class="mcTop"><div class="mcTopFila"><button type="button" class="ajVolver vVolver mkSub" id="mcSalir"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>Volver</button><h3><span aria-hidden="true">🛒</span>Mercando</h3>' +
       '<span class="mcCuenta" id="mcCuenta" aria-live="polite">' + (tot ? n + ' <small>de ' + tot + '</small>' : '') + '</span>' +
-      '<button type="button" class="mcSalir" id="mcSalir">Salir</button></div>' +
+      '</div>' +
       (tot ? '<div class="mcBar" role="progressbar" aria-valuemin="0" aria-valuemax="' + tot + '" aria-valuenow="' + n + '" aria-label="Cosas en el carrito"><i style="width:' + (n / tot * 100) + '%"></i></div>' : '') + '</div>' +
       '<div class="mcAvisos" role="status" aria-live="polite">' + avisos.map(a => '<p>' + esc(a) + '</p>').join("") + '</div>' +
       (viejo && n ? '<div class="mcViejo" role="alert"><b>Estas marcas son del ' + esc(diaLargo(mcE.dia)) + '.</b> Si ya hiciste ese mercado, regístralo con esa fecha; si no, borra las marcas.</div>' : '');
@@ -11998,7 +12428,7 @@ const Mercar = (function(){
         else if(espera > 0) setTimeout(() => { if(estado === "inicio") inicio(true); }, espera); else inicio(true);
       }
     }catch{
-      if(!datos) statusEl.innerHTML = "No se pudo cargar. Revisa tu internet y que Tailscale esté encendido.";
+      if(!datos) statusEl.innerHTML = 'No se pudo cargar. Revisa tu internet y que Tailscale esté encendido.<button type="button" class="uxReint" onclick="Mercar.refresh(true)">Reintentar</button>';
     } finally { enVuelo = false; }
   }
   function refresh(entrando){
