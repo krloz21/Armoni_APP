@@ -16,7 +16,7 @@ function pagado(keyword){
 const reglas = [
   { id: 'energia',  nombre: 'la energía',  keyword: 'energia',  desde: 3,  hasta: 10,          seguir: ultimoDiaMes },
   { id: 'agua',     nombre: 'el agua',     keyword: 'agua',     desde: 25, hasta: ultimoDiaMes, seguir: ultimoDiaMes },
-  { id: 'gas',      nombre: 'el gas',      keyword: 'gas',      desde: 25, hasta: ultimoDiaMes, seguir: ultimoDiaMes },
+  { id: 'gas',      nombre: 'el gas',      keyword: 'gas',      desde: 17, hasta: 21,          seguir: ultimoDiaMes },   // vence el 21
   { id: 'internet', nombre: 'el internet', keyword: 'internet', desde: 1,  hasta: 5,           seguir: ultimoDiaMes },
 ];
 

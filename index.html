@@ -2711,7 +2711,7 @@ body.mode-mercar:has(#mkStage .mcTop) #thread{ -webkit-mask-image:none; mask-ima
 .tpCard.ahora .tpChip{ animation:tpLatido 1.6s ease-in-out infinite; }
 .tpX{ position:absolute; top:8px; left:8px; width:28px; height:28px; border-radius:50%; display:grid; place-items:center; font-size:.8rem; color:#fff; background:rgba(0,0,0,.25); opacity:.75; }
 .tpEd{ position:absolute; top:8px; left:42px; width:28px; height:28px; border-radius:50%; display:grid; place-items:center; font-size:.85rem; color:#fff; background:rgba(0,0,0,.25); opacity:.85; }
-.tpGrid .tpEd{ left:46px; }
+.tpGrid .tpX{ left:auto; right:8px; } .tpGrid .tpEd{ left:auto; right:42px; }
 .tpBorrar{ display:flex; align-items:center; justify-content:center; gap:8px; width:100%; min-height:46px; margin-top:16px; padding:10px 14px; border:1px solid rgba(255,107,107,.32); border-radius:14px; background:rgba(255,107,107,.07); color:#ff8a8a; font:inherit; font-size:.9rem; font-weight:650; cursor:pointer; transition:background .2s, transform .15s var(--ease-spring); }
 .tpBorrar svg{ width:18px; height:18px; flex:none; }
 .tpBorrar:active{ transform:scale(.97); background:rgba(255,107,107,.16); }
@@ -2817,9 +2817,17 @@ body.mode-mercar:has(#mkStage .mcTop) #thread{ -webkit-mask-image:none; mask-ima
 .tpIntro{ margin:-4px 4px 14px; color:var(--dim); font-size:.86rem; line-height:1.45; text-align:center; }
 .tpGrupo{ margin:18px 4px 8px; font-size:.72rem; color:var(--dim); letter-spacing:.08em; text-transform:uppercase; }
 .tpGrid{ display:grid; gap:12px; }
-.tpGrid .tpCard{ width:auto; min-height:170px; padding:18px; border-radius:24px; }
-.tpGrid .tpCard b{ font-size:1.12rem; } .tpGrid .tpCard small{ font-size:.8rem; }
-.tpGrid .tpEmo{ font-size:3.4rem; top:12px; right:14px; }
+.tpGrid .tpCard{ width:auto; min-height:96px; padding:12px 14px; border-radius:18px; gap:3px; }
+.tpGrid .tpCard b{ font-size:1rem; padding-right:64px; } .tpGrid .tpCard small{ font-size:.76rem; padding-right:44px; }
+.tpTop h2{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.tpGrid .tpEmo{ font-size:2.2rem; top:auto; bottom:10px; right:12px; }
+/* arriba: Volver a la izquierda, título y «+ Anotar» pequeño (sin el cuadro grande) */
+.tpTop{ display:flex; align-items:center; gap:10px; margin:2px 0 10px; }
+.tpTop h2{ flex:1; margin:0; font-size:1.25rem; letter-spacing:-.01em; text-align:center; }
+.tpVolver, .tpAddMini{ display:inline-flex; align-items:center; gap:4px; min-height:40px; padding:0 12px; border-radius:12px; border:1px solid var(--line); background:rgba(var(--ink),.05); color:var(--white); font:inherit; font-size:.84rem; font-weight:600; cursor:pointer; }
+.tpVolver{ padding-left:6px; } .tpVolver svg{ width:18px; height:18px; }
+.tpAddMini{ border-color:rgba(var(--cyan-rgb),.4); color:var(--cyan); }
+.tpVolver:active, .tpAddMini:active{ transform:scale(.95); }
 .tpGrid .tpNota{ font-size:.78rem; opacity:.9; font-weight:500; }
 .tpAddBig{ width:100%; margin-top:14px; min-height:52px; border-radius:18px; border:1px dashed var(--line); background:rgba(var(--ink),.04); color:var(--white); font:inherit; font-weight:650; cursor:pointer; }
 .tpVacio{ margin:0 4px 6px; padding:14px; border-radius:18px; border:1px dashed var(--line); color:var(--dim); font-size:.84rem; }
@@ -3544,8 +3552,7 @@ body[class*="mode-"] #masIngreso{ display:none; }
       </section>
 
       <section id="tempView" aria-label="Temporada">
-        <div class="restIntro"><h2>De temporada en Cali</h2></div>
-        <p class="tpIntro">Festivales, ferias y planes que solo pasan unos días. Anota lo que veas en Instagram y Armoni les avisa cuando se acerque.</p>
+        <div class="tpTop"><button type="button" class="tpVolver" id="tpVolver" aria-label="Volver a Salidas Ema"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>Volver</button><h2>Temporada</h2><button type="button" class="tpAddMini" data-tp="nuevo" aria-label="Anotar un plan de temporada">+ Anotar</button></div>
         <div id="tempLista"></div>
       </section>
 
@@ -3691,7 +3698,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-18.233";
+const APP_VERSION = "2026-10-18.234";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -6908,7 +6915,7 @@ const Temporada = (function(){
     vistaEl.innerHTML = (v.length ? (ya.length ? '<div class="tpGrupo">Está pasando</div><div class="tpGrid">' + ya.map(tarjeta).join("") + '</div>' : '') +
       (luego.length ? '<div class="tpGrupo">Lo que viene</div><div class="tpGrid">' + luego.map((x, i) => tarjeta(x, i + ya.length)).join("") + '</div>' : '')
       : '<p class="tpVacio">Todavía no hay planes anotados. Cuando veas uno en Instagram, anótalo aquí.</p>') +
-      '<button type="button" class="tpAddBig" data-tp="nuevo">+ Anotar un plan de temporada</button>';
+      '';
   }
   async function vista(){
     pintaVista();
@@ -6936,6 +6943,8 @@ const Temporada = (function(){
   };
   if(box) box.addEventListener("click", clic);
   if(vistaEl) vistaEl.addEventListener("click", clic);
+  const tv = document.getElementById("tempView");
+  if(tv) tv.querySelector(".tpTop").addEventListener("click", ev => { if(ev.target.closest("[data-tp='nuevo']")) nuevo(); else if(ev.target.closest("#tpVolver")) Drawer.go("ema"); });
   /* al abrir Armoni también: si hay algo que está por empezar o pasando, sale el pop-up (una vez por fase) */
   /* sale al abrir Armoni, mientras la presentación se va, una sola vez (los planes se ven siempre en Salidas → Temporada) */
   setTimeout(() => anuncia(0, true), 1900);
@@ -10051,7 +10060,7 @@ const Servicios = (function(){
   const VENCE = {
     energia:  { desde: 3,  hasta: () => 10 },
     agua:     { desde: 25, hasta: ult => ult },
-    gas:      { desde: 25, hasta: ult => ult },
+    gas:      { desde: 17, hasta: () => 21 },   // fecha límite: el 21 de cada mes
     internet: { desde: 1,  hasta: () => 5 },
     cel_aleja:  { desde: 1,  hasta: () => 5 },
     cel_carlos: { desde: 15, hasta: () => 23 },
