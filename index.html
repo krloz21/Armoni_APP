@@ -882,6 +882,11 @@ body.mode-gmail footer, body.mode-glim footer{ display:none; }
 .gmModal .gmRow{ margin-top:20px; }
 .gmRow.split{ justify-content:space-between; flex-wrap:nowrap; }
 .gmRow.split .gmBtn{ flex:1; }
+/* patrón global: en una fila de dos, «Cancelar» va a la izquierda y la acción principal a la derecha */
+.gmRow.split #gmCancel{ order:-1; }
+/* «Volver» de los formularios: el dibujo no cambia, pero el dedo tiene ~44 px para acertarle */
+.fmVolver{ position:relative; }
+.fmVolver::before{ content:""; position:absolute; inset:-7px -4px; }
 .gmThumb{ transition:max-height .45s cubic-bezier(.16,1,.3,1), opacity .3s ease, margin .45s ease; max-height:44vh; }
 .gmModal.busy .gmThumb{ max-height:0; opacity:0; margin:0; border-width:0; }
 .gmStage{ display:none; height:0; overflow:hidden; opacity:0; transition:height .45s cubic-bezier(.16,1,.3,1), opacity .35s ease .1s; }
@@ -3718,7 +3723,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-18.235";
+const APP_VERSION = "2026-10-18.236";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -9382,6 +9387,58 @@ const Drawer = (function(){
 })();
 
 Uso.entra(MODE);   // empieza a medir el apartado con el que abre la app
+
+/* ════════════════════════════════════════════════════════════
+   ATRÁS DEL SISTEMA (botón/gesto de Android, Escape no aplica aquí)
+   Mientras haya algo que cerrar (pop-up, hoja, menú lateral, o un apartado
+   distinto del inicio) se deja UNA entrada de historial de reserva. Al
+   tocar atrás se gasta esa entrada y se cierra solo lo de más arriba,
+   igual que su propio «Volver»/✕. En el inicio sin nada abierto, atrás
+   sale de la app como siempre.
+   ════════════════════════════════════════════════════════════ */
+const AtrasSistema = (function(){
+  const CAPAS = ".pgScrim, .sheetScrim, .paySheet, .masMenu, .ws, .tmAvScrim, .cfAn, .tpAn";
+  const CON_ON = /\b(pgScrim|sheetScrim|paySheet|masMenu|tmAvScrim)\b/;     // estas se marcan .on mientras están abiertas
+  const BOTONES = [".fmVolver:not([hidden])", ".sheetBack", ".sheetClose", ".tpAnX", ".cfAnX", ".wsX", ".tmAvNo",
+    'button[aria-label="Cerrar"]', "[data-cerrar]", ".pgCancel"];
+  const visible = e => { const r = e.getBoundingClientRect(); return r.width > 0 && r.height > 0 && !e.disabled; };
+  function capaArriba(){
+    const ls = [...document.querySelectorAll(CAPAS)].filter(e => !e.classList.contains("sale") && (!CON_ON.test(e.className) || e.classList.contains("on")));
+    let mejor = null, zMejor = -Infinity;
+    ls.forEach(e => { const z = parseInt(getComputedStyle(e).zIndex, 10) || 0; if(z >= zMejor){ zMejor = z; mejor = e; } });
+    return mejor;
+  }
+  const hayAlgo = () => !!capaArriba() || document.body.classList.contains("drawer-open") || MODE !== "chat";
+  let reserva = false;
+  function arma(){
+    if(reserva || !hayAlgo()) return;
+    try{ history.pushState({ armoniAtras: 1 }, ""); reserva = true; }catch{}
+  }
+  let t = 0; const revisa = () => { clearTimeout(t); t = setTimeout(arma, 80); };
+  function cierraCapa(c){
+    if(c.classList.contains("masMenu")){ MenuMas.cierra(); return; }
+    for(const sel of BOTONES){
+      const b = [...c.querySelectorAll(sel)].find(visible);
+      if(b){ b.click(); return; }
+    }
+    document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));   // el resto ya sabe cerrarse con Escape
+  }
+  addEventListener("popstate", () => {
+    reserva = false;
+    const c = capaArriba();
+    if(c) cierraCapa(c);
+    else if(document.body.classList.contains("drawer-open")) Drawer.close();
+    else if(MODE !== "chat"){ const v = document.querySelector("#tpVolver, #ajVolver"); if(v && visible(v)) v.click(); else Drawer.go("chat"); }
+    else { history.back(); return; }      // nada que cerrar: atrás sale de la app (o vuelve a la página anterior)
+    setTimeout(arma, 500);                 // si aún queda algo abierto (p. ej. un formulario de pasos), se vuelve a reservar
+  });
+  new MutationObserver(revisa).observe(document.body, { childList: true, attributes: true, attributeFilter: ["class"] });
+  const rr = document.getElementById("restModalRoot");
+  if(rr) new MutationObserver(revisa).observe(rr, { childList: true, subtree: true, attributes: true, attributeFilter: ["class"] });
+  document.addEventListener("click", revisa, true);
+  revisa();
+  return { revisa };
+})();
 
 /* el aviso de un plan nuevo de Comfandi abre Armoni directo en Salidas Ema */
 try{
