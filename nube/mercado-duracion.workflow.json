@@ -1,0 +1,378 @@
+{
+  "name": "Armoni - Duración inteligente (mercado-duracion)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "mercado-duracion",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "d0a00000-0000-4000-8000-000000000001",
+      "name": "Recibir",
+      "webhookId": "d0a00000-0000-4000-8000-0000000000aa"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Duración inteligente: valida el token y decide si sirve lo calculado hace poco (ahorra lecturas a Notion)\nconst q = $input.first().json.query || {};\nconst ok = q.token === 'mercado-7d41c2a9e05b';\nconst sd = $getWorkflowStaticData('global');\nconst fresco = q.fresco === '1';\nconst cache = sd.duraCache && (Date.now() - sd.duraCache.t) < 3 * 60 * 1000 && !fresco ? sd.duraCache.r : null;\nreturn [{ json: { ok, cache: !!cache, r: cache } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        220,
+        0
+      ],
+      "id": "d0a00000-0000-4000-8000-000000000002",
+      "name": "Validar"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ $json.ok }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        440,
+        0
+      ],
+      "id": "d0a00000-0000-4000-8000-000000000003",
+      "name": "¿Válido?"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c2",
+              "leftValue": "={{ $json.cache }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        660,
+        -96
+      ],
+      "id": "d0a00000-0000-4000-8000-000000000004",
+      "name": "¿Recién calculado?"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json.r }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        880,
+        -240
+      ],
+      "id": "d0a00000-0000-4000-8000-000000000005",
+      "name": "Responder caché"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.notion.com/v1/databases/266bbfb6-7edd-491e-82e2-423917460283/query",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "notionApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Notion-Version",
+              "value": "2022-06-28"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\"page_size\":100}",
+        "options": {
+          "pagination": {
+            "pagination": {
+              "paginationMode": "updateAParameterInEachRequest",
+              "parameters": {
+                "parameters": [
+                  {
+                    "type": "body",
+                    "name": "start_cursor",
+                    "value": "={{ $response.body.next_cursor }}"
+                  }
+                ]
+              },
+              "paginationCompleteWhen": "other",
+              "completeExpression": "={{ !$response.body.has_more }}",
+              "limitPagesFetched": true,
+              "maxRequests": 40,
+              "requestInterval": 350
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        880,
+        -48
+      ],
+      "id": "d0a00000-0000-4000-8000-000000000006",
+      "name": "Productos",
+      "credentials": {
+        "notionApi": {
+          "id": "pgk4uKXwaEEnuyRO",
+          "name": "Notion account"
+        }
+      },
+      "executeOnce": true,
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.notion.com/v1/databases/01c69a2b-1220-4ee7-a90f-c46c32f94614/query",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "notionApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Notion-Version",
+              "value": "2022-06-28"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ page_size: 100, sorts: [{ property: 'Fecha', direction: 'ascending' }], filter: { or: [ { property: 'Fecha', date: { on_or_after: $now.minus({ days: 730 }).toFormat('yyyy-MM-dd') } }, { property: 'Fecha', date: { is_empty: true } } ] } }) }}",
+        "options": {
+          "pagination": {
+            "pagination": {
+              "paginationMode": "updateAParameterInEachRequest",
+              "parameters": {
+                "parameters": [
+                  {
+                    "type": "body",
+                    "name": "start_cursor",
+                    "value": "={{ $response.body.next_cursor }}"
+                  }
+                ]
+              },
+              "paginationCompleteWhen": "other",
+              "completeExpression": "={{ !$response.body.has_more }}",
+              "limitPagesFetched": true,
+              "maxRequests": 40,
+              "requestInterval": 350
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1100,
+        -48
+      ],
+      "id": "d0a00000-0000-4000-8000-000000000007",
+      "name": "Compras",
+      "credentials": {
+        "notionApi": {
+          "id": "pgk4uKXwaEEnuyRO",
+          "name": "Notion account"
+        }
+      },
+      "executeOnce": true,
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// Modelo de Duración (copiado de durA_modelo.js — editar allá y regenerar con durA_construir.js)\n/* durA_modelo.js — Modelo de «Duración» de Armoni (contrato dura v1, ver durA_contrato.md)\n * Función pura, sin dependencias: corre igual en Node (tests) y dentro de un nodo Code de n8n.\n *\n * calcularDuracion({ hoy, productos, compras }) → { v, hoy, productos: { idSinGuiones: dura }, global }\n *   productos: [{ id, nombre, grupo, falta, marcadoEl, acaboEl }]          (Mercado - Productos)\n *   compras:   [{ productoId, fecha:'YYYY-MM-DD', nombre, cantidad?, acaboAnterior? }]   (Mercado - Compras; nombre trae « · detalle »)\n *              acaboAnterior opcional: día en que se acabó la compra anterior (lo que marcaba «Marcado el» al registrar).\n *              cantidad opcional: número (multiplica el detalle) o texto (\"2 libras\").\n */\nfunction calcularDuracion(entrada) {\n  'use strict';\n  const SEP = ' · ';\n  const hoy = String(entrada.hoy || '').slice(0, 10);\n  const productos = Array.isArray(entrada.productos) ? entrada.productos : [];\n  const compras = Array.isArray(entrada.compras) ? entrada.compras : [];\n\n  /* ── utilidades de fecha ── */\n  const esFecha = f => /^\\d{4}-\\d{2}-\\d{2}$/.test(String(f || '').slice(0, 10));\n  const f10 = v => { if (!v) return null; if (typeof v === 'object') v = v.start || v.date || ''; const t = String(v).slice(0, 10); return esFecha(t) ? t : null; };\n  const ms = f => Date.parse(f + 'T12:00:00Z');\n  const dif = (a, b) => Math.round((ms(b) - ms(a)) / 864e5);\n  const suma = (f, n) => new Date(ms(f) + Math.round(n) * 864e5).toISOString().slice(0, 10);\n  const idc = id => String(id || '').replace(/-/g, '').toLowerCase();\n  const norm = t => String(t || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/\\s+/g, ' ').trim();\n  const baseNom = n => String(n || '').split(SEP)[0].trim();\n  const detNom = n => { const s = String(n || ''), k = s.indexOf(SEP); return k < 0 ? '' : s.slice(k + SEP.length).trim(); };\n  const MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];\n  const MES_C = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];\n  const nomMes = m => MESES[+m.slice(5, 7) - 1];\n  const fCorta = f => (+f.slice(8, 10)) + ' ' + MES_C[+f.slice(5, 7) - 1];\n  const DIAS_S = ['domingos', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábados'];\n\n  /* ── estadística ── */\n  const mediana = a => { const s = a.slice().sort((x, y) => x - y), n = s.length; return n ? (n % 2 ? s[(n - 1) / 2] : (s[n / 2 - 1] + s[n / 2]) / 2) : null; };\n  const binomCola = (k, n, p) => { // P(X >= k)\n    let t = 0; for (let i = k; i <= n; i++) { let c = 1; for (let j = 0; j < i; j++) c = c * (n - j) / (j + 1); t += c * Math.pow(p, i) * Math.pow(1 - p, n - i); } return t;\n  };\n  const r1 = x => Math.round(x * 10) / 10;\n\n  /* ── cantidades: «2 libras», «1/2 kilo», «x3», «2 de 500 g», «una docena», «30 huevos» ── */\n  const NUM_PAL = { un: 1, uno: 1, una: 1, dos: 2, tres: 3, cuatro: 4, cinco: 5, seis: 6, siete: 7, ocho: 8, nueve: 9, diez: 10, doce: 12, quince: 15, veinte: 20, treinta: 30, medio: .5, media: .5 };\n  const UNI = [ // [regex, etiqueta, dimensión, factor a unidad base]\n    [/^(lb|lbs|libras?)$/, 'lb', 'masa', 500], [/^(kg|kgs|kilos?|kilogramos?)$/, 'kg', 'masa', 1000], [/^(g|gr|grs|gramos?)$/, 'g', 'masa', 1],\n    [/^(arrobas?)$/, 'arroba', 'masa', 12500], [/^(ml|cc|mililitros?)$/, 'ml', 'vol', 1], [/^(l|lt|lts|litros?)$/, 'l', 'vol', 1000],\n    [/^(galon|galones)$/, 'galón', 'vol', 3785], [/^(docenas?)$/, 'unid', 'unid', 12], [/^(cubetas?)$/, 'unid', 'unid', 30],\n    [/^(u|und|unds|unid|unidad|unidades)$/, 'unid', 'unid', 1],\n    [/^(paquetes?|paq|bolsas?|cajas?|tarros?|botellas?|frascos?|latas?|rollos?|pacas?|sobres?|barras?)$/, null, 'paq', 1]\n  ];\n  const ETQ = { lb: ['libra', 'libras'], kg: ['kilo', 'kilos'], g: ['gramo', 'gramos'], arroba: ['arroba', 'arrobas'], ml: ['ml', 'ml'], l: ['litro', 'litros'], 'galón': ['galón', 'galones'], unid: ['unidad', 'unidades'] };\n  const numTxt = s => { s = s.replace(',', '.'); if (s === '½') return .5; if (/^\\d+\\/\\d+$/.test(s)) { const [a, b] = s.split('/').map(Number); return b ? a / b : null; } const n = parseFloat(s); return isFinite(n) ? n : (s in NUM_PAL ? NUM_PAL[s] : null); };\n  const singular = w => w.replace(/(es|s)$/, '') || w;\n  function leeCantidad(texto) {\n    let t = norm(texto).replace(/½/g, ' ½ ').replace(/(\\d)\\s*([a-z])/g, '$1 $2');\n    if (!t) return null;\n    let mult = 1, m;\n    if ((m = t.match(/(?:^|\\s)x\\s*(\\d+)\\b|\\b(\\d+)\\s*x(?:\\s|$)/))) { mult = +(m[1] || m[2]); t = t.replace(m[0], ' ').trim(); }\n    const tok = t.split(/\\s+/).filter(Boolean);\n    let n = null, u = null, extra = 0;\n    for (let i = 0; i < tok.length; i++) {\n      const v = numTxt(tok[i]);\n      if (v != null && n == null) { n = v; continue; }\n      if (v != null && n != null && u == null && tok[i - 1] === 'de') { n = n * v; continue; } // «2 de 500 g»\n      if (tok[i] === 'y' && (tok[i + 1] === 'media' || tok[i + 1] === 'medio')) { extra = .5; i++; continue; }\n      if (u == null && n != null) {\n        const w = tok[i]; if (w === 'de') continue;\n        const hit = UNI.find(x => x[0].test(w));\n        if (hit) u = { etq: hit[1] || singular(w), dim: hit[2] === 'paq' ? 'paq:' + singular(w) : hit[2], f: hit[3] };\n        else if (/^[a-z]{3,}$/.test(w)) u = { etq: 'unid', dim: 'unid', f: 1 };   // «30 huevos», «6 bananos»\n      }\n      if (u == null && n == null) { const hit = UNI.find(x => x[0].test(tok[i])); if (hit) { n = 1; u = { etq: hit[1] || singular(tok[i]), dim: hit[2] === 'paq' ? 'paq:' + singular(tok[i]) : hit[2], f: hit[3] }; } } // «libra y media», «docena»\n    }\n    if (n == null && mult === 1) return null;\n    if (n == null) n = 1;\n    n = (n + extra) * mult;\n    if (!u) u = { etq: 'unid', dim: 'unid', f: 1 };\n    if (u.dim === 'unid' && u.f !== 1) { n = n * u.f; u = { etq: 'unid', dim: 'unid', f: 1 }; }   // docena, cubeta → unidades\n    if (!(n > 0) || n > 100000) return null;\n    return { n, u: u.etq, dim: u.dim, base: n * u.f, f: u.f };\n  }\n  function cantidadCompra(c) {\n    const det = detNom(c.nombre);\n    const k = c.cantidad;\n    if (typeof k === 'string' && k.trim()) { const q = leeCantidad(k); if (q) return q; }\n    const qd = det ? leeCantidad(det) : null;\n    if (typeof k === 'number' && k > 0) {\n      if (qd) return Object.assign({}, qd, { n: qd.n * k, base: qd.base * k });\n      return { n: k, u: 'unid', dim: 'unid', base: k, f: 1 };\n    }\n    return qd;\n  }\n  function fmtN(n) {\n    if (Math.abs(n - .5) < .05) return '½';\n    if (Math.abs(n - .25) < .03) return '¼';\n    const e = Math.floor(n), fr = n - e;\n    if (e >= 1 && Math.abs(fr - .5) < .05 && n < 10) return e + '½';\n    return n >= 10 ? String(Math.round(n)) : String(r1(n)).replace('.', ',');\n  }\n  function textoCant(n, u) {\n    const e = ETQ[u] || [u, u.endsWith('s') ? u : u + 's'];\n    const plural = !(n <= 1);\n    if (u === 'g' && n >= 1000) return fmtN(n / 1000) + (n >= 2000 ? ' kilos' : ' kilo');\n    if (u === 'ml' && n >= 1000) return fmtN(n / 1000) + (n >= 2000 ? ' litros' : ' litro');\n    return fmtN(n) + ' ' + (plural ? e[1] : e[0]);\n  }\n\n  /* ── agrupar compras por producto ── */\n  const porNombre = {};\n  productos.forEach(p => { porNombre[norm(baseNom(p.nombre))] = idc(p.id); });\n  const comprasDe = {};\n  for (const c of compras) {\n    const f = f10(c.fecha); if (!f || (hoy && f > hoy)) continue;\n    let id = idc(c.productoId);\n    if (!id || id.length !== 32) id = porNombre[norm(baseNom(c.nombre))] || null;\n    if (!id) continue;\n    (comprasDe[id] = comprasDe[id] || []).push({ fecha: f, nombre: c.nombre || '', q: cantidadCompra(c), acaboAnt: f10(c.acaboAnterior), clave: f + '|' + norm(c.nombre) + '|' + (c.cantidad == null ? '' : c.cantidad) });\n  }\n\n  function eventos(lista) {\n    const vistos = new Set(), dias = {};\n    for (const c of lista) {\n      if (vistos.has(c.clave)) continue;     // reintentos duplicados del mismo día y mismo nombre cuentan una vez\n      vistos.add(c.clave);\n      (dias[c.fecha] = dias[c.fecha] || []).push(c);\n    }\n    return Object.keys(dias).sort().map(f => ({ fecha: f, items: dias[f], acaboAnt: dias[f].map(c => c.acaboAnt).filter(Boolean).sort().pop() || null }));\n  }\n\n  /* ── un producto ── */\n  function modelaProducto(p, prior) {\n    const id = idc(p.id);\n    const ev = eventos(comprasDe[id] || []);\n    const falta = !!p.falta;\n    const acabo = f10(p.acaboEl) || f10(p.marcadoEl);\n    const vacio = {\n      v: 1, estado: 'sin', fuente: null, dias: null, diasEstaVez: null, rango: null, confianza: 'baja', confianzaN: 0,\n      datos: { compras: ev.length, intervalos: 0, usados: 0, descartados: 0 },\n      tendencia: { dir: null, cambioPct: null, texto: null }, cantidad: null, porSemana: null, porMes: null, comprasPorMes: null,\n      ultimaCompra: null, proxima: null, proximaRango: null, quedan: null, uso: null, nivel: null, acabo: null,\n      historial: [], meses: [], mesMas: null, mesMenos: null, patron: null, nota: 'Todavía no hay compras registradas.'\n    };\n    if (!ev.length) return vacio;\n\n    // cantidad por día de compra, en la dimensión más común\n    const dimCuenta = {};\n    ev.forEach(e => e.items.forEach(c => { if (c.q) dimCuenta[c.q.dim] = (dimCuenta[c.q.dim] || 0) + 1; }));\n    const dim = Object.keys(dimCuenta).sort((a, b) => dimCuenta[b] - dimCuenta[a])[0] || null;\n    const etqCuenta = {};\n    ev.forEach(e => {\n      const qs = e.items.map(c => c.q);\n      e.base = dim && qs.every(q => q && q.dim === dim) ? qs.reduce((s, q) => s + q.base, 0) : null;\n      qs.forEach(q => { if (q && q.dim === dim) etqCuenta[q.u + '|' + q.f] = (etqCuenta[q.u + '|' + q.f] || 0) + 1; });\n    });\n    const etqTop = Object.keys(etqCuenta).sort((a, b) => etqCuenta[b] - etqCuenta[a])[0];\n    const [uMostrar, fMostrar] = etqTop ? [etqTop.split('|')[0], +etqTop.split('|')[1]] : [null, 1];\n    const conQ = ev.filter(e => e.base != null);\n    const qHab = conQ.length ? mediana(conQ.map(e => e.base)) : null;\n    const rel = e => (qHab && e.base != null) ? Math.min(4, Math.max(.25, e.base / qHab)) : 1;\n    const ult = ev[ev.length - 1];\n    const rUlt = rel(ult);\n\n    // observaciones: días que duró cada compra, normalizados a la cantidad habitual\n    const obs = [];\n    for (let i = 0; i + 1 < ev.length; i++) {\n      // si al comprar se guardó el día en que se acabó la anterior, esa es la duración real (sin el tiempo en la canasta)\n      const ac = ev[i + 1].acaboAnt, real = ac && ac >= ev[i].fecha && ac <= ev[i + 1].fecha;\n      const g = dif(ev[i].fecha, real ? ac : ev[i + 1].fecha);\n      if (g >= 1) obs.push({ i, g, r: rel(ev[i]), norm: g / rel(ev[i]), w: real ? 1.5 : 1, tipo: 'intervalo' });\n    }\n    let acaboObs = null;\n    if (falta && acabo && acabo >= ult.fecha && (!hoy || acabo <= hoy)) {\n      const g = dif(ult.fecha, acabo);\n      if (g >= 1) { acaboObs = { i: ev.length - 1, g, r: rUlt, norm: g / rUlt, w: 1.5, tipo: 'acabo' }; obs.push(acaboObs); }\n    }\n\n    // atípicos: escala logarítmica, mediana y MAD\n    const L = obs.map(o => Math.log(o.norm));\n    const med = mediana(L);\n    let mad = mediana(L.map(x => Math.abs(x - med)));\n    obs.forEach((o, k) => {\n      const x = L[k];\n      if (obs.length >= 4) o.atipico = Math.abs(x - med) > Math.max(3 * 1.4826 * mad, Math.log(2.2));\n      else if (obs.length === 3) { const otros = L.filter((_, j) => j !== k); o.atipico = Math.abs(x - mediana(otros)) > Math.log(3); }\n      else o.atipico = false;\n    });\n    const usados = obs.filter(o => !o.atipico);\n\n    // estimación ponderada: lo reciente pesa más (vida media de 3 compras)\n    let dias = null, spred = null, fuente = null;\n    if (usados.length) {\n      const orden = usados.slice().sort((a, b) => b.i - a.i);\n      let sw = 0, sx = 0;\n      orden.forEach((o, rango) => { o.peso = o.w * Math.pow(.5, rango / 3); sw += o.peso; sx += o.peso * Math.log(o.norm); });\n      const mu = sx / sw;\n      let sv = 0; orden.forEach(o => { sv += o.peso * Math.pow(Math.log(o.norm) - mu, 2); });\n      const k = usados.length, s0 = .35;\n      const s2 = ((k > 1 ? sv / sw : 0) * k + 2 * s0 * s0) / (k + 2);\n      spred = Math.sqrt(s2 * (1 + 1 / k));\n      dias = Math.exp(mu);\n      fuente = usados.some(o => o.tipo === 'intervalo') ? 'historial' : 'acabo';\n    }\n    // lleva más tiempo del esperado sin acabarse: es un mínimo, sube un poco la estimación\n    const abierto = hoy && !falta ? dif(ult.fecha, hoy) : 0;\n    if (dias && abierto / rUlt > dias && abierto / rUlt <= 2.5 * dias && usados.length < 6) {\n      const k = usados.length; dias = Math.exp((k * Math.log(dias) + .5 * Math.log(abierto / rUlt)) / (k + .5));\n    }\n    if (!dias && prior) { dias = prior; spred = .6; fuente = 'grupo'; }\n\n    const r = Object.assign({}, vacio);\n    r.datos = { compras: ev.length, intervalos: obs.filter(o => o.tipo === 'intervalo').length, usados: usados.length, descartados: obs.length - usados.length };\n    r.ultimaCompra = ult.fecha;\n    r.estado = usados.length ? 'calculado' : 'aprendiendo';\n    r.fuente = fuente;\n    if (dias) {\n      dias = Math.max(1, dias);\n      r.dias = Math.max(1, Math.round(dias));\n      r.diasEstaVez = Math.max(1, Math.round(dias * rUlt));\n      const z = 1.2816;\n      r.rango = [Math.max(1, Math.round(dias * rUlt * Math.exp(-z * spred))), Math.max(1, Math.round(dias * rUlt * Math.exp(z * spred)))];\n      const k = usados.length;\n      let cn = fuente === 'grupo' ? .15 : (1 - Math.exp(-k / 3)) * Math.exp(-Math.max(0, spred - .2) * 1.5);\n      if (fuente === 'acabo') cn = Math.min(cn, .3);\n      r.confianzaN = Math.round(Math.max(0, Math.min(1, cn)) * 100) / 100;\n      r.confianza = (r.confianzaN >= .55 && k >= 4) ? 'alta' : (r.confianzaN >= .3 && k >= 2) ? 'media' : 'baja';\n      r.comprasPorMes = r1(30.44 / dias);\n      if (falta) { r.proxima = null; r.proximaRango = null; r.uso = 1; r.nivel = 'ya'; r.quedan = 0; }\n      else {\n        r.proxima = suma(ult.fecha, r.diasEstaVez);\n        r.proximaRango = [suma(ult.fecha, r.rango[0]), suma(ult.fecha, r.rango[1])];\n        const trans = hoy ? dif(ult.fecha, hoy) : 0;\n        r.uso = Math.round(trans / r.diasEstaVez * 100) / 100;\n        r.quedan = r.diasEstaVez - trans;\n        r.nivel = r.uso >= 1 ? 'ya' : r.uso >= .85 ? 'pronto' : r.uso >= .5 ? 'medio' : 'fresco';\n      }\n    }\n    if (acaboObs) r.acabo = { ultimaVez: acaboObs.g };\n\n    // tendencia: las últimas compras contra las de antes\n    if (usados.length >= 4) {\n      const nR = usados.length >= 6 ? 3 : 2, ord = usados.slice().sort((a, b) => a.i - b.i);\n      const rec = mediana(ord.slice(-nR).map(o => o.norm)), ant = mediana(ord.slice(0, -nR).map(o => o.norm));\n      const ratio = rec / ant, pct = Math.round((ratio - 1) * 100);\n      const dir = ratio <= .8 ? 'mas_rapido' : ratio >= 1.25 ? 'mas_lento' : 'estable';\n      r.tendencia = { dir, cambioPct: pct, texto: dir === 'mas_rapido' ? 'Últimamente se gasta más rápido' : dir === 'mas_lento' ? 'Últimamente te dura más' : 'Se gasta al mismo ritmo de siempre' };\n    }\n\n    // cantidad y consumo\n    if (qHab && uMostrar) {\n      const habN = qHab / fMostrar, ultN = ult.base != null ? ult.base / fMostrar : null;\n      r.cantidad = { ultima: ultN != null ? { n: r1(ultN), u: uMostrar, texto: textoCant(ultN, uMostrar) } : null, habitual: { n: r1(habN), u: uMostrar, texto: textoCant(habN, uMostrar) }, relativa: r1(rUlt) };\n    }\n    if (dias) {\n      if (qHab && uMostrar) {\n        const sem = qHab / fMostrar / dias * 7, mes = qHab / fMostrar / dias * 30.44;\n        r.porSemana = { n: r1(sem), u: uMostrar, texto: textoCant(sem, uMostrar) + ' por semana' };\n        r.porMes = { n: r1(mes), u: uMostrar, texto: textoCant(mes, uMostrar) + ' al mes' };\n      } else {\n        const sem = 7 / dias, mes = 30.44 / dias;\n        const tx = x => x >= .95 ? fmtN(x) + (Math.round(x * 10) === 10 ? ' vez' : ' veces') : '1 vez cada ' + (dias < 21 ? Math.round(dias / 7 * 10) / 10 + ' semanas' : Math.round(dias / 30.44 * 10) / 10 + ' meses');\n        r.porSemana = { n: r1(sem), u: 'veces', texto: sem >= .95 ? tx(sem) + ' por semana' : tx(sem) };\n        r.porMes = { n: r1(mes), u: 'veces', texto: mes >= .95 ? tx(mes) + ' al mes' : tx(mes) };\n      }\n      r.porSemana.texto = r.porSemana.texto.replace(/,0 /, ' ');\n    }\n\n    // historial (últimas 12)\n    const atip = new Set(obs.filter(o => o.atipico && o.tipo === 'intervalo').map(o => o.i));\n    r.historial = ev.slice(-12).map(e => {\n      const i = ev.indexOf(e);\n      return { fecha: e.fecha, cantidad: e.base != null && uMostrar ? textoCant(e.base / fMostrar, uMostrar) : (detNom(e.items[0].nombre) || null), dias: i + 1 < ev.length ? dif(e.fecha, ev[i + 1].fecha) : null, atipico: atip.has(i) };\n    });\n\n    // meses: cuándo se compró más o menos (últimos 6, desde la primera compra)\n    const ref = hoy || ult.fecha;\n    const meses = [];\n    for (let k = 5; k >= 0; k--) { const d = new Date(Date.UTC(+ref.slice(0, 4), +ref.slice(5, 7) - 1 - k, 1)); meses.push(d.toISOString().slice(0, 7)); }\n    const cuenta = {}; ev.forEach(e => { const m = e.fecha.slice(0, 7); cuenta[m] = (cuenta[m] || 0) + 1; });\n    r.meses = meses.map(m => ({ mes: m, veces: cuenta[m] || 0 }));\n    const validos = r.meses.filter(x => x.mes >= ev[0].fecha.slice(0, 7) && x.mes < ref.slice(0, 7));   // meses completos con el producto ya existiendo\n    if (validos.length >= 3 && validos.reduce((s, x) => s + x.veces, 0) >= 3) {\n      const mx = Math.max(...validos.map(x => x.veces)), mn = Math.min(...validos.map(x => x.veces));\n      if (mx - mn >= 2) { r.mesMas = validos.filter(x => x.veces === mx).pop().mes; r.mesMenos = validos.filter(x => x.veces === mn).pop().mes; }\n    }\n\n    // patrón: inicio / mitad / fin de mes, o un día de la semana\n    r.patron = patronDe(ev.map(e => e.fecha), 4, .6, 'Lo sueles comprar');\n\n    r.nota = nota(r, p);\n    return r;\n  }\n\n  function patronDe(fechas, minN, minFrac, prefijo) {\n    const n = fechas.length; if (n < minN) return null;\n    const t = [0, 0, 0]; fechas.forEach(f => { const d = +f.slice(8, 10); t[d <= 10 ? 0 : d <= 20 ? 1 : 2]++; });\n    const im = t.indexOf(Math.max(...t));\n    if (t[im] / n >= minFrac && binomCola(t[im], n, 1 / 3) < .1) {\n      const tipo = ['inicio_mes', 'mitad_mes', 'fin_mes'][im];\n      return { tipo, texto: prefijo + ' ' + ['a inicio de mes', 'a mitad de mes', 'a fin de mes'][im] };\n    }\n    const w = [0, 0, 0, 0, 0, 0, 0]; fechas.forEach(f => { w[new Date(ms(f)).getUTCDay()]++; });\n    const iw = w.indexOf(Math.max(...w));\n    if (w[iw] >= 3 && w[iw] / n >= .5 && binomCola(w[iw], n, 1 / 7) < .05) return { tipo: 'dia_semana', dia: iw, texto: prefijo + ' los ' + DIAS_S[iw] };\n    return null;\n  }\n\n  const plD = n => n + (n === 1 ? ' día' : ' días');\n  const enPal = d => d < 11 || (d < 25 && Math.abs(d / 7 - Math.round(d / 7)) > .2) ? plD(d) : d < 25 ? (Math.round(d / 7) === 1 ? 'una semana' : 'unas ' + Math.round(d / 7) + ' semanas') : d < 45 ? 'un mes' : 'unos ' + Math.round(d / 30.44) + ' meses';\n  function nota(r, p) {\n    if (r.estado === 'sin') return 'Todavía no hay compras registradas.';\n    const partes = [];\n    if (r.fuente === 'grupo') partes.push('Solo hay una compra. Mientras aprendo, calculo con lo que duran cosas parecidas: ~' + enPal(r.diasEstaVez) + '.');\n    else if (r.fuente === 'acabo') partes.push('La última vez duró ' + plD(r.acabo.ultimaVez) + '. Con una compra más lo afino.');\n    else if (r.dias) partes.push('Te dura ' + (r.dias < 11 ? '~' : '') + enPal(r.dias) + (r.rango && r.confianza !== 'alta' ? ' (entre ' + r.rango[0] + ' y ' + r.rango[1] + ' días)' : '') + '.');\n    else partes.push('Aprendiendo: falta una compra más para saber cuánto dura.');\n    if (r.cantidad && r.cantidad.relativa >= 1.4 && r.diasEstaVez && r.proxima) partes.push('La última vez compraste ' + (r.cantidad.relativa >= 1.9 && r.cantidad.relativa <= 2.1 ? 'el doble' : 'más de lo normal') + ': debería alcanzar hasta el ' + fCorta(r.proxima) + '.');\n    else if (r.cantidad && r.cantidad.relativa <= .7 && r.diasEstaVez && r.proxima) partes.push('La última vez compraste menos de lo normal: se acabaría hacia el ' + fCorta(r.proxima) + '.');\n    if (r.tendencia.dir === 'mas_rapido' || r.tendencia.dir === 'mas_lento') partes.push(r.tendencia.texto + ' (' + (r.tendencia.cambioPct > 0 ? '+' : '') + r.tendencia.cambioPct + '%).');\n    if (r.patron) partes.push(r.patron.texto + '.');\n    if (r.mesMas && r.mesMas.slice(0, 7) !== (r.mesMenos || '')) { const mx = r.meses.find(x => x.mes === r.mesMas); if (mx && mx.veces >= 2) partes.push('Donde más lo compraste fue en ' + nomMes(r.mesMas) + '.'); }\n    if (r.datos.descartados) partes.push('Ignoré ' + r.datos.descartados + (r.datos.descartados === 1 ? ' compra rara' : ' compras raras') + ' para no despistarme.');\n    return partes.slice(0, 3).join(' ');\n  }\n\n  /* ── todos los productos: primero los que tienen historial, después los de 1 compra con el promedio del grupo ── */\n  const out = {};\n  const pendientes = [];\n  for (const p of productos) {\n    if (!p || !p.id) continue;\n    const r = modelaProducto(p, null);\n    out[idc(p.id)] = r;\n    if (r.estado === 'aprendiendo') pendientes.push(p);\n  }\n  const grupoDias = {}, todos = [];\n  productos.forEach(p => { const r = p && out[idc(p.id)]; if (r && r.estado === 'calculado' && r.fuente === 'historial') { (grupoDias[p.grupo || 'Otros'] = grupoDias[p.grupo || 'Otros'] || []).push(r.dias); todos.push(r.dias); } });\n  for (const p of pendientes) {\n    const g = grupoDias[p.grupo || 'Otros'];\n    const prior = g && g.length >= 2 ? mediana(g) : todos.length >= 3 ? mediana(todos) : null;\n    if (prior) out[idc(p.id)] = modelaProducto(p, prior);\n  }\n\n  /* ── global: cada cuánto se merca, qué día, qué meses ── */\n  const diasMercado = [...new Set(Object.values(comprasDe).flat().map(c => c.fecha))].sort();\n  const gaps = []; for (let i = 1; i < diasMercado.length; i++) gaps.push(dif(diasMercado[i - 1], diasMercado[i]));\n  const ref = hoy || diasMercado[diasMercado.length - 1] || '2000-01-01';\n  const meses = [];\n  for (let k = 5; k >= 0; k--) { const d = new Date(Date.UTC(+ref.slice(0, 4), +ref.slice(5, 7) - 1 - k, 1)); meses.push(d.toISOString().slice(0, 7)); }\n  const cuentaM = {};\n  Object.values(comprasDe).forEach(l => eventos(l).forEach(e => { const m = e.fecha.slice(0, 7); cuentaM[m] = (cuentaM[m] || 0) + e.items.length; }));\n  const global = {\n    mercadoCadaDias: gaps.length ? Math.round(mediana(gaps.slice(-20))) : null,\n    diaSemana: null, patronMes: null,\n    meses: meses.map(m => ({ mes: m, compras: cuentaM[m] || 0 })),\n    mesMas: null, mesMenos: null,\n    rapido: Object.keys(out).filter(id => out[id].tendencia.dir === 'mas_rapido'),\n    nota: null\n  };\n  const pd = patronDe(diasMercado.slice(-30), 6, .5, 'Mercas más');\n  if (pd && pd.tipo === 'dia_semana') global.diaSemana = { d: pd.dia, texto: 'Sueles mercar los ' + DIAS_S[pd.dia] };\n  else if (pd) global.patronMes = { tipo: pd.tipo, texto: pd.texto + (pd.tipo !== 'mitad_mes' ? ' (después de la quincena)' : '') };\n  const completos = global.meses.filter(x => x.mes < ref.slice(0, 7) && diasMercado.length && x.mes >= diasMercado[0].slice(0, 7));\n  if (completos.length >= 3) {\n    const vals = completos.map(x => x.compras), md = mediana(vals), mx = Math.max(...vals), mn = Math.min(...vals);\n    if (mx > mn) {\n      global.mesMas = completos.filter(x => x.compras === mx).pop().mes; global.mesMenos = completos.filter(x => x.compras === mn).pop().mes;\n      if (md > 0 && mx >= 1.3 * md && mx - md >= 2) global.nota = 'En ' + nomMes(global.mesMas) + ' compraste más que de costumbre.';\n      else if (md > 0 && mn <= .7 * md && md - mn >= 2) global.nota = 'En ' + nomMes(global.mesMenos) + ' compraste menos que de costumbre.';\n    }\n  }\n  if (!global.nota && global.mercadoCadaDias) global.nota = 'Sueles mercar cada ' + plD(global.mercadoCadaDias) + '.';\n\n  return { v: 1, hoy, productos: out, global };\n}\n\n\nconst txt = (a) => ((a || []).map(t => t.plain_text).join('') || '').trim();\nconst prop = (pg, n) => (pg.properties || {})[n];\nconst fecha = (pr) => pr && pr.date && pr.date.start ? pr.date.start : null;\nconst paginas = (nodo) => { try { return $(nodo).all().flatMap(i => Array.isArray(i.json.results) ? i.json.results : (i.json && i.json.object === 'page' ? [i.json] : [])); } catch (e) { return []; } };\nconst hoy = new Date(Date.now() - 5 * 3600 * 1000).toISOString().slice(0, 10);   // hora de Colombia\n\nconst productos = paginas('Productos').map(pg => ({\n  id: pg.id,\n  nombre: txt((prop(pg, 'Nombre') || {}).title),\n  grupo: (prop(pg, 'Grupo') || {}).select ? prop(pg, 'Grupo').select.name : null,\n  falta: !!(prop(pg, 'Falta') || {}).checkbox,\n  marcadoEl: fecha(prop(pg, 'Marcado el'))\n}));\nconst compras = paginas('Compras').map(pg => {\n  const c = prop(pg, 'Cantidad');                       // opcional: número o texto, si el flujo de compras lo empieza a guardar\n  const cantidad = !c ? undefined : c.type === 'number' ? (c.number == null ? undefined : c.number) : (txt(c.rich_text) || undefined);\n  return {\n    productoId: txt((prop(pg, 'ID producto') || {}).rich_text) || null,\n    fecha: (fecha(prop(pg, 'Fecha')) || pg.created_time || '').slice(0, 10),\n    nombre: txt((prop(pg, 'Nombre') || {}).title),\n    cantidad,\n    acaboAnterior: fecha(prop(pg, 'Se acabó la anterior')) || undefined   // opcional\n  };\n});\n\nconst r = calcularDuracion({ hoy, productos, compras });\nr.ok = true;\nr.calculado = new Date().toISOString();\nif (productos.length) $getWorkflowStaticData('global').duraCache = { t: Date.now(), r };\nreturn [{ json: r }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1320,
+        -48
+      ],
+      "id": "d0a00000-0000-4000-8000-000000000008",
+      "name": "Calcular duración"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        1540,
+        -48
+      ],
+      "id": "d0a00000-0000-4000-8000-000000000009",
+      "name": "Responder"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\"ok\": false}",
+        "options": {
+          "responseCode": 400
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        660,
+        112
+      ],
+      "id": "d0a00000-0000-4000-8000-000000000010",
+      "name": "Responder error"
+    }
+  ],
+  "connections": {
+    "Recibir": {
+      "main": [
+        [
+          {
+            "node": "Validar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validar": {
+      "main": [
+        [
+          {
+            "node": "¿Válido?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Válido?": {
+      "main": [
+        [
+          {
+            "node": "¿Recién calculado?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Responder error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Recién calculado?": {
+      "main": [
+        [
+          {
+            "node": "Responder caché",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Productos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Productos": {
+      "main": [
+        [
+          {
+            "node": "Compras",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Compras": {
+      "main": [
+        [
+          {
+            "node": "Calcular duración",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calcular duración": {
+      "main": [
+        [
+          {
+            "node": "Responder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": []
+}

@@ -3066,6 +3066,83 @@ body.mode-mercar:has(#mkStage .mcTop) #thread{ -webkit-mask-image:none; mask-ima
 .duCard.duEntra{ animation:duSube .6s var(--ease-out) backwards; animation-delay:calc(var(--i, 0) * 45ms + .15s); }
 @media (max-width:360px){ .duDatos{ grid-template-columns:repeat(2, 1fr); } }
 @media (prefers-reduced-motion:reduce){ .duPista i, .duAroFg, .duMas, .duMasIn, .duEmo{ transition:none; } }
+/* Duración inteligente: resumen de la semana, ritmo, tendencia, confianza y barras de cuánto duró cada compra */
+.duHero2{ display:block; padding:18px 18px 14px; }
+.duOver{ display:block; font-size:.7rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--dim); }
+.duHero2 .duBig{ margin-top:4px; font-size:1.3rem; }
+.duSem{ list-style:none; display:grid; grid-template-columns:repeat(7, 1fr); gap:4px; margin:14px 0 10px; padding:0; }
+.duSem li{ position:relative; display:flex; flex-direction:column; align-items:center; gap:1px; min-height:92px; padding:7px 0 6px; border-radius:14px; background:rgba(var(--ink),.035); }
+.duSem li.con{ background:rgba(var(--ink),.08); }
+.duSem li.hoy{ box-shadow:inset 0 0 0 1px rgba(var(--ink),.28); }
+.duSem small{ font-size:.66rem; font-weight:600; color:var(--dim); text-transform:capitalize; }
+.duSem b{ font-size:.92rem; font-weight:700; color:var(--white); line-height:1.2; }
+.duSemE{ display:flex; flex-direction:column; align-items:center; gap:1px; margin-top:3px; font-size:1.02rem; line-height:1.15; }
+.duSemE i{ font-style:normal; }
+.duSemE em{ font-style:normal; font-size:.66rem; font-weight:700; color:var(--ghost); }
+.duSem u{ position:absolute; top:-6px; right:-2px; text-decoration:none; font-size:.6rem; font-weight:800; padding:1px 5px; border-radius:999px; color:var(--on-accent); background:#ff8a6b; }
+.duSemTx{ margin:0; font-size:.86rem; line-height:1.45; color:var(--ghost); }
+.duSemTx b{ color:var(--white); font-weight:600; }
+.duRitmo{ display:flex; align-items:flex-end; gap:12px; margin-top:14px; padding-top:12px; border-top:1px solid var(--line); }
+.duRitmoTx{ flex:1; min-width:0; display:flex; flex-direction:column; gap:3px; }
+.duRitmoTx b{ font-size:.88rem; font-weight:600; color:var(--white); line-height:1.3; }
+.duRitmoTx small{ font-size:.76rem; color:var(--dim); line-height:1.35; }
+.duCuentas{ margin:10px 0 0; font-size:.74rem; color:var(--dim); }
+.duTend{ display:flex; align-items:center; gap:6px; margin-top:8px; font-size:.78rem; font-weight:600; color:var(--ghost); }
+.duTend svg{ width:16px; height:16px; flex:none; }
+.duTend.mas_rapido svg{ color:var(--late); }
+.duTend.mas_lento svg{ color:var(--calm-a); }
+.duSec{ display:flex; align-items:center; gap:8px; margin:18px 4px 8px; font-size:.74rem; font-weight:700; letter-spacing:.07em; text-transform:uppercase; color:var(--dim); }
+.duSec:first-child{ margin-top:4px; }
+.duSec em{ font-style:normal; font-size:.7rem; min-width:20px; padding:1px 6px; border-radius:999px; background:rgba(var(--ink),.08); text-align:center; letter-spacing:0; }
+.duLista > .duCard + .duCard{ margin-top:10px; }
+.duSinCompras{ margin:18px 4px 0; font-size:.8rem; line-height:1.5; color:var(--dim); }
+.duSinCompras b{ color:var(--ghost); font-weight:600; }
+.duIntel{ padding-top:14px; margin-top:12px; border-top:1px solid var(--line); cursor:default; }
+.duFrase{ margin:0; display:flex; flex-direction:column; gap:3px; }
+.duFrase b{ font-size:1.08rem; font-weight:700; color:var(--white); }
+.duFrase span{ font-size:.8rem; color:var(--ghost); }
+.duConf{ display:flex; align-items:center; gap:8px; margin-top:8px; font-size:.76rem; font-weight:600; color:var(--ghost); }
+.duConfBar{ display:flex; gap:3px; }
+.duConfBar i{ width:12px; height:5px; border-radius:3px; background:rgba(var(--ink),.16); }
+.duConf[data-n="1"] .duConfBar i:nth-child(-n+1), .duConf[data-n="2"] .duConfBar i:nth-child(-n+2), .duConf[data-n="3"] .duConfBar i{ background:rgba(var(--ink),.78); }
+.duHechos{ display:grid; grid-template-columns:1fr 1fr; gap:10px 12px; margin:14px 0 0; }
+.duHechos div{ min-width:0; }
+.duHechos dt{ font-size:.66rem; color:var(--dim); letter-spacing:.04em; text-transform:uppercase; }
+.duHechos dd{ margin:2px 0 0; font-size:.88rem; font-weight:600; color:var(--white); line-height:1.3; }
+.duHechos dd small{ display:block; font-size:.72rem; font-weight:500; color:var(--dim); }
+.duBloque{ margin-top:16px; }
+.duBloqueT{ display:flex; align-items:baseline; justify-content:space-between; font-size:.74rem; font-weight:700; color:var(--ghost); }
+.duBloqueT small{ font-size:.66rem; font-weight:500; color:var(--dim); }
+.duHist{ height:96px; margin-top:8px; padding-top:18px; border-bottom:1px solid rgba(var(--ink),.22); }
+.duHistIn{ position:relative; height:100%; display:grid; grid-template-columns:repeat(var(--n), 1fr); align-items:end; gap:2px; }
+.duBarH{ position:relative; height:100%; display:flex; flex-direction:column; justify-content:flex-end; align-items:center; padding:0; border:0; background:none; font:inherit; cursor:pointer; -webkit-tap-highlight-color:transparent; }
+.duBarH i{ position:relative; display:block; width:min(16px, 70%); border-radius:4px 4px 0 0; background:color-mix(in srgb, var(--c2) 78%, transparent); transition:background .2s; }
+.duBarH.ahora i{ background:none; border:1.5px dashed var(--c2); border-bottom:0; box-sizing:border-box; }
+.duBarH.raro i{ background:repeating-linear-gradient(45deg, color-mix(in srgb, var(--c2) 45%, transparent) 0 3px, transparent 3px 6px); }
+.duBarV{ font-style:normal; position:absolute; bottom:100%; left:50%; transform:translateX(-50%); padding-bottom:2px; font-size:.66rem; font-weight:700; color:var(--white); visibility:hidden; }
+.duBarH:last-child .duBarV, .duBarH.sel .duBarV{ visibility:visible; }
+.duBarH.sel i{ background:var(--c2); }
+.duBarH:focus-visible{ outline:2px solid var(--c2); outline-offset:1px; border-radius:4px; }
+.duRef{ position:absolute; left:0; right:0; height:0; border-top:1px dashed rgba(var(--ink),.5); pointer-events:none; z-index:1; }
+.duRefL{ display:inline-block; width:14px; height:0; border-top:1px dashed rgba(var(--ink),.6); vertical-align:middle; margin-right:5px; }
+.duHistPie{ display:grid; grid-template-columns:repeat(var(--n), 1fr); gap:2px; margin-top:4px; }
+.duHistPie span{ display:flex; flex-direction:column; align-items:center; font-size:.6rem; color:var(--dim); white-space:nowrap; overflow:hidden; text-align:center; }
+.duHistPie b{ font-size:.62rem; font-weight:700; color:var(--ghost); }
+.duHistCap{ margin:8px 0 0; font-size:.8rem; line-height:1.45; color:var(--ghost); }
+.duMeses{ display:grid; grid-template-columns:repeat(6, 1fr); gap:4px; height:62px; margin-top:8px; padding-top:14px; }
+.duMeses span{ display:flex; flex-direction:column; align-items:center; min-width:0; height:100%; }
+.duMeses b{ flex:1; width:100%; display:flex; justify-content:center; align-items:flex-end; }
+.duMeses i{ position:relative; display:block; width:min(14px, 70%); border-radius:3px 3px 0 0; background:rgba(var(--ink),.3); }
+.duMeses span.mx i{ background:var(--c2, var(--cyan)); }
+.duMeses em{ position:absolute; bottom:100%; left:50%; transform:translateX(-50%); padding-bottom:1px; font-style:normal; font-size:.62rem; font-weight:700; color:var(--white); }
+.duMeses small{ font-size:.58rem; color:var(--dim); margin-top:3px; }
+.duMeses.chico{ flex:none; width:118px; height:62px; margin:0; gap:3px; }
+.duMeses.chico span.mx i{ background:var(--cyan); }
+@media (max-width:360px){ .duSem li{ min-height:84px; } .duMeses.chico{ width:96px; } }
+@media (prefers-reduced-motion:reduce){ .duBarH i{ transition:none; } }
+.duChips{ flex-wrap:nowrap; gap:6px; }
+.duChip{ flex:1 1 auto; justify-content:center; gap:5px; padding:9px 8px; font-size:.8rem; min-width:0; white-space:nowrap; }
+.duChip em{ min-width:18px; padding:2px 5px; }
 /* editar producto: buscador, lista que entra escalonada y cambio de vista deslizando */
 .mkBusca{ position:relative; display:block; }
 .mkBusca svg{ position:absolute; left:16px; top:50%; width:18px; height:18px; margin-top:-9px; color:var(--dim); pointer-events:none; transition:color .3s, transform .45s var(--ease-spring); }
@@ -3821,7 +3898,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-18.237";
+const APP_VERSION = "2026-10-18.238";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -12137,22 +12214,84 @@ const Mercar = (function(){
   const abiertosD = new Set();
   let duInicia = true;   // la primera vez que llegan datos, se abren los apartados con cosas urgentes
   const duEl = document.getElementById("duStage");
-  let filtroD = "todo", duAbierto = null;
+  let filtroD = "urge", duAbierto = null;
   const fechaCorta = f => new Date(f + "T12:00:00").toLocaleDateString("es-CO", { day: "numeric", month: "short" }).replace(".", "");
   const sumaDias = (f, n) => { const d = new Date(f + "T12:00:00"); d.setDate(d.getDate() + n); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); };
   const plD = n => n + (n === 1 ? " día" : " días");
+  /* ── lo que calcula la torre (contrato dura v1, agentes/durA_contrato.md): llega por mercado-duracion (o en p.dura);
+     se guarda en el celular para verlo al instante. Si no hay nada, todo sigue como antes con duraDias/ultimaCompra/veces ── */
+  const DURA_URL = N8N + "/webhook/mercado-duracion", DUKEY = "armoni.mercar.dura";
+  let duraB = (() => { try{ const j = JSON.parse(localStorage.getItem(DUKEY)); return j && j.productos && typeof j.productos === "object" ? j : null; }catch{ return null; } })();
+  let duraVuela = false, duraIntento = 0;
+  /* si desde la última consulta hubo compras nuevas, se pide sin la caché de 3 min del flujo */
+  const firmaCompras = () => (((datos && datos.productos) || []).map(p => p.id + ":" + (p.ultimaCompra || "") + ":" + (p.veces || 0)).join("|"));
+  const duraVieja = () => !duraB || !duraB.firma || duraB.firma !== firmaCompras();
+  async function traeDura(fresco){
+    if(duraVuela) return;
+    duraVuela = true; duraIntento = Date.now();
+    const pedido = firmaCompras();
+    try{
+      const r = await fetch(DURA_URL + "?token=" + encodeURIComponent(MERCADO_TOKEN) + (fresco ? "&fresco=1" : ""), { cache: "no-store", signal: AbortSignal.timeout ? AbortSignal.timeout(10000) : undefined });
+      if(!r.ok) return;
+      const j = await r.json();
+      if(!j || j.ok === false || !j.productos || typeof j.productos !== "object" || Array.isArray(j.productos)) return;   // flujo apagado o respuesta rara: se queda lo que había
+      const nuevo = { productos: j.productos, global: j.global && typeof j.global === "object" ? j.global : null, firma: pedido };
+      if(JSON.stringify(nuevo) === JSON.stringify(duraB)) return;
+      duraB = nuevo;
+      try{ localStorage.setItem(DUKEY, JSON.stringify(nuevo)); }catch{}
+      if(document.body.classList.contains("mode-dura")) pintaDura(false);
+    }catch{} finally { duraVuela = false; }
+  }
+  const nume = v => typeof v === "number" && isFinite(v) ? v : null;
+  const esISO = f => typeof f === "string" && /^\d{4}-\d{2}-\d{2}/.test(f);
+  /* lectura tolerante: cualquier clave puede faltar o venir en null */
+  function duraDe(p){
+    const d = (p.dura && typeof p.dura === "object" ? p.dura : null) || (duraB && duraB.productos[String(p.id).replace(/-/g, "")]) || null;
+    if(!d || typeof d !== "object") return null;
+    const t = d.tendencia, dir = t && typeof t === "object" ? t.dir : t;
+    const txt = o => o && typeof o === "object" && typeof o.texto === "string" ? o.texto : null;
+    const rg = Array.isArray(d.rango) && d.rango.length === 2 && d.rango.every(x => nume(x) != null) ? d.rango.map(Math.round) : null;
+    return {
+      estado: d.estado || null, fuente: d.fuente || null,
+      dias: nume(d.dias) && Math.round(d.dias), estaVez: nume(d.diasEstaVez) ? Math.round(d.diasEstaVez) : nume(d.dias) && Math.round(d.dias),
+      rango: rg && rg[0] < rg[1] ? rg : null,
+      conf: ["alta", "media", "baja"].includes(d.confianza) ? d.confianza : null,
+      compras: d.datos && nume(d.datos.compras),
+      tend: dir === "mas_rapido" || dir === "mas_lento" ? { dir, texto: txt(t) || (dir === "mas_rapido" ? "Últimamente se acaba más rápido" : "Últimamente te dura más") } : null,
+      cantUlt: d.cantidad && txt(d.cantidad.ultima), cantHab: d.cantidad && txt(d.cantidad.habitual), cantRel: d.cantidad && nume(d.cantidad.relativa),
+      porSemana: txt(d.porSemana), porMes: txt(d.porMes), comprasMes: nume(d.comprasPorMes),
+      proxRango: Array.isArray(d.proximaRango) && d.proximaRango.length === 2 && d.proximaRango.every(esISO) ? d.proximaRango : null,
+      hist: Array.isArray(d.historial) ? d.historial.filter(h => h && esISO(h.fecha)).slice(-8) : [],
+      meses: Array.isArray(d.meses) ? d.meses.filter(m => m && /^\d{4}-\d{2}/.test(m.mes || "") && nume(m.veces) != null).slice(-6) : [],
+      mesMas: typeof d.mesMas === "string" ? d.mesMas : null, mesMenos: typeof d.mesMenos === "string" ? d.mesMenos : null,
+      patron: txt(d.patron),
+      nota: typeof d.nota === "string" ? d.nota.trim() : ""
+    };
+  }
+  const duraGlobal = () => (datos && datos.duraGlobal) || (duraB && duraB.global) || null;
   /* cada producto en uno de tres estados: con duración calculada, aprendiendo (le falta una compra) o sin compras */
   function infoDura(p){
-    const veces = p.veces || 0;
-    if(p.duraDias > 0 && /^\d{4}-\d{2}-\d{2}/.test(p.ultimaCompra || "")){
-      const dias = diasDesde(p.ultimaCompra), dur = p.duraDias, pct = dias / dur;
+    const veces = p.veces || 0, d = duraDe(p);
+    const ult = esISO(p.ultimaCompra) ? p.ultimaCompra.slice(0, 10) : null;
+    /* con el cálculo nuevo manda su estado; sin él, lo de siempre */
+    const dur = d ? ((d.estado == null || d.estado === "calculado") && d.estaVez > 0 ? d.estaVez : 0) : (p.duraDias > 0 ? p.duraDias : 0);
+    if(dur && ult){
+      const dias = diasDesde(ult), pct = dias / dur;   // se recalcula aquí con la fecha de hoy: lo guardado puede ser de ayer
       const nivel = pct >= 1 ? "ya" : pct >= .85 ? "pronto" : pct >= .5 ? "medio" : "fresco";
-      return { tipo: "dura", p, veces, dias, dur, pct, nivel: p.falta ? "ya" : nivel, quedan: Math.round(dur - dias), proxima: sumaDias(p.ultimaCompra, dur) };
+      return { tipo: "dura", p, d, veces: Math.max(veces, (d && d.compras) || 0), dias, dur, pct, nivel: p.falta ? "ya" : nivel, quedan: Math.round(dur - dias), proxima: sumaDias(ult, dur) };
     }
-    if(veces >= 1 || p.ultimaCompra) return { tipo: "aprende", p, veces: Math.max(1, veces), dias: p.ultimaCompra ? diasDesde(p.ultimaCompra) : null };
-    return { tipo: "sin", p, veces: 0 };
+    if(veces >= 1 || ult) return { tipo: "aprende", p, d, veces: Math.max(1, veces), dias: ult ? diasDesde(ult) : null };
+    return { tipo: "sin", p, d, veces: 0 };
   }
   const TXT_NIVEL = { fresco: "Recién comprado", medio: "Va por la mitad", pronto: "Se está acabando", ya: "Ya toca comprarlo" };
+  const DIAS_L = ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"];
+  const MES_L = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
+  const entreDias = (a, b) => Math.round((new Date(b + "T12:00:00") - new Date(a + "T12:00:00")) / 86400000);
+  /* «hoy», «mañana», «jueves 24» (esta semana) o «2 nov» (más lejos); corto = «jue 24» */
+  const fechaDia = (f, corto) => { const n = entreDias(hoyISO(), f), d = new Date(f + "T12:00:00"); if(n === 0) return "hoy"; if(n === 1) return "mañana"; if(n > 1 && n < 7) return (corto ? DIAS_L[d.getDay()].slice(0, 3) : DIAS_L[d.getDay()]) + " " + d.getDate(); return fechaCorta(f); };
+  const mesDe = m => MES_L[+m.slice(5, 7) - 1] || m;
+  const nCant = s => { const m = String(s || "").replace(",", ".").match(/\d+(\.\d+)?/); return m ? +m[0] : /^(una?|medi)/i.test(String(s || "")) ? (/^medi/i.test(s) ? .5 : 1) : null; };
+  const cantCorta = s => String(s || "").replace(/\blibras?\b/i, "lb").replace(/\bkilos?\b|\bkilogramos?\b/i, "kg").replace(/\bgramos?\b/i, "g").replace(/\bunidades?\b/i, "u").replace(/\bpaquetes?\b/i, "paq").replace(/\bbolsas?\b/i, "bol").trim().slice(0, 7);
 
   /* lo indispensable (huevos, arroz, arepas…) avisa cada mañana al celular cuando se está acabando; lo opcional no */
   let esenciales = (() => { try{ return new Set(JSON.parse(localStorage.getItem("armoni.esenciales")) || []); }catch{ return new Set(); } })();
@@ -12169,81 +12308,184 @@ const Mercar = (function(){
   }
   const accionEsencial = p => '<button type="button" class="duEsc' + (esenciales.has(p.id) ? ' on' : '') + '" data-esc="' + esc(p.id) + '" aria-pressed="' + esenciales.has(p.id) + '"><span class="duEscPt" aria-hidden="true"></span>' + (esenciales.has(p.id) ? 'Indispensable · te aviso cada mañana' : 'Opcional · tocar para que te avise') + '</button>';
   const accionCanasta = p => '<button type="button" class="duCanasta' + (p.falta ? ' dentro' : '') + '" data-canasta="' + esc(p.id) + '"><span aria-hidden="true">🧺</span>' + (p.falta ? 'En la canasta · tocar para quitar' : 'Se acabó · dejar en la canasta') + '</button>';
+  const FLECHA_T = { mas_rapido: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 17l6-6 4 4 6-7"/><path d="M15 8h5v5"/></svg>', mas_lento: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7l6 6 4-4 6 7"/><path d="M15 16h5v-5"/></svg>' };
+  const TXT_CONF = { alta: "Muy seguro", media: "Bastante seguro", baja: "Todavía aprendiendo" };
+  /* barras finas: cuánto duró cada compra (una sola escala: días). La compra de ahora va punteada con lo que lleva */
+  function histDura(x){
+    const d = x.d, h = d.hist;
+    if(h.length < 2) return "";
+    const cants = h.map(c => c.cantidad).filter(Boolean), varia = cants.length >= 2 && new Set(cants).size > 1;
+    const cols = h.map((c, i) => {
+      const ult = i === h.length - 1 && c.dias == null;
+      const v = ult ? x.dias : nume(c.dias);
+      return { c, ult, v, cant: c.cantidad || "" };
+    }).filter(o => o.v != null);
+    if(cols.length < 2) return "";
+    const top = Math.max(x.dur, d.dias || 0, ...cols.map(o => o.v), 1) * 1.08;
+    const ref = d.dias || null;
+    /* ¿comprar más hace que dure más? se mira solo si hay cantidades distintas */
+    let lectura = "";
+    const pares = cols.filter(o => !o.ult && !o.c.atipico && nCant(o.cant) != null);
+    if(varia && pares.length >= 3){
+      const xs = pares.map(o => nCant(o.cant)), ys = pares.map(o => o.v), mx = xs.reduce((a, b) => a + b) / xs.length, my = ys.reduce((a, b) => a + b) / ys.length;
+      const sxy = xs.reduce((a, v, i) => a + (v - mx) * (ys[i] - my), 0), sxx = xs.reduce((a, v) => a + (v - mx) ** 2, 0), syy = ys.reduce((a, v) => a + (v - my) ** 2, 0);
+      const r = sxx && syy ? sxy / Math.sqrt(sxx * syy) : 0;
+      if(r > .5) lectura = "Cuando compras más cantidad, te dura más.";
+    }
+    const cap = (d.nota || lectura || (ref ? "La raya punteada es lo normal: ~" + plD(ref) + "." : "")) + (cols.some(o => o.c.atipico) ? " La barra rayada fue fuera de lo normal y no cuenta." : "");
+    const bars = cols.map((o, i) => {
+      const hgt = Math.max(4, Math.round(o.v / top * 100));
+      const t = (o.ult ? "Compra de ahora (" + fechaCorta(o.c.fecha) + ")" : fechaCorta(o.c.fecha)) + (o.cant ? " · " + o.cant : "") + (o.ult ? " · lleva " + plD(o.v) + ", todavía no se acaba" : " · te duró " + plD(o.v)) + (o.c.atipico ? " · fuera de lo normal, no cuenta" : "");
+      return '<button type="button" class="duBarH' + (o.ult ? ' ahora' : '') + (o.c.atipico ? ' raro' : '') + '" data-t="' + esc(t) + '" aria-pressed="false" aria-label="' + esc(t) + '">' +
+        '<i style="height:' + hgt + '%"><span class="duBarV">' + o.v + '</span></i></button>';
+    }).join("");
+    const pies = cols.map(o => '<span>' + (varia && o.cant ? '<b>' + esc(cantCorta(o.cant)) + '</b>' : '') + (o.ult ? 'ahora' : esc(fechaCorta(o.c.fecha).replace(/ de /, " "))) + '</span>').join("");
+    return '<div class="duBloque"><div class="duBloqueT">Cuánto te duró cada compra <small>' + (ref ? '<i class="duRefL" aria-hidden="true"></i>lo normal ~' + plD(ref) : 'en días') + '</small></div>' +
+      '<div class="duHist" style="--n:' + cols.length + '"><div class="duHistIn">' + (ref ? '<span class="duRef" style="bottom:' + (ref / top * 100).toFixed(1) + '%"></span>' : '') + bars + '</div></div>' +
+      '<div class="duHistPie" style="--n:' + cols.length + '">' + pies + '</div>' +
+      '<p class="duHistCap" aria-live="polite">' + esc(cap) + '</p></div>';
+  }
+  /* cuándo se compró más o menos: 6 meses, una barra por mes, solo se rotula el mes de más */
+  function mesesDura(d){
+    const m = d.meses.slice(d.meses.findIndex(x => x.veces > 0));   // los meses de antes de la primera compra no cuentan como «menos»
+    if(!d.meses.some(x => x.veces > 0) || m.length < 3) return "";
+    const mx = Math.max(...m.map(x => x.veces)), mn = Math.min(...m.map(x => x.veces));
+    const mas = d.mesMas || (mx > mn ? m.find(x => x.veces === mx).mes : null), menos = d.mesMenos || (mx > mn ? m.find(x => x.veces === mn).mes : null);
+    if(!mas && !d.patron) return "";
+    const tx = d.patron || ("Más en " + mesDe(mas) + (menos ? ", menos en " + mesDe(menos) : ""));
+    return '<div class="duBloque"><div class="duBloqueT">Cuándo lo compras <small>veces al mes</small></div><div class="duMeses" style="grid-template-columns:repeat(' + m.length + ', 1fr)" role="img" aria-label="' + esc(m.map(x => mesDe(x.mes) + " " + x.veces).join(", ")) + '">' +
+      m.map(x => '<span class="' + (x.mes === mas ? 'mx' : '') + '"><b><i style="height:' + Math.max(x.veces ? 8 : 2, Math.round(x.veces / mx * 100)) + '%"><em>' + (x.mes === mas || x.mes === menos ? x.veces : '') + '</em></i></b><small>' + mesDe(x.mes).slice(0, 3) + '</small></span>').join("") +
+      '</div><p class="duHistCap">' + esc(tx) + '</p></div>';
+  }
   function pintaDura(entrando){
     if(!datos){ try{ const c = JSON.parse(localStorage.getItem(KEY)); if(c && Array.isArray(c.productos)) datos = c; }catch{} }
     const ps = Array.isArray(datos && datos.productos) ? datos.productos : [];
+    if(ps.length && duraB && duraVieja() && Date.now() - duraIntento > 60000) traeDura(true);   // llegó una compra nueva: el cálculo de la torre ya no sirve
     if(!ps.length){ duEl.innerHTML = '<p class="gEmpty">' + (datos ? 'Todavía no hay productos.' : 'Cargando…') + '</p>'; return; }
     const todos = ps.map(infoDura);
-    const dura = todos.filter(x => x.tipo === "dura").sort((a, b) => b.pct - a.pct);
+    /* orden por urgencia: lo que ya está en la canasta, luego lo que antes se acaba */
+    const urg = (a, b) => (b.p.falta ? 1 : 0) - (a.p.falta ? 1 : 0) || a.quedan - b.quedan || b.pct - a.pct;
+    const dura = todos.filter(x => x.tipo === "dura").sort(urg);
     const aprende = todos.filter(x => x.tipo === "aprende").sort((a, b) => (a.dias == null) - (b.dias == null) || a.dias - b.dias);
     const sin = todos.filter(x => x.tipo === "sin");
     const pronto = dura.filter(x => x.nivel === "pronto" || x.nivel === "ya");
-    const bien = dura.length - pronto.length;
     if(duInicia && ps.length){ duInicia = false; pronto.forEach(x => abiertosD.add(grupoDe(x.p))); }
-    const vista = filtroD === "pronto" ? pronto : filtroD === "aprende" ? aprende : dura.concat(aprende, sin);
     const cls = entrando ? " duEntra" : "";
+    const hoy = hoyISO();
 
-    const num = pronto.length;
-    const frase = !dura.length ? "Aprendiendo tus hábitos"
-      : num === 0 ? "Todo en orden"
-      : num === 1 ? "cosa se está acabando" : "cosas se están acabando";
-    const aro = dura.length ? Math.round(100 * bien / dura.length) : 0;
-    const R = 34, C = 2 * Math.PI * R;
-    let html =
-      '<div class="duHero' + cls + '"><div class="duAro"><svg viewBox="0 0 80 80" aria-hidden="true"><circle cx="40" cy="40" r="' + R + '" class="duAroBg"/><circle cx="40" cy="40" r="' + R + '" class="duAroFg" stroke-dasharray="' + C.toFixed(1) + '" stroke-dashoffset="' + (entrando ? C.toFixed(1) : (C * (1 - aro / 100)).toFixed(1)) + '" data-off="' + (C * (1 - aro / 100)).toFixed(1) + '"/></svg>' +
-        '<b class="duAroN" data-n="' + aro + '">' + (entrando ? 0 : aro) + '<small>%</small></b></div>' +
-      '<div class="duHeroTx"><div class="duBig">' + (dura.length && num ? '<span class="duCuenta" data-n="' + num + '">' + (entrando ? 0 : num) + '</span> ' : '') + frase + '</div>' +
-      '<p>' + (dura.length ? dura.length + ' con duración calculada' : 'Registra la misma cosa en dos compras y aquí verás cuánto te dura') + (aprende.length ? ' · ' + aprende.length + ' aprendiendo' : '') + '</p></div></div>' +
-      '<div class="duChips' + cls + '" role="tablist">' +
-        [["todo", "Todo", ps.length], ["pronto", "Se acaban", pronto.length], ["aprende", "Aprendiendo", aprende.length]].map(([k, t, n]) =>
-          '<button type="button" role="tab" aria-selected="' + (filtroD === k) + '" class="duChip' + (filtroD === k ? ' on' : '') + '" data-f="' + k + '">' + t + '<em>' + n + '</em></button>').join("") +
-      '</div><div class="duLista" id="duLista">';
-    if(!vista.length){
-      html += '<p class="gEmpty duVacio">' + (filtroD === "pronto" ? 'Nada se está acabando por ahora 🎉' : 'Aquí no hay nada todavía.') + '</p>';
+    /* ── resumen: qué se acaba esta semana, día por día ── */
+    const semana = Array.from({ length: 7 }, (_, i) => ({ f: sumaDias(hoy, i), xs: [] }));
+    dura.forEach(x => { const q = x.p.falta ? 0 : x.quedan; if(q <= 6) semana[Math.max(0, q)].xs.push(x); });
+    const enSemana = semana.reduce((a, s) => a + s.xs.length, 0);
+    const nombres = xs => { const n = xs.map(x => baseDe(x.p)); return n.length <= 2 ? n.join(" y ") : n.slice(0, 2).join(", ") + " y " + (n.length - 2) + " más"; };
+    const partes = semana.map((s, i) => !s.xs.length ? "" : '<b>' + esc(nombres(s.xs)) + '</b> ' + (i === 0 ? (s.xs.every(x => x.p.falta || x.quedan < 0) ? 'ya' : 'hoy') : i === 1 ? 'mañana' : 'el ' + DIAS_L[new Date(s.f + "T12:00:00").getDay()])).filter(Boolean);
+    const g = duraGlobal();
+    let ritmo = "";
+    if(g){
+      const cada = nume(g.mercadoCadaDias), dia = g.diaSemana && g.diaSemana.texto;
+      const frase = dia ? dia + (cada ? ', más o menos cada ' + plD(Math.round(cada)) : '') : cada ? 'Sueles mercar cada ~' + plD(Math.round(cada)) : '';
+      const gm = Array.isArray(g.meses) ? g.meses.filter(m => m && /^\d{4}-\d{2}/.test(m.mes || "") && nume(m.compras) != null).slice(-6) : [];
+      const mx = gm.length ? Math.max(...gm.map(m => m.compras)) : 0;
+      const barras = gm.length >= 3 && mx > 0 ? '<div class="duMeses chico" role="img" aria-label="Compras por mes: ' + esc(gm.map(m => mesDe(m.mes) + " " + m.compras).join(", ")) + '">' +
+        gm.map(m => '<span class="' + (m.mes === g.mesMas ? 'mx' : '') + '"><b><i style="height:' + Math.max(m.compras ? 8 : 2, Math.round(m.compras / mx * 100)) + '%"><em>' + (m.mes === g.mesMas || m.mes === g.mesMenos ? m.compras : '') + '</em></i></b><small>' + mesDe(m.mes).slice(0, 3) + '</small></span>').join("") + '</div>' : '';
+      const nota = (g.patronMes && g.patronMes.texto) || g.nota || "";
+      if(frase || barras) ritmo = '<div class="duRitmo"><div class="duRitmoTx"><span class="duOver">Tu ritmo</span>' + (frase ? '<b>' + esc(frase) + '</b>' : '') + (nota ? '<small>' + esc(nota) + '</small>' : '') + '</div>' + barras + '</div>';
     }
+    let html =
+      '<div class="duHero duHero2' + cls + '">' +
+        '<span class="duOver">Esta semana se acaban</span>' +
+        '<div class="duBig">' + (!dura.length ? 'Aprendiendo tus hábitos' : enSemana ? '<span class="duCuenta" data-n="' + enSemana + '">' + (entrando ? 0 : enSemana) + '</span> ' + (enSemana === 1 ? 'cosa' : 'cosas') : 'Nada por ahora 🎉') + '</div>' +
+        (dura.length ? '<ol class="duSem" aria-hidden="true">' + semana.map((s, i) => {
+          const d = new Date(s.f + "T12:00:00"), ya = i === 0 && s.xs.some(x => x.p.falta || x.quedan < 0);
+          return '<li class="' + (i === 0 ? 'hoy' : '') + (s.xs.length ? ' con' : '') + '"><small>' + (i === 0 ? 'Hoy' : DIAS_L[d.getDay()].slice(0, 3)) + '</small><b>' + d.getDate() + '</b><span class="duSemE">' +
+            s.xs.slice(0, s.xs.length > 3 ? 2 : 3).map(x => '<i>' + emojiMercado(baseDe(x.p), x.p.grupo) + '</i>').join("") + (s.xs.length > 3 ? '<em>+' + (s.xs.length - 2) + '</em>' : '') + '</span>' + (ya ? '<u>ya</u>' : '') + '</li>';
+        }).join("") + '</ol>' : '') +
+        '<p class="duSemTx">' + (partes.length ? partes.slice(0, 3).join(' · ') + (partes.length > 3 ? ' · …' : '') : dura.length ? 'Lo más cercano: <b>' + esc(baseDe(dura[0].p)) + '</b> ' + fechaDia(dura[0].proxima) : 'Registra la misma cosa en dos compras y aquí verás cuánto te dura') + '</p>' +
+        ritmo +
+        '<p class="duCuentas">' + (dura.length ? dura.length + ' con duración calculada' : '') + (aprende.length ? (dura.length ? ' · ' : '') + aprende.length + ' aprendiendo' : '') + '</p>' +
+      '</div>' +
+      '<div class="duChips' + cls + '" role="tablist">' +
+        [["urge", "Urgencia", dura.length], ["grupo", "Apartados", null], ["aprende", "Aprendiendo", aprende.length]].map(([k, t, n]) =>
+          '<button type="button" role="tab" aria-selected="' + (filtroD === k) + '" class="duChip' + (filtroD === k ? ' on' : '') + '" data-f="' + k + '">' + t + (n == null ? '' : '<em>' + n + '</em>') + '</button>').join("") +
+      '</div><div class="duLista" id="duLista">';
     const tarjeta = (x, i) => {
-      const p = x.p, nom = baseDe(p), det = detDe(p);
+      const p = x.p, nom = baseDe(p), det = detDe(p), d = x.d;
       const cab = '<span class="duEmo" aria-hidden="true">' + emojiMercado(nom, p.grupo) + '</span><span class="duTx"><b>' + esc(nom) + '</b><small>' + esc(det || p.grupo || "Otros") + '</small></span>';
       const abre = duAbierto === p.id ? " abierto" : "";
       const dly = 'style="--i:' + Math.min(i, 12) + '"';
       if(x.tipo === "dura"){
         const w = x.p.falta ? 100 : Math.min(100, Math.round(x.pct * 100));
         const ac = acaboDe(p), real = ac && p.ultimaCompra ? Math.max(0, Math.round((new Date(ac + "T12:00:00") - new Date(p.ultimaCompra + "T12:00:00")) / 86400000)) : null;
-        return '<div class="duCard ' + x.nivel + (p.falta ? ' canasta' : '') + abre + (entrando ? ' duEntra' : '') + '" data-id="' + esc(p.id) + '" ' + dly + ' role="button" tabindex="0" aria-expanded="' + !!abre + '">' +
-          '<div class="duCab">' + cab + '<span class="duBadge">' + (p.falta ? '🧺 En la canasta' : '~' + plD(x.dur)) + '</span></div>' +
-          '<div class="duPista"><i style="width:' + (entrando ? 0 : w) + '%" data-w="' + w + '"></i></div>' +
-          '<div class="duPie"><span>' + (p.falta ? 'Toca comprarlo' : TXT_NIVEL[x.nivel]) + '</span><span>' + (p.falta ? (ac ? textoAcabo(ac) : 'ya se acabó') : x.quedan > 0 ? 'quedan ~' + plD(x.quedan) : x.quedan === 0 ? 'se acaba hoy' : 'hace ' + plD(-x.quedan) + ' que debió acabarse') + '</span></div>' +
-          '<div class="duMas"><div class="duMasIn"><div class="duDatos">' +
+        const badge = p.falta ? '🧺 En la canasta' : d && d.conf === "baja" && d.rango ? d.rango[0] + '–' + plD(d.rango[1]) : '~' + plD(x.dur);
+        const izq = p.falta ? 'Toca comprarlo' : x.quedan <= 0 ? 'Ya toca comprarlo' : 'Próxima compra ~' + fechaDia(x.proxima, true);
+        const der = p.falta ? (ac ? textoAcabo(ac) : 'ya se acabó') : x.quedan > 0 ? 'quedan ~' + plD(x.quedan) : x.quedan === 0 ? 'se acaba hoy' : 'hace ' + plD(-x.quedan) + ' que debió acabarse';
+        let mas;
+        if(d){
+          const distinto = d.dias && Math.abs(x.dur - d.dias) / d.dias > .15;
+          const frase = distinto
+            ? '<b>Esta compra te dura ~' + plD(x.dur) + '</b><span>' + (d.rango ? 'entre ' + d.rango[0] + ' y ' + d.rango[1] + ' · ' : '') + 'lo normal son ~' + plD(d.dias) + (d.cantHab ? ' con ' + esc(d.cantHab) : '') + '</span>'
+            : '<b>Te dura ~' + plD(x.dur) + '</b>' + (d.rango ? '<span>entre ' + d.rango[0] + ' y ' + d.rango[1] + ' días</span>' : '');
+          const nConf = { alta: 3, media: 2, baja: 1 }[d.conf] || 0;
+          const conf = d.conf ? '<div class="duConf" data-n="' + nConf + '"><span class="duConfBar" aria-hidden="true"><i></i><i></i><i></i></span>' + TXT_CONF[d.conf] + (x.veces ? ' · ' + x.veces + (x.veces === 1 ? ' compra' : ' compras') : '') + '</div>' : '';
+          const prox = p.falta ? (ac ? textoAcabo(ac) : 'ya se acabó') : x.quedan <= 0 ? 'ya toca' : '~' + fechaDia(x.proxima) + (d.proxRango && d.conf !== "alta" ? ' <small>(' + fechaCorta(d.proxRango[0]) + ' – ' + fechaCorta(d.proxRango[1]) + ')</small>' : '');
+          const hechos = [
+            ['Próxima compra', prox],
+            d.porSemana ? ['Gastas', esc(d.porSemana)] : d.porMes ? ['Gastas', esc(d.porMes)] : null,
+            d.comprasMes ? ['Lo compras', d.comprasMes >= 1 ? '~' + String(Math.round(d.comprasMes * 10) / 10).replace(".", ",") + (Math.round(d.comprasMes * 10) === 10 ? ' vez' : ' veces') + ' al mes' : '1 vez cada ~' + Math.round(30 / d.comprasMes) + ' días'] : null,
+            ['Última compra', fechaCorta(p.ultimaCompra) + (d.cantUlt ? ' · ' + esc(d.cantUlt) : '')]
+          ].filter(Boolean);
+          mas = '<div class="duIntel"><p class="duFrase">' + frase + '</p>' + conf +
+            '<dl class="duHechos">' + hechos.map(([k, v]) => '<div><dt>' + k + '</dt><dd>' + v + '</dd></div>').join("") + '</dl>' +
+            histDura(x) + mesesDura(d) +
+            (!d.hist.length && d.nota ? '<p class="duHistCap">' + esc(d.nota) + '</p>' : '') + '</div>';
+        } else {
+          mas = '<div class="duDatos">' +
             '<div><small>Última compra</small><b>' + fechaCorta(p.ultimaCompra) + '</b></div>' +
             '<div><small>Compras</small><b>' + x.veces + '</b></div>' +
             (ac && ac > hoyISO() ? '<div><small>Se acaba</small><b>' + fechaCorta(ac) + '</b></div><div><small>Te dura</small><b>~' + plD(x.dur) + '</b></div>'
               : ac ? '<div><small>Se acabó</small><b>' + fechaCorta(ac) + '</b></div><div><small>Duró</small><b>' + plD(real) + '</b></div>'
                 : '<div><small>Te dura</small><b>~' + plD(x.dur) + '</b></div><div><small>Próxima</small><b>' + fechaCorta(x.proxima) + '</b></div>') +
-          '</div>' + accionCanasta(p) + accionEsencial(p) + '</div></div></div>';
+          '</div>';
+        }
+        return '<div class="duCard ' + x.nivel + (p.falta ? ' canasta' : '') + abre + (entrando ? ' duEntra' : '') + '" data-id="' + esc(p.id) + '" ' + dly + ' role="button" tabindex="0" aria-expanded="' + !!abre + '">' +
+          '<div class="duCab">' + cab + '<span class="duBadge">' + badge + '</span></div>' +
+          '<div class="duPista"><i style="width:' + (entrando ? 0 : w) + '%" data-w="' + w + '"></i></div>' +
+          '<div class="duPie"><span>' + izq + '</span><span>' + der + '</span></div>' +
+          (d && d.tend && !p.falta ? '<div class="duTend ' + d.tend.dir + '">' + FLECHA_T[d.tend.dir] + esc(d.tend.texto) + '</div>' : '') +
+          '<div class="duMas"><div class="duMasIn">' + mas + accionCanasta(p) + accionEsencial(p) + '</div></div></div>';
       }
       if(x.tipo === "aprende"){
+        const est = d && d.estaVez > 0 && d.fuente === "grupo" ? 'parecido a otros: ~' + plD(d.estaVez) : '';
         return '<div class="duCard aprende' + abre + (entrando ? ' duEntra' : '') + '" data-id="' + esc(p.id) + '" ' + dly + ' role="button" tabindex="0" aria-expanded="' + !!abre + '">' +
           '<div class="duCab">' + cab + '<span class="duPuntos" aria-label="' + x.veces + ' de 2 compras"><i class="on"></i><i></i></span></div>' +
           '<div class="duPie"><span>' + (p.falta ? '🧺 En la canasta · toca comprarlo' : 'Aprendiendo · falta 1 compra más') + '</span><span>' + (p.falta && acaboDe(p) ? textoAcabo(acaboDe(p)) : x.dias != null ? 'comprado hace ' + plD(x.dias) : '') + '</span></div>' +
-          '<div class="duMas"><div class="duMasIn"><p class="duNota">Cuando la compres de nuevo con otra fecha, calculo cada cuánto se acaba y te aviso cuándo toca.</p>' + accionCanasta(p) + accionEsencial(p) + '</div></div></div>';
+          '<div class="duMas"><div class="duMasIn"><p class="duNota">' + (d && d.nota ? esc(d.nota) : 'Cuando la compres de nuevo con otra fecha, calculo cada cuánto se acaba y te aviso cuándo toca.') + (est ? ' <b>Por ahora, ' + est + '.</b>' : '') + '</p>' + accionCanasta(p) + accionEsencial(p) + '</div></div></div>';
       }
       return '<div class="duCard sin' + (entrando ? ' duEntra' : '') + '" ' + dly + '><div class="duCab">' + cab + '<span class="duBadge mudo">Sin compras</span></div></div>';
     };
     let ni = 0;
-    ORDEN_G.forEach(g => {
-      const del = vista.filter(x => grupoDe(x.p) === g);
-      if(!del.length) return;
-      const urgentes = del.filter(x => x.tipo === "dura" && (x.nivel === "pronto" || x.nivel === "ya")).length;
-      const abierto = filtroD === "pronto" || abiertosD.has(g);
-      html += acordeon(g, del.length, abierto, '<div class="duGrupoLista">' + del.map(x => tarjeta(x, ni++)).join("") + '</div>', urgentes || "");
-    });
+    const seccion = (t, xs, extra) => xs.length ? '<h3 class="duSec">' + t + '<em>' + xs.length + '</em></h3>' + (extra || '') + xs.map(x => tarjeta(x, ni++)).join("") : '';
+    if(filtroD === "grupo"){
+      ORDEN_G.forEach(gr => {
+        const del = dura.concat(aprende, sin).filter(x => grupoDe(x.p) === gr);
+        if(!del.length) return;
+        const urgentes = del.filter(x => x.tipo === "dura" && (x.nivel === "pronto" || x.nivel === "ya")).length;
+        html += acordeon(gr, del.length, abiertosD.has(gr), '<div class="duGrupoLista">' + del.map(x => tarjeta(x, ni++)).join("") + '</div>', urgentes || "");
+      });
+    } else if(filtroD === "aprende"){
+      html += aprende.length ? aprende.map(x => tarjeta(x, ni++)).join("") : '<p class="gEmpty duVacio">Aquí no hay nada todavía.</p>';
+    } else {
+      const ya = dura.filter(x => x.p.falta || x.quedan <= 0), semanaX = dura.filter(x => !x.p.falta && x.quedan > 0 && x.quedan <= 6), luego = dura.filter(x => !x.p.falta && x.quedan > 6);
+      html += seccion("Ya toca comprar", ya) + seccion("Se acaban esta semana", semanaX) + seccion("Más adelante", luego) + seccion("Aprendiendo", aprende);
+      if(sin.length) html += '<p class="duSinCompras"><b>Sin compras todavía:</b> ' + esc(sin.map(x => baseDe(x.p)).join(", ")) + '</p>';
+      if(!dura.length && !aprende.length && !sin.length) html += '<p class="gEmpty duVacio">Aquí no hay nada todavía.</p>';
+    }
     html += '</div>';
     duEl.innerHTML = html;
     if(entrando){
       requestAnimationFrame(() => requestAnimationFrame(() => {
         duEl.querySelectorAll(".duPista i").forEach(b => { b.style.width = b.dataset.w + "%"; });
-        const fg = duEl.querySelector(".duAroFg"); if(fg) fg.style.strokeDashoffset = fg.dataset.off;
-        [".duAroN", ".duCuenta"].forEach(sel => { const el = duEl.querySelector(sel); if(el) cuenta(el); });
+        const el = duEl.querySelector(".duCuenta"); if(el) cuenta(el);
       }));
     }
   }
@@ -12276,6 +12518,9 @@ const Mercar = (function(){
       gr.nextElementSibling.classList.toggle("on", abrir);
       return;
     }
+    const hb = e.target.closest(".duBarH");
+    if(hb){ e.stopPropagation(); const card = hb.closest(".duCard"); card.querySelectorAll(".duBarH.sel").forEach(b => { b.classList.remove("sel"); b.setAttribute("aria-pressed", "false"); }); hb.classList.add("sel"); hb.setAttribute("aria-pressed", "true"); const cap = card.querySelector(".duHistCap"); if(cap) cap.textContent = hb.dataset.t; return; }
+    if(e.target.closest(".duIntel")) return;   // tocar dentro del detalle (gráficas, datos) no lo cierra
     const ch = e.target.closest(".duChip");
     if(ch){ filtroD = ch.dataset.f; duAbierto = null; pintaDura(false); duEl.querySelectorAll(".duCard").forEach(c => c.classList.add("duEntra")); return; }
     const c = e.target.closest(".duCard[data-id]");
@@ -12283,9 +12528,9 @@ const Mercar = (function(){
   });
   duEl.addEventListener("keydown", e => { if((e.key === "Enter" || e.key === " ") && e.target.classList && e.target.classList.contains("duCard")){ e.preventDefault(); e.target.click(); } });
   function dura(entrando){
-    if(entrando) traeEsenciales();
     if(!datos){ try{ const c = JSON.parse(localStorage.getItem(KEY)); if(c && Array.isArray(c.productos)) datos = c; }catch{} }
-    if(entrando){ filtroD = "todo"; duAbierto = null; abiertosD.clear(); duInicia = true; }
+    if(entrando){ traeEsenciales(); traeDura(duraVieja()); }
+    if(entrando){ filtroD = "urge"; duAbierto = null; abiertosD.clear(); duInicia = true; }
     pintaDura(!!entrando);
     cargar();
   }
