@@ -2443,10 +2443,34 @@ body.mode-mercar:has(#mkStage .mcTop) #thread{ -webkit-mask-image:none; mask-ima
 .ddRedSvg .hub .et{ font-size:10.5px; fill:var(--white); paint-order:stroke; stroke:var(--void); stroke-width:3.5px; stroke-linejoin:round; }
 .ddRedSvg .hub.on .disco{ fill:var(--c); }
 .ddRedSvg .hub.on .num{ fill:var(--void); }
-.ddRedSvg .core .aura{ fill:url(#ddAura); animation:ddLate 4.8s ease-in-out infinite; transform-box:fill-box; transform-origin:center; }
-@keyframes ddLate{ 0%,100%{ transform:scale(.92); opacity:.75; } 50%{ transform:scale(1.08); opacity:1; } }
-.ddRedSvg .core .nucleo{ fill:url(#ddNucleo); stroke:rgba(255,255,255,.5); stroke-width:1; }
-.ddRedSvg .core text{ font:800 9.5px "Schibsted Grotesk", system-ui, sans-serif; fill:#1a1208; text-anchor:middle; dominant-baseline:central; letter-spacing:.02em; }
+/* ── uxd · Armoni, el núcleo: aura que late, ondas de energía, órbitas a distintas velocidades y partículas ── */
+.ddRedSvg .core .aura{ fill:url(#ddAura); transform-origin:0 0; animation:ddAuraLate 2.4s ease-in-out infinite; }
+@keyframes ddAuraLate{ 0%,42%,100%{ transform:scale(.93); opacity:.78; } 10%{ transform:scale(1.09); opacity:1; } 26%{ transform:scale(1.03); opacity:.94; } }
+.ddRedSvg .core .onda{ fill:none; stroke:#ffb066; stroke-width:.45; opacity:0; transform-origin:0 0; animation:ddOndaCore 3.6s cubic-bezier(.15,.6,.3,1) infinite; animation-delay:var(--d, 0s); }
+@keyframes ddOndaCore{ 0%{ opacity:0; transform:scale(1); } 5%{ opacity:.6; } 100%{ opacity:0; transform:scale(3.9); } }
+.ddRedSvg .core .boom{ fill:none; stroke:#ffe0b8; stroke-width:1.6; opacity:0; transform-origin:0 0; }
+.ddRedSvg .core .ring{ fill:none; stroke:rgba(255,190,130,.5); stroke-width:.9; }
+.ddRedSvg .core .ring.d{ stroke-dasharray:2 3.2; }
+.ddRedSvg .core .cometa{ fill:none; stroke:#ffd9a8; stroke-width:2.2; stroke-linecap:round; stroke-dasharray:14 86; }
+.ddRedSvg .core .cometa.b{ stroke:#7ee8ff; stroke-width:1.8; stroke-dasharray:9 91; }
+.ddRedSvg .core .cometa.c{ stroke:#ff8fb1; stroke-width:1.6; stroke-dasharray:7 93; }
+.ddRedSvg .core .sat{ fill:#fff; }
+.ddRedSvg .core .tics{ fill:none; stroke:rgba(255,214,170,.6); stroke-width:2.4; stroke-dasharray:.5 3.4; }
+.ddRedSvg .core .halo2{ fill:none; stroke:#ffb066; stroke-opacity:.55; stroke-width:1.2; }
+.ddRedSvg .core .gira{ transform-origin:0 0; animation:ddGira var(--t, 8s) linear infinite; animation-delay:var(--d, 0s); }
+.ddRedSvg .core .gira.rev{ animation-direction:reverse; }
+@keyframes ddGira{ to{ transform:rotate(360deg); } }
+.ddRedSvg .core .pt circle{ fill:#ffe6c8; }
+.ddRedSvg .core .late{ transform-origin:0 0; animation:ddLub 2.4s ease-in-out infinite; }
+@keyframes ddLub{ 0%,42%,100%{ transform:scale(1); } 9%{ transform:scale(1.075); } 18%{ transform:scale(.99); } 27%{ transform:scale(1.04); } }
+.ddRedSvg .core .nucleo{ fill:url(#ddNucleo); }
+.ddRedSvg .core .plasma{ fill:url(#ddPlasma); }
+.ddRedSvg .core .plasma.b{ fill:url(#ddPlasma2); }
+.ddRedSvg .core .brillo{ fill:url(#ddBrillo); }
+.ddRedSvg .core .borde{ fill:none; stroke:rgba(255,240,222,.75); stroke-width:.8; }
+.ddRedSvg .core text{ font:800 10px "Schibsted Grotesk", system-ui, sans-serif; fill:#1a1208; text-anchor:middle; dominant-baseline:central; letter-spacing:.03em; }
+.ddRedSvg .core:focus-visible .borde{ stroke:#fff; stroke-width:2.2; }
+.ddRedSvg.entra .core .esc{ animation:ddAparece .7s var(--ease-spring, ease) both; }
 .ddRedSvg.filtra .nd:not(.si) .esc{ opacity:.16; }
 .ddRedSvg.filtra .ln:not(.si), .ddRedSvg.filtra .pulso:not(.si){ stroke-opacity:.05; opacity:.05; }
 .ddRedSvg.filtra .cruz:not(.si){ stroke-opacity:.03; }
@@ -2475,7 +2499,100 @@ body.mode-mercar:has(#mkStage .mcTop) #thread{ -webkit-mask-image:none; mask-ima
 .ddRed.vacio .ddRedCaja{ padding-bottom:16px; }
 .ddRed.vacio p{ position:relative; margin:-6px 20px 0; font-size:.86rem; color:var(--ghost); text-align:center; }
 .ddRedSvg .orb{ fill:none; stroke:rgba(var(--ink),.14); stroke-dasharray:3 5; }
-@media (prefers-reduced-motion:reduce){ .ddRedSvg *, .ddRedDet .ddHecho{ animation:none !important; transition:none !important; } .ddRedDet .ddHecho{ opacity:1; transform:none; } .ddRedSvg .pulso{ display:none; } }
+/* ── uxd · temas y neuronas con más vida ── */
+.ddRedSvg .hub .giro{ fill:none; stroke:var(--c); stroke-opacity:.6; stroke-width:1; stroke-dasharray:1.4 4.1; transform-origin:0 0; animation:ddGira 18s linear infinite; }
+.ddRedSvg .hub.on .giro{ stroke-opacity:1; animation-duration:6s; }
+.ddRedSvg .nd:nth-child(3n+1) .halo{ animation:ddTwk 3.6s ease-in-out infinite; animation-delay:calc(var(--i) * -.53s); }
+@keyframes ddTwk{ 0%,100%{ opacity:.1; } 50%{ opacity:.3; } }
+.ddRedSvg .nd.sel .halo{ animation:ddSelHalo 1.6s ease-in-out infinite; }
+@keyframes ddSelHalo{ 0%,100%{ opacity:.3; } 50%{ opacity:.6; } }
+.ddRedSvg .pulso.eje{ stroke-width:2.8; }
+.ddRedSvg.foco .nd.sel .anillo{ animation:ddOnda 1.7s ease-out infinite; }
+.ddRedSvg.foco .nd.sel .dot{ stroke:#fff; stroke-width:1.2; }
+/* ── uxd · navegar: la cámara entra a un tema o a una neurona ── */
+.ddRedSvg{ transform-origin:0 0; }
+.ddRedCaja{ scroll-margin-top:78px; isolation:isolate; }
+.ddRedCaja.nave .ddRedSvg{ touch-action:pan-y; }
+.ddRedSvg.foco .nd:not(.si):not(.sel) .esc{ opacity:.1; }
+.ddRedSvg.foco .hub:not(.on):not(.si) .esc{ opacity:.2; }
+.ddRedSvg.foco .ln:not(.si), .ddRedSvg.foco .cruz:not(.si):not(.sel), .ddRedSvg.foco .pulso:not(.si):not(.eje){ opacity:.06; }
+.ddRedSvg.foco .pulso:not(.si){ animation-play-state:paused; visibility:hidden; }
+.ddRedSvg.foco .eje:not(.si){ stroke-opacity:.1; }
+.ddRedSvg.foco .eje.si:not(.pulso){ stroke-opacity:.85; stroke-width:2; }
+.ddRedSvg.foco .pulso.eje.si{ visibility:visible; animation-play-state:running; }
+.ddRedSvg.foco .ln.sel, .ddRedSvg.foco .cruz.sel, .ddRedSvg.foco .ln.si{ stroke-opacity:1; stroke-width:1.5; stroke-dasharray:3 2.5; animation:ddFlujo .9s linear infinite; }
+@keyframes ddFlujo{ to{ stroke-dashoffset:-11; } }
+.ddRedSvg .mira{ pointer-events:none; opacity:0; color:var(--c, #ffb066); transition:opacity .25s ease; }
+.ddRedSvg .mira.on{ opacity:1; transition-delay:.28s; }
+.ddRedSvg .mira path, .ddRedSvg .mira circle{ fill:none; stroke:currentColor; stroke-width:1.5; stroke-linecap:round; }
+.ddRedSvg .mira .md{ stroke-dasharray:2 5; stroke-opacity:.85; transform-origin:0 0; animation:ddGira 7s linear infinite; }
+.ddRedSvg .mira .mx{ stroke-opacity:.6; }
+.ddRedSvg .mira.on .mz{ transform-origin:0 0; animation:ddMira .65s .28s cubic-bezier(.2,.8,.2,1) both; }
+@keyframes ddMira{ from{ transform:scale(2.3) rotate(-60deg); opacity:0; } }
+.ddRedSvg .mira .mt{ font:700 8px ui-monospace, "SFMono-Regular", Menlo, monospace; fill:currentColor; letter-spacing:.1em; paint-order:stroke; stroke:var(--void); stroke-width:3px; }
+.ddVolverRed{ position:absolute; z-index:3; top:10px; left:10px; display:inline-flex; align-items:center; gap:3px; min-height:40px; padding:0 13px 0 7px; border-radius:12px; border:1px solid rgba(var(--ink),.16); background:rgba(var(--shade),.5); -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px); color:var(--white); font:inherit; font-size:.82rem; font-weight:700; cursor:pointer; opacity:0; visibility:hidden; transform:translateX(-12px); transition:opacity .3s ease, transform .4s var(--ease-spring, ease), visibility 0s linear .4s; }
+.ddVolverRed svg{ width:18px; height:18px; }
+.ddVolverRed:active{ transform:scale(.95); }
+.ddVolverRed:focus-visible{ outline:2px solid #ffb066; outline-offset:2px; }
+.ddRedCaja.nave .ddVolverRed{ opacity:1; visibility:visible; transform:none; transition-delay:.3s, .3s, 0s; }
+.ddHud{ position:absolute; z-index:2; top:12px; right:14px; display:grid; gap:4px; justify-items:end; font:700 .6rem/1 ui-monospace, "SFMono-Regular", Menlo, monospace; letter-spacing:.14em; text-transform:uppercase; color:rgba(var(--ink),.6); pointer-events:none; opacity:0; transform:translateY(-4px); transition:opacity .3s ease, transform .3s ease; }
+.ddHud b{ color:#ffcf99; font-variant-numeric:tabular-nums; }
+.ddRedCaja.nave .ddHud{ opacity:1; transform:none; transition-delay:.35s; }
+.ddRedCaja .ddVig{ position:absolute; inset:0; z-index:1; pointer-events:none; opacity:0; transition:opacity .6s ease; background:radial-gradient(circle at 50% 46%, transparent 24%, rgba(var(--shade),.6) 80%); }
+.ddRedCaja.nave .ddVig{ opacity:1; }
+.ddRedCaja .ddScan{ position:absolute; inset:0; z-index:2; pointer-events:none; opacity:0; background:linear-gradient(180deg, transparent 38%, rgba(255,176,102,.08) 46%, rgba(255,224,184,.38) 50%, transparent 51.5%), repeating-linear-gradient(180deg, rgba(255,255,255,.05) 0 1px, transparent 1px 3px); }
+.ddRed.enNave .ddRedCuenta{ display:none; }
+/* ── uxd · la tarjeta holográfica de la neurona o del tema ── */
+.ddHolo{ --cc:rgba(255,176,102,.16); position:relative; margin:12px 0 6px; padding:14px 14px 12px; border-radius:20px; background:linear-gradient(160deg, var(--cc), rgba(var(--ink),.03) 62%), var(--panel); box-shadow:0 22px 44px -28px var(--c); isolation:isolate; overflow:hidden; animation:hoEntra .55s cubic-bezier(.2,.8,.2,1) both; }
+@supports (color:color-mix(in srgb, red 10%, transparent)){ .ddHolo{ --cc:color-mix(in srgb, var(--c) 17%, transparent); } }
+@keyframes hoEntra{ from{ opacity:0; transform:translateY(16px) scale(.96); clip-path:inset(0 0 100% 0 round 20px); } to{ clip-path:inset(0 0 0 0 round 20px); } }
+.ddHolo::before{ content:""; position:absolute; inset:0; z-index:-1; pointer-events:none; background:repeating-linear-gradient(180deg, rgba(var(--ink),.035) 0 1px, transparent 1px 3px); }
+.ddHolo::after{ content:""; position:absolute; left:0; right:0; top:0; height:45%; z-index:2; pointer-events:none; background:linear-gradient(180deg, transparent, var(--cc), transparent); opacity:0; animation:hoBarre 1.2s .2s ease-out both; }
+@keyframes hoBarre{ from{ transform:translateY(-100%); opacity:1; } to{ transform:translateY(240%); opacity:0; } }
+.hoRayo{ position:absolute; top:0; left:50%; width:2px; height:26px; margin-left:-1px; background:linear-gradient(var(--c), transparent); opacity:0; pointer-events:none; animation:hoRayo .7s ease-out both; }
+@keyframes hoRayo{ from{ opacity:1; transform:scaleY(0); transform-origin:top; } 50%{ opacity:1; transform:scaleY(1); } to{ opacity:0; } }
+.hoMarco{ position:absolute; inset:0; width:100%; height:100%; pointer-events:none; overflow:visible; }
+.hoMarco rect{ x:1px; y:1px; width:calc(100% - 2px); height:calc(100% - 2px); rx:19px; fill:none; stroke:var(--c); stroke-opacity:.7; stroke-width:1.2; stroke-dasharray:100; animation:hoTraza 1.1s .05s cubic-bezier(.6,0,.2,1) both; }
+@keyframes hoTraza{ from{ stroke-dashoffset:100; } }
+.hoEsq{ position:absolute; inset:6px; pointer-events:none; opacity:.95;
+  background:linear-gradient(var(--c),var(--c)) left top/12px 2px no-repeat, linear-gradient(var(--c),var(--c)) left top/2px 12px no-repeat,
+    linear-gradient(var(--c),var(--c)) right top/12px 2px no-repeat, linear-gradient(var(--c),var(--c)) right top/2px 12px no-repeat,
+    linear-gradient(var(--c),var(--c)) left bottom/12px 2px no-repeat, linear-gradient(var(--c),var(--c)) left bottom/2px 12px no-repeat,
+    linear-gradient(var(--c),var(--c)) right bottom/12px 2px no-repeat, linear-gradient(var(--c),var(--c)) right bottom/2px 12px no-repeat;
+  animation:hoEsq .5s .3s cubic-bezier(.2,.8,.2,1) both; }
+@keyframes hoEsq{ from{ opacity:0; transform:scale(1.08); } }
+.hoCab{ position:relative; display:flex; align-items:baseline; gap:8px; margin:0 4px 10px; font:700 .64rem/1 ui-monospace, "SFMono-Regular", Menlo, monospace; letter-spacing:.14em; text-transform:uppercase; color:var(--c); }
+.hoNum{ font:800 1.2rem/1 "Schibsted Grotesk", system-ui, sans-serif; letter-spacing:0; text-transform:none; color:var(--strong); font-variant-numeric:tabular-nums; }
+.hoNum small{ margin-left:1px; font-size:.68rem; font-weight:700; color:var(--dim); }
+.hoHex{ margin-left:auto; color:var(--dim); text-transform:none; font-variant-numeric:tabular-nums; }
+.ddRedDet .ddHolo .ddHecho{ position:relative; padding:2px 4px 0; border:0; background:none; animation:none; opacity:1; transform:none; }
+.ddHolo .ddHecho > span{ font-size:1rem; font-weight:600; line-height:1.42; color:var(--strong); }
+.ddHolo .ddHecho .ddDet{ border-top-color:rgba(var(--ink),.1); }
+.ddHolo .ddRedTm{ position:relative; margin:0 2px 10px; }
+.tecleando::after{ content:"▍"; margin-left:1px; color:var(--c); animation:hoCaret .45s steps(1) infinite; }
+@keyframes hoCaret{ 50%{ opacity:0; } }
+.hoDat{ position:relative; display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:6px; margin:12px 0 0; }
+.hoDat div{ min-width:0; padding:8px 10px; border-radius:12px; border:1px solid rgba(var(--ink),.07); background:rgba(var(--ink),.04); animation:hoSube .45s cubic-bezier(.2,.8,.2,1) both; animation-delay:calc(.45s + var(--k, 0) * 80ms); }
+.hoDat dt{ font:700 .56rem/1.2 ui-monospace, "SFMono-Regular", Menlo, monospace; letter-spacing:.12em; text-transform:uppercase; color:var(--dim); }
+.hoDat dd{ margin:4px 0 0; font-size:.9rem; font-weight:800; line-height:1.2; color:var(--strong); font-variant-numeric:tabular-nums; }
+@keyframes hoSube{ from{ opacity:0; transform:translateY(8px); } }
+.hoGrande{ position:relative; display:flex; gap:22px; margin:0 4px 12px; }
+.hoGrande b{ display:block; font-size:2.1rem; font-weight:800; line-height:1; color:var(--strong); font-variant-numeric:tabular-nums; text-shadow:0 0 22px var(--c); }
+.hoGrande span{ font-size:.74rem; color:var(--ghost); }
+.hoLista{ position:relative; display:grid; grid-template-columns:minmax(0, 1fr); gap:6px; margin:0; padding:0; list-style:none; }
+.hoLista button{ display:flex; align-items:center; gap:10px; width:100%; min-height:42px; padding:6px 12px; border-radius:12px; border:1px solid rgba(var(--ink),.08); background:rgba(var(--ink),.04); color:var(--white); font:inherit; font-size:.82rem; text-align:left; cursor:pointer; animation:hoSube .4s cubic-bezier(.2,.8,.2,1) both; animation-delay:calc(.3s + var(--k, 0) * 55ms); transition:background .2s ease, transform .15s ease; }
+.hoLista button:active{ transform:scale(.98); background:rgba(var(--ink),.08); }
+.hoLista button span{ flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.hoLista button::after{ content:"›"; color:var(--dim); font-size:1.1rem; }
+.hoLista i{ flex:none; width:7px; height:7px; border-radius:50%; background:var(--c); box-shadow:0 0 8px var(--c); }
+.hoMas{ position:relative; display:block; width:100%; min-height:42px; margin-top:8px; border:1px dashed rgba(var(--ink),.18); border-radius:12px; background:none; color:var(--ghost); font:inherit; font-size:.8rem; font-weight:700; cursor:pointer; }
+body.asleep .ddHolo, body.asleep .ddHolo *, body.asleep .ddHolo::after{ animation:none !important; }
+@media (prefers-reduced-motion:reduce){
+  .ddRedSvg *, .ddRedDet .ddHecho, .ddHolo, .ddHolo *, .ddHolo::after{ animation:none !important; transition:none !important; }
+  .ddRedDet .ddHecho{ opacity:1; transform:none; }
+  .ddRedSvg .pulso, .ddRedSvg .core .onda, .ddRedSvg .core .pt, .hoRayo{ display:none; }
+  .ddVolverRed, .ddHud, .ddRedCaja .ddVig{ transition:none; }
+}
 .ddDesp{ margin-bottom:10px; border-radius:18px; border:1px solid var(--line); background:var(--panel); overflow:hidden; }
 .ddDesp summary{ display:flex; align-items:center; gap:10px; min-height:52px; padding:0 16px; list-style:none; cursor:pointer; font-weight:600; color:var(--strong); }
 .ddDesp summary::-webkit-details-marker{ display:none; }
@@ -3583,6 +3700,40 @@ body[class*="mode-"] #masIngreso{ display:none; }
 /* copiar del chat: el dibujo sigue de 26 px, el toque llega a 44 */
 .tools button{ position:relative; }
 .tools button::before{ content:""; position:absolute; inset:-9px; }
+/* ── ux-c: coherencia y toques de 44 px (Salidas, Control, Ajustes, Pagos, menú) ── */
+/* «‹ Volver» de subpantalla (Temporada, Ajustes): la misma pastilla que .fmVolver */
+.tpVolver, .ajVolver{ min-height:40px; padding:0 14px 0 8px; gap:3px; border-radius:999px; border:1px solid var(--line); background:rgba(var(--ink),.05); color:var(--ghost); font-size:.84rem; font-weight:600; position:relative; }
+.tpVolver svg, .ajVolver svg{ width:17px; height:17px; }
+.tpAddMini{ border-radius:999px; position:relative; }
+.tpVolver::before, .ajVolver::before, .tpAddMini::before{ content:""; position:absolute; inset:-3px -2px; }
+/* Ajustes: Volver y título en la misma fila, como Temporada (el espejo invisible centra el título) */
+.ajTop .ajVolver{ margin:0; }
+.ajTop .ajEspejo{ visibility:hidden; pointer-events:none; }
+.ajTop h2{ font-weight:700; }
+/* Restaurantes: nombre largo con «…» (antes se cortaba a media letra) */
+.restName .restNomT{ min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+/* Temporada: letras legibles sobre los degradados claros (verde, amarillo) */
+.tpCard b, .tpCard small{ text-shadow:0 1px 2px rgba(0,0,0,.45), 0 0 12px rgba(0,0,0,.18); }
+.tpCard small{ opacity:1; }
+/* ✎ / ✕ de cada plan: 28 px a la vista, ~44 px de alto al tocar (sin pisarse entre sí) */
+.tpX::before, .tpEd::before{ content:""; position:absolute; inset:-8px -3px; }
+/* Salidas Ema: «Registra salida» ya no se monta sobre «Los días que salieron» */
+.emaMas small{ position:static; }
+/* Ahorro: «+ Agregar meta» (24 px) con zona de toque cómoda */
+.ahPonMeta{ position:relative; }
+.ahPonMeta::before{ content:""; position:absolute; inset:-10px -8px; }
+/* Ajustes: interruptores y botones con zona de toque de 44 px */
+.segTheme{ width:92px; height:40px; }
+.swc::before{ content:""; position:absolute; inset:-7px -4px; }
+.notifBtn{ position:relative; min-height:38px; }
+.notifBtn::before{ content:""; position:absolute; inset:-4px; }
+/* menú lateral y historias: la ✕ se ve igual pero se toca a 44 px */
+#drawerClose{ position:relative; }
+#drawerClose::before{ content:""; position:absolute; inset:-6px; }
+.wsX{ position:relative; }
+.wsX::before{ content:""; position:absolute; inset:-4px; }
+/* Balance: el mes en curso se marca con un punto, no con «Oct ·» */
+.blCurso{ display:inline-block; width:6px; height:6px; margin-left:5px; border-radius:50%; background:currentColor; vertical-align:middle; opacity:.75; }
 </style>
 </head>
 <body>
@@ -3797,8 +3948,7 @@ body[class*="mode-"] #masIngreso{ display:none; }
         <div id="duStage"></div>
       </section>
       <section id="ajustesView" aria-label="Ajustes">
-        <button type="button" class="ajVolver" id="ajVolver"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>Volver</button>
-        <div class="restIntro"><h2>Ajustes</h2></div>
+        <div class="tpTop ajTop"><button type="button" class="ajVolver" id="ajVolver"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>Volver</button><h2>Ajustes</h2><span class="ajVolver ajEspejo" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>Volver</span></div>
         <div class="ajGrupo">Apariencia</div>
         <div class="ajCard">
       <div class="setRow">
@@ -4001,7 +4151,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-18.239";
+const APP_VERSION = "2026-10-18.240";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -5914,7 +6064,7 @@ let MODE = "chat";
    También se ven en Ajustes → «Uso de Armoni». Sirve para decidir qué mejorar según la tendencia. */
 const Uso = (function(){
   const K = "armoni.uso", DIAS = 90;
-  const NOMBRES = { chat: "Arm", mercar: "Check", dura: "Duración", mes: "Tu mes", balance: "Balance", ahorro: "Ahorro", recuerda: "Recuerda", credito: "Crédito carro", glim: "Glim", rest: "Restaurantes", ema: "Salidas Ema", gmail: "AT Gmail", ajustes: "Ajustes" };
+  const NOMBRES = { chat: "Arm", mercar: "Check", dura: "Duración", mes: "Tu mes", balance: "Balance", ahorro: "Ahorro", recuerda: "Recuerda", credito: "Crédito carro", glim: "Glim", rest: "Restaurantes", ema: "Salidas Ema", gmail: "AT Gmail", ajustes: "Ajustes", dudas: "Dudas", temp: "Temporada" };
   const hoy = () => { const d = new Date(); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); };
   const lee = () => { try{ return JSON.parse(localStorage.getItem(K)) || { dias: {} }; }catch{ return { dias: {} }; } };
   const guarda = d => {
@@ -6175,7 +6325,7 @@ const Restaurantes = (function(){
     el.setAttribute("aria-haspopup", "dialog");
     const emos = r.comidas.map(id => { const c = catDe(id); return '<span title="' + esc(c.label) + '">' + c.emo + "</span>"; }).join("");
     el.innerHTML =
-      '<div class="restMain"><div class="restName">' + esc(r.nombre) + (emos ? '<span class="emos">' + emos + "</span>" : "") + "</div>" +
+      '<div class="restMain"><div class="restName"><span class="restNomT">' + esc(r.nombre) + '</span>' + (emos ? '<span class="emos">' + emos + "</span>" : "") + "</div>" +
       (r.nota ? '<div class="restNote">' + esc(r.nota) + "</div>" : "") + "</div>" +
       '<div class="restNum' + (r.score >= 8.5 ? " top" : r.score < 6 ? " low" : "") + '" aria-label="' + (r.score > 0 ? nota10(r.score) + ' de 10' : 'sin puntuación') + '">' + (r.score > 0 ? nota10(r.score) + "<small>/10</small>" : "<small>sin nota</small>") + "</div>";
     el.addEventListener("click", () => Sheet.openDetail(r));
@@ -6378,7 +6528,7 @@ const Restaurantes = (function(){
     pidiendo = true;
     fetchLive(cache && JSON.stringify(cache.items))
       .catch(() => {
-        if(!cache) statusEl.innerHTML = 'No se pudo cargar tus restaurantes. Revisa tu internet y que Tailscale esté encendido.';
+        if(!cache) statusEl.innerHTML = 'No se pudieron cargar tus restaurantes. Revisa tu internet y que Tailscale esté encendido.';
       })
       .finally(() => { pidiendo = false; });
   }
@@ -8368,16 +8518,17 @@ const Balance = (function(){
     { k: "des", nombre: "Entretenimiento", ideal: 30, color: "#e66767", tonos: ["#e66767", "#f5a3a3", "#c44747", "#fbc9c9"], cats: ["Salidas", "Salidas Ema", "Otros"], nota: "Salidas, planes, antojos y lo demás" },
     { k: "aho", nombre: "Ahorro", ideal: 20, color: "#199e70", tonos: ["#199e70", "#5fcfa4", "#0f7a55"], cats: ["Ahorro"], nota: "Lo que se guarda y lo que quedó sin gastar" }
   ];
-  let datos = null, mes = null, pestana = "valores", vista = "meses", rango = "anio", abiertas = {}, sel = null;
+  let balFallo = false, datos = null, mes = null, pestana = "valores", vista = "meses", rango = "anio", abiertas = {}, sel = null;
 
   function lee(){ try{ datos = JSON.parse(localStorage.getItem("armoni.tumes.datos")); }catch{} }
   async function cargar(){
     try{
       const r = await fetch(RESUMEN_URL, { cache: "no-store", signal: AbortSignal.timeout ? AbortSignal.timeout(10000) : undefined });
-      if(!r.ok) return;
+      if(!r.ok){ balFallo = true; if(!datos) pinta(false); return; }
+      balFallo = false;
       const d = await r.json();
       if(d && Array.isArray(d.meses) && JSON.stringify(d) !== JSON.stringify(datos)){ datos = d; try{ localStorage.setItem("armoni.tumes.datos", JSON.stringify(d)); }catch{} pinta(false); }
-    }catch{}
+    }catch{ balFallo = true; if(!datos) pinta(false); }
   }
   /* todos los meses, sin omitir ninguno (el que va en curso aparece marcado) */
   const meses = () => Preguntas.aplica((datos && datos.meses) || []).meses.filter(m => m.gastos > 0 || m.ingresos > 0).slice().sort((a, b) => a.mes.localeCompare(b.mes));
@@ -8420,7 +8571,7 @@ const Balance = (function(){
   function resumen(M){
     const ing = M.ingresos || 0, gas = M.gastos || 0, bal = ing - gas, uso = ing ? Math.min(100, gas / ing * 100) : 100;
     return '<div class="balResumen">' +
-      '<div class="rsTit"><small>Resumen general</small><b>' + (M.mes === "general" ? 'Todo junto · ' + M.n + (M.n === 1 ? ' mes' : ' meses') + '</b><small style="margin-top:2px">' + esc(rango_(M.desde, M.hasta)) + '</small>' : esc(cap(mesNombre(M.mes))) + ' ' + M.mes.slice(0, 4) + (M.mes === mesHoy() ? ' · en curso' : '') + '</b>') + '</div>' +
+      '<div class="rsTit"><small>' + (M.mes === "general" ? 'Resumen general' : 'Resumen del mes') + '</small><b>' + (M.mes === "general" ? 'Todo junto · ' + M.n + (M.n === 1 ? ' mes' : ' meses') + '</b><small style="margin-top:2px">' + esc(rango_(M.desde, M.hasta)) + '</small>' : esc(cap(mesNombre(M.mes))) + ' ' + M.mes.slice(0, 4) + (M.mes === mesHoy() ? ' · en curso' : '') + '</b>') + '</div>' +
       '<div class="rsBal ' + (bal >= 0 ? 'pos' : 'neg') + '"><span>Balance</span><strong>' + peso(bal) + '</strong><small>' + (M.mes === "general" ? (bal >= 0 ? 'Lo que quedó en total' : 'En total salió más de lo que entró') : (bal >= 0 ? 'Lo que quedó este mes' : 'Salió más de lo que entró')) + '</small></div>' +
       '<div class="rsDos">' +
         '<div class="rsIng"><i aria-hidden="true">↑</i><span>Ingresos</span><b>' + peso(ing) + '</b></div>' +
@@ -8480,10 +8631,10 @@ const Balance = (function(){
   function pinta(animar){
     if(!view) return;
     const cuerpo = view.querySelector("#balCuerpo"), ms = meses();
-    if(!ms.length){ cuerpo.innerHTML = '<p class="gEmpty">Todavía no hay meses con movimientos.</p>'; return; }
+    if(!ms.length){ cuerpo.innerHTML = datos ? '<p class="gEmpty">Todavía no hay meses con movimientos.</p>' : balFallo ? '<p class="gEmpty">No se pudo cargar el balance. Revisa tu internet y que Tailscale esté encendido.</p>' : '<p class="gEmpty"><span class="dot" aria-hidden="true"></span>Cargando el balance…</p>'; return; }
     if(!mes || (mes !== "general" && !ms.find(m => m.mes === mes))) mes = ms[ms.length - 1].mes;
     const M = mes === "general" ? agregado(ms) : ms.find(m => m.mes === mes);
-    const chips = '<button type="button" role="tab" data-m="general" class="gen" aria-selected="' + (mes === "general") + '">General</button>' + ms.slice(-12).map(m => '<button type="button" role="tab" data-m="' + m.mes + '" aria-selected="' + (m.mes === mes) + '">' + esc(mesNombre(m.mes).slice(0, 3)) + (m.mes === mesHoy() ? ' ·' : '') + '</button>').join("");
+    const chips = '<button type="button" role="tab" data-m="general" class="gen" aria-selected="' + (mes === "general") + '">General</button>' + ms.slice(-12).map(m => '<button type="button" role="tab" data-m="' + m.mes + '" aria-selected="' + (m.mes === mes) + '">' + esc(mesNombre(m.mes).slice(0, 3)) + (m.mes === mesHoy() ? '<i class="blCurso" aria-label="en curso"></i>' : '') + '</button>').join("");
     cuerpo.innerHTML =
       '<div class="balPest" role="tablist"><button type="button" role="tab" data-p="valores" aria-selected="' + (pestana === "valores") + '">Valores</button><button type="button" role="tab" data-p="grafica" aria-selected="' + (pestana === "grafica") + '">Gráfica</button></div>' +
       (pestana === "valores"
@@ -8865,7 +9016,7 @@ const Preguntas = (function(){
   const KD = "armoni.dudas", KS = "armoni.saber";
   let pestana = "dudas", busca = "", tema = "todo";
   let vistaSaber = (() => { try{ return localStorage.getItem("armoni.saber.vista") || "red"; }catch{ return "red"; } })();
-  let redSel = null, redNuevos = null, redUlt = 0, redIO = null;
+  let redSel = null, redNuevos = null, redUlt = 0, redIO = null, redHub = null, redEsc = false;   // redHub: el tema al que «entró» la cámara
   const abiertosMas = new Set();   // los «Más información» abiertos no se cierran cuando la pantalla se repinta
   let revision = (() => { try{ return JSON.parse(localStorage.getItem("armoni.revision")); }catch{ return null; } })();
   /* temas para ordenar lo que Armoni sabe (se deducen del texto de cada recuerdo) */
@@ -8904,28 +9055,56 @@ const Preguntas = (function(){
     const alto = Math.max(200, y1 - y0);
     return { W, H, cx, cy, hs, ns, porK, y0: y0 - (alto - (y1 - y0)) / 2, alto };
   }
+  /* ── Armoni, el núcleo (uxd): esfera con plasma, órbitas inclinadas a distintas velocidades, partículas, latido y ondas ── */
+  const RED_DEFS = '<radialGradient id="ddAura"><stop offset="0" stop-color="#ffb066" stop-opacity=".62"/><stop offset=".38" stop-color="#ff8a50" stop-opacity=".22"/><stop offset="1" stop-color="#ff8a50" stop-opacity="0"/></radialGradient>' +
+    '<radialGradient id="ddNucleo" cx=".4" cy=".34" r=".72"><stop offset="0" stop-color="#fff4e4"/><stop offset=".34" stop-color="#ffc47e"/><stop offset=".76" stop-color="#ff8a50"/><stop offset="1" stop-color="#e2572b"/></radialGradient>' +
+    '<radialGradient id="ddPlasma" cx=".74" cy=".7" r=".5"><stop offset="0" stop-color="#ff5fa2" stop-opacity=".6"/><stop offset="1" stop-color="#ff5fa2" stop-opacity="0"/></radialGradient>' +
+    '<radialGradient id="ddPlasma2" cx=".22" cy=".72" r=".46"><stop offset="0" stop-color="#7ee8ff" stop-opacity=".5"/><stop offset="1" stop-color="#7ee8ff" stop-opacity="0"/></radialGradient>' +
+    '<radialGradient id="ddBrillo" cx=".36" cy=".26" r=".42"><stop offset="0" stop-color="#fff" stop-opacity=".9"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>';
+  const coreSVG = (x, y, boton) => {
+    const orbita = (inc, ry, r, t, d, cl, rev, sat) => '<g transform="rotate(' + inc + ') scale(1 ' + ry + ')"><circle class="ring' + (cl === "b" ? " d" : "") + '" r="' + r + '"/><g class="gira' + (rev ? ' rev' : '') + '" style="--t:' + t + 's;--d:' + d + 's"><circle class="cometa ' + cl + '" r="' + r + '" pathLength="100"/>' + (sat ? '<circle class="sat" cx="' + r + '" r="2.4"/>' : '') + '</g></g>';
+    const pts = [[31, 5.5, 0, 1.3], [37, 9, -3, 1], [42, 7, -1.5, 1.5], [49, 13, -6, 1.1], [34, 11, -8, .9], [46, 6.5, -2.2, 1.2], [53, 16, -4, 1]]
+      .map(([r, t, d, s], i) => '<g class="gira pt' + (i % 2 ? ' rev' : '') + '" style="--t:' + t + 's;--d:' + d + 's"><circle cx="' + r + '" r="' + s + '"/></g>').join("");
+    return '<g class="core"' + (boton ? ' role="button" tabindex="0" aria-label="Armoni, el centro de la red. Toca para ver toda la red"' : ' aria-hidden="true"') + ' transform="translate(' + x + ' ' + y + ')"><g class="esc">' +
+      '<circle class="aura" r="62"/><circle class="onda" r="25"/><circle class="onda" r="25" style="--d:-1.2s"/><circle class="onda" r="25" style="--d:-2.4s"/><circle class="boom" r="25"/>' +
+      orbita(-26, .36, 44, 6.5, 0, "", false, true) + orbita(34, .3, 40, 9, -2, "b", true, false) + orbita(80, .22, 36, 11, -5, "c", false, true) +
+      '<g class="gira rev" style="--t:26s"><circle class="tics" r="30"/></g>' + pts +
+      '<circle class="halo2" r="25.5"/><g class="late"><circle class="nucleo" r="23"/><g class="gira" style="--t:7s"><circle class="plasma" r="23"/></g><g class="gira rev" style="--t:10s"><circle class="plasma b" r="23"/></g><circle class="brillo" r="23"/><circle class="borde" r="23"/></g>' +
+      '<text>Armoni</text></g></g>';
+  };
+  /* números que se escriben, código que se descifra y texto que se teclea (solo con movimiento y sin reposo) */
+  const efectoHolo = raiz => {
+    if(REDUCED || document.body.classList.contains("asleep")) return;
+    const corre = (dur, paso, retraso) => { const t0 = performance.now() + (retraso || 0); const f = now => { const k = Math.max(0, Math.min(1, (now - t0) / dur)); const sigue = paso(k); if(k < 1 && sigue !== false) requestAnimationFrame(f); }; requestAnimationFrame(f); };
+    raiz.querySelectorAll("[data-n]").forEach(el => { const n = +el.dataset.n, pad = +(el.dataset.pad || 0); el.textContent = "0".padStart(pad, "0");
+      corre(700, k => { el.textContent = String(Math.round(n * (1 - Math.pow(1 - k, 3)))).padStart(pad, "0"); return el.isConnected; }, 200); });
+    raiz.querySelectorAll("[data-hex]").forEach(el => { const fin = el.dataset.hex, A = "0123456789ABCDEF";
+      corre(800, k => { const f = Math.floor(k * fin.length); el.textContent = "0x" + fin.slice(0, f) + Array.from(fin.slice(f), () => A[Math.random() * 16 | 0]).join(""); return el.isConnected; }); });
+    raiz.querySelectorAll("[data-teclea]").forEach(el => { const fin = el.textContent; el.textContent = ""; el.classList.add("tecleando");
+      corre(Math.min(900, 160 + fin.length * 13), k => { el.textContent = fin.slice(0, Math.round(k * fin.length)); if(k >= 1 || !el.isConnected){ el.textContent = fin; el.classList.remove("tecleando"); return false; } }, 320); });
+  };
   function redSVG(P, nuevos, quieto){
     const f = v => v.toFixed(1);
     const curva = (a, b, k) => { const mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2, dx = b.x - a.x, dy = b.y - a.y; return "M" + f(a.x) + " " + f(a.y) + "Q" + f(mx - dy * k) + " " + f(my + dx * k) + " " + f(b.x) + " " + f(b.y); };
     const C = { x: P.cx, y: P.cy };
-    const ejes = P.hs.map(h => '<path class="eje" d="' + curva(C, h, .06) + '" style="--c:' + RED_C[h.k] + '"/>').join("");
+    const ejes = P.hs.map(h => '<path class="eje" data-k="' + h.k + '" d="' + curva(C, h, .06) + '" style="--c:' + RED_C[h.k] + '"/>').join("");
     const lns = P.ns.map(n => '<path class="ln" data-i="' + n.i + '" d="' + curva(n.h, n, .12) + '" style="--c:' + RED_C[n.h.k] + '"/>' +
       n.tm.slice(1).filter(k => P.porK[k]).map(k => '<path class="cruz" data-i="' + n.i + '" data-tm="' + k + '" d="' + curva(n, P.porK[k], .18) + '" style="--c:' + RED_C[k] + '"/>').join("")).join("");
     let pul = "";
     if(!quieto){
-      pul += P.hs.map((h, i) => '<path class="pulso eje" pathLength="100" d="' + curva(C, h, .06) + '" style="--c:' + RED_C[h.k] + ';--d:' + (-(i * 1.3) % 4.6).toFixed(2) + 's"/>').join("");
+      pul += P.hs.map((h, i) => '<path class="pulso eje" data-k="' + h.k + '" pathLength="100" d="' + curva(C, h, .06) + '" style="--c:' + RED_C[h.k] + ';--d:' + (-(i * 1.3) % 4.6).toFixed(2) + 's"/>').join("");
       const paso = Math.max(1, Math.ceil(P.ns.length / 10));
       pul += P.ns.filter(n => nuevos.has(n.t) || n.i % paso === 0).slice(0, 16).map(n => '<path class="pulso' + (nuevos.has(n.t) ? ' nuevo' : '') + '" data-i="' + n.i + '" pathLength="100" d="' + curva(n.h, n, .12) + '" style="--c:' + RED_C[n.h.k] + ';--d:' + (-((hashT(n.t) % 46) / 10)).toFixed(1) + 's;--t:' + (4.2 + (hashT(n.t) % 9) / 10).toFixed(1) + 's"/>').join("");
     }
     const nds = P.ns.map(n => '<g class="nd' + (nuevos.has(n.t) ? ' nuevo' : '') + '" data-nd="' + n.i + '" role="button" tabindex="0" aria-pressed="false" aria-label="' + esc(RED_N[n.tm[0]] + ': ' + n.t) + '" transform="translate(' + f(n.x) + ' ' + f(n.y) + ')" style="--c:' + RED_C[n.h.k] + ';--i:' + n.i + '">' +
       '<circle class="hit" r="13"/><g class="esc"><circle class="halo" r="9"/><circle class="anillo" r="6"/><circle class="dot" r="' + (n.tm.length > 1 ? 5.6 : 4.8) + '"/></g></g>').join("");
-    const hubs = P.hs.map(h => '<g class="hub" data-hub="' + h.k + '" role="button" tabindex="0" aria-pressed="false" aria-label="' + esc("Tema " + RED_N[h.k] + ", " + h.todos + (h.todos === 1 ? " cosa" : " cosas") + ". Toca para filtrar") + '" transform="translate(' + f(h.x) + ' ' + f(h.y) + ')" style="--c:' + RED_C[h.k] + ';--i:' + h.i + '">' +
-      '<g class="esc"><circle class="brillo" r="20"/><circle class="disco" r="13.5"/><text class="num">' + h.todos + '</text><text class="et" y="25">' + RED_N[h.k] + '</text></g></g>').join("");
-    const core = '<g class="core" role="button" tabindex="0" aria-label="Armoni. Toca para ver todos los temas" transform="translate(' + P.cx + ' ' + P.cy + ')"><g class="esc"><circle class="aura" r="40"/><circle class="nucleo" r="22"/><text>Armoni</text></g></g>';
+    const hubs = P.hs.map(h => '<g class="hub" data-hub="' + h.k + '" role="button" tabindex="0" aria-pressed="false" aria-label="' + esc("Tema " + RED_N[h.k] + ", " + h.todos + (h.todos === 1 ? " cosa" : " cosas") + ". Toca para entrar") + '" transform="translate(' + f(h.x) + ' ' + f(h.y) + ')" style="--c:' + RED_C[h.k] + ';--i:' + h.i + '">' +
+      '<g class="esc"><circle class="brillo" r="20"/><circle class="giro" r="17.5"/><circle class="disco" r="13.5"/><text class="num">' + h.todos + '</text><text class="et" y="25">' + RED_N[h.k] + '</text></g></g>').join("");
+    const core = coreSVG(P.cx, P.cy, true);
+    const mira = '<g class="mira" aria-hidden="true"><g class="mz"><path d="M-30 -18V-30H-18M18 -30H30V-18M30 18V30H18M-18 30H-30V18"/><circle class="md" r="22"/><path class="mx" d="M-40 0h6M34 0h6M0 -40v6M0 34v6"/><text class="mt" x="31" y="-35"></text></g></g>';
     return '<svg class="ddRedSvg" viewBox="0 ' + f(P.y0) + ' ' + P.W + ' ' + f(P.alto) + '" role="group" aria-label="Red de lo que Armoni ha aprendido: ' + P.ns.length + ' cosas en ' + P.hs.length + ' temas">' +
-      '<defs><radialGradient id="ddAura"><stop offset="0" stop-color="#ffb066" stop-opacity=".55"/><stop offset=".55" stop-color="#ff8a50" stop-opacity=".16"/><stop offset="1" stop-color="#ff8a50" stop-opacity="0"/></radialGradient>' +
-      '<radialGradient id="ddNucleo" cx=".38" cy=".32"><stop offset="0" stop-color="#ffe0b8"/><stop offset=".6" stop-color="#ffb066"/><stop offset="1" stop-color="#ff7a3c"/></radialGradient></defs>' +
-      '<g>' + ejes + lns + '</g><g>' + pul + '</g>' + core + '<g>' + hubs + '</g><g>' + nds + '</g></svg>';
+      '<defs>' + RED_DEFS + '</defs>' +
+      '<g>' + ejes + lns + '</g><g>' + pul + '</g>' + core + '<g>' + hubs + '</g><g>' + nds + '</g>' + mira + '</svg>';
   }
   const temasDe = t => { const r = TEMAS.filter(x => x[2].test(t)).map(x => x[0]); return r.length ? r : ["otros"]; };
   /* lo que Armoni ha aprendido de nuestras respuestas (copia en el celular por si se reinstala el flujo) */
@@ -9111,17 +9290,82 @@ const Preguntas = (function(){
       (A.length ? '<div class="ddLista">' + A.map((q, i) => '<article class="ddCard" style="--i:' + Math.min(i, 8) + '">' + (q.tipo === "par" ? '<span class="ddTag">Dos registros parecidos</span>' : q.tipo === "lugar" ? '<span class="ddTag">Falta el lugar</span>' : q.tipo === "caso" ? '<span class="ddTag">Caso abierto</span>' : q.saltada ? '<span class="ddTag dif">La dejaste para después</span>' : '<span class="ddTag">Por resolver</span>') + ((q.hilo || []).length > 1 ? ' <span class="ddTag dif">En conversación</span>' : '') + '<h3>' + esc(limpia(q)) + '</h3>' + movs(q) + masInfo(q) + '<button type="button" class="ddBtn" data-id="' + esc(q.id) + '">' + (q.tipo === "lugar" || q.tipo === "par" ? "Completar" : q.tipo === "caso" || (q.hilo || []).length > 1 ? "Hablar con Armoni" : "Responder") + '</button></article>').join("") + '</div>' : '') +
       '<button type="button" class="ddBuscar" id="ddBuscar">Buscar dudas nuevas</button>' + revisionHTML()
       :
-      '<p class="ddNota">' + (saber.length ? 'Lo que Armoni ha aprendido de tus respuestas, conectado por temas. Toca un punto para ver tu respuesta, cambiarla o borrarla con la ✕.' : 'Aquí verás lo que Armoni aprende de tus respuestas, conectado por temas.') + '</p>' +
-      (saber.length ? sab : '<div class="ddRed vacio"><div class="ddRedCaja"><svg class="ddRedSvg" viewBox="0 0 360 230" role="img" aria-label="Armoni todavía no ha aprendido nada"><defs><radialGradient id="ddAura"><stop offset="0" stop-color="#ffb066" stop-opacity=".55"/><stop offset=".55" stop-color="#ff8a50" stop-opacity=".16"/><stop offset="1" stop-color="#ff8a50" stop-opacity="0"/></radialGradient><radialGradient id="ddNucleo" cx=".38" cy=".32"><stop offset="0" stop-color="#ffe0b8"/><stop offset=".6" stop-color="#ffb066"/><stop offset="1" stop-color="#ff7a3c"/></radialGradient></defs><circle class="orb" cx="180" cy="110" r="58"/><circle class="orb" cx="180" cy="110" r="92"/><g class="core" transform="translate(180 110)"><g class="esc"><circle class="aura" r="40"/><circle class="nucleo" r="22"/><text>Armoni</text></g></g></svg><p>Todavía no ha aprendido nada. Cada vez que respondas una duda, aquí aparece una conexión nueva.</p></div></div>'));
+      '<p class="ddNota">' + (saber.length ? 'Cada punto es algo que aprendió de tus respuestas. Toca uno para entrar en él: ahí ves tu respuesta y puedes corregirla, modificarla o borrarla.' : 'Aquí verás lo que Armoni aprende de tus respuestas, conectado por temas.') + '</p>' +
+      (saber.length ? sab : '<div class="ddRed vacio"><div class="ddRedCaja"><svg class="ddRedSvg" viewBox="0 0 360 230" role="img" aria-label="Armoni todavía no ha aprendido nada"><defs>' + RED_DEFS + '</defs><circle class="orb" cx="180" cy="110" r="70"/><circle class="orb" cx="180" cy="110" r="100"/>' + coreSVG(180, 110, false) + '</svg><p>Todavía no ha aprendido nada. Cada vez que respondas una duda, aquí aparece una conexión nueva.</p></div></div>'));
     cuerpo.querySelectorAll(".ddMas[data-k]").forEach(d => d.addEventListener("toggle", () => { if(d.open) abiertosMas.add(d.dataset.k); else abiertosMas.delete(d.dataset.k); }));
-    cuerpo.querySelectorAll("[data-t]").forEach(b => b.addEventListener("click", () => { pestana = b.dataset.t; pinta(); }));
+    cuerpo.querySelectorAll("[data-t]").forEach(b => b.addEventListener("click", () => { pestana = b.dataset.t; redSel = null; if(redHub){ redHub = null; tema = "todo"; } pinta(); }));
+    const sub = document.querySelector("#dudasView .tmSub"); if(sub) sub.textContent = pestana === "dudas" ? "Lo que Armoni no entendió de tus cuentas y quiere preguntarte" : "Lo que Armoni va aprendiendo de tus respuestas";
     cuerpo.querySelectorAll(".ddCorr").forEach(b => b.addEventListener("click", () => abre(b.dataset.c)));
     cuerpo.querySelectorAll(".ddBtn").forEach(b => b.addEventListener("click", () => { const q = A.find(x => x.id === b.dataset.id); if(q && q.tipo === "lugar") abreLugar(q); else if(q && q.tipo === "par") abrePar(q); else abre(b.dataset.id); }));
     /* lista de lo que sabe: se filtra por tema y por lo que escribas, sin repintar todo (el cursor se queda en el buscador) */
-    /* la red: se arma una vez por cada versión de lo aprendido; tema, búsqueda y punto elegido solo cambian clases */
-    const pintaRed = (Rd, pasa, fila) => {
+    /* la red: se arma una vez por cada versión de lo aprendido; tema, búsqueda y punto elegido solo cambian clases.
+       Tocar un tema o una neurona «navega»: la cámara entra hasta ella y abajo se abre su tarjeta holográfica (uxd) */
+    const HUD_VOLVER = '<button type="button" class="ddVolverRed"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg><span>Volver a la red</span></button>' +
+      '<div class="ddHud" aria-hidden="true"><span>Zoom <b class="hz">1.0×</b></span><span class="hc"></span></div><i class="ddVig" aria-hidden="true"></i><i class="ddScan" aria-hidden="true"></i>';
+    const hace = ms => { const d = Math.floor((Date.now() - ms) / 864e5); return d < 1 ? "hoy" : d === 1 ? "ayer" : d < 30 ? "hace " + d + " días" : "hace " + Math.round(d / 30) + (Math.round(d / 30) === 1 ? " mes" : " meses"); };
+    const diaCorto = ms => { try{ return new Date(ms).toLocaleDateString("es-CO", { day: "numeric", month: "short" }).replace(".", ""); }catch{ return ""; } };
+    const marco = '<svg class="hoMarco" aria-hidden="true"><rect pathLength="100"/></svg><i class="hoEsq" aria-hidden="true"></i><i class="hoRayo" aria-hidden="true"></i>';
+    const hexDe = t => ("000000" + (hashT(t) >>> 8).toString(16).toUpperCase()).slice(-6);
+    const holoNd = (Rd, n, fila, rel) => {
+      const t = n.t, idx = saber.indexOf(t) + 1, rs = rel(t), cu = (Rd._cu || {})[t], hx = hexDe(t);
+      const cuando = !cu ? "—" : cu > 0 ? hace(cu) : "antes del " + diaCorto(-cu);
+      return '<section class="ddHolo" style="--c:' + RED_C[n.h.k] + '" role="region" aria-label="Neurona ' + idx + ' de ' + saber.length + ', ' + esc(RED_N[n.tm[0]]) + '" tabindex="-1">' + marco +
+        '<div class="hoCab"><span>Neurona</span><b class="hoNum"><span data-n="' + idx + '" data-pad="2">' + String(idx).padStart(2, "0") + '</span><small>/' + saber.length + '</small></b><span class="hoHex" aria-hidden="true" data-hex="' + hx + '">0x' + hx + '</span></div>' +
+        '<div class="ddRedTm">' + n.tm.map(k => '<span style="--c:' + RED_C[k] + '"><i></i>' + RED_N[k] + '</span>').join("") + '</div>' + fila(t, true) +
+        '<dl class="hoDat"><div style="--k:0"><dt>Temas</dt><dd data-n="' + n.tm.length + '">' + n.tm.length + '</dd></div><div style="--k:1"><dt>Respuestas</dt><dd data-n="' + rs.length + '">' + rs.length + '</dd></div><div style="--k:2"><dt>Aprendido</dt><dd>' + esc(cuando) + '</dd></div></dl></section>';
+    };
+    const holoHub = (P, h) => {
+      const de = P.ns.filter(n => n.tm.includes(h.k)), cruces = [...new Set(de.flatMap(n => n.tm.filter(k => k !== h.k)))].filter(k => P.porK[k]), hx = hexDe(h.k + "#tema");
+      return '<section class="ddHolo hub" style="--c:' + RED_C[h.k] + '" role="region" aria-label="Tema ' + esc(RED_N[h.k]) + '" tabindex="-1">' + marco +
+        '<div class="hoCab"><span>Tema</span><b class="hoNum">' + esc(RED_N[h.k]) + '</b><span class="hoHex" aria-hidden="true" data-hex="' + hx + '">0x' + hx + '</span></div>' +
+        '<div class="hoGrande"><div><b data-n="' + de.length + '">' + de.length + '</b><span>' + (de.length === 1 ? "neurona" : "neuronas") + '</span></div><div><b data-n="' + cruces.length + '">' + cruces.length + '</b><span>' + (cruces.length === 1 ? "tema conectado" : "temas conectados") + '</span></div></div>' +
+        (cruces.length ? '<div class="ddRedTm">' + cruces.map(k => '<span style="--c:' + RED_C[k] + '"><i></i>' + RED_N[k] + '</span>').join("") + '</div>' : '') +
+        '<ul class="hoLista" aria-label="Lo que sabe de ' + esc(RED_N[h.k]) + '">' + de.slice(0, 6).map((n, j) => '<li><button type="button" data-ir="' + n.i + '" style="--k:' + j + '"><i></i><span>' + esc(n.t) + '</span></button></li>').join("") + '</ul>' +
+        (de.length > 6 ? '<button type="button" class="hoMas" data-alista>Ver las ' + de.length + ' en la lista</button>' : '') + '</section>';
+    };
+    /* la cámara: un transform (translate + scale) sobre el SVG, animado con Web Animations; entre dos destinos «vuela» (se aleja a mitad de camino) */
+    const camara = (Rd, foco, anima) => {
+      const caja = Rd.querySelector(".ddRedCaja"), svg = caja && caja.querySelector(".ddRedSvg"), P = Rd._P; if(!svg) return;
+      const k = foco ? (foco.tipo === "nd" ? "n" + foco.n.i : "h" + foco.h.k) : "";
+      const vb = caja.querySelector(".ddVolverRed span"); if(vb) vb.textContent = foco && foco.tipo === "nd" && redHub ? "Volver a " + RED_N[redHub] : "Volver a la red";
+      if(Rd._camK === k) return;
+      const cw = caja.clientWidth || 360, u = cw / P.W, ch = P.alto * u, cy = ch * .46;
+      const pt = foco ? (foco.tipo === "nd" ? foco.n : foco.h) : null, s = !foco ? 1 : foco.tipo === "nd" ? 2.8 : 1.75;
+      const a = { s, tx: pt ? cw / 2 - s * pt.x * u : 0, ty: pt ? cy - s * (pt.y - P.y0) * u : 0 }, de = Rd._camT || { s: 1, tx: 0, ty: 0 };
+      const T = c => "translate(" + c.tx.toFixed(1) + "px, " + c.ty.toFixed(1) + "px) scale(" + c.s.toFixed(3) + ")";
+      const enVuelo = svg._an && svg._an.playState === "running" ? getComputedStyle(svg).transform : null;
+      Rd._camK = k; Rd._camT = a;
+      caja.classList.toggle("nave", !!foco); Rd.classList.toggle("enNave", !!foco);
+      const mira = svg.querySelector(".mira");
+      if(mira){
+        mira.classList.remove("on");
+        if(pt){
+          const c = RED_C[foco.tipo === "nd" ? foco.n.h.k : foco.h.k], m = foco.tipo === "nd" ? 1 : 1.45;
+          mira.setAttribute("transform", "translate(" + pt.x.toFixed(1) + " " + pt.y.toFixed(1) + ") scale(" + (m / (s * u)).toFixed(3) + ")");
+          mira.style.setProperty("--c", c);
+          mira.querySelector(".mt").textContent = foco.tipo === "nd" ? "N-" + String(saber.indexOf(foco.n.t) + 1).padStart(2, "0") : "";
+          void mira.getBoundingClientRect(); mira.classList.add("on");
+        }
+      }
+      const hc = caja.querySelector(".hc"); if(hc) hc.textContent = pt ? (foco.tipo === "nd" ? RED_N[foco.n.h.k] + " · N-" + String(saber.indexOf(foco.n.t) + 1).padStart(2, "0") : RED_N[foco.h.k]) + " · " + Math.round(pt.x) + "," + Math.round(pt.y) : "";
+      const hz = caja.querySelector(".hz");
+      if(svg._an){ svg._an.cancel(); svg._an = null; }
+      svg.style.transform = s === 1 ? "" : T(a);
+      if(!anima || REDUCED || !svg.animate){ if(hz) hz.textContent = s.toFixed(1) + "×"; return; }
+      let kf = [{ transform: enVuelo || T(de) }, { transform: T(a) }], dur = 700;
+      if(!enVuelo && de.s > 1.01 && s > 1.01){
+        const wx = ((cw / 2 - de.tx) / de.s + (cw / 2 - a.tx) / a.s) / 2, wy = ((cy - de.ty) / de.s + (cy - a.ty) / a.s) / 2, sm = Math.max(1, Math.min(de.s, s) * .58);
+        kf = [kf[0], { transform: T({ s: sm, tx: cw / 2 - sm * wx, ty: cy - sm * wy }), offset: .5 }, kf[1]]; dur = 950;
+      }
+      svg._an = svg.animate(kf, { duration: dur, easing: "cubic-bezier(.65,0,.35,1)" });
+      const sc = caja.querySelector(".ddScan"); if(sc) sc.animate([{ transform: "translateY(-60%)", opacity: 0 }, { opacity: 1, offset: .25 }, { transform: "translateY(60%)", opacity: 0 }], { duration: dur + 100, easing: "cubic-bezier(.4,0,.2,1)" });
+      if(hz){ const s0 = de.s, t0 = performance.now(); const f = now => { const x = Math.min(1, (now - t0) / dur), e = x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2; hz.textContent = (s0 + (s - s0) * e).toFixed(1) + "×"; if(x < 1 && hz.isConnected) requestAnimationFrame(f); }; requestAnimationFrame(f); }
+    };
+    const pintaRed = (Rd, pasa, fila, rel) => {
       const firma = saber.join("\u0001");
       if(redSel != null && !saber.includes(redSel)) redSel = null;
+      if(redHub && tema !== redHub) redHub = null;
+      let nueva = false;
       if(Rd.dataset.firma !== firma || !Rd.querySelector("svg")){
         if(!redNuevos){
           redNuevos = new Set();
@@ -9129,47 +9373,115 @@ const Preguntas = (function(){
           if(Array.isArray(vistos)) saber.forEach(t => { if(!vistos.includes(t)) redNuevos.add(t); });
         } else saber.forEach(t => { if(Rd.dataset.firma && !Rd.dataset.firma.split("\u0001").includes(t)) redNuevos.add(t); });
         try{ localStorage.setItem("armoni.saber.vistos", JSON.stringify(saber.slice(-400))); }catch{}
+        /* cuándo lo aprendió: la primera vez que el celular lo vio (lo que ya estaba antes queda «antes del …») */
+        let cu = null; try{ cu = JSON.parse(localStorage.getItem("armoni.saber.cuando")); }catch{}
+        const ini = !cu || typeof cu !== "object"; if(ini) cu = {};
+        const ya = new Set(saber); saber.forEach(t => { if(!(t in cu)) cu[t] = ini ? -Date.now() : Date.now(); }); Object.keys(cu).forEach(t => { if(!ya.has(t)) delete cu[t]; });
+        try{ localStorage.setItem("armoni.saber.cuando", JSON.stringify(cu)); }catch{}
+        Rd._cu = cu;
         const P = redPlano(saber), entra = !REDUCED && Date.now() - redUlt > 4000; redUlt = Date.now();
         Rd._P = P;
-        Rd.innerHTML = '<div class="ddRedCaja">' + redSVG(P, redNuevos, REDUCED) + '</div><p class="ddRedCuenta" id="ddRedCuenta" aria-live="polite"></p><div class="ddRedDet" id="ddRedDet"></div>';
-        Rd.dataset.firma = firma;
+        Rd.innerHTML = '<div class="ddRedCaja">' + redSVG(P, redNuevos, REDUCED) + HUD_VOLVER + '</div><p class="ddRedCuenta" id="ddRedCuenta" aria-live="polite"></p><div class="ddRedDet" id="ddRedDet"></div>';
+        Rd.dataset.firma = firma; Rd._camK = null; Rd._camT = null; nueva = true;
         const svg = Rd.querySelector("svg"); if(entra) svg.classList.add("entra");
         if(redIO) redIO.disconnect();
-        if("IntersectionObserver" in window){ redIO = new IntersectionObserver(es => es.forEach(x => Rd.classList.toggle("quieta", !x.isIntersecting))); redIO.observe(svg); }
+        if("IntersectionObserver" in window){ redIO = new IntersectionObserver(es => es.forEach(x => Rd.classList.toggle("quieta", !x.isIntersecting))); redIO.observe(Rd.querySelector(".ddRedCaja")); }
       }
       const P = Rd._P, svg = Rd.querySelector("svg"), q = sinTilde(busca).trim();
+      const nSel = redSel != null ? P.ns.find(n => n.t === redSel) : null;
+      const foco = nSel ? { tipo: "nd", n: nSel } : redHub && P.porK[redHub] ? { tipo: "hub", h: P.porK[redHub] } : null;
       svg.classList.toggle("filtra", tema !== "todo" || !!q || redSel != null);
+      svg.classList.toggle("foco", !!foco);
       const si = P.ns.map(n => pasa(n.t) && (redSel == null || redSel === n.t));
       svg.querySelectorAll("[data-nd]").forEach(g => { const i = +g.dataset.nd, sel = P.ns[i].t === redSel; g.classList.toggle("si", si[i] || sel); g.classList.toggle("sel", sel); g.setAttribute("aria-pressed", String(sel)); });
       svg.querySelectorAll(".ln[data-i], .pulso[data-i]").forEach(l => { const i = +l.dataset.i; l.classList.toggle("si", si[i]); l.classList.toggle("sel", P.ns[i].t === redSel); });
       svg.querySelectorAll(".cruz").forEach(l => { const i = +l.dataset.i; l.classList.toggle("si", si[i] && (tema === "todo" || l.dataset.tm === tema)); l.classList.toggle("sel", P.ns[i].t === redSel); });
       svg.querySelectorAll("[data-hub]").forEach(h => { const on = tema === h.dataset.hub; h.classList.toggle("on", on); h.setAttribute("aria-pressed", String(on)); h.classList.toggle("si", P.ns.some((n, i) => si[i] && n.tm.includes(h.dataset.hub))); });
+      svg.querySelectorAll(".eje[data-k]").forEach(e => e.classList.toggle("si", !!foco && (foco.tipo === "hub" ? e.dataset.k === foco.h.k : foco.n.tm.includes(e.dataset.k))));
       const visibles = si.filter(Boolean).length, nv = saber.filter(t => redNuevos.has(t)).length;
       Rd.querySelector("#ddRedCuenta").innerHTML = '<span>' + saber.length + (saber.length === 1 ? ' cosa aprendida' : ' cosas aprendidas') + ' · ' + P.hs.length + (P.hs.length === 1 ? ' tema' : ' temas') + '</span>' +
         ((tema !== "todo" || q) && redSel == null ? '<span>· mostrando ' + visibles + '</span>' : '') + (nv ? '<span class="nv">✨ ' + nv + (nv === 1 ? ' nueva' : ' nuevas') + '</span>' : '');
-      const det = Rd.querySelector("#ddRedDet");
-      if(det.dataset.s !== (redSel || "")){
-        det.dataset.s = redSel || "";
-        det.innerHTML = redSel != null
-          ? '<div class="ddRedTm">' + temasDe(redSel).map(k => '<span style="--c:' + RED_C[k] + '"><i></i>' + RED_N[k] + '</span>').join("") + '</div>' + fila(redSel, true)
-          : '<p class="ddRedPista">Toca un punto para ver qué aprendió y de cuál respuesta. Los círculos con número son los temas: tócalos para filtrar.</p>';
-        det.querySelectorAll(".ddCorr").forEach(b => b.addEventListener("click", () => abre(b.dataset.c)));
+      const det = Rd.querySelector("#ddRedDet"), clave = foco ? (foco.tipo === "nd" ? "n:" + redSel : "h:" + redHub) : "";
+      if(det.dataset.s !== clave){
+        det.dataset.s = clave;
+        const html = !foco ? '<p class="ddRedPista">Toca una neurona para entrar en ella y ver qué aprendió y de cuál respuesta. Los círculos con número son los temas: tócalos para recorrerlos.</p>'
+          : foco.tipo === "nd" ? holoNd(Rd, foco.n, fila, rel) : holoHub(P, foco.h);
+        const pon = () => {
+          if(det.dataset.s !== clave || !det.isConnected) return;
+          det.innerHTML = html;
+          det.querySelectorAll(".ddCorr").forEach(b => b.addEventListener("click", () => abre(b.dataset.c)));
+          const tx = det.querySelector(".ddHolo .ddHecho > span"); if(tx) tx.setAttribute("data-teclea", "");
+          if(foco) efectoHolo(det);
+        };
+        const viejo = det.querySelector(".ddHolo");
+        if(viejo && !REDUCED && viejo.animate) viejo.animate([{ opacity: 1, transform: "none" }, { opacity: 0, transform: "translateY(10px) scale(.97)" }], { duration: 170, easing: "ease-in", fill: "forwards" }).finished.then(pon, pon);
+        else pon();
       }
+      camara(Rd, foco, !nueva);
       if(!Rd._ok){
         Rd._ok = true;
-        const toca = el => {
-          const n = el.closest("[data-nd]"), h = el.closest("[data-hub]"), c = el.closest(".core");
-          if(n){ const t = Rd._P.ns[+n.dataset.nd].t; redSel = redSel === t ? null : t; }
-          else if(h){ tema = tema === h.dataset.hub ? "todo" : h.dataset.hub; redSel = null; }
-          else if(c){ tema = "todo"; redSel = null; }
+        const sync = () => cuerpo.querySelectorAll("[data-tm]").forEach(x => x.classList.toggle("on", x.dataset.tm === tema));
+        /* un nivel hacia atrás: neurona → su tema (si se entró por ahí) → la red completa */
+        const volver = () => {
+          const antes = redSel != null ? Rd._P.ns.find(n => n.t === redSel) : null, hubAntes = redHub, dentro = Rd.contains(document.activeElement);
+          if(redSel != null) redSel = null;
+          else if(redHub){ redHub = null; tema = "todo"; }
           else return false;
-          cuerpo.querySelectorAll("[data-tm]").forEach(x => x.classList.toggle("on", x.dataset.tm === tema));
-          cuerpo._pintaSaber();
-          if(n && redSel != null){ const d = Rd.querySelector("#ddRedDet"); if(d && d.getBoundingClientRect().bottom > innerHeight) d.scrollIntoView({ behavior: REDUCED ? "auto" : "smooth", block: "nearest" }); }
+          sync(); cuerpo._pintaSaber();
+          if(dentro){ const el = antes ? Rd.querySelector('[data-nd="' + antes.i + '"]') : hubAntes ? Rd.querySelector('[data-hub="' + hubAntes + '"]') : null; if(el) el.focus({ preventScroll: true }); }
           return true;
         };
-        Rd.addEventListener("click", e => { if(e.target.closest("svg")) toca(e.target); });
-        Rd.addEventListener("keydown", e => { if((e.key === "Enter" || e.key === " ") && e.target.closest && e.target.closest("svg [role=button]")){ e.preventDefault(); toca(e.target); } });
+        Rd._volver = volver;
+        const muestra = teclado => {
+          const caja = Rd.querySelector(".ddRedCaja"), d = Rd.querySelector("#ddRedDet"); if(!caja || !d) return;
+          const r = caja.getBoundingClientRect();
+          if(r.top < 56 || r.bottom + 170 > innerHeight) caja.scrollIntoView({ behavior: REDUCED ? "auto" : "smooth", block: "start" });
+          if(teclado) setTimeout(() => { const h = Rd.querySelector(".ddHolo"); if(h) h.focus({ preventScroll: true }); }, REDUCED ? 0 : 720);
+        };
+        const toca = (el, teclado) => {
+          const n = el.closest("[data-nd]"), h = el.closest("[data-hub]"), c = el.closest(".core");
+          if(n){ const t = Rd._P.ns[+n.dataset.nd].t; if(redSel === t){ volver(); return true; } redSel = t; }
+          else if(h){ const k = h.dataset.hub; if(redHub === k && redSel == null){ volver(); return true; } redHub = k; tema = k; redSel = null; }
+          else if(c){
+            const habia = redSel != null || !!redHub; redSel = null; redHub = null; tema = "todo";
+            if(!habia && !REDUCED){ const b = c.querySelector(".boom"), l = c.querySelector(".late");
+              if(b && b.animate) b.animate([{ opacity: .9, transform: "scale(1)" }, { opacity: 0, transform: "scale(5)" }], { duration: 900, easing: "cubic-bezier(.2,.7,.3,1)" });
+              if(l && l.animate) l.animate([{ transform: "scale(1)" }, { transform: "scale(1.18)", offset: .3 }, { transform: "scale(1)" }], { duration: 600, easing: "ease-out", composite: "add" }); }
+          }
+          else return false;
+          sync(); cuerpo._pintaSaber();
+          if(redSel != null || redHub) muestra(teclado);
+          return true;
+        };
+        let ultToque = 0, pinza = 0;
+        Rd.addEventListener("click", e => {
+          if(e.target.closest(".ddVolverRed")){ volver(); return; }
+          const b = e.target.closest("[data-ir]");
+          if(b){ const n = Rd._P.ns[+b.dataset.ir]; if(n){ redSel = n.t; sync(); cuerpo._pintaSaber(); muestra(e.detail === 0); } return; }
+          if(e.target.closest("[data-alista]")){
+            vistaSaber = "lista"; try{ localStorage.setItem("armoni.saber.vista", vistaSaber); }catch{}
+            redSel = null; redHub = null; cuerpo.querySelectorAll("[data-vs]").forEach(x => x.setAttribute("aria-pressed", String(x.dataset.vs === "lista"))); cuerpo._pintaSaber(); return;
+          }
+          if(!e.target.closest(".ddRedSvg")) return;
+          if(toca(e.target, false)){ ultToque = 0; return; }
+          /* doble toque en el fondo: alejarse */
+          const ahora = Date.now();
+          if(ahora - ultToque < 350 && Rd.querySelector(".ddRedCaja.nave")){ ultToque = 0; volver(); } else ultToque = ahora;
+        });
+        Rd.addEventListener("keydown", e => { if((e.key === "Enter" || e.key === " ") && e.target.closest && e.target.closest(".ddRedSvg [role=button]")){ e.preventDefault(); toca(e.target, true); } });
+        /* pellizcar hacia adentro (dos dedos que se juntan) también aleja */
+        const dist = t => Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY);
+        Rd.addEventListener("touchstart", e => { pinza = e.touches.length === 2 && e.target.closest(".ddRedCaja.nave") ? dist(e.touches) : 0; }, { passive: true });
+        Rd.addEventListener("touchmove", e => { if(pinza && e.touches.length === 2 && dist(e.touches) < pinza * .72){ pinza = 0; volver(); } }, { passive: true });
+        if(!redEsc){
+          redEsc = true;
+          document.addEventListener("keydown", e => {
+            if(e.key !== "Escape" || !document.body.classList.contains("mode-dudas") || hayVentana()) return;
+            const R = document.getElementById("ddRed"); if(!R || !R._volver || !R.querySelector(".ddRedCaja.nave")) return;
+            const a = document.activeElement; if(a && a.tagName === "TEXTAREA" && R.contains(a)) return;   // con el editor abierto, Escape no se lleva lo que escribes
+            e.preventDefault(); R._volver();
+          });
+        }
       }
     };
     const pintaSaber = () => {
@@ -9183,7 +9495,7 @@ const Preguntas = (function(){
         '<div class="ddEd" hidden><textarea maxlength="240" aria-label="Lo que Armoni sabe">' + esc(t) + '</textarea><div class="ddAcc"><button type="button" data-guarda>Guardar cambio</button><button type="button" data-cancela>Cancelar</button></div></div>' +
         '<div class="ddAcc"><button type="button" data-edita>Modificar</button></div></div></div>'; };
       const Rd = cuerpo.querySelector("#ddRed");
-      if(Rd && vistaSaber === "red"){ L.hidden = true; L.innerHTML = ""; Rd.hidden = false; pintaRed(Rd, pasa, fila); return; }
+      if(Rd && vistaSaber === "red"){ L.hidden = true; L.innerHTML = ""; Rd.hidden = false; pintaRed(Rd, pasa, fila, rel); return; }
       if(Rd){ Rd.hidden = true; if(redIO){ redIO.disconnect(); redIO = null; } Rd.innerHTML = ""; Rd.dataset.firma = ""; }
       L.hidden = false;
       L.innerHTML = v.length ? v.map(t => fila(t, false)).join("") :
@@ -9493,6 +9805,8 @@ const Drawer = (function(){
   const navDura = document.getElementById("navDura");
   const setMercarG = on => { navMercarG.classList.toggle("abierto", on); navMercarBtn.setAttribute("aria-expanded", String(on)); };
   navMercarBtn.addEventListener("click", () => setMercarG(!navMercarG.classList.contains("abierto")));
+  const GRUPOS = [[navMercarBtn, setMercarG], [navControlBtn, setControl], [navSalidasBtn, setSalidasG]];
+  GRUPOS.forEach(([b]) => b.addEventListener("click", () => { if(b.getAttribute("aria-expanded") === "true") GRUPOS.forEach(([o, f]) => { if(o !== b) f(false); }); }));   // acordeón: un grupo abierto a la vez
   /* la primera vez, «Salidas» y «Temporada» alumbran en el menú para que descubran el apartado nuevo; al tocarlos dejan de alumbrar */
   const FL = k => { try{ return localStorage.getItem(k) === "1"; }catch{ return false; } };
   const setFL = k => { try{ localStorage.setItem(k, "1"); }catch{} };
@@ -10645,7 +10959,7 @@ const Servicios = (function(){
       const sl = document.createElement("div");
       sl.className = "svSlide";
       sl.innerHTML =
-        '<span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h7l-1 8 11-14h-7l1-6z"/></svg></span>' +
+        '<span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + ({ agua: '<path d="M12 3s6 6.4 6 11a6 6 0 0 1-12 0c0-4.6 6-11 6-11z"/>', gas: '<path d="M12 3c1 3.5 5 5 5 10a5 5 0 0 1-10 0c0-2 1-3 2-4 0 2 1 3 2 3 0-3-1-5 1-9z"/>', internet: '<path d="M4 9a12 12 0 0 1 16 0M7 12.5a8 8 0 0 1 10 0M10 16a4 4 0 0 1 4 0"/><circle cx="12" cy="19" r=".8"/>', arriendo: '<path d="M4 11 12 4l8 7"/><path d="M6 10v10h12V10"/><path d="M10 20v-5h4v5"/>', jardin: '<path d="M12 21v-8"/><path d="M12 13c0-4 3-7 7-7 0 4-3 7-7 7z"/><path d="M12 15c0-3-2.4-5-5.5-5 0 3 2.4 5 5.5 5z"/>', cel: '<rect x="7" y="3" width="10" height="18" rx="2.2"/><path d="M11 18h2"/>' }[/^cel_/.test(item.id) ? 'cel' : item.id] || '<path d="M13 2 3 14h7l-1 8 11-14h-7l1-6z"/>') + '</svg></span>' +
         '<div class="txt"><b>Hace falta pagar ' + esc(item.nombre) + '</b><span>' + textoLeft(inf.left) + '</span></div>' +
         '<button type="button" class="go">' + (esArriendo ? "Enviar comprobante" : esJardin ? "Ya se pagó" : "Pagar") + '</button>';
       sl.querySelector(".go").addEventListener("click", async e => {
