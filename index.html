@@ -1668,6 +1668,7 @@ body.mode-gmail footer, body.mode-glim footer{ display:none; }
 .gBar i{ display:block; height:100%; border-radius:4px; background:linear-gradient(90deg, var(--cyan), var(--blue)); transition:width .9s cubic-bezier(.22,1,.36,1); }
 .gMeta{ display:flex; justify-content:space-between; margin-top:8px; font-size:.78rem; color:var(--dim); font-variant-numeric:tabular-nums; }
 .glimTip{ margin-top:12px; padding:12px 14px; border-radius:14px; border:1px solid rgba(var(--cyan-rgb),.25); background:rgba(var(--cyan-rgb),.06); }
+.glimTip.logrado{ border-color:rgba(74,222,128,.4); background:rgba(74,222,128,.08); }
 .glimTip.lento{ border-color:rgba(255,160,60,.38); background:rgba(255,160,60,.08); }
 .glimTip b{ display:block; font-size:.88rem; }
 .glimTip span{ display:block; font-size:.8rem; color:var(--ghost); margin-top:2px; }
@@ -3531,7 +3532,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-18.229";
+const APP_VERSION = "2026-10-18.230";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -9840,12 +9841,13 @@ const Glim = (function(){
     const promedio = compras.length ? compras.reduce((a, m) => a + m.monto, 0) / compras.length : 0;
     return { dia, ult, R, S, gastado, restan, atraso: esperado - gastado,
              porSemana: S / restan * 7, nCompras: promedio ? Math.ceil(S / promedio) : 0,
+             casi: R > 0 && S <= Math.max(R * 0.1, promedio),  // lo que queda es tan poco que ya no vale la pena recordarlo: objetivo logrado
              u: Math.min(1, Math.max(0, (dia - 15) / Math.max(1, ult - 15))) };
   }
   function debeAvisar(d){
     if(!d || !d.saldo || !d.recarga) return false;
     const r = ritmo(d);
-    if(r.dia < 15) return false;                         // la primera quincena no hace falta molestar
+    if(r.dia < 15 || r.casi) return false;               // la primera quincena no hace falta molestar; y si ya casi no queda, tampoco
     return r.atraso > r.R * 0.1;                         // vas más de un 10% por debajo del ritmo normal
   }
   function consejo(r){
@@ -9892,7 +9894,8 @@ const Glim = (function(){
         '<div class="gBar" aria-hidden="true"><i style="width:0%"></i></div>' +
         '<div class="gMeta"><span>Usado ' + plata(r.gastado) + '</span><span>de ' + plata(r.R) + '</span></div>' +
       '</div>';
-    if(r.dia >= 15 && r.S > 0){
+    if(r.casi) html += '<div class="glimTip logrado"><b>🎯 ¡Objetivo logrado!</b><span>' + (r.S > 0 ? 'Ya usaste casi todo el saldo de Glim este mes. Lo que queda (' + plata(r.S) + ') es muy poco: no hace falta gastarlo.' : 'Usaste todo el saldo de Glim este mes.') + '</span></div>';
+    else if(r.dia >= 15 && r.S > 0){
       const lento = debeAvisar(d);
       html += '<div class="glimTip' + (lento ? ' lento' : '') + '"><b>' + (lento ? 'Vas más lento de lo normal' : 'Vas a buen ritmo') + '</b><span>' + consejo(r) + '</span></div>';
     }
