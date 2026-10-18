@@ -2421,15 +2421,15 @@ body.mode-mercar:has(#mkStage .mcTop) #thread{ -webkit-mask-image:none; mask-ima
 .ddRedSvg{ position:relative; display:block; width:100%; height:auto; touch-action:manipulation; -webkit-user-select:none; user-select:none; }
 .ddRedSvg [role="button"]{ cursor:pointer; outline:none; }
 .ddRedSvg .eje{ fill:none; stroke:var(--c); stroke-opacity:.35; stroke-width:1.6; }
-.ddRedSvg .ln{ fill:none; stroke:var(--c); stroke-opacity:.28; stroke-width:1; transition:stroke-opacity .3s ease, stroke-width .3s ease; }
+.ddRedSvg .ln{ fill:none; stroke:var(--c); stroke-opacity:.32; stroke-width:.8; transition:stroke-opacity .3s ease, stroke-width .3s ease; }
 .ddRedSvg .cruz{ fill:none; stroke:rgba(var(--ink),.5); stroke-opacity:.16; stroke-width:.8; stroke-dasharray:2 3; transition:stroke-opacity .3s ease; }
-.ddRedSvg .pulso{ fill:none; stroke:var(--c); stroke-width:2.2; stroke-linecap:round; stroke-dasharray:7 93; stroke-dashoffset:100; opacity:0; animation:ddPulso var(--t, 4.6s) linear infinite; animation-delay:var(--d, 0s); }
+.ddRedSvg .pulso{ fill:none; stroke:var(--c); stroke-width:1.5; stroke-linecap:round; stroke-dasharray:7 93; stroke-dashoffset:100; opacity:0; animation:ddPulso var(--t, 4.6s) linear infinite; animation-delay:var(--d, 0s); }
 .ddRedSvg .pulso.nuevo{ stroke-width:3; --t:2.2s; }
 @keyframes ddPulso{ 0%{ stroke-dashoffset:100; opacity:0; } 8%{ opacity:.95; } 85%{ opacity:.95; } 100%{ stroke-dashoffset:0; opacity:0; } }
 .ddRedSvg .nd .esc, .ddRedSvg .hub .esc, .ddRedSvg .core .esc{ transform-box:fill-box; transform-origin:center; transition:transform .3s var(--ease-spring, ease), opacity .3s ease; }
 .ddRedSvg .nd .hit{ fill:transparent; }
-.ddRedSvg .nd .dot{ fill:var(--c); stroke:var(--void); stroke-width:1.5; }
-.ddRedSvg .nd .halo{ fill:var(--c); opacity:.16; }
+.ddRedSvg .nd .dot{ fill:var(--c); stroke:var(--void); stroke-width:1.2; }
+.ddRedSvg .nd .halo{ fill:var(--c); opacity:.12; }
 .ddRedSvg .nd .anillo{ fill:none; stroke:var(--c); stroke-width:1.5; opacity:0; transform-box:fill-box; transform-origin:center; }
 .ddRedSvg .nd.nuevo .anillo{ animation:ddOnda 1.8s ease-out 3; }
 @keyframes ddOnda{ 0%{ opacity:.9; transform:scale(.6); } 100%{ opacity:0; transform:scale(2.6); } }
@@ -2443,33 +2443,27 @@ body.mode-mercar:has(#mkStage .mcTop) #thread{ -webkit-mask-image:none; mask-ima
 .ddRedSvg .hub .et{ font-size:10.5px; fill:var(--white); paint-order:stroke; stroke:var(--void); stroke-width:3.5px; stroke-linejoin:round; }
 .ddRedSvg .hub.on .disco{ fill:var(--c); }
 .ddRedSvg .hub.on .num{ fill:var(--void); }
-/* ── uxd · Armoni, el núcleo: aura que late, ondas de energía, órbitas a distintas velocidades y partículas ── */
-.ddRedSvg .core .aura{ fill:url(#ddAura); transform-origin:0 0; animation:ddAuraLate 2.4s ease-in-out infinite; }
-@keyframes ddAuraLate{ 0%,42%,100%{ transform:scale(.93); opacity:.78; } 10%{ transform:scale(1.09); opacity:1; } 26%{ transform:scale(1.03); opacity:.94; } }
-.ddRedSvg .core .onda{ fill:none; stroke:#ffb066; stroke-width:.45; opacity:0; transform-origin:0 0; animation:ddOndaCore 3.6s cubic-bezier(.15,.6,.3,1) infinite; animation-delay:var(--d, 0s); }
-@keyframes ddOndaCore{ 0%{ opacity:0; transform:scale(1); } 5%{ opacity:.6; } 100%{ opacity:0; transform:scale(3.9); } }
-.ddRedSvg .core .boom{ fill:none; stroke:#ffe0b8; stroke-width:1.6; opacity:0; transform-origin:0 0; }
-.ddRedSvg .core .ring{ fill:none; stroke:rgba(255,190,130,.5); stroke-width:.9; }
-.ddRedSvg .core .ring.d{ stroke-dasharray:2 3.2; }
-.ddRedSvg .core .cometa{ fill:none; stroke:#ffd9a8; stroke-width:2.2; stroke-linecap:round; stroke-dasharray:14 86; }
-.ddRedSvg .core .cometa.b{ stroke:#7ee8ff; stroke-width:1.8; stroke-dasharray:9 91; }
-.ddRedSvg .core .cometa.c{ stroke:#ff8fb1; stroke-width:1.6; stroke-dasharray:7 93; }
-.ddRedSvg .core .sat{ fill:#fff; }
-.ddRedSvg .core .tics{ fill:none; stroke:rgba(255,214,170,.6); stroke-width:2.4; stroke-dasharray:.5 3.4; }
-.ddRedSvg .core .halo2{ fill:none; stroke:#ffb066; stroke-opacity:.55; stroke-width:1.2; }
-.ddRedSvg .core .gira{ transform-origin:0 0; animation:ddGira var(--t, 8s) linear infinite; animation-delay:var(--d, 0s); }
-.ddRedSvg .core .gira.rev{ animation-direction:reverse; }
-@keyframes ddGira{ to{ transform:rotate(360deg); } }
-.ddRedSvg .core .pt circle{ fill:#ffe6c8; }
-.ddRedSvg .core .late{ transform-origin:0 0; animation:ddLub 2.4s ease-in-out infinite; }
-@keyframes ddLub{ 0%,42%,100%{ transform:scale(1); } 9%{ transform:scale(1.075); } 18%{ transform:scale(.99); } 27%{ transform:scale(1.04); } }
+/* ── Armoni, el núcleo: sobrio y elegante. Solo 3 movimientos suaves (respira, una onda, un arco lento) y nada más ── */
+.ddRedSvg .core .aura{ fill:url(#ddAura); transform-origin:0 0; animation:ddRespira 5.5s ease-in-out infinite; }
+@keyframes ddRespira{ 0%,100%{ opacity:.7; transform:scale(.96); } 50%{ opacity:1; transform:scale(1.04); } }
+.ddRedSvg .core .onda{ fill:none; stroke:#ffb066; stroke-width:.7; opacity:0; transform-origin:0 0; animation:ddOndaCore 5.5s cubic-bezier(.2,.6,.3,1) infinite; }
+@keyframes ddOndaCore{ 0%{ opacity:0; transform:scale(1); } 8%{ opacity:.55; } 100%{ opacity:0; transform:scale(2.5); } }
+.ddRedSvg .core .boom{ fill:none; stroke:#ffe0b8; stroke-width:1.4; opacity:0; transform-origin:0 0; }
+.ddRedSvg .core .late{ transform-origin:0 0; }
 .ddRedSvg .core .nucleo{ fill:url(#ddNucleo); }
-.ddRedSvg .core .plasma{ fill:url(#ddPlasma); }
-.ddRedSvg .core .plasma.b{ fill:url(#ddPlasma2); }
-.ddRedSvg .core .brillo{ fill:url(#ddBrillo); }
-.ddRedSvg .core .borde{ fill:none; stroke:rgba(255,240,222,.75); stroke-width:.8; }
-.ddRedSvg .core text{ font:800 10px "Schibsted Grotesk", system-ui, sans-serif; fill:#1a1208; text-anchor:middle; dominant-baseline:central; letter-spacing:.03em; }
-.ddRedSvg .core:focus-visible .borde{ stroke:#fff; stroke-width:2.2; }
+.ddRedSvg .core .aA{ fill:none; stroke:#ffb066; stroke-width:1.5; }
+.ddRedSvg .core .aB{ fill:none; stroke:#ffb066; stroke-opacity:.35; stroke-width:.8; stroke-dasharray:1.2 3.6; }
+.ddRedSvg .core .aC{ fill:none; stroke:#ffb066; stroke-opacity:.16; stroke-width:.8; }
+.ddRedSvg .core .arco{ fill:none; stroke:#ffd9a8; stroke-width:1.8; stroke-linecap:round; stroke-dasharray:22 154; transform-origin:0 0; animation:ddGira 16s linear infinite; }
+.ddRedSvg .core .sinapsis{ fill:#ffb066; opacity:.9; }
+.ddRedSvg .core text{ font:700 8.6px "Schibsted Grotesk", system-ui, sans-serif; fill:#ffcf99; text-anchor:middle; dominant-baseline:central; letter-spacing:.09em; text-transform:uppercase; }
+.ddRedSvg .core:focus-visible .aA{ stroke:#fff; stroke-width:2.2; }
+/* el cerebro de fondo (apenas se ve) y las dendritas de cada neurona */
+.ddRedSvg .cerebro path{ fill:none; stroke:rgba(var(--ink),.17); stroke-width:1; stroke-linecap:round; stroke-linejoin:round; }
+.ddRedSvg .cerebro .hem{ fill:rgba(var(--ink),.025); }
+.ddRedSvg .cerebro .giro2{ stroke:rgba(var(--ink),.10); }
+.ddRedSvg .dn{ fill:none; stroke:var(--c); stroke-opacity:.5; stroke-width:.8; stroke-linecap:round; }
+.ddRedSvg .hub .dn{ stroke-opacity:.45; stroke-width:1; }
 .ddRedSvg.entra .core .esc{ animation:ddAparece .7s var(--ease-spring, ease) both; }
 .ddRedSvg.filtra .nd:not(.si) .esc{ opacity:.16; }
 .ddRedSvg.filtra .ln:not(.si), .ddRedSvg.filtra .pulso:not(.si){ stroke-opacity:.05; opacity:.05; }
@@ -2500,13 +2494,12 @@ body.mode-mercar:has(#mkStage .mcTop) #thread{ -webkit-mask-image:none; mask-ima
 .ddRed.vacio p{ position:relative; margin:-6px 20px 0; font-size:.86rem; color:var(--ghost); text-align:center; }
 .ddRedSvg .orb{ fill:none; stroke:rgba(var(--ink),.14); stroke-dasharray:3 5; }
 /* ── uxd · temas y neuronas con más vida ── */
-.ddRedSvg .hub .giro{ fill:none; stroke:var(--c); stroke-opacity:.6; stroke-width:1; stroke-dasharray:1.4 4.1; transform-origin:0 0; animation:ddGira 18s linear infinite; }
-.ddRedSvg .hub.on .giro{ stroke-opacity:1; animation-duration:6s; }
-.ddRedSvg .nd:nth-child(3n+1) .halo{ animation:ddTwk 3.6s ease-in-out infinite; animation-delay:calc(var(--i) * -.53s); }
+.ddRedSvg .hub .giro{ fill:none; stroke:var(--c); stroke-opacity:.5; stroke-width:.9; stroke-dasharray:1.4 4.1; }
+.ddRedSvg .hub.on .giro{ stroke-opacity:1; }
 @keyframes ddTwk{ 0%,100%{ opacity:.1; } 50%{ opacity:.3; } }
 .ddRedSvg .nd.sel .halo{ animation:ddSelHalo 1.6s ease-in-out infinite; }
 @keyframes ddSelHalo{ 0%,100%{ opacity:.3; } 50%{ opacity:.6; } }
-.ddRedSvg .pulso.eje{ stroke-width:2.8; }
+.ddRedSvg .pulso.eje{ stroke-width:1.8; }
 .ddRedSvg.foco .nd.sel .anillo{ animation:ddOnda 1.7s ease-out infinite; }
 .ddRedSvg.foco .nd.sel .dot{ stroke:#fff; stroke-width:1.2; }
 /* ── uxd · navegar: la cámara entra a un tema o a una neurona ── */
@@ -2525,7 +2518,7 @@ body.mode-mercar:has(#mkStage .mcTop) #thread{ -webkit-mask-image:none; mask-ima
 .ddRedSvg .mira{ pointer-events:none; opacity:0; color:var(--c, #ffb066); transition:opacity .25s ease; }
 .ddRedSvg .mira.on{ opacity:1; transition-delay:.28s; }
 .ddRedSvg .mira path, .ddRedSvg .mira circle{ fill:none; stroke:currentColor; stroke-width:1.5; stroke-linecap:round; }
-.ddRedSvg .mira .md{ stroke-dasharray:2 5; stroke-opacity:.85; transform-origin:0 0; animation:ddGira 7s linear infinite; }
+.ddRedSvg .mira .md{ stroke-dasharray:2 5; stroke-opacity:.85; }
 .ddRedSvg .mira .mx{ stroke-opacity:.6; }
 .ddRedSvg .mira.on .mz{ transform-origin:0 0; animation:ddMira .65s .28s cubic-bezier(.2,.8,.2,1) both; }
 @keyframes ddMira{ from{ transform:scale(2.3) rotate(-60deg); opacity:0; } }
@@ -4167,7 +4160,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-18.242";
+const APP_VERSION = "2026-10-18.243";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -9085,22 +9078,31 @@ const Preguntas = (function(){
     return { W, H, cx, cy, hs, ns, porK, y0: y0 - (alto - (y1 - y0)) / 2, alto };
   }
   /* ── Armoni, el núcleo (uxd): esfera con plasma, órbitas inclinadas a distintas velocidades, partículas, latido y ondas ── */
-  const RED_DEFS = '<radialGradient id="ddAura"><stop offset="0" stop-color="#ffb066" stop-opacity=".62"/><stop offset=".38" stop-color="#ff8a50" stop-opacity=".22"/><stop offset="1" stop-color="#ff8a50" stop-opacity="0"/></radialGradient>' +
-    '<radialGradient id="ddNucleo" cx=".4" cy=".34" r=".72"><stop offset="0" stop-color="#fff4e4"/><stop offset=".34" stop-color="#ffc47e"/><stop offset=".76" stop-color="#ff8a50"/><stop offset="1" stop-color="#e2572b"/></radialGradient>' +
-    '<radialGradient id="ddPlasma" cx=".74" cy=".7" r=".5"><stop offset="0" stop-color="#ff5fa2" stop-opacity=".6"/><stop offset="1" stop-color="#ff5fa2" stop-opacity="0"/></radialGradient>' +
-    '<radialGradient id="ddPlasma2" cx=".22" cy=".72" r=".46"><stop offset="0" stop-color="#7ee8ff" stop-opacity=".5"/><stop offset="1" stop-color="#7ee8ff" stop-opacity="0"/></radialGradient>' +
-    '<radialGradient id="ddBrillo" cx=".36" cy=".26" r=".42"><stop offset="0" stop-color="#fff" stop-opacity=".9"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>';
-  const coreSVG = (x, y, boton) => {
-    const orbita = (inc, ry, r, t, d, cl, rev, sat) => '<g transform="rotate(' + inc + ') scale(1 ' + ry + ')"><circle class="ring' + (cl === "b" ? " d" : "") + '" r="' + r + '"/><g class="gira' + (rev ? ' rev' : '') + '" style="--t:' + t + 's;--d:' + d + 's"><circle class="cometa ' + cl + '" r="' + r + '" pathLength="100"/>' + (sat ? '<circle class="sat" cx="' + r + '" r="2.4"/>' : '') + '</g></g>';
-    const pts = [[31, 5.5, 0, 1.3], [37, 9, -3, 1], [42, 7, -1.5, 1.5], [49, 13, -6, 1.1], [34, 11, -8, .9], [46, 6.5, -2.2, 1.2], [53, 16, -4, 1]]
-      .map(([r, t, d, s], i) => '<g class="gira pt' + (i % 2 ? ' rev' : '') + '" style="--t:' + t + 's;--d:' + d + 's"><circle cx="' + r + '" r="' + s + '"/></g>').join("");
-    return '<g class="core"' + (boton ? ' role="button" tabindex="0" aria-label="Armoni, el centro de la red. Toca para ver toda la red"' : ' aria-hidden="true"') + ' transform="translate(' + x + ' ' + y + ')"><g class="esc">' +
-      '<circle class="aura" r="62"/><circle class="onda" r="25"/><circle class="onda" r="25" style="--d:-1.2s"/><circle class="onda" r="25" style="--d:-2.4s"/><circle class="boom" r="25"/>' +
-      orbita(-26, .36, 44, 6.5, 0, "", false, true) + orbita(34, .3, 40, 9, -2, "b", true, false) + orbita(80, .22, 36, 11, -5, "c", false, true) +
-      '<g class="gira rev" style="--t:26s"><circle class="tics" r="30"/></g>' + pts +
-      '<circle class="halo2" r="25.5"/><g class="late"><circle class="nucleo" r="23"/><g class="gira" style="--t:7s"><circle class="plasma" r="23"/></g><g class="gira rev" style="--t:10s"><circle class="plasma b" r="23"/></g><circle class="brillo" r="23"/><circle class="borde" r="23"/></g>' +
-      '<text>Armoni</text></g></g>';
+  const RED_DEFS = '<radialGradient id="ddAura"><stop offset="0" stop-color="#ffb066" stop-opacity=".30"/><stop offset=".55" stop-color="#ff8a50" stop-opacity=".09"/><stop offset="1" stop-color="#ff8a50" stop-opacity="0"/></radialGradient>' +
+    '<radialGradient id="ddNucleo" cx=".5" cy=".4" r=".75"><stop offset="0" stop-color="#2c2015"/><stop offset=".75" stop-color="#150f0a"/><stop offset="1" stop-color="#0b0805"/></radialGradient>';
+  /* el cerebro de fondo: dos hemisferios, la fisura del medio y unos pliegues; apenas se ve y no se mueve */
+  const CEREBRO = '<g class="cerebro" aria-hidden="true">' +
+    '<path class="hem" d="M178 30C150 20 102 26 68 58C34 90 24 138 30 184C36 232 70 276 118 296C146 308 166 304 178 294C172 240 184 196 172 150C164 112 176 70 178 30Z"/>' +
+    '<path class="hem" d="M182 30C210 20 258 26 292 58C326 90 336 138 330 184C324 232 290 276 242 296C214 308 194 304 182 294C188 240 176 196 188 150C196 112 184 70 182 30Z"/>' +
+    '<path class="giro2" d="M62 118C88 96 118 104 140 84M44 176C72 150 104 160 128 138M70 236C96 212 126 220 150 198M108 60C124 76 118 100 138 112M92 270C112 250 142 256 160 238"/>' +
+    '<path class="giro2" d="M298 118C272 96 242 104 220 84M316 176C288 150 256 160 232 138M290 236C264 212 234 220 210 198M252 60C236 76 242 100 222 112M268 270C248 250 218 256 200 238"/></g>';
+  /* las dendritas: unas ramitas finas alrededor de la neurona (la forma sale del texto, siempre la misma) */
+  const dendritas = (sem, cant, r0, largo, arriba) => {
+    let d = "";
+    for(let k = 0; k < cant; k++){
+      const a = arriba ? -Math.PI + (k + .5) / cant * Math.PI + (((sem >>> (k * 2)) % 7) - 3) * .035 : ((sem % 628) / 100) + k * 2 * Math.PI / cant + (((sem >>> (k * 3)) % 9) - 4) * .05;
+      const L = largo + ((sem >>> (6 + k * 3)) % 5), c = Math.cos(a), sn = Math.sin(a), q = ((sem >>> (k + 2)) % 2 ? 1 : -1) * L * .28;
+      d += "M" + (c * r0).toFixed(1) + " " + (sn * r0).toFixed(1) + "Q" + (c * (r0 + L * .55) - sn * q).toFixed(1) + " " + (sn * (r0 + L * .55) + c * q).toFixed(1) + " " + (c * (r0 + L)).toFixed(1) + " " + (sn * (r0 + L)).toFixed(1);
+    }
+    return '<path class="dn" d="' + d + '"/>';
   };
+  const coreSVG = (x, y, boton) =>
+    '<g class="core"' + (boton ? ' role="button" tabindex="0" aria-label="Armoni, el centro de la red. Toca para ver toda la red"' : ' aria-hidden="true"') + ' transform="translate(' + x + ' ' + y + ')"><g class="esc">' +
+    '<circle class="aura" r="58"/><circle class="onda" r="28"/><circle class="boom" r="28"/>' +
+    '<circle class="aC" r="40"/><circle class="aB" r="34"/>' +
+    '<g class="late"><circle class="nucleo" r="27"/><circle class="aA" r="27"/><circle class="arco" r="31" pathLength="176" transform="rotate(-70)"/>' +
+    '<circle class="sinapsis" cx="0" cy="-34" r="1.6"/><circle class="sinapsis" cx="29.4" cy="17" r="1.2"/><circle class="sinapsis" cx="-29.4" cy="17" r="1.2"/>' +
+    '<text>Armoni</text></g></g></g>';
   /* números que se escriben, código que se descifra y texto que se teclea (solo con movimiento y sin reposo) */
   const efectoHolo = raiz => {
     if(REDUCED || document.body.classList.contains("asleep")) return;
@@ -9123,17 +9125,17 @@ const Preguntas = (function(){
     if(!quieto){
       pul += P.hs.map((h, i) => '<path class="pulso eje" data-k="' + h.k + '" pathLength="100" d="' + curva(C, h, .06) + '" style="--c:' + RED_C[h.k] + ';--d:' + (-(i * 1.3) % 4.6).toFixed(2) + 's"/>').join("");
       const paso = Math.max(1, Math.ceil(P.ns.length / 10));
-      pul += P.ns.filter(n => nuevos.has(n.t) || n.i % paso === 0).slice(0, 16).map(n => '<path class="pulso' + (nuevos.has(n.t) ? ' nuevo' : '') + '" data-i="' + n.i + '" pathLength="100" d="' + curva(n.h, n, .12) + '" style="--c:' + RED_C[n.h.k] + ';--d:' + (-((hashT(n.t) % 46) / 10)).toFixed(1) + 's;--t:' + (4.2 + (hashT(n.t) % 9) / 10).toFixed(1) + 's"/>').join("");
+      pul += P.ns.filter(n => nuevos.has(n.t) || n.i % paso === 0).slice(0, 6).map(n => '<path class="pulso' + (nuevos.has(n.t) ? ' nuevo' : '') + '" data-i="' + n.i + '" pathLength="100" d="' + curva(n.h, n, .12) + '" style="--c:' + RED_C[n.h.k] + ';--d:' + (-((hashT(n.t) % 46) / 10)).toFixed(1) + 's;--t:' + (4.2 + (hashT(n.t) % 9) / 10).toFixed(1) + 's"/>').join("");
     }
     const nds = P.ns.map(n => '<g class="nd' + (nuevos.has(n.t) ? ' nuevo' : '') + '" data-nd="' + n.i + '" role="button" tabindex="0" aria-pressed="false" aria-label="' + esc(RED_N[n.tm[0]] + ': ' + n.t) + '" transform="translate(' + f(n.x) + ' ' + f(n.y) + ')" style="--c:' + RED_C[n.h.k] + ';--i:' + n.i + '">' +
-      '<circle class="hit" r="13"/><g class="esc"><circle class="halo" r="9"/><circle class="anillo" r="6"/><circle class="dot" r="' + (n.tm.length > 1 ? 5.6 : 4.8) + '"/></g></g>').join("");
+      '<circle class="hit" r="13"/><g class="esc">' + dendritas(hashT(n.t), 4, 4.4, 5, false) + '<circle class="halo" r="8"/><circle class="anillo" r="6"/><circle class="dot" r="' + (n.tm.length > 1 ? 4.4 : 3.7) + '"/></g></g>').join("");
     const hubs = P.hs.map(h => '<g class="hub" data-hub="' + h.k + '" role="button" tabindex="0" aria-pressed="false" aria-label="' + esc("Tema " + RED_N[h.k] + ", " + h.todos + (h.todos === 1 ? " cosa" : " cosas") + ". Toca para entrar") + '" transform="translate(' + f(h.x) + ' ' + f(h.y) + ')" style="--c:' + RED_C[h.k] + ';--i:' + h.i + '">' +
-      '<g class="esc"><circle class="brillo" r="20"/><circle class="giro" r="17.5"/><circle class="disco" r="13.5"/><text class="num">' + h.todos + '</text><text class="et" y="25">' + RED_N[h.k] + '</text></g></g>').join("");
+      '<g class="esc">' + dendritas(hashT(h.k), 7, 14.5, 7, true) + '<circle class="brillo" r="20"/><circle class="giro" r="17.5"/><circle class="disco" r="13.5"/><text class="num">' + h.todos + '</text><text class="et" y="25">' + RED_N[h.k] + '</text></g></g>').join("");
     const core = coreSVG(P.cx, P.cy, true);
     const mira = '<g class="mira" aria-hidden="true"><g class="mz"><path d="M-30 -18V-30H-18M18 -30H30V-18M30 18V30H18M-18 30H-30V18"/><circle class="md" r="22"/><path class="mx" d="M-40 0h6M34 0h6M0 -40v6M0 34v6"/><text class="mt" x="31" y="-35"></text></g></g>';
     return '<svg class="ddRedSvg" viewBox="0 ' + f(P.y0) + ' ' + P.W + ' ' + f(P.alto) + '" role="group" aria-label="Red de lo que Armoni ha aprendido: ' + P.ns.length + ' cosas en ' + P.hs.length + ' temas">' +
       '<defs>' + RED_DEFS + '</defs>' +
-      '<g>' + ejes + lns + '</g><g>' + pul + '</g>' + core + '<g>' + hubs + '</g><g>' + nds + '</g>' + mira + '</svg>';
+      CEREBRO + '<g>' + ejes + lns + '</g><g>' + pul + '</g>' + core + '<g>' + hubs + '</g><g>' + nds + '</g>' + mira + '</svg>';
   }
   const temasDe = t => { const r = TEMAS.filter(x => x[2].test(t)).map(x => x[0]); return r.length ? r : ["otros"]; };
   /* lo que Armoni ha aprendido de nuestras respuestas (copia en el celular por si se reinstala el flujo) */
