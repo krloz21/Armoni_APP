@@ -792,6 +792,7 @@ body.no-gl #drawer{ background:var(--drawer-solid); }
 
 /* ───────── vista de restaurantes (ocupa el lugar del chat) ───────── */
 #restView, #emaView, #creditoView, #gmailView, #glimView, #recuerdaView, #mercarView, #duraView, #mesView, #balanceView, #ahorroView, #dudasView, #ajustesView, #tempView{ display:none; padding-bottom:10px; }
+#emaTemporada{ display:none; }   /* «De temporada» tiene su propio apartado: en Salidas Ema no se repite */
 body.mode-rest #restView{ display:block; }
 body.mode-ema #emaView{ display:block; }
 body.mode-ema #welcome, body.mode-ema #messages, body.mode-ema #pending, body.mode-ema #servicioBanner, body.mode-ema #glimBanner{ display:none !important; }
@@ -3566,7 +3567,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-18.231";
+const APP_VERSION = "2026-10-18.232";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
