@@ -3132,6 +3132,22 @@ body.asleep .ddHolo, body.asleep .ddHolo *, body.asleep .ddHolo::after{ animatio
 .emaGastos p.emaPend{ opacity:.7; }
 /* emaB: el detalle agrupado por lugar y lo pagado en efectivo */
 .emaGrupo{ margin-top:12px; }
+/* el recorrido del día: una línea con una parada por lugar */
+.emaDetSub{ margin:2px 0 0; font-size:.76rem; color:var(--dim); }
+.emaRuta{ margin:16px 0 0 2px; }
+.emaParada{ position:relative; margin-left:16px; padding:0 0 16px 24px; border-left:2px dashed rgba(255,138,80,.38); }
+.emaParada:last-child{ border-left-color:transparent; padding-bottom:2px; }
+.emaPIco{ position:absolute; left:-18px; top:-2px; width:34px; height:34px; display:grid; place-items:center; font-size:1.05rem; border-radius:50%; background:linear-gradient(150deg, rgba(255,150,80,.32), rgba(255,100,60,.14)); border:1px solid rgba(255,138,80,.5); box-shadow:0 0 0 4px var(--void, #000); }
+.emaPCab{ display:flex; align-items:baseline; justify-content:space-between; gap:10px; min-height:30px; }
+.emaPCab b{ min-width:0; font-size:1.02rem; font-weight:650; letter-spacing:-.01em; overflow:hidden; text-overflow:ellipsis; }
+.emaPCab span{ flex:none; font-size:.86rem; font-weight:650; color:#ffb066; font-variant-numeric:tabular-nums; }
+.emaChips{ display:flex; flex-wrap:wrap; gap:6px; margin-top:6px; }
+.emaChip{ display:inline-flex; align-items:baseline; gap:5px; padding:5px 10px; border-radius:999px; font-size:.8rem; color:var(--ghost); background:rgba(var(--ink),.06); border:1px solid var(--line); }
+.emaChip em{ font-style:normal; font-weight:650; color:var(--white); font-variant-numeric:tabular-nums; }
+.emaChip small{ font-size:.68rem; color:var(--dim); }
+.emaChip.ef{ background:rgba(120,220,150,.1); border-color:rgba(120,220,150,.28); color:#9fe3b4; }
+.emaChip.ef em{ color:#c9f3d6; }
+.emaChip.emaPend{ opacity:.7; }
 .emaGrupoCab{ display:flex; justify-content:space-between; align-items:baseline; gap:10px; padding:0 0 4px; font-size:.74rem; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:#ffb066; }
 .emaGrupoCab.solo{ margin-top:10px; }
 .emaGrupoCab b{ font-size:.86rem; letter-spacing:0; color:var(--white); font-variant-numeric:tabular-nums; }
@@ -4151,7 +4167,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-18.240";
+const APP_VERSION = "2026-10-18.242";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -6659,14 +6675,27 @@ const SalidasEma = (function(){
   /* los gastos de un día, agrupados por lugar en el orden en que aparecen */
   const porLugar = q => { const gr = []; ((q && q.gastos) || []).forEach(g => { const k = g.l || ""; let x = gr.find(y => y.l === k); if(!x) gr.push(x = { l: k, gastos: [], total: 0 }); x.gastos.push(g); x.total += g.m || 0; }); return gr; };
   const LAPIZ = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/></svg>';
+  /* el icono del lugar según su nombre: centro comercial, parque, cine, agua, comida… */
+  const iconoLugar = n => {
+    n = String(n || "").toLowerCase();
+    if(/\bcc\b|c\.c\.|centro comercial|mall|plaza|unicentro|chipichape|cosmocentro|holgu[ií]nes|palmetto|[úu]nico|premier|bochalema|la estaci[oó]n|alfaguara|campanario|outlet/.test(n)) return "🏬";
+    if(/parque|zool[oó]gic|granja|ecoparque|bosque|bot[aá]nic/.test(n)) return "🌳";
+    if(/cine|cinemark|royal films|cin[eé]polis/.test(n)) return "🎬";
+    if(/piscina|acu[aá]tic|aqua|balneario/.test(n)) return "🏊";
+    if(/restaurante|pizza|burger|hamburg|sushi|asadero|helader|caf[eé]|crepes|panader/.test(n)) return "🍽️";
+    return "📍";
+  };
+  const chipGasto = g => '<span class="emaChip' + (EF(g) ? ' ef' : '') + (g.pend ? ' emaPend' : '') + '">' + (EF(g) ? '💵 ' : '') + esc(g.c) +
+    (g.p ? ' <small class="emaAntes">pagado el ' + esc(fechaCorta(g.p)) + '</small>' : '') + (g.pend ? ' <small>· por enviar</small>' : '') + ' <em>' + peso(g.m) + '</em></span>';
   function detalleHTML(q){
     if(!q) return "";
     const largo = new Date(q.fecha + "T12:00:00").toLocaleDateString("es-CO", { weekday: "long", day: "numeric", month: "long" });
-    const gr = porLugar(q), ef = q.gastos.filter(EF).reduce((a, g) => a + (g.m || 0), 0);
+    const gr = porLugar(q), ef = q.gastos.filter(EF).reduce((a, g) => a + (g.m || 0), 0), nLug = gr.filter(x => x.l).length;
     return '<div class="emaDetCab"><span>' + esc(largo) + '</span><b>' + peso(q.total) + '</b><button type="button" class="emaLapiz" data-editar="' + esc(q.fecha) + '" aria-label="Editar lo anotado el ' + esc(largo) + '" title="Editar lo anotado">' + LAPIZ + '</button></div>' +
-      (gr.length > 1
-        ? gr.map(x => '<div class="emaGrupo"><div class="emaGrupoCab"><span>📍 ' + esc(x.l || "Sin lugar") + '</span><b>' + peso(x.total) + '</b></div><div class="emaGastos">' + x.gastos.map(g => gastoHTML(g, true)).join("") + '</div></div>').join("")
-        : (gr[0] && gr[0].l ? '<div class="emaGrupoCab solo"><span>📍 ' + esc(gr[0].l) + '</span></div>' : '') + '<div class="emaGastos">' + q.gastos.map(g => gastoHTML(g, true)).join("") + '</div>') +
+      (nLug ? '<p class="emaDetSub">' + (nLug === 1 ? "1 lugar" : nLug + " lugares") + ' · el recorrido del día</p>' : '') +
+      '<div class="emaRuta">' + gr.map(x => '<div class="emaParada"><span class="emaPIco" aria-hidden="true">' + (x.l ? iconoLugar(x.l) : "🧾") + '</span>' +
+        '<div class="emaPCab"><b>' + esc(x.l || "Otros gastos") + '</b><span>' + peso(x.total) + '</span></div>' +
+        '<div class="emaChips">' + x.gastos.map(chipGasto).join("") + '</div></div>').join("") + '</div>' +
       (ef ? '<p class="emaEfNota">💵 ' + peso(ef) + ' en efectivo · no se descuenta del fondo</p>' : '') +
       '<button type="button" class="emaAgregar" data-otra><span>+ Agregar otra salida</span><small>con su fecha y su lugar, desde cero</small></button>';   // emaE: lo que faltó en este día se suma desde el lápiz
   }
@@ -10390,7 +10419,7 @@ const GastoManual = (function(){
     const CATS = esIngreso ? CATS_INGRESO : CATS_GASTO;
     try{ SalidasEma.precarga(); }catch{}   // trae los recurrentes al día para la próxima vez
     const frec = Frecuentes.top(tipo);
-    let concepto = "", monto = 0, categoria = "", fecha = hoy(), nota = "", pareja = false, iaManual = false, iaOn = false;
+    let concepto = "", monto = 0, categoria = "", fecha = hoy(), nota = "", pareja = false, iaManual = false, iaOn = false, medio = "digital";   // medio: «efectivo» queda solo como registro, no toca el presupuesto
     let lugar = "", personas = 0, puntos = 0, comentario = "", lugarVisto = false;
     const existente = () => { try{ return Restaurantes.info(lugar); }catch{ return null; } };   // el lugar ya está en Restaurantes
     const yaCalif = () => { const e = existente(); return !!(e && e.score > 0); };              // y ya tiene nota: no se vuelve a puntuar   // salidas a comer: dónde, cuántos y qué nota (van a «Restaurantes»)
@@ -10413,6 +10442,14 @@ const GastoManual = (function(){
     const marca = (c, on) => { card.classList.toggle(c, on); wrap.classList.toggle(c, on); };
     const obligada = () => false;   // antes las salidas pasaban por el chat; ahora se piden lugar, personas y nota aquí mismo
     const conLugar = () => tipo === "Gasto" && categoria === "Salidas";
+    /* ¿digital o efectivo? el efectivo no baja el presupuesto: queda solo anotado (n8n lo guarda con Monto 0 y el valor en «Efectivo») */
+    const segMedioG = () => '<div class="seMedio fmMedio" role="radiogroup" aria-label="¿Cómo lo pagaste?">' + [["digital", "💳", "Digital"], ["efectivo", "💵", "Efectivo"]].map(([k, e, t]) => '<button type="button" role="radio" data-medio="' + k + '" aria-checked="' + (medio === k) + '" tabindex="' + (medio === k ? 0 : -1) + '"><span aria-hidden="true">' + e + '</span>' + t + '</button>').join("") + '</div><p class="seMedioNota"' + (medio === "efectivo" ? '' : ' hidden') + '>En efectivo: no se descuenta del presupuesto, solo queda anotado.</p>';
+    const ligaMedioG = () => {
+      const box = vista.querySelector(".fmMedio"), nota = vista.querySelector(".seMedioNota"); if(!box) return;
+      const marca = () => { box.querySelectorAll("[data-medio]").forEach(b => { const on = b.dataset.medio === medio; b.setAttribute("aria-checked", String(on)); b.tabIndex = on ? 0 : -1; }); if(nota) nota.hidden = medio !== "efectivo"; };
+      box.addEventListener("click", e => { const b = e.target.closest("[data-medio]"); if(b){ medio = b.dataset.medio; marca(); } });
+      box.addEventListener("keydown", e => { if(!/^Arrow(Left|Right|Up|Down)$/.test(e.key)) return; e.preventDefault(); medio = medio === "digital" ? "efectivo" : "digital"; marca(); box.querySelector('[data-medio="' + medio + '"]').focus(); });
+    };
     const pintaIA = () => { const on = obligada() || iaOn; marca("armoni", on); const b = $("inIA"); if(b){ b.setAttribute("aria-pressed", String(on)); b.disabled = obligada(); } };
 
     function cierra(modo){
@@ -10495,6 +10532,7 @@ const GastoManual = (function(){
         vista.innerHTML =
           '<label class="fmMonto" for="inMonto"><span class="fmMontoLbl">¿Cuánto' + (esIngreso ? ' entró' : '') + '?</span><span class="fmMontoIn"><b>$</b><input id="inMonto" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="0" autocomplete="off" enterkeyhint="next" aria-label="Valor" value="' + (monto ? monto.toLocaleString("es-CO") : "") + '"></span><i class="fmLinea" aria-hidden="true"></i></label>';
         botones.innerHTML = '<button type="button" class="pgSi" id="inSig">Siguiente</button>';
+        if(tipo === "Gasto"){ vista.insertAdjacentHTML("beforeend", segMedioG()); ligaMedioG(); }
         const inp = $("inMonto"), sig = $("inSig");
         const ancho = () => ajustaMonto(inp);
         const listo = () => { sig.disabled = !(monto > 0); };
@@ -10602,11 +10640,12 @@ const GastoManual = (function(){
         vista.innerHTML =
           '<div class="fmResumen">' +
             '<button type="button" data-ir="que"><small>' + (esIngreso ? 'De dónde' : 'En qué') + '</small><b>' + escH(nombre) + '</b></button>' +
-            '<button type="button" data-ir="cuanto"><small>Valor</small><b>' + pesoG(monto) + '</b></button>' +
+            '<button type="button" data-ir="cuanto"><small>Valor</small><b>' + pesoG(monto) + (tipo === "Gasto" && medio === "efectivo" ? ' 💵' : '') + '</b></button>' +
             '<button type="button" data-ir="categoria"><small>Categoría</small><b>' + escH(categoria) + (pareja ? ' 💑' : '') + '</b></button>' +
             '<button type="button" data-ir="fecha"><small>Fecha</small><b>' + escH(fechaBonita(fecha)) + '</b></button>' +
             (lugar.trim() ? '<button type="button" data-ir="lugar"><small>Lugar</small><b>' + escH(lugar.trim()) + '</b></button><button type="button" data-ir="personas"><small>Adultos</small><b>' + personas + '</b></button><button type="button" data-ir="puntos"><small>Nota</small><b>' + (yaCalif() ? 'Ya tiene' : puntos ? puntos + ' / 10' : 'Sin nota') + '</b></button>' : '') +
           '</div>' +
+          (tipo === "Gasto" ? '<span class="inLbl">¿Cómo lo pagaste?</span>' + segMedioG() : '') +
           '<label class="inLbl" for="inNota">Nota <span style="font-weight:400;letter-spacing:0;text-transform:none">(opcional)</span></label>' +
           '<textarea id="inNota" rows="2" placeholder="Algo que quieras recordar" maxlength="300">' + escH(nota) + '</textarea>' +
           '<button type="button" class="inIA" id="inIA" aria-pressed="false"><i class="inIAdot" aria-hidden="true"></i><b>Pasar por Armoni</b></button>' +
@@ -10614,6 +10653,7 @@ const GastoManual = (function(){
           '<p class="inErr" id="inErr" role="alert"></p>';
         botones.innerHTML = '<button type="button" class="pgSi" id="inGuardar">Guardar</button>';
         $("inNota").addEventListener("input", e => { nota = e.target.value; });
+        ligaMedioG();
         vista.querySelector(".fmResumen").addEventListener("click", e => { const b = e.target.closest("[data-ir]"); if(b){ editando = true; histResumen = historia.slice(); ir(b.dataset.ir, -1); } });
         $("inIA").addEventListener("click", () => { if(obligada()) return; iaManual = true; iaOn = !iaOn; pintaIA(); });
         $("inGuardar").addEventListener("click", guardar);
@@ -10639,7 +10679,7 @@ const GastoManual = (function(){
         (tipo === "Gasto"
           ? " Revisa si esto es una salida a comer o algo que necesite más datos (por ejemplo cuántas personas comieron, el restaurante o la puntuación): si falta algún dato, pregúntamelo antes de guardar; si no falta nada, guárdalo de una."
           : " Es plata que ENTRA (por ejemplo un salario, o alguien que me devuelve su parte al dividir una cuenta en un restaurante): guárdalo de una como ingreso. No me preguntes por personas, restaurante ni puntuación; solo pregunta si de verdad falta el concepto, el valor o la fecha.");
-      if(obligada() || iaOn){
+      if((obligada() || iaOn) && medio !== "efectivo"){
         Frecuentes.aprende(tipo, concepto.trim(), categoria, monto);
         cierra("guardado");
         ask(texto, mostrar);
@@ -10647,6 +10687,7 @@ const GastoManual = (function(){
       }
       const dato = { tipo, concepto: nombre, categoria, monto, fecha, nota: nota$ };
       if(pareja) dato.salida = "Pareja";
+      if(tipo === "Gasto" && medio === "efectivo") dato.medio = "efectivo";   // n8n: Monto 0 + «Efectivo» = valor (no baja el presupuesto)
       if(conLugar() && lugar.trim()){ const ex = existente(), rated = !!(ex && ex.score > 0); dato.lugar = lugar.trim(); dato.personas = personas; if(ex && ex.id) dato.lugarId = ex.id; if(!rated && puntos) dato.puntuacion = puntos; if(!rated && comentario.trim()) dato.comentario = comentario.trim(); }
       guardando = true; btn.disabled = true; btn.textContent = "Guardando…"; err.textContent = "";
       const enviar = forzar => Cola.post(MOVIMIENTO_URL, { method: "POST", body: JSON.stringify(Object.assign({ token: MERCADO_TOKEN }, dato, forzar ? { forzar: true } : {})) })
@@ -10671,7 +10712,9 @@ const GastoManual = (function(){
           if(j && j.yaEstaba){ cierra(); avisoOk("No se duplicó", nombre + " · " + monto$ + " ya estaba registrado"); return; }
           Frecuentes.aprende(tipo, concepto.trim(), categoria, monto);
           cierra("guardado");
-          if(j && j.enCola) avisoOk("Guardado en el celular", nombre + " · " + monto$ + " · se envía cuando el PC esté prendido");
+          if(j && j.enCola) avisoOk("Guardado en el celular", nombre + " · " + monto$ + (dato.medio ? " · efectivo" : "") + " · se envía cuando el PC esté prendido");
+          else if(dato.medio === "efectivo" && !(j && j.medio === "efectivo")) avisoOk("Ojo", "Quedó como digital: falta actualizar el flujo «movimiento-nuevo» en n8n para el efectivo.");
+          else if(dato.medio === "efectivo") avisoOk("Efectivo anotado", nombre + " · " + monto$ + " · no baja el presupuesto");
           else avisoOk((tipo === "Gasto" ? "Gasto guardado" : "Ingreso guardado"), nombre + " · " + monto$);
         })
         .catch(e => { guardando = false; btn.disabled = false; btn.textContent = "Guardar"; err.textContent = (e && e.message && e.message !== "Failed to fetch") ? e.message : "No pude guardarlo. Revisa la conexión e inténtalo de nuevo."; });
