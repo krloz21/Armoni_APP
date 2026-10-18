@@ -2818,8 +2818,42 @@ body.mode-mercar:has(#mkStage .mcTop) #thread{ -webkit-mask-image:none; mask-ima
 .emaDiaChip.on{ background:linear-gradient(160deg, #ffb066, #ff7a4d); border-color:transparent; color:#1a0f08; box-shadow:0 10px 24px -12px rgba(255,138,80,.7); }
 .emaDiaChip.on small{ color:rgba(26,15,8,.75); }
 .emaDetalle{ margin-top:14px; padding:12px 14px; border-radius:16px; border:1px solid rgba(255,138,80,.28); background:rgba(255,138,80,.07); }
-.emaAgregar{ display:block; width:100%; min-height:44px; margin-top:10px; border-radius:14px; border:1px dashed rgba(255,138,80,.5); background:none; color:#ffb066; font:inherit; font-size:.86rem; font-weight:650; cursor:pointer; }
+.emaAgregar{ display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1px; width:100%; min-height:52px; margin-top:12px; padding:8px 12px; border-radius:14px; border:1px dashed rgba(255,138,80,.5); background:none; color:#ffb066; font:inherit; font-size:.9rem; font-weight:650; cursor:pointer; }
+.emaAgregar small{ font-size:.72rem; font-weight:500; color:var(--dim); }
 .emaAgregar:active{ transform:scale(.98); }
+.emaGastos p.emaPend{ opacity:.7; }
+/* emaB: el detalle agrupado por lugar y lo pagado en efectivo */
+.emaGrupo{ margin-top:12px; }
+.emaGrupoCab{ display:flex; justify-content:space-between; align-items:baseline; gap:10px; padding:0 0 4px; font-size:.74rem; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:#ffb066; }
+.emaGrupoCab.solo{ margin-top:10px; }
+.emaGrupoCab b{ font-size:.86rem; letter-spacing:0; color:var(--white); font-variant-numeric:tabular-nums; }
+.emaGrupo .emaGastos{ margin-top:0; }
+.emaEf, .seEf, .sprEf{ display:inline-block; white-space:nowrap; font-style:normal; font-size:.68rem !important; font-weight:600; padding:1px 7px; border-radius:999px; background:rgba(120,220,150,.14); color:#9fe3b4 !important; border:1px solid rgba(120,220,150,.28); }
+.seItemTx .seEf{ margin-left:0; margin-top:2px; }
+.emaEfNota, .seEfNota{ margin:10px 0 0; padding:8px 10px; border-radius:12px; font-size:.78rem; line-height:1.35; color:#9fe3b4; background:rgba(120,220,150,.08); border:1px solid rgba(120,220,150,.2); }
+/* emaB: «¿Qué quieres agregar?» */
+.seAgTit{ margin-top:6px; }
+.seAgLista{ display:flex; flex-direction:column; gap:8px; }
+.seAgLugar{ display:flex; align-items:center; gap:12px; width:100%; min-height:60px; padding:10px 14px; text-align:left; border-radius:16px; border:1px solid rgba(255,138,80,.35); background:rgba(255,138,80,.08); color:var(--white); font:inherit; cursor:pointer; animation:duSube .4s var(--ease-out) backwards; transition:transform .15s, background .2s; }
+.seAgLugar:nth-child(2){ animation-delay:.05s; } .seAgLugar:nth-child(3){ animation-delay:.1s; }
+.seAgLugar:active{ transform:scale(.98); background:rgba(255,138,80,.16); }
+.seAgIco{ font-size:1.2rem; flex:none; }
+.seAgTx{ flex:1; min-width:0; }
+.seAgTx b{ display:block; font-size:.98rem; font-weight:650; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.seAgTx small{ font-size:.76rem; color:var(--dim); }
+.seAgMas{ flex:none; display:grid; place-items:center; width:32px; height:32px; border-radius:50%; background:linear-gradient(160deg,#ffb066,#ff7a4d); color:#1a0f08; font-weight:800; font-size:1.1rem; }
+.seAgOtro{ display:flex; flex-wrap:wrap; justify-content:center; align-items:center; gap:2px 6px; min-height:56px; margin-top:16px; }
+.seAgOtro small{ flex-basis:100%; text-align:center; font-size:.74rem; font-weight:500; color:var(--dim); }
+.seYaHay, .seYaAnotado{ margin:10px 2px 0; font-size:.78rem; line-height:1.4; color:var(--ghost); }
+.seYaHay b, .seYaAnotado b{ color:var(--white); }
+/* emaB: Digital / Efectivo junto al valor */
+.seMedio{ display:inline-flex; gap:2px; margin:10px 0 0; padding:3px; border-radius:999px; border:1px solid var(--line); background:rgba(var(--ink),.05); }
+.seMedio button{ display:inline-flex; align-items:center; gap:5px; min-height:36px; padding:0 14px; border:0; border-radius:999px; background:none; color:var(--ghost); font:inherit; font-size:.82rem; font-weight:600; cursor:pointer; transition:background .2s, color .2s; }
+.seMedio button[aria-checked="true"]{ background:rgba(var(--ink),.14); color:var(--white); }
+.seMedio button[data-medio="efectivo"][aria-checked="true"]{ background:rgba(120,220,150,.2); color:#bff0cd; box-shadow:inset 0 0 0 1px rgba(120,220,150,.4); }
+.seMedio button:focus-visible{ outline:2px solid rgba(var(--cyan-rgb),.8); outline-offset:1px; }
+.seMedioNota{ margin:6px 4px 0; font-size:.74rem; color:#9fe3b4; }
+.seMedioNota[hidden]{ display:none; }
 .emaDetalle.cambia{ animation:emaSube .4s var(--ease-out); }
 .emaDetCab{ display:flex; justify-content:space-between; align-items:baseline; gap:10px; font-size:.9rem; }
 .emaDetCab span{ font-weight:600; }
@@ -3532,7 +3566,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-18.230";
+const APP_VERSION = "2026-10-18.231";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -6034,12 +6068,43 @@ const SalidasEma = (function(){
   const hace = d => d === 0 ? "hoy" : d === 1 ? "ayer" : "hace " + d + " días";
   const lugares = () => ((datos && datos.lugares) || []).slice();
   const fechaCorta = f => new Date(f + "T12:00:00").toLocaleDateString("es-CO", { day: "numeric", month: "short" }).replace(".", "");
-  const gastoHTML = g => '<p><span>' + esc(g.c) + (g.l ? ' <small>· ' + esc(g.l) + '</small>' : '') + (g.p ? ' <small class="emaAntes">pagado el ' + esc(fechaCorta(g.p)) + '</small>' : '') + '</span><em>' + peso(g.m) + '</em></p>';
+  const EF = g => !!g && g.medio === "efectivo";   // lo pagado en efectivo no se descuenta del fondo (el flujo trae medio por gasto)
+  const gastoHTML = (g, sinLugar) => '<p' + (g.pend ? ' class="emaPend"' : '') + '><span>' + esc(g.c) + (g.l && !sinLugar ? ' <small>· ' + esc(g.l) + '</small>' : '') + (g.p ? ' <small class="emaAntes">pagado el ' + esc(fechaCorta(g.p)) + '</small>' : '') + (EF(g) ? ' <small class="emaEf">💵 efectivo</small>' : '') + (g.pend ? ' <small>· por enviar</small>' : '') + '</span><em>' + peso(g.m) + '</em></p>';
+  const salidaDe = f => { const q0 = (mesActual().salidas || []).find(z => z.fecha === f); if(q0) return q0; for(const m of ((datos && datos.meses) || [])){ const q = (m.salidas || []).find(z => z.fecha === f); if(q) return q; } return null; };
+  /* los gastos de un día, agrupados por lugar en el orden en que aparecen */
+  const porLugar = q => { const gr = []; ((q && q.gastos) || []).forEach(g => { const k = g.l || ""; let x = gr.find(y => y.l === k); if(!x) gr.push(x = { l: k, gastos: [], total: 0 }); x.gastos.push(g); x.total += g.m || 0; }); return gr; };
+  function detalleHTML(q){
+    if(!q) return "";
+    const largo = new Date(q.fecha + "T12:00:00").toLocaleDateString("es-CO", { weekday: "long", day: "numeric", month: "long" });
+    const gr = porLugar(q), ef = q.gastos.filter(EF).reduce((a, g) => a + (g.m || 0), 0);
+    return '<div class="emaDetCab"><span>' + esc(largo) + '</span><b>' + peso(q.total) + '</b></div>' +
+      (gr.length > 1
+        ? gr.map(x => '<div class="emaGrupo"><div class="emaGrupoCab"><span>📍 ' + esc(x.l || "Sin lugar") + '</span><b>' + peso(x.total) + '</b></div><div class="emaGastos">' + x.gastos.map(g => gastoHTML(g, true)).join("") + '</div></div>').join("")
+        : (gr[0] && gr[0].l ? '<div class="emaGrupoCab solo"><span>📍 ' + esc(gr[0].l) + '</span></div>' : '') + '<div class="emaGastos">' + q.gastos.map(g => gastoHTML(g, true)).join("") + '</div>') +
+      (ef ? '<p class="emaEfNota">💵 ' + peso(ef) + ' en efectivo · no se descuenta del fondo</p>' : '') +
+      '<button type="button" class="emaAgregar" data-agregar="' + esc(q.fecha) + '"><span>+ Agregar a esta salida</span><small>algo que faltó u otro lugar del día</small></button>';
+  }
 
+  /* el mes de hoy con lo que espera conexión en la cola (gastos «Con Ema» de movimiento-nuevo), sin tocar «datos» */
+  const mesActual = () => {
+    const hoyM = mesHoy(), base = ((datos && datos.meses) || []).find(m => m.mes === hoyM) || { mes: hoyM, veces: 0, total: 0, dias: [], salidas: [] };
+    let pend = []; try{ pend = (JSON.parse(localStorage.getItem("armoni.cola")) || []).filter(x => String(x.url).includes("movimiento-nuevo")).map(x => JSON.parse(x.body)).filter(b => b.salida === "Con Ema" && b.tipo === "Gasto"); }catch{}
+    pend = pend.filter(b => String(b.fechaSalida || b.fecha || "").slice(0, 7) === hoyM);
+    if(!pend.length) return base;
+    const act = JSON.parse(JSON.stringify(base));
+    pend.forEach(b => {
+      const f = b.fechaSalida || b.fecha;
+      let s = act.salidas.find(z => z.fecha === f);
+      if(!s){ s = { fecha: f, total: 0, gastos: [] }; act.salidas.push(s); act.dias.push(f); act.veces++; }
+      const g = { c: b.concepto, m: Number(b.monto) || 0, pend: true }; if(b.lugar) g.l = b.lugar; if(b.lugarId) g.li = b.lugarId; if(b.medio === "efectivo") g.medio = "efectivo"; if(b.fechaSalida) g.p = b.fecha;
+      s.gastos.push(g); s.total += g.m; act.total += g.m; delete s.paradas;   // se vuelve a agrupar por lugar con lo pendiente
+    });
+    return act;
+  };
   function pinta(anim){
     const ms = (datos && datos.meses) || [];
     if(!datos){ stage.innerHTML = ""; return; }
-    const hoyM = mesHoy(), act = ms.find(m => m.mes === hoyM) || { mes: hoyM, veces: 0, total: 0, dias: [], salidas: [] };
+    const hoyM = mesHoy(), act = mesActual();
     const ult = ms.filter(m => m.mes !== hoyM).slice(-5);
     const max = Math.max(1, act.veces, ...ult.map(m => m.veces));
     const barras = ult.concat([act]).map(m => '<div class="emBar' + (m.mes === hoyM ? ' act' : '') + '"><b>' + m.veces + '</b><span class="emCol"><i style="height:' + Math.max(6, Math.round(m.veces / max * 100)) + '%"></i></span><small>' + esc(mesNombre(m.mes).slice(0, 3)) + '</small></div>').join("");
@@ -6047,13 +6112,7 @@ const SalidasEma = (function(){
     if(!sal.find(q => q.fecha === abierta)) abierta = sal.length ? sal[sal.length - 1].fecha : null;
     const diaCorto = f => new Date(f + "T12:00:00").toLocaleDateString("es-CO", { weekday: "short" }).replace(/\./g, "");
     const chipsDias = sal.map(q => '<button type="button" class="emaDiaChip' + (q.fecha === abierta ? ' on' : '') + '" data-f="' + esc(q.fecha) + '" aria-pressed="' + (q.fecha === abierta) + '"><b>' + (+q.fecha.slice(8, 10)) + '</b><small>' + esc(diaCorto(q.fecha)) + '</small></button>').join("");
-    const detalle = q => {
-      if(!q) return "";
-      const f = new Date(q.fecha + "T12:00:00"), largo = f.toLocaleDateString("es-CO", { weekday: "long", day: "numeric", month: "long" });
-      return '<div class="emaDetCab"><span>' + esc(largo) + '</span><b>' + peso(q.total) + '</b></div>' +
-        '<div class="emaGastos">' + q.gastos.map(gastoHTML).join("") + '</div>' +
-        '<button type="button" class="emaAgregar" data-agregar="' + esc(q.fecha) + '">+ Agregar algo que faltó en esta salida</button>';
-    };
+    const detalle = detalleHTML;
     const promSalida = act.veces ? act.total / act.veces : 0;
     const lug = lugares().sort((a, b) => (a.ultima ? diasDesde(a.ultima) : 9999) - (b.ultima ? diasDesde(b.ultima) : 9999));
     stage.innerHTML =
@@ -6077,17 +6136,14 @@ const SalidasEma = (function(){
   }
   stage.addEventListener("click", e => {
     const ag = e.target.closest("[data-agregar]");
-    if(ag){ SalidaEmaForm.abrir({ fecha: ag.dataset.agregar, agregar: true }); return; }   // se guarda con esa fecha y entra a la misma salida
+    if(ag){ SalidaEmaForm.abrir({ fecha: ag.dataset.agregar, agregar: true, salida: salidaDe(ag.dataset.agregar) }); return; }   // misma fecha; pregunta si es algo que faltó en un lugar ya anotado o un lugar nuevo
     const c = e.target.closest(".emaDiaChip"); if(!c || c.classList.contains("on")) return;
     abierta = c.dataset.f;
     stage.querySelectorAll(".emaDiaChip").forEach(x => { const on = x === c; x.classList.toggle("on", on); x.setAttribute("aria-pressed", String(on)); });
-    const act = ((datos && datos.meses) || []).find(m => m.mes === mesHoy()), q = act && (act.salidas || []).find(z => z.fecha === abierta);
+    const act = mesActual(), q = act && (act.salidas || []).find(z => z.fecha === abierta);
     const box = document.getElementById("emaDetalle");
     if(box && q){
-      const f = new Date(q.fecha + "T12:00:00"), largo = f.toLocaleDateString("es-CO", { weekday: "long", day: "numeric", month: "long" });
-      box.innerHTML = '<div class="emaDetCab"><span>' + esc(largo) + '</span><b>' + peso(q.total) + '</b></div>' +
-        '<div class="emaGastos">' + q.gastos.map(gastoHTML).join("") + '</div>' +
-        '<button type="button" class="emaAgregar" data-agregar="' + esc(q.fecha) + '">+ Agregar algo que faltó en esta salida</button>';
+      box.innerHTML = detalleHTML(q);
       box.classList.remove("cambia"); void box.offsetWidth; box.classList.add("cambia");
     }
   });
@@ -6195,7 +6251,7 @@ const SalidasEma = (function(){
     const lug = lugares().map(l => "- " + l.nombre + " | puntuación: " + (l.puntuacion ? l.puntuacion + "/10" : "sin puntuación") + " | visitas: " + (l.visitas || 0) +
       " | gasto promedio por salida: " + (l.promedio ? peso(l.promedio) : "sin dato") + " | última vez: " + (l.ultima ? hace(diasDesde(l.ultima)) : "sin registro") + (l.notas ? " | comentario: " + l.notas : ""));
     const sal = [];
-    ms.slice(-3).forEach(m => (m.salidas || []).forEach(q => sal.push("- " + q.fecha + " | total " + peso(q.total) + " | " + q.gastos.map(g => g.c + (g.l ? " (" + g.l + ")" : "") + " " + peso(g.m) + (g.p ? " [pagado antes, el " + g.p + "]" : "")).join(", "))));
+    ms.slice(-3).forEach(m => (m.salidas || []).forEach(q => sal.push("- " + q.fecha + " | total " + peso(q.total) + " | " + q.gastos.map(g => g.c + (g.l ? " (" + g.l + ")" : "") + " " + peso(g.m) + (EF(g) ? " [en efectivo]" : "") + (g.p ? " [pagado antes, el " + g.p + "]" : "")).join(", "))));
     return "[Hoy es " + hoy + ". Lugares a los que han llevado a Ema:\n" + (lug.join("\n") || "(todavía no hay lugares registrados)") + "\n\nÚltimas salidas con Ema (cada una es un día, con todos sus gastos):\n" + (sal.join("\n") || "(sin salidas)") + "]\n\n";
   }
   const burbuja = (who, html) => { const w = document.createElement("div"); w.className = "msg " + who; w.innerHTML = '<div class="body">' + html + "</div>"; return w; };
@@ -6245,7 +6301,7 @@ const SalidasEma = (function(){
     })));
     return Object.values(c).sort((a, b) => b.n - a.n).map(x => x.nombre);
   };
-  return { refresh, nueva, preguntar, lugares, nombres, precarga, frecuentes };
+  return { refresh, nueva, preguntar, lugares, nombres, precarga, frecuentes, salidaDe, esEfectivo: EF };
 })();
 
 /* ════════════════════════════════════════════════════════════
@@ -6808,7 +6864,10 @@ const PlanesComfandi = (function(){
    ════════════════════════════════════════════════════════════ */
 const SalidaEmaForm = (function(){
   /* Un paso a la vez, como una conversación:
-     1) ¿cuándo y a dónde fueron?  2) ¿qué pagaron ahí?  3) ¿pagaron parqueadero?  4) ¿fueron a otro lugar ese día?  5) se guarda todo */
+     1) ¿cuándo y a dónde fueron?  2) ¿qué pagaron ahí?  3) ¿pagaron parqueadero?  4) ¿fueron a otro lugar ese día?  5) se guarda todo
+     Desde «Agregar a esta salida» (opts.agregar) no pregunta la fecha: primero «¿qué quieres agregar?»
+     → algo que faltó en un lugar ya anotado (va directo a los gastos) u otro lugar ese día.
+     Cada valor lleva medio: "digital" (por defecto) o "efectivo" (no se descuenta del fondo). */
   let abierta = false;
   const esc = t => String(t == null ? "" : t).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
   const iso = d => d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
@@ -6833,8 +6892,21 @@ const SalidaEmaForm = (function(){
     if(abierta) return; abierta = true;
     SalidasEma.precarga();
     let fecha = (opts && /^\d{4}-\d{2}-\d{2}$/.test(opts.fecha || "")) ? opts.fecha : hoyISO(), paradas = [], idx = 0, paso = "lugar", guardando = false;   // «agregar a una salida»: viene con su fecha
-    const nuevaParada = () => ({ lugar: "", puntuacion: 0, comentario: "", gastos: [], preguntado: false });
+    const nuevaParada = () => ({ lugar: "", puntuacion: 0, comentario: "", gastos: [], preguntado: false, fija: false });
     paradas.push(nuevaParada());
+    const ag = !!(opts && opts.agregar && opts.fecha);   // «Agregar a esta salida»: la fecha ya está; no se vuelve a preguntar ni el día ni el lugar
+    const ya = ag ? ((opts && opts.salida) || SalidasEma.salidaDe(fecha)) : null;
+    const yaLugares = (() => { const gr = []; ((ya && ya.gastos) || []).forEach(g => { const k = g.l || ""; let x = gr.find(y => y.l === k); if(!x) gr.push(x = { l: k, cosas: [], total: 0 }); x.cosas.push(g); x.total += g.m || 0; }); return gr; })();
+    const yaDe = nombre => yaLugares.find(x => normL(x.l) === normL(nombre)) || null;
+    const ES_EF = g => g.medio === "efectivo";
+    const segMedio = v => '<div class="seMedio" role="radiogroup" aria-label="¿Cómo lo pagaron?">' + [["digital", "💳", "Digital"], ["efectivo", "💵", "Efectivo"]].map(([k, e, t]) => '<button type="button" role="radio" data-medio="' + k + '" aria-checked="' + (v === k) + '" tabindex="' + (v === k ? 0 : -1) + '"><span aria-hidden="true">' + e + '</span>' + t + '</button>').join("") + '</div><p class="seMedioNota"' + (v === "efectivo" ? '' : ' hidden') + '>En efectivo: no se descuenta del fondo</p>';
+    const ligaMedio = (get, set) => {   // botones Digital / Efectivo: toque o flechas del teclado
+      const box = vista.querySelector(".seMedio"), nota = vista.querySelector(".seMedioNota");
+      const marca = () => { box.querySelectorAll("[data-medio]").forEach(b => { const on = b.dataset.medio === get(); b.setAttribute("aria-checked", String(on)); b.tabIndex = on ? 0 : -1; }); nota.hidden = get() !== "efectivo"; };
+      box.addEventListener("click", e => { const b = e.target.closest("[data-medio]"); if(b){ set(b.dataset.medio); marca(); } });
+      box.addEventListener("keydown", e => { if(!/^Arrow(Left|Right|Up|Down)$/.test(e.key)) return; e.preventDefault(); set(get() === "digital" ? "efectivo" : "digital"); marca(); box.querySelector('[data-medio="' + get() + '"]').focus(); });
+      return marca;
+    };
     if(opts && opts.pre && opts.pre.c && opts.pre.m > 0) paradas[0].gastos.push({ c: opts.pre.c, m: opts.pre.m, hecho: false });
     const scrim = document.createElement("div");
     scrim.className = "pgScrim seScrim";
@@ -6853,7 +6925,8 @@ const SalidaEmaForm = (function(){
     const validos = p => p.gastos.filter(g => g.c.trim() && g.m > 0);
     const subtotal = p => validos(p).reduce((a, g) => a + g.m, 0);
     const total = () => paradas.reduce((a, p) => a + subtotal(p), 0);
-    const nombreLugar = p => (p.lugar.trim() && (conocido(p.lugar) || p.lugar.trim())) || "ese lugar";
+    const nombreLugar = p => (p.lugar.trim() && (conocido(p.lugar) || p.lugar.trim())) || (p.fija ? "esta salida" : "ese lugar");
+    const efectivo = lista => lista.filter(ES_EF).reduce((a, g) => a + g.m, 0);
 
     const cierra = () => { document.removeEventListener("keydown", tecla); scrim.classList.remove("on"); setTimeout(() => { scrim.remove(); abierta = false; }, 340); };
     const hayDatos = () => paradas.some(q => q.lugar.trim() || validos(q).length);   // si ya escribiste algo, un toque afuera no lo tira
@@ -6862,11 +6935,12 @@ const SalidaEmaForm = (function(){
     scrim.addEventListener("click", e => { if(e.target === scrim && !guardando && !hayDatos()) cierra(); });
     atras.addEventListener("click", () => {
       if(guardando) return;
-      if(paso === "gastos") ir("lugar", -1);
+      if(paso === "gastos") ir(P().fija ? "elige" : "lugar", -1);
       else if(paso === "parqueo") ir("gastos", -1);
       else if(paso === "resumen"){ ir("gastos", -1); }
       else if(paso === "lugar" && idx > 0){ if(!validos(P()).length){ paradas.splice(idx, 1); idx = paradas.length - 1; } ir("resumen", -1); }
-      else if(paso === "lugar"){ cierra(); if(opts && opts.desdeMenu) setTimeout(() => MenuMas.abre(), 260); }
+      else if(paso === "lugar" && ag) ir("elige", -1);
+      else if(paso === "lugar" || paso === "elige"){ cierra(); if(opts && opts.desdeMenu) setTimeout(() => MenuMas.abre(), 260); }
     });
 
     /* cambia de paso deslizando (adelante entra por la derecha, atrás por la izquierda) */
@@ -6876,25 +6950,44 @@ const SalidaEmaForm = (function(){
       void vista.offsetWidth;
       vista.classList.add("entra");
       pinta();
-      const k = PASOS.indexOf(paso);
+      const k = paso === "elige" ? 0 : PASOS.indexOf(paso);
       $("sePuntos").querySelectorAll("i").forEach((d, i) => { d.classList.toggle("on", i === k); d.classList.toggle("ok", i < k); });
       atras.hidden = guardando || paso === "fin";
       const sub = $("seSubT");
-      if(sub) sub.textContent = paso === "lugar" ? (idx ? "Otro lugar del mismo día" : "Lo que pagaron, lugar por lugar") : paso === "resumen" ? "Revisa y guarda" : nombreLugar(P());
+      if(sub) sub.textContent = paso === "elige" ? "Agregar a la salida del " + fechaCorta(fecha) : paso === "lugar" ? (idx || ag ? "Otro lugar del mismo día" : "Lo que pagaron, lugar por lugar") : paso === "resumen" ? "Revisa y guarda" : nombreLugar(P());
       scrim.querySelector(".seVista").scrollTop = 0;
     }
 
     function pinta(){
       const p = P();
-      if(paso === "lugar"){
-        const sugeridos = SalidasEma.lugares().filter(l => l.visitas).sort((a, b) => b.visitas - a.visitas).slice(0, 5).map(l => l.nombre);
+      if(paso === "elige"){
+        const ops = yaLugares.length ? yaLugares : [{ l: "", cosas: [], total: 0 }];
         vista.innerHTML =
-          (idx === 0
+          '<p class="seContexto">' + esc(fechaLarga(fecha)) + (ya ? ' · ' + peso(ya.total) : '') + '</p>' +
+          '<div class="sePregunta seAgTit">¿Qué quieres agregar?</div>' +
+          '<span class="inLbl">Algo que faltó en…</span><div class="seAgLista">' + ops.map(x =>
+            '<button type="button" class="seAgLugar" data-l="' + esc(x.l) + '"><span class="seAgIco" aria-hidden="true">' + (x.l ? '📍' : '🧾') + '</span><span class="seAgTx"><b>' + esc(x.l || (yaLugares.length > 1 ? 'Lo que no tiene lugar' : 'Esta salida')) + '</b><small>' + (x.cosas.length ? x.cosas.length + (x.cosas.length === 1 ? ' cosa' : ' cosas') + ' · ' + peso(x.total) : 'Se suma a este día') + '</small></span><span class="seAgMas" aria-hidden="true">+</span></button>').join("") + '</div>' +
+          '<button type="button" class="seOtroLugar seAgOtro" id="seAgOtro"><span aria-hidden="true">📍</span> Fuimos a otro lugar ese día<small>Otra parada o una segunda salida</small></button>';
+        botones.innerHTML = "";
+        vista.querySelectorAll(".seAgLugar").forEach(b => b.addEventListener("click", () => {
+          p.lugar = b.dataset.l; p.fija = true;
+          p.preguntado = true;   // «faltó algo» es corto: no vuelve a preguntar parqueadero (está en los atajos)
+          ir("gastos", 1);
+        }));
+        $("seAgOtro").addEventListener("click", () => { if(p.fija){ p.lugar = ""; p.fija = false; p.preguntado = false; } ir("lugar", 1); });
+        return;
+      }
+      if(paso === "lugar"){
+        const sugeridos = SalidasEma.lugares().filter(l => l.visitas && !yaDe(l.nombre)).sort((a, b) => b.visitas - a.visitas).slice(0, 5).map(l => l.nombre);
+        const yaHay = !ag && idx === 0 ? SalidasEma.salidaDe(fecha) : null;
+        vista.innerHTML =
+          (idx === 0 && !ag
             ? '<span class="inLbl seLbl1">¿Cuándo fue?</span><div class="recDia" id="seDia">' +
                 [["Hoy", 0], ["Ayer", 1]].map(([t, d]) => '<button type="button" class="recChip" data-d="' + d + '" aria-pressed="' + (fecha === diaISO(d)) + '">' + t + '</button>').join("") +
                 '<label class="recChip inFechaBtn" id="seFechaBtn" aria-pressed="' + ([0, 1].every(d => fecha !== diaISO(d))) + '"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg><span>' + ([0, 1].every(d => fecha !== diaISO(d)) ? esc(fecha.slice(8) + "/" + fecha.slice(5, 7)) : "Otra fecha") + '</span><input type="date" id="seFecha" max="' + hoyISO() + '" aria-label="Elegir otra fecha"></label></div>'
-            : '<p class="seContexto">' + esc(fechaLarga(fecha)) + ' · lugar ' + (idx + 1) + '</p>') +
-          '<label class="inLbl" for="seLugar">' + (idx === 0 ? '¿A dónde fueron?' : '¿A qué otro lugar fueron?') + '</label>' +
+            : '<p class="seContexto">' + esc(fechaLarga(fecha)) + ' · lugar ' + (idx + 1 + yaLugares.filter(x => x.l).length) + '</p>') +
+          (yaHay ? '<p class="seYaHay">Ese día ya hay una salida (<b>' + peso(yaHay.total) + '</b>). Lo que anotes se suma a ella.</p>' : '') +
+          '<label class="inLbl" for="seLugar">' + (idx === 0 && !ag ? '¿A dónde fueron?' : '¿A qué otro lugar fueron?') + '</label>' +
           '<datalist id="seLista">' + SalidasEma.nombres().map(n => '<option value="' + esc(n) + '">').join("") + '</datalist>' +
           '<input id="seLugar" class="seLugarIn" type="text" list="seLista" placeholder="Pance, cine, heladería…" maxlength="60" autocomplete="off" value="' + esc(p.lugar) + '">' +
           (sugeridos.length ? '<div class="inFrecs seSugeridos">' + sugeridos.map(n => '<button type="button" class="recChip" data-l="' + esc(n) + '">' + esc(n) + '</button>').join("") + '</div>' : '') +
@@ -6908,7 +7001,7 @@ const SalidaEmaForm = (function(){
         vista.querySelectorAll(".seSugeridos [data-l]").forEach(b => b.addEventListener("click", () => { p.lugar = b.dataset.l; lugarIn.value = p.lugar; refrescaNuevo(); ir("gastos", 1); }));
         vista.querySelectorAll(".seNotas [data-n]").forEach(b => b.addEventListener("click", () => { const n = +b.dataset.n; p.puntuacion = p.puntuacion === n ? 0 : n; vista.querySelectorAll(".seNotas [data-n]").forEach(x => x.classList.toggle("on", +x.dataset.n === p.puntuacion)); }));
         const com = $("seComent"); com.addEventListener("input", () => { p.comentario = com.value; });
-        if(idx === 0){
+        if(idx === 0 && !ag){
           const chips = [...vista.querySelectorAll("#seDia .recChip[data-d]")];
           chips.forEach(b => b.addEventListener("click", () => { fecha = diaISO(+b.dataset.d); pinta(); }));
           alElegirFecha($("seFecha"), v => { fecha = v > hoyISO() ? hoyISO() : v; pinta(); });
@@ -6925,14 +7018,18 @@ const SalidaEmaForm = (function(){
       if(paso === "gastos"){
         p.gastos = p.gastos.filter(g => g.c.trim() && g.m > 0);
         const frec = SalidasEma.frecuentes();
-        const atajos = (frec.length ? frec : []).concat(["Almuerzo", "Helado", "Entradas", "Juegos"]).filter((x, i, a) => a.findIndex(y => y.toLowerCase() === x.toLowerCase()) === i).slice(0, 6);
-        const nuevo = { c: "", m: 0, fp: undefined };
+        const yaAqui = p.fija ? yaDe(p.lugar) : null;
+        const atajos = (p.fija && !(yaAqui && yaAqui.cosas.some(g => PARQ.test(g.c))) ? ["Parqueadero"] : []).concat(frec.length ? frec : []).concat(["Almuerzo", "Helado", "Entradas", "Juegos"]).filter((x, i, a) => a.findIndex(y => y.toLowerCase() === x.toLowerCase()) === i).slice(0, 6);
+        const nuevo = { c: "", m: 0, fp: undefined, medio: "digital" };
         vista.innerHTML =
+          (ag ? '<p class="seContexto">' + esc(fechaLarga(fecha)) + '</p>' : '') +
           '<label class="fmMonto" for="seMontoIn"><span class="fmMontoLbl">¿Cuánto pagaron?</span><span class="fmMontoIn"><b>$</b><input id="seMontoIn" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="0" autocomplete="off" aria-label="Valor"></span><i class="fmLinea" aria-hidden="true"></i></label>' +
+          segMedio(nuevo.medio) +
           '<label class="inLbl" for="seQue">¿En qué?</label>' +
           '<div class="seEntrada"><input id="seQue" type="text" placeholder="Helado, entradas, almuerzo…" maxlength="60" autocomplete="off" enterkeyhint="done"><button type="button" class="seMas" id="seMas" aria-label="Agregar a la salida" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button></div>' +
           '<div class="inFrecs seRapidos">' + atajos.map(n => '<button type="button" class="recChip" data-r="' + esc(n) + '"><span aria-hidden="true">' + emoGasto(n) + '</span> ' + esc(n) + '</button>').join("") + '</div>' +
           '<div class="sePagoOtro"><button type="button" class="recChip" id="seAntes" aria-pressed="false">🎟️ Lo pagaron otro día</button><label class="sePagoDia" id="sePagoDia" hidden><span class="sePagoTxt"></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg><input type="date" id="sePagoIn" max="' + diaAntes(fecha) + '" aria-label="Día en que lo pagaron"></label></div>' +
+          (yaAqui && yaAqui.cosas.length ? '<p class="seYaAnotado">Ya anotado' + (yaAqui.l ? ' en ' + esc(yaAqui.l) : '') + ': ' + esc(yaAqui.cosas.map(g => g.c).join(", ")) + ' · <b>' + peso(yaAqui.total) + '</b></p>' : '') +
           '<div class="seLista" id="seLista"></div>';
         botones.innerHTML = '<button type="button" class="pgSi" id="seSig">Listo</button>';
         const mIn = $("seMontoIn"), qIn = $("seQue"), mas = $("seMas"), lista = $("seLista"), antes = $("seAntes"), pDia = $("sePagoDia"), pIn = $("sePagoIn");
@@ -6940,17 +7037,20 @@ const SalidaEmaForm = (function(){
         const completo = () => nuevo.c.trim() && nuevo.m > 0;
         const pintaLista = (nuevoIdx) => {
           const v = validos(p);
+          const ef = efectivo(v);
           lista.innerHTML = v.length
-            ? '<div class="seListaCab"><span>En ' + esc(nombreLugar(p)) + '</span><b>' + peso(subtotal(p)) + '</b></div>' + v.map((g, j) =>
-                '<div class="seItem' + (j === nuevoIdx ? ' nuevo' : '') + '" data-j="' + p.gastos.indexOf(g) + '"><span class="seItemEmo" aria-hidden="true">' + emoGasto(g.c) + '</span><span class="seItemTx"><b>' + esc(g.c) + '</b>' + (g.fp ? '<small>pagado el ' + esc(fechaCorta(g.fp)) + '</small>' : '') + '</span><em>' + peso(g.m) + '</em><button type="button" class="seQuitar" aria-label="Quitar ' + esc(g.c) + '">×</button></div>').join("")
+            ? '<div class="seListaCab"><span>' + (p.fija ? 'Lo que sumas en ' : 'En ') + esc(nombreLugar(p)) + '</span><b>' + peso(subtotal(p)) + '</b></div>' + v.map((g, j) =>
+                '<div class="seItem' + (j === nuevoIdx ? ' nuevo' : '') + '" data-j="' + p.gastos.indexOf(g) + '"><span class="seItemEmo" aria-hidden="true">' + emoGasto(g.c) + '</span><span class="seItemTx"><b>' + esc(g.c) + '</b>' + (g.fp ? '<small>pagado el ' + esc(fechaCorta(g.fp)) + '</small> ' : '') + (ES_EF(g) ? '<small class="seEf">💵 efectivo</small>' : '') + '</span><em>' + peso(g.m) + '</em><button type="button" class="seQuitar" aria-label="Quitar ' + esc(g.c) + '">×</button></div>').join("") +
+              (ef ? '<p class="seEfNota">💵 ' + peso(ef) + ' en efectivo · no se descuenta del fondo</p>' : '')
             : '<p class="seListaVacia">Escribe cuánto y en qué, y toca <b>+</b>. Puedes agregar varias cosas.</p>';
           $("seSig").disabled = !v.length && !completo();
         };
         const refresca = () => { mas.disabled = !completo(); $("seSig").disabled = !validos(p).length && !completo(); };
+        const marcaMedio = ligaMedio(() => nuevo.medio, v => { nuevo.medio = v; });
         const agrega = () => {
           if(!completo()) { (nuevo.m > 0 ? qIn : mIn).focus(); return false; }
-          p.gastos.push({ c: nuevo.c.trim(), m: nuevo.m, fp: nuevo.fp, hecho: false });
-          nuevo.c = ""; nuevo.m = 0; nuevo.fp = undefined;
+          p.gastos.push({ c: nuevo.c.trim(), m: nuevo.m, fp: nuevo.fp, medio: nuevo.medio, hecho: false });
+          nuevo.c = ""; nuevo.m = 0; nuevo.fp = undefined; nuevo.medio = "digital"; marcaMedio();   // cada valor vuelve a Digital: el efectivo es la excepción
           mIn.value = ""; qIn.value = ""; ancho();
           antes.setAttribute("aria-pressed", "false"); pDia.hidden = true;
           pintaLista(validos(p).length - 1); refresca();
@@ -6993,17 +7093,19 @@ const SalidaEmaForm = (function(){
 
       if(paso === "parqueo"){
         const ult = ultimosParq();
-        let monto = 0;
+        let monto = 0, medioP = "digital";
         vista.innerHTML =
           '<div class="seParqueo"><div class="seParqEmo" aria-hidden="true">🅿️</div>' +
           '<div class="sePregunta">¿Pagaron parqueadero en <span class="seLugarNom">' + esc(nombreLugar(p)) + '</span>?</div>' +
           '<div class="seParqSi" id="seParqSi" hidden>' +
             '<label class="fmMonto" for="seParqIn"><span class="fmMontoLbl">¿Cuánto?</span><span class="fmMontoIn"><b>$</b><input id="seParqIn" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="0" autocomplete="off" aria-label="Valor del parqueadero"></span><i class="fmLinea" aria-hidden="true"></i></label>' +
             (ult.length ? '<div class="recDia seParqChips">' + ult.map(v => '<button type="button" class="recChip" data-v="' + v + '">' + peso(v) + '</button>').join("") + '</div>' : '') +
+            segMedio(medioP) +
           '</div></div>';
         botones.innerHTML = '<button type="button" class="pgNo" id="seNo">No</button><button type="button" class="pgSi" id="seSi">Sí, pagamos</button>';
         const si = $("seParqSi"), inp = $("seParqIn"), bSi = $("seSi");
         const listoSi = () => { bSi.disabled = !(monto > 0); };
+        ligaMedio(() => medioP, v => { medioP = v; });
         const ancho = () => ajustaMonto(inp);
         const marca = () => vista.querySelectorAll("[data-v]").forEach(x => x.setAttribute("aria-pressed", String(+x.dataset.v === monto)));
         vista.addEventListener("click", e => { const v = e.target.closest("[data-v]"); if(v){ monto = +v.dataset.v; inp.value = monto.toLocaleString("es-CO"); ancho(); marca(); listoSi(); } });
@@ -7013,7 +7115,7 @@ const SalidaEmaForm = (function(){
         bSi.addEventListener("click", () => {
           if(si.hidden){ si.hidden = false; si.classList.add("seAparece"); bSi.textContent = "Agregar"; listoSi(); setTimeout(() => inp.focus(), 200); return; }
           if(!(monto > 0)) return;
-          p.gastos.unshift({ c: "Parqueadero", m: monto, hecho: false });   // va primero en ese lugar: así quedan en el orden en que pasaron
+          p.gastos.unshift({ c: "Parqueadero", m: monto, medio: medioP, hecho: false });   // va primero en ese lugar: así quedan en el orden en que pasaron
           recuerdaParq(monto); p.preguntado = true;
           ir("resumen", 1);
         });
@@ -7021,15 +7123,17 @@ const SalidaEmaForm = (function(){
       }
 
       if(paso === "resumen"){
+        const efT = efectivo(paradas.flatMap(validos));
         vista.innerHTML =
-          '<p class="seContexto">' + esc(fechaLarga(fecha)) + '</p>' +
-          '<div class="fmMonto"><span class="fmMontoLbl">Total de la salida</span><span class="fmMontoIn"><b>$</b><span class="seTotN">' + total().toLocaleString("es-CO") + '</span></span><i class="fmLinea" aria-hidden="true"></i></div>' +
+          '<p class="seContexto">' + (ag ? 'Se suma a la salida del ' + esc(fechaLarga(fecha).toLowerCase()) : esc(fechaLarga(fecha))) + '</p>' +
+          '<div class="fmMonto"><span class="fmMontoLbl">' + (ag ? 'Lo que agregas' : 'Total de la salida') + '</span><span class="fmMontoIn"><b>$</b><span class="seTotN">' + total().toLocaleString("es-CO") + '</span></span><i class="fmLinea" aria-hidden="true"></i></div>' +
           '<div class="seParadas">' + paradas.map((q, i) =>
             '<button type="button" class="seParadaRes" data-i="' + i + '"><div class="sprCab"><b>' + esc(nombreLugar(q)) + '</b><span>' + peso(subtotal(q)) + '</span></div>' +
-            '<div class="sprGastos">' + validos(q).map(g => '<span>' + emoGasto(g.c) + ' ' + esc(g.c) + ' · ' + peso(g.m) + (g.fp ? ' <em class="sprAntes">pagado ' + esc(fechaCorta(g.fp)) + '</em>' : '') + '</span>').join("") + '</div><small class="sprEditar">Tocar para editar</small></button>').join("") + '</div>' +
+            '<div class="sprGastos">' + validos(q).map(g => '<span>' + emoGasto(g.c) + ' ' + esc(g.c) + ' · ' + peso(g.m) + (g.fp ? ' <em class="sprAntes">pagado ' + esc(fechaCorta(g.fp)) + '</em>' : '') + (ES_EF(g) ? ' <em class="sprEf">💵 efectivo</em>' : '') + '</span>').join("") + '</div><small class="sprEditar">Tocar para editar</small></button>').join("") + '</div>' +
+          (efT ? '<p class="seEfNota">💵 ' + peso(efT) + ' en efectivo · no se descuenta del fondo</p>' : '') +
           '<button type="button" class="seOtroLugar" id="seOtro"><span aria-hidden="true">📍</span> Fuimos a otro lugar ese día</button>' +
           '<p class="inErr" id="seErr" role="alert"></p>';
-        botones.innerHTML = '<button type="button" class="pgSi" id="seGuardar">Guardar salida</button>';
+        botones.innerHTML = '<button type="button" class="pgSi" id="seGuardar">' + (ag ? 'Sumar a la salida' : 'Guardar salida') + '</button>';
         vista.querySelectorAll(".seParadaRes").forEach(b => b.addEventListener("click", () => { idx = +b.dataset.i; ir("gastos", -1); }));
         $("seOtro").addEventListener("click", () => { paradas.push(nuevaParada()); idx = paradas.length - 1; ir("lugar", 1); });
         $("seGuardar").addEventListener("click", guardar);
@@ -7047,29 +7151,35 @@ const SalidaEmaForm = (function(){
       vista.innerHTML = '<div class="seGuardando"><svg class="seAro" viewBox="0 0 80 80" aria-hidden="true"><circle cx="40" cy="40" r="34" class="seAroBg"/><circle cx="40" cy="40" r="34" class="seAroFg" id="seAroFg" stroke-dasharray="213.6" stroke-dashoffset="192"/><text class="seAroN" id="seAroN" x="40" y="41" text-anchor="middle" dominant-baseline="central">0/' + n + '</text><path class="seCheck" d="M27 41 L36 50 L54 31"/></svg><b id="seGuardTxt">Guardando…</b><small id="seGuardSub">' + n + (n === 1 ? ' gasto' : ' gastos') + ' · ' + peso(total()) + '</small></div>';
       botones.innerHTML = "";
       const aro = $("seAroFg");
-      let sinConexion = false;
+      let sinConexion = false, flujoViejo = false;
       try{
         for(const { p, g } of lista){
           $("seGuardTxt").textContent = "Guardando " + (k + 1) + " de " + n + "…";
           /* la categoría dice en qué se fue la plata (comer afuera = Salidas; entradas, juegos, parqueadero = Salidas Ema)
              y «Salida: Con Ema» la suma a esta salida completa, sin mezclarla */
-          const dato = { tipo: "Gasto", concepto: g.c.trim(), categoria: ES_COMIDA.test(g.c) ? "Salidas" : "Salidas Ema", salida: "Con Ema", monto: g.m, fecha: g.fp || fecha, nota: "" };
+          const dato = { tipo: "Gasto", concepto: g.c.trim(), categoria: ES_COMIDA.test(g.c) ? "Salidas" : "Salidas Ema", salida: "Con Ema", monto: g.m, fecha: g.fp || fecha, nota: "", medio: g.medio === "efectivo" ? "efectivo" : "digital" };
           if(g.fp && g.fp !== fecha) dato.fechaSalida = fecha;   // pagado antes: el gasto queda en el día en que se pagó, pero hace parte de esta salida
           const l = p.lugar.trim();
-          if(l){ const c = conocido(l); if(c) dato.lugar = c; else { dato.lugar = l; if(!p.nuevoEnviado){ dato.puntuacion = p.puntuacion || null; dato.comentario = p.comentario.trim(); } } }
+          if(l){ const c = conocido(l); dato.lugar = c || l;
+            const lid = p.lugarId || (c && (SalidasEma.lugares().find(x => x.nombre === c) || {}).id) || "";   // con el id, n8n no busca el lugar ni lo crea otra vez
+            if(lid) dato.lugarId = lid;
+            else if(!c && !p.nuevoEnviado){ dato.puntuacion = p.puntuacion || null; dato.comentario = p.comentario.trim(); } }
           if(!g.cid) g.cid = Date.now().toString(36) + Math.random().toString(36).slice(2, 8);   // el mismo en cada reintento: n8n no lo duplica
           const r = await Cola.post(MOVIMIENTO_URL, { method: "POST", body: JSON.stringify(Object.assign({ token: MERCADO_TOKEN, forzar: true, colaId: g.cid }, dato)) }, true);
           const j = await r.json().catch(() => ({}));
-          if(!r.ok || j.ok === false) throw new Error(j.error || "No se pudo guardar");
+          if((!r.ok || j.ok === false) && j.error !== "repetido") throw new Error(j.error || "No se pudo guardar");   // «repetido»: ya había llegado y se perdió la respuesta
           if(j.enCola) sinConexion = true;
+          else if(dato.medio === "efectivo" && j.medio !== "efectivo") flujoViejo = true;   // n8n viejo: lo guardó como digital
+          if(j.lugarId) p.lugarId = j.lugarId;   // el lugar ya existe en Notion: los siguientes gastos van con su id
           if(l && !conocido(l)) p.nuevoEnviado = true;
           g.hecho = true; k++;
           aro.style.strokeDashoffset = String(213.6 * (1 - Math.max(k / n, .1)));
           const nTxt = $("seAroN"); if(nTxt) nTxt.textContent = k + "/" + n;
         }
         scrim.querySelector(".seGuardando").classList.add("listo");
-        $("seGuardTxt").textContent = "¡Salida guardada!";
+        $("seGuardTxt").textContent = ag ? "¡Listo, quedó sumado!" : "¡Salida guardada!";
         $("seGuardSub").textContent = sinConexion ? "Quedó en el celular · se envía cuando el PC esté prendido" : paradas.length + (paradas.length === 1 ? " lugar" : " lugares") + " · " + peso(total());
+        if(flujoViejo) avisoOk("Ojo", "Lo pagado en efectivo quedó como digital: falta actualizar el flujo «movimiento-nuevo» en n8n.");
         if(document.body.classList.contains("mode-ema")) setTimeout(() => SalidasEma.refresh(), 300); else SalidasEma.precarga();
         setTimeout(cierra, REDUCED ? 600 : 1500);
       }catch(e){
@@ -7080,7 +7190,7 @@ const SalidaEmaForm = (function(){
       }
     }
 
-    ir("lugar", 1);
+    ir(ag ? "elige" : "lugar", 1);
   }
   document.getElementById("emaView").addEventListener("click", e => { if(e.target.closest(".emaMas")) abrir(); });
   return { abrir };
@@ -7814,7 +7924,7 @@ const Cola = (function(){
       if(enOrden && lee().length) throw new Error("en orden");
       return await fetch(url, Object.assign({}, opts, { body, signal: AbortSignal.timeout ? AbortSignal.timeout(15000) : undefined }));
     }catch(e){
-      const c = lee(); c.push({ url, body, t: Date.now(), resumen: (cuerpo.concepto || "Registro") + (cuerpo.monto ? " · $" + Math.round(cuerpo.monto).toLocaleString("es-CO") : "") }); escribe(c);
+      const c = lee(); c.push({ url, body, t: Date.now(), resumen: (cuerpo.concepto || "Registro") + (cuerpo.monto ? " · $" + Math.round(cuerpo.monto).toLocaleString("es-CO") : "") + (cuerpo.medio === "efectivo" ? " · efectivo" : "") }); escribe(c);
       return new Response(JSON.stringify({ ok: true, enCola: true }), { status: 200, headers: { "Content-Type": "application/json" } });
     }
   }

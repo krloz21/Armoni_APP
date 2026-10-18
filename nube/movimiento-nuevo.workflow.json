@@ -20,7 +20,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// Valida lo que manda Armoni y lo deja listo para Notion\nconst TOKEN = 'mercado-7d41c2a9e05b';\nconst CAT_GASTO = ['Alimentación', 'Salidas', 'Salidas Ema', 'Hogar', 'Carro', 'Hijo', 'Salud', 'Tarjetas', 'Ahorro', 'Otros'];   // Servicios se registra solo\nconst CAT_INGRESO = ['Hogar', 'Alimentación', 'Salidas', 'Ahorro', 'Otros'];   // Ahorro como ingreso = plata que se sacó del ahorro\nconst AUTOMATICOS = /arriendo|jard[ií]n|cuota\\s+(del\\s+)?(carro|cr[eé]dito)/i;\n\nlet b = $input.first().json.body;\nif (typeof b === 'string') { try { b = JSON.parse(b); } catch (e) { b = {}; } }\nb = b || {};\n\nconst falla = (error) => [{ json: { ok: false, error } }];\n\nif (b.token !== TOKEN) return falla('token');\n// registros que esperaron sin conexión: cada uno trae un código; si ya llegó antes, no se guarda dos veces\nconst colaId = String(b.colaId || '').slice(0, 40);\nif (colaId) {\n  const sd = $getWorkflowStaticData('global'); sd.cola = sd.cola || {};\n  if (sd.cola[colaId]) return falla('repetido');\n  sd.cola[colaId] = Date.now();\n  const ks = Object.keys(sd.cola); if (ks.length > 2000) ks.slice(0, ks.length - 2000).forEach(k => delete sd.cola[k]);\n}\nconst tipo = String(b.tipo || '');\nif (tipo !== 'Gasto' && tipo !== 'Ingreso') return falla('tipo');\nconst concepto = String(b.concepto || '').trim().slice(0, 80);\nconst categoria = String(b.categoria || '');\nconst fecha = String(b.fecha || '');\nconst monto = Math.round(Number(b.monto));\nconst notas = String(b.nota || b.notas || '').trim().slice(0, 300);\nconst lugar = String(b.lugar || '').trim().slice(0, 80);\nconst lugarId = /^[0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12}$/i.test(String(b.lugarId || '').trim()) ? String(b.lugarId).trim() : '';   // lugar que ya existe en Restaurantes: no se busca ni se crea\nconst punt = Number(b.puntuacion);\nconst puntuacion = punt >= 1 && punt <= 10 ? Math.round(punt * 2) / 2 : null;\nconst comentario = String(b.comentario || '').trim().slice(0, 200);\n// cuántos comieron (solo salidas con lugar): entero de 1 a 30\nconst pers = Math.round(Number(b.personas));\nconst personas = pers >= 1 && pers <= 30 ? pers : null;\n// Salidas Ema: si se pagó otro día (boletas compradas antes), el día en que salieron\n// «Salida»: a qué salida pertenece (la categoría dice en qué se fue la plata; esto dice con quién fue)\nconst salida = ['Con Ema', 'Pareja'].includes(b.salida) ? b.salida : (categoria === 'Salidas Ema' ? 'Con Ema' : '');\nlet fechaSalida = String(b.fechaSalida || '');\nif (!/^\\d{4}-\\d{2}-\\d{2}$/.test(fechaSalida) || fechaSalida === String(b.fecha || '') || salida !== 'Con Ema') fechaSalida = '';\n\nif (!concepto) return falla('concepto');\nif (!(tipo === 'Gasto' ? CAT_GASTO : CAT_INGRESO).includes(categoria)) return falla('categoria');\nif (tipo === 'Gasto' && AUTOMATICOS.test(concepto)) return falla('Eso ya se registra solo desde su aviso');\nif (!/^\\d{4}-\\d{2}-\\d{2}$/.test(fecha)) return falla('fecha');\nif (!(monto > 0) || monto > 1000000000) return falla('monto');\n\nreturn [{ json: { ok: true, tipo, concepto, categoria, fecha, monto, notas, lugar, lugarId, puntuacion, comentario, personas, fechaSalida, salida, forzar: !!b.forzar } }];\n"
+        "jsCode": "// Valida lo que manda Armoni y lo deja listo para Notion\nconst TOKEN = 'mercado-7d41c2a9e05b';\nconst CAT_GASTO = ['Alimentación', 'Salidas', 'Salidas Ema', 'Hogar', 'Carro', 'Hijo', 'Salud', 'Tarjetas', 'Ahorro', 'Otros'];   // Servicios se registra solo\nconst CAT_INGRESO = ['Hogar', 'Alimentación', 'Salidas', 'Ahorro', 'Otros'];   // Ahorro como ingreso = plata que se sacó del ahorro\nconst AUTOMATICOS = /arriendo|jard[ií]n|cuota\\s+(del\\s+)?(carro|cr[eé]dito)/i;\n\nlet b = $input.first().json.body;\nif (typeof b === 'string') { try { b = JSON.parse(b); } catch (e) { b = {}; } }\nb = b || {};\n\nconst falla = (error) => [{ json: { ok: false, error } }];\n\nif (b.token !== TOKEN) return falla('token');\n// registros que esperaron sin conexión: cada uno trae un código; si ya llegó antes, no se guarda dos veces\nconst colaId = String(b.colaId || '').slice(0, 40);\nif (colaId) {\n  const sd = $getWorkflowStaticData('global'); sd.cola = sd.cola || {};\n  if (sd.cola[colaId]) return falla('repetido');\n  sd.cola[colaId] = Date.now();\n  const ks = Object.keys(sd.cola); if (ks.length > 2000) ks.slice(0, ks.length - 2000).forEach(k => delete sd.cola[k]);\n}\nconst tipo = String(b.tipo || '');\nif (tipo !== 'Gasto' && tipo !== 'Ingreso') return falla('tipo');\nconst concepto = String(b.concepto || '').trim().slice(0, 80);\nconst categoria = String(b.categoria || '');\nconst fecha = String(b.fecha || '');\nconst monto = Math.round(Number(b.monto));\nconst notas = String(b.nota || b.notas || '').trim().slice(0, 300);\nconst lugar = String(b.lugar || '').trim().slice(0, 80);\nconst lugarId = /^[0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12}$/i.test(String(b.lugarId || '').trim()) ? String(b.lugarId).trim() : '';   // lugar que ya existe en Restaurantes: no se busca ni se crea\nconst punt = Number(b.puntuacion);\nconst puntuacion = punt >= 1 && punt <= 10 ? Math.round(punt * 2) / 2 : null;\nconst comentario = String(b.comentario || '').trim().slice(0, 200);\n// cuántos comieron (solo salidas con lugar): entero de 1 a 30\nconst pers = Math.round(Number(b.personas));\nconst personas = pers >= 1 && pers <= 30 ? pers : null;\n// Salidas Ema: si se pagó otro día (boletas compradas antes), el día en que salieron\n// «Salida»: a qué salida pertenece (la categoría dice en qué se fue la plata; esto dice con quién fue)\nconst salida = ['Con Ema', 'Pareja'].includes(b.salida) ? b.salida : (categoria === 'Salidas Ema' ? 'Con Ema' : '');\nlet fechaSalida = String(b.fechaSalida || '');\nif (!/^\\d{4}-\\d{2}-\\d{2}$/.test(fechaSalida) || fechaSalida === String(b.fecha || '') || salida !== 'Con Ema') fechaSalida = '';\n\n// «medio»: cómo se pagó. Lo pagado en EFECTIVO no es plata de la cuenta: se guarda con Monto 0 y el valor en «Efectivo»,\n// así no baja el bolsillo para gastar, ni sale en Tu mes ni en Balance, pero sí en la salida con Ema. Sin «medio» = digital (lo de siempre).\nconst medio = String(b.medio || '').toLowerCase() === 'efectivo' && tipo === 'Gasto' ? 'efectivo' : 'digital';\n\nif (!concepto) return falla('concepto');\nif (!(tipo === 'Gasto' ? CAT_GASTO : CAT_INGRESO).includes(categoria)) return falla('categoria');\nif (tipo === 'Gasto' && AUTOMATICOS.test(concepto)) return falla('Eso ya se registra solo desde su aviso');\nif (!/^\\d{4}-\\d{2}-\\d{2}$/.test(fecha)) return falla('fecha');\nif (!(monto > 0) || monto > 1000000000) return falla('monto');\n\nreturn [{ json: { ok: true, tipo, concepto, categoria, fecha, monto, notas, lugar, lugarId, puntuacion, comentario, personas, fechaSalida, salida, medio, forzar: !!b.forzar } }];\n"
       },
       "id": "191f7681-ac7c-44ab-85d5-4f463f80723e",
       "name": "Validar movimiento",
@@ -68,7 +68,7 @@
     {
       "parameters": {
         "respondWith": "json",
-        "responseBody": "={{ { ok: true } }}",
+        "responseBody": "={{ { ok: true, medio: $('Validar movimiento').first().json.medio, lugarId: $('Armar datos').first().json.lugarId || null } }}",
         "options": {
           "responseCode": 200
         }
@@ -180,7 +180,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// Lee una propiedad venga como página completa de Notion (properties) o simplificada de n8n (property_xxx)\nconst clave = (n) => 'property_' + String(n).toLowerCase().replace(/\\s+/g, '_');\nconst txt = (a) => ((a || []).map(t => t.plain_text).join('') || '').trim();\nconst leer = (it, nombre, tipo) => {\n  const pr = it.properties && it.properties[nombre];\n  if (pr) {\n    if (tipo === 'titulo') return txt(pr.title);\n    if (tipo === 'texto') return txt(pr.rich_text);\n    if (tipo === 'numero') return pr.number != null ? pr.number : null;\n    if (tipo === 'fecha') return pr.date && pr.date.start ? pr.date.start.slice(0, 10) : null;\n    if (tipo === 'select') return pr.select ? pr.select.name : (pr.status ? pr.status.name : null);\n    if (tipo === 'relacion') return pr.relation && pr.relation[0] ? pr.relation[0].id : null;\n  }\n  let v = it[clave(nombre)];\n  if (v === undefined && tipo === 'titulo') v = it.name;\n  if (v === undefined || v === null || v === '') return null;\n  if (tipo === 'fecha') { const s = typeof v === 'object' ? (v.start || '') : String(v); return s ? s.slice(0, 10) : null; }\n  if (tipo === 'relacion') { const r = Array.isArray(v) ? v[0] : v; return r ? (typeof r === 'object' ? r.id : String(r)) : null; }\n  if (tipo === 'numero') return typeof v === 'number' ? v : (Number(v) || null);\n  return String(v);\n};\n\nconst v = $('Validar movimiento').first().json;\nconst lugs = $input.all().map(i => i.json).filter(x => x && x.id);\nconst norm = (t) => String(t || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9 ]/g, ' ').replace(/\\s+/g, ' ').trim().split(' ').map(w => w.replace(/s$/, '')).join(' ');\nconst buscado = norm(v.lugar);\n// primero el nombre exacto; si no, que uno contenga al otro como palabras completas (así «Pan» no se confunde con «Pandebono»)\nconst conPalabras = (a, b) => (' ' + a + ' ').includes(' ' + b + ' ');\nconst nombres = lugs.map(l => ({ id: l.id, n: norm(leer(l, 'Nombre', 'titulo')) })).filter(x => x.n);\nlet lugarId = (nombres.find(x => x.n === buscado) || {}).id || null;\nif (!lugarId && buscado.length > 3) {\n  const m = nombres.find(x => x.n.length > 3 && (conPalabras(x.n, buscado) || conPalabras(buscado, x.n)));\n  if (m) lugarId = m.id;\n}\nreturn [{ json: { lugarId, crear: !lugarId, esEma: v.salida === 'Con Ema' || v.categoria === 'Salidas Ema', nombre: v.lugar, puntuacion: v.puntuacion, tienePuntuacion: v.puntuacion != null, comentario: v.comentario || '' } }];\n"
+        "jsCode": "// Lee una propiedad venga como página completa de Notion (properties) o simplificada de n8n (property_xxx)\nconst clave = (n) => 'property_' + String(n).toLowerCase().replace(/\\s+/g, '_');\nconst txt = (a) => ((a || []).map(t => t.plain_text).join('') || '').trim();\nconst leer = (it, nombre, tipo) => {\n  const pr = it.properties && it.properties[nombre];\n  if (pr) {\n    if (tipo === 'titulo') return txt(pr.title);\n    if (tipo === 'texto') return txt(pr.rich_text);\n    if (tipo === 'numero') return pr.number != null ? pr.number : null;\n    if (tipo === 'fecha') return pr.date && pr.date.start ? pr.date.start.slice(0, 10) : null;\n    if (tipo === 'select') return pr.select ? pr.select.name : (pr.status ? pr.status.name : null);\n    if (tipo === 'relacion') return pr.relation && pr.relation[0] ? pr.relation[0].id : null;\n  }\n  let v = it[clave(nombre)];\n  if (v === undefined && tipo === 'titulo') v = it.name;\n  if (v === undefined || v === null || v === '') return null;\n  if (tipo === 'fecha') { const s = typeof v === 'object' ? (v.start || '') : String(v); return s ? s.slice(0, 10) : null; }\n  if (tipo === 'relacion') { const r = Array.isArray(v) ? v[0] : v; return r ? (typeof r === 'object' ? r.id : String(r)) : null; }\n  if (tipo === 'numero') return typeof v === 'number' ? v : (Number(v) || null);\n  return String(v);\n};\n\nconst v = $('Validar movimiento').first().json;\nconst lugs = $input.all().map(i => i.json).filter(x => x && x.id);\nconst norm = (t) => String(t || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9 ]/g, ' ').replace(/\\s+/g, ' ').trim().split(' ').map(w => w.replace(/s$/, '')).join(' ');\nconst buscado = norm(v.lugar);\n// primero el nombre exacto; si no, que uno contenga al otro como palabras completas (así «Pan» no se confunde con «Pandebono»)\nconst conPalabras = (a, b) => (' ' + a + ' ').includes(' ' + b + ' ');\nconst nombres = lugs.map(l => ({ id: l.id, n: norm(leer(l, 'Nombre', 'titulo')) })).filter(x => x.n);\nlet lugarId = (nombres.find(x => x.n === buscado) || {}).id || null;\nif (!lugarId && buscado.length > 3) {\n  const m = nombres.find(x => x.n.length > 3 && (conPalabras(x.n, buscado) || conPalabras(buscado, x.n)));\n  if (m) lugarId = m.id;\n}\n// un lugar que este flujo creó hace poco y que Notion todavía no muestra en la búsqueda (gastos en cola que llegan seguidos)\nif (!lugarId) { const sd = $getWorkflowStaticData('global'); const r = (sd.lugaresNuevos || {})[buscado]; if (r && Date.now() - r.t < 30 * 60000) lugarId = r.id; }\nreturn [{ json: { lugarId, crear: !lugarId, esEma: v.salida === 'Con Ema' || v.categoria === 'Salidas Ema', nombre: v.lugar, puntuacion: v.puntuacion, tienePuntuacion: v.puntuacion != null, comentario: v.comentario || '' } }];\n"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -346,7 +346,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const v = $('Validar movimiento').first().json;\nlet lugarId = v.lugarId || null;\nfor (const n of ['Crear lugar con puntuación', 'Crear lugar sin puntuación', 'Crear restaurante con puntuación', 'Crear restaurante sin puntuación']) {\n  try { const c = $(n).first(); if (c && c.json && c.json.id) { lugarId = c.json.id; break; } } catch (e) {}\n}\nif (!lugarId) { try { const d = $('Decidir lugar').first(); if (d && d.json && d.json.lugarId) lugarId = d.json.lugarId; } catch (e) {} }\nreturn [{ json: { concepto: v.concepto, monto: v.monto, tipo: v.tipo, categoria: v.categoria, fecha: v.fecha, notas: v.notas || '',\n  personas: v.personas != null ? v.personas : (v.categoria === 'Salidas Ema' ? 0 : null), lugarId, tieneLugar: !!lugarId, fechaSalida: v.fechaSalida || '', salida: v.salida || '' } }];\n"
+        "jsCode": "const v = $('Validar movimiento').first().json;\nlet lugarId = v.lugarId || null;\nlet creado = false;\nfor (const n of ['Crear lugar con puntuación', 'Crear lugar sin puntuación', 'Crear restaurante con puntuación', 'Crear restaurante sin puntuación']) {\n  try { const c = $(n).first(); if (c && c.json && c.json.id) { lugarId = c.json.id; creado = true; break; } } catch (e) {}\n}\n// se recuerda 30 min: si llega otro gasto del mismo lugar antes de que Notion lo indexe, no se crea dos veces\nif (creado) {\n  const norm = (t) => String(t || '').toLowerCase().normalize('NFD').replace(/[\\u0300-\\u036f]/g, '').replace(/[^a-z0-9 ]/g, ' ').replace(/\\s+/g, ' ').trim().split(' ').map(w => w.replace(/s$/, '')).join(' ');\n  const sd = $getWorkflowStaticData('global'); sd.lugaresNuevos = sd.lugaresNuevos || {};\n  for (const [k, r] of Object.entries(sd.lugaresNuevos)) if (Date.now() - r.t > 30 * 60000) delete sd.lugaresNuevos[k];\n  sd.lugaresNuevos[norm(v.lugar)] = { id: lugarId, t: Date.now() };\n}\nif (!lugarId) { try { const d = $('Decidir lugar').first(); if (d && d.json && d.json.lugarId) lugarId = d.json.lugarId; } catch (e) {} }\nconst esEfectivo = v.medio === 'efectivo';\n// efectivo: Monto queda en 0 (no toca ninguna suma de la cuenta) y el valor va en «Efectivo»\nreturn [{ json: { concepto: v.concepto, monto: v.monto, tipo: v.tipo, categoria: v.categoria, fecha: v.fecha,\n  notas: esEfectivo ? ('Pagado en efectivo: no sale de la cuenta' + (v.notas ? ' · ' + v.notas : '')).slice(0, 300) : (v.notas || ''),\n  medio: esEfectivo ? 'efectivo' : 'digital', esEfectivo, efectivo: esEfectivo ? v.monto : 0,\n  personas: v.personas != null ? v.personas : (v.categoria === 'Salidas Ema' ? 0 : null), lugarId, tieneLugar: !!lugarId, fechaSalida: v.fechaSalida || '', salida: v.salida || '' } }];\n"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -696,7 +696,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// Lee una propiedad venga como página completa de Notion (properties) o simplificada de n8n (property_xxx)\nconst clave = (n) => 'property_' + String(n).toLowerCase().replace(/\\s+/g, '_');\nconst txt = (a) => ((a || []).map(t => t.plain_text).join('') || '').trim();\nconst leer = (it, nombre, tipo) => {\n  const pr = it.properties && it.properties[nombre];\n  if (pr) {\n    if (tipo === 'titulo') return txt(pr.title);\n    if (tipo === 'texto') return txt(pr.rich_text);\n    if (tipo === 'numero') return pr.number != null ? pr.number : null;\n    if (tipo === 'fecha') return pr.date && pr.date.start ? pr.date.start.slice(0, 10) : null;\n    if (tipo === 'select') return pr.select ? pr.select.name : (pr.status ? pr.status.name : null);\n    if (tipo === 'relacion') return pr.relation && pr.relation[0] ? pr.relation[0].id : null;\n  }\n  let v = it[clave(nombre)];\n  if (v === undefined && tipo === 'titulo') v = it.name;\n  if (v === undefined || v === null || v === '') return null;\n  if (tipo === 'fecha') { const s = typeof v === 'object' ? (v.start || '') : String(v); return s ? s.slice(0, 10) : null; }\n  if (tipo === 'relacion') { const r = Array.isArray(v) ? v[0] : v; return r ? (typeof r === 'object' ? r.id : String(r)) : null; }\n  if (tipo === 'numero') return typeof v === 'number' ? v : (Number(v) || null);\n  return String(v);\n};\n\n// ¿Ese pago ya estaba anotado? (mismo tipo, casi el mismo valor y fechas cercanas: por ejemplo, llegó solo desde el correo de PSE)\nconst v = $('Validar movimiento').first().json;\nif (v.forzar) return [{ json: { repetido: false } }];\nconst dia = f => new Date(f + 'T12:00:00').getTime();\nconst cerca = $input.all().map(i => i.json).filter(x => x && x.id).map(x => ({\n  concepto: leer(x, 'Concepto', 'titulo') || '', monto: leer(x, 'Monto', 'numero') || 0, tipo: leer(x, 'Tipo', 'select') || '',\n  fecha: leer(x, 'Fecha', 'fecha') || '', categoria: leer(x, 'Categoría', 'select') || '', notas: leer(x, 'Notas', 'texto') || ''\n})).filter(x => x.tipo === v.tipo && x.fecha && Math.abs(x.monto - v.monto) <= Math.max(100, v.monto * 0.005) && Math.abs(dia(x.fecha) - dia(v.fecha)) <= 4 * 864e5);\nif (!cerca.length) return [{ json: { repetido: false } }];\nconst x = cerca.sort((a, b) => Math.abs(dia(a.fecha) - dia(v.fecha)) - Math.abs(dia(b.fecha) - dia(v.fecha)))[0];\nconst automatico = /pse|correo|gmail|autom|bancolombia|nequi|nu\\b/i.test(x.notas + ' ' + x.concepto);\nreturn [{ json: { repetido: true, parecido: { concepto: x.concepto, monto: x.monto, fecha: x.fecha, categoria: x.categoria, automatico } } }];\n"
+        "jsCode": "// Lee una propiedad venga como página completa de Notion (properties) o simplificada de n8n (property_xxx)\nconst clave = (n) => 'property_' + String(n).toLowerCase().replace(/\\s+/g, '_');\nconst txt = (a) => ((a || []).map(t => t.plain_text).join('') || '').trim();\nconst leer = (it, nombre, tipo) => {\n  const pr = it.properties && it.properties[nombre];\n  if (pr) {\n    if (tipo === 'titulo') return txt(pr.title);\n    if (tipo === 'texto') return txt(pr.rich_text);\n    if (tipo === 'numero') return pr.number != null ? pr.number : null;\n    if (tipo === 'fecha') return pr.date && pr.date.start ? pr.date.start.slice(0, 10) : null;\n    if (tipo === 'select') return pr.select ? pr.select.name : (pr.status ? pr.status.name : null);\n    if (tipo === 'relacion') return pr.relation && pr.relation[0] ? pr.relation[0].id : null;\n  }\n  let v = it[clave(nombre)];\n  if (v === undefined && tipo === 'titulo') v = it.name;\n  if (v === undefined || v === null || v === '') return null;\n  if (tipo === 'fecha') { const s = typeof v === 'object' ? (v.start || '') : String(v); return s ? s.slice(0, 10) : null; }\n  if (tipo === 'relacion') { const r = Array.isArray(v) ? v[0] : v; return r ? (typeof r === 'object' ? r.id : String(r)) : null; }\n  if (tipo === 'numero') return typeof v === 'number' ? v : (Number(v) || null);\n  return String(v);\n};\n\n// ¿Ese pago ya estaba anotado? (mismo tipo, casi el mismo valor y fechas cercanas: por ejemplo, llegó solo desde el correo de PSE)\nconst v = $('Validar movimiento').first().json;\nif (v.forzar || v.medio === 'efectivo') return [{ json: { repetido: false } }];   // el efectivo nunca llega por PSE: no se compara\nconst dia = f => new Date(f + 'T12:00:00').getTime();\nconst cerca = $input.all().map(i => i.json).filter(x => x && x.id).map(x => ({\n  concepto: leer(x, 'Concepto', 'titulo') || '', monto: leer(x, 'Monto', 'numero') || 0, tipo: leer(x, 'Tipo', 'select') || '',\n  fecha: leer(x, 'Fecha', 'fecha') || '', categoria: leer(x, 'Categoría', 'select') || '', notas: leer(x, 'Notas', 'texto') || ''\n})).filter(x => x.tipo === v.tipo && x.fecha && Math.abs(x.monto - v.monto) <= Math.max(100, v.monto * 0.005) && Math.abs(dia(x.fecha) - dia(v.fecha)) <= 4 * 864e5);\nif (!cerca.length) return [{ json: { repetido: false } }];\nconst x = cerca.sort((a, b) => Math.abs(dia(a.fecha) - dia(v.fecha)) - Math.abs(dia(b.fecha) - dia(v.fecha)))[0];\nconst automatico = /pse|correo|gmail|autom|bancolombia|nequi|nu\\b/i.test(x.notas + ' ' + x.concepto);\nreturn [{ json: { repetido: true, parecido: { concepto: x.concepto, monto: x.monto, fecha: x.fecha, categoria: x.categoria, automatico } } }];\n"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -909,6 +909,204 @@
           "name": "Notion account"
         }
       }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "ef1",
+              "leftValue": "={{ $json.esEfectivo }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -19176,
+        3872
+      ],
+      "id": "cb40a210-6270-40aa-b143-c0c8834840da",
+      "name": "¿Es efectivo?"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c5",
+              "leftValue": "={{ $json.tieneLugar }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -19056,
+        3744
+      ],
+      "id": "738842ca-5a92-4392-9a3d-93eede82a154",
+      "name": "¿Tiene lugar? (efectivo)"
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "dataSourceId": {
+          "__rl": true,
+          "value": "6c565ad1-789f-41c7-8ca2-8bcfb9098a68",
+          "mode": "list",
+          "cachedResultName": "Movimientos",
+          "cachedResultUrl": "https://app.notion.com/p/922bb9e4e3d648feab56d6b2d75be29d"
+        },
+        "title": "={{ $json.concepto }}",
+        "propertiesUi": {
+          "propertyValues": [
+            {
+              "key": "Concepto|title",
+              "title": "={{ $json.concepto }}"
+            },
+            {
+              "key": "Monto|number",
+              "numberValue": "={{ 0 }}"
+            },
+            {
+              "key": "Efectivo|number",
+              "numberValue": "={{ $json.efectivo }}"
+            },
+            {
+              "key": "Tipo|select",
+              "selectValue": "={{ $json.tipo }}"
+            },
+            {
+              "key": "Categoría|select",
+              "selectValue": "={{ $json.categoria }}"
+            },
+            {
+              "key": "Fecha|date",
+              "includeTime": false,
+              "date": "={{ $json.fecha }}"
+            },
+            {
+              "key": "Notas|rich_text",
+              "textContent": "={{ $json.notas }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 3,
+      "position": [
+        -18816,
+        3872
+      ],
+      "id": "e408a6ee-06cb-4cff-ae2b-66dca10b476e",
+      "name": "Crear efectivo",
+      "credentials": {
+        "notionApi": {
+          "id": "pgk4uKXwaEEnuyRO",
+          "name": "Notion account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "dataSourceId": {
+          "__rl": true,
+          "value": "6c565ad1-789f-41c7-8ca2-8bcfb9098a68",
+          "mode": "list",
+          "cachedResultName": "Movimientos",
+          "cachedResultUrl": "https://app.notion.com/p/922bb9e4e3d648feab56d6b2d75be29d"
+        },
+        "title": "={{ $json.concepto }}",
+        "propertiesUi": {
+          "propertyValues": [
+            {
+              "key": "Concepto|title",
+              "title": "={{ $json.concepto }}"
+            },
+            {
+              "key": "Monto|number",
+              "numberValue": "={{ 0 }}"
+            },
+            {
+              "key": "Efectivo|number",
+              "numberValue": "={{ $json.efectivo }}"
+            },
+            {
+              "key": "Tipo|select",
+              "selectValue": "={{ $json.tipo }}"
+            },
+            {
+              "key": "Categoría|select",
+              "selectValue": "={{ $json.categoria }}"
+            },
+            {
+              "key": "Fecha|date",
+              "includeTime": false,
+              "date": "={{ $json.fecha }}"
+            },
+            {
+              "key": "Notas|rich_text",
+              "textContent": "={{ $json.notas }}"
+            },
+            {
+              "key": "Restaurante|relation",
+              "relationValue": "={{ [$json.lugarId] }}"
+            },
+            {
+              "key": "Personas|number",
+              "numberValue": "={{ $json.personas }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 3,
+      "position": [
+        -18816,
+        3648
+      ],
+      "id": "085be30b-582c-42b2-9c29-99737ca859d8",
+      "name": "Crear efectivo con lugar",
+      "credentials": {
+        "notionApi": {
+          "id": "pgk4uKXwaEEnuyRO",
+          "name": "Notion account"
+        }
+      }
     }
   ],
   "pinData": {},
@@ -1066,7 +1264,7 @@
       "main": [
         [
           {
-            "node": "¿Tiene lugar?",
+            "node": "¿Es efectivo?",
             "type": "main",
             "index": 0
           }
@@ -1263,6 +1461,64 @@
         [
           {
             "node": "Armar datos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Es efectivo?": {
+      "main": [
+        [
+          {
+            "node": "¿Tiene lugar? (efectivo)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "¿Tiene lugar?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Tiene lugar? (efectivo)": {
+      "main": [
+        [
+          {
+            "node": "Crear efectivo con lugar",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Crear efectivo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Crear efectivo con lugar": {
+      "main": [
+        [
+          {
+            "node": "¿Salieron otro día?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Crear efectivo": {
+      "main": [
+        [
+          {
+            "node": "¿Salieron otro día?",
             "type": "main",
             "index": 0
           }
