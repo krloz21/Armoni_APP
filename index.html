@@ -2193,6 +2193,64 @@ body.mode-mercar:has(#mkStage .mcTop) #thread{ -webkit-mask-image:none; mask-ima
 .emaMas:active .mas{ transform:scale(.9); }
 .emaVacio{ margin:14px 0 0; font-size:.86rem; color:var(--dim); text-align:center; }
 .emaLugares{ display:flex; flex-direction:column; gap:10px; }
+/* Lugares con Ema: podio con los 3 primeros, chips para ordenar y el resto plegado (toca uno para ver su ficha) */
+.elCab{ display:flex; align-items:baseline; justify-content:space-between; gap:10px; margin:22px 4px 10px; }
+.elCab .mkSec{ margin:0; }
+.elCab small{ font-size:.74rem; color:var(--dim); }
+.elOrd{ display:flex; gap:6px; margin:0 -16px 14px; padding:0 16px 2px; overflow-x:auto; scrollbar-width:none; }
+.elOrd::-webkit-scrollbar{ display:none; }
+.elOrd button{ flex:none; min-height:36px; padding:0 14px; border-radius:18px; border:1px solid var(--line); background:rgba(var(--ink),.03); font:inherit; font-size:.8rem; font-weight:600; color:var(--ghost); cursor:pointer; white-space:nowrap; transition:background .25s, color .25s, border-color .25s; }
+.elOrd button[aria-pressed="true"]{ color:#1a1208; border-color:transparent; background:linear-gradient(140deg,#ffb066,#ff8a50); box-shadow:0 6px 16px -8px rgba(255,138,80,.8); }
+.elPodio{ display:grid; grid-template-columns:repeat(var(--n,3), minmax(0,1fr)); align-items:end; gap:8px; }
+.elPodio.n1{ width:62%; margin:0 auto; }
+.elPod{ display:flex; flex-direction:column; min-width:0; padding:0; border:0; background:none; font:inherit; color:inherit; text-align:center; cursor:pointer; -webkit-tap-highlight-color:transparent; }
+.elAnim .elPod{ animation:elSube .65s cubic-bezier(.16,1,.3,1) backwards; animation-delay:calc(var(--i,0) * 110ms); }
+@keyframes elSube{ from{ opacity:0; transform:translateY(22px); } to{ opacity:1; transform:none; } }
+.elPodCard{ position:relative; display:flex; flex-direction:column; align-items:center; gap:3px; padding:14px 6px 10px; border-radius:18px 18px 6px 6px; border:1px solid var(--line); border-bottom:0; background:linear-gradient(180deg, rgba(var(--ink),.07), rgba(var(--ink),.02)); transition:transform .2s var(--ease-spring); }
+.elPod:active .elPodCard{ transform:scale(.96); }
+.elPod:focus-visible{ outline:2px solid var(--cyan); outline-offset:3px; border-radius:18px; }
+.elNom{ font-size:.8rem; font-weight:600; line-height:1.25; color:var(--strong); display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; min-height:2.5em; overflow-wrap:anywhere; }
+.elMet{ font-size:1.3rem; font-weight:600; letter-spacing:-.02em; line-height:1.15; font-variant-numeric:tabular-nums; color:var(--strong); }
+.elMet small{ margin-left:2px; font-size:.64rem; font-weight:500; letter-spacing:0; color:var(--dim); }
+.elMet.top{ background:linear-gradient(180deg, var(--num-a), var(--cyan)); -webkit-background-clip:text; background-clip:text; color:transparent; }
+.elSub{ font-size:.68rem; color:var(--dim); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%; }
+.elBase{ display:grid; place-items:center; border-radius:6px 6px 14px 14px; font-size:1.05rem; font-weight:700; color:rgba(var(--ink),.75); }
+.elPod.r1 .elBase{ height:58px; color:#1a1208; background:linear-gradient(170deg,#ffc58a,#ff8a50); box-shadow:0 16px 30px -16px rgba(255,138,80,.95), inset 0 1px 0 rgba(255,255,255,.4); }
+.elPod.r2 .elBase{ height:40px; background:linear-gradient(170deg, rgba(var(--ink),.26), rgba(var(--ink),.09)); }
+.elPod.r3 .elBase{ height:28px; background:linear-gradient(170deg, rgba(214,150,105,.6), rgba(214,150,105,.18)); }
+.elPod.r1 .elPodCard{ border-color:rgba(255,176,102,.45); background:linear-gradient(180deg, rgba(255,138,80,.18), rgba(255,138,80,.04)); }
+.elCor{ position:absolute; top:-13px; left:50%; transform:translateX(-50%); font-size:1.05rem; line-height:1; }
+.elResto{ display:grid; grid-template-columns:minmax(0,1fr); gap:6px; margin-top:12px; }
+.elFila{ display:flex; align-items:center; gap:12px; width:100%; min-height:54px; padding:8px 14px 8px 10px; border-radius:14px; border:1px solid var(--line); background:var(--panel); font:inherit; color:inherit; text-align:left; cursor:pointer; animation:elFilaIn .4s cubic-bezier(.16,1,.3,1) backwards; animation-delay:calc(var(--i,0) * 30ms); }
+.elFila:active{ transform:scale(.985); }
+@keyframes elFilaIn{ from{ opacity:0; transform:translateY(-6px); } to{ opacity:1; transform:none; } }
+.elRk{ flex:none; width:28px; height:28px; border-radius:9px; display:grid; place-items:center; font-size:.76rem; font-weight:700; color:var(--dim); background:rgba(var(--ink),.07); }
+.elFN{ flex:1; min-width:0; }
+.elFN b{ display:block; font-size:.9rem; font-weight:600; color:var(--strong); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.elFN small{ display:block; margin-top:1px; font-size:.74rem; color:var(--dim); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.elFM{ flex:none; font-weight:600; font-variant-numeric:tabular-nums; color:var(--strong); }
+.elFM small{ margin-left:2px; font-size:.66rem; font-weight:500; color:var(--dim); }
+.elVer{ display:flex; align-items:center; justify-content:center; gap:10px; width:100%; min-height:48px; margin-top:12px; border-radius:14px; border:1px dashed rgba(var(--ink),.2); background:none; font:inherit; font-size:.86rem; font-weight:600; color:var(--ghost); cursor:pointer; }
+.elVer svg{ width:18px; height:18px; transition:transform .3s var(--ease-out); }
+.elVer[aria-expanded="true"] svg{ transform:rotate(180deg); }
+.elCaras{ display:inline-flex; }
+.elCaras i{ width:24px; height:24px; margin-left:-7px; border-radius:50%; display:grid; place-items:center; font-style:normal; font-size:.66rem; font-weight:700; color:var(--strong); background:rgba(var(--ink),.14); border:2px solid var(--void); }
+.elCaras i:first-child{ margin-left:0; }
+.elFicha{ text-align:left; }
+.elFTop{ display:flex; align-items:center; gap:12px; }
+.elFTop > div{ flex:1; min-width:0; }
+.elFTop small{ display:block; font-size:.7rem; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:#ffb066; }
+.elFTop h3{ text-align:left; margin:2px 0 0; font-size:1.1rem; line-height:1.25; overflow-wrap:anywhere; }
+.elFEmo{ flex:none; width:44px; height:44px; border-radius:14px; display:grid; place-items:center; font-size:1.35rem; background:rgba(255,138,80,.14); }
+.elFTop .restNum{ font-size:1.6rem; white-space:nowrap; }
+.elSinNota{ flex:none; font-size:.76rem; color:var(--dim); }
+.elFStats{ display:grid; grid-template-columns:repeat(3,1fr); gap:6px; margin-top:16px; }
+.elFStats div{ padding:10px 6px; border-radius:14px; background:rgba(var(--ink),.05); text-align:center; min-width:0; }
+.elFStats b{ display:block; font-size:.95rem; font-weight:600; color:var(--strong); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.elFStats small{ display:block; margin-top:2px; font-size:.7rem; color:var(--dim); }
+.elFNota{ margin:14px 0 0; padding:12px 14px; border-radius:14px; background:rgba(255,138,80,.08); font-size:.88rem; line-height:1.45; color:var(--ghost); }
+.elFicha .pgRow .pgSi{ background:linear-gradient(140deg,#ffb066,#ff7a4d); color:#1a1208; }
+@media (prefers-reduced-motion:reduce){ .elAnim .elPod, .elFila{ animation:none; } .elPodCard, .elVer svg{ transition:none; } }
 /* ── Balance ── */
 .balPest{ display:grid; grid-template-columns:1fr 1fr; gap:4px; padding:4px; margin:0 0 14px; border-radius:16px; border:1px solid var(--line); background:var(--panel); }
 .balPest button{ padding:10px 0; border:0; border-radius:12px; background:none; color:var(--ghost); font:inherit; font-size:.9rem; font-weight:700; cursor:pointer; transition:background .25s ease, color .25s ease; }
@@ -2313,6 +2371,72 @@ body.mode-mercar:has(#mkStage .mcTop) #thread{ -webkit-mask-image:none; mask-ima
 .ddTabs button[aria-selected="true"] b{ background:rgba(26,18,8,.28); }
 .ddNota{ margin:0 4px 12px; font-size:.82rem; color:var(--ghost); }
 .ddVacio{ margin:0; font-size:.84rem; color:var(--dim); }
+/* aprendizaje como red neuronal (ux1) */
+.ddVista{ display:inline-flex; gap:2px; margin:0 0 10px; padding:3px; border-radius:12px; background:rgba(var(--ink),.06); }
+.ddVista button{ display:inline-flex; align-items:center; gap:6px; min-height:34px; padding:0 12px; border:0; border-radius:9px; background:none; font:inherit; font-size:.78rem; font-weight:700; color:var(--dim); cursor:pointer; }
+.ddVista button svg{ width:15px; height:15px; }
+.ddVista button[aria-pressed="true"]{ color:#1a1208; background:linear-gradient(140deg,#ffb066,#ff8a50); }
+.ddRed{ margin:0 0 4px; }
+.ddRedCaja{ position:relative; border-radius:24px; border:1px solid var(--line); background:radial-gradient(120% 90% at 50% 48%, rgba(255,138,80,.10), rgba(var(--blue-rgb),.05) 45%, transparent 75%), var(--panel); overflow:hidden; }
+.ddRedCaja::before{ content:""; position:absolute; inset:0; background-image:radial-gradient(rgba(var(--ink),.07) 1px, transparent 1.2px); background-size:18px 18px; pointer-events:none; -webkit-mask-image:radial-gradient(circle at 50% 50%, #000 30%, transparent 75%); mask-image:radial-gradient(circle at 50% 50%, #000 30%, transparent 75%); }
+.ddRedSvg{ position:relative; display:block; width:100%; height:auto; touch-action:manipulation; -webkit-user-select:none; user-select:none; }
+.ddRedSvg [role="button"]{ cursor:pointer; outline:none; }
+.ddRedSvg .eje{ fill:none; stroke:var(--c); stroke-opacity:.35; stroke-width:1.6; }
+.ddRedSvg .ln{ fill:none; stroke:var(--c); stroke-opacity:.28; stroke-width:1; transition:stroke-opacity .3s ease, stroke-width .3s ease; }
+.ddRedSvg .cruz{ fill:none; stroke:rgba(var(--ink),.5); stroke-opacity:.16; stroke-width:.8; stroke-dasharray:2 3; transition:stroke-opacity .3s ease; }
+.ddRedSvg .pulso{ fill:none; stroke:var(--c); stroke-width:2.2; stroke-linecap:round; stroke-dasharray:7 93; stroke-dashoffset:100; opacity:0; animation:ddPulso var(--t, 4.6s) linear infinite; animation-delay:var(--d, 0s); }
+.ddRedSvg .pulso.nuevo{ stroke-width:3; --t:2.2s; }
+@keyframes ddPulso{ 0%{ stroke-dashoffset:100; opacity:0; } 8%{ opacity:.95; } 85%{ opacity:.95; } 100%{ stroke-dashoffset:0; opacity:0; } }
+.ddRedSvg .nd .esc, .ddRedSvg .hub .esc, .ddRedSvg .core .esc{ transform-box:fill-box; transform-origin:center; transition:transform .3s var(--ease-spring, ease), opacity .3s ease; }
+.ddRedSvg .nd .hit{ fill:transparent; }
+.ddRedSvg .nd .dot{ fill:var(--c); stroke:var(--void); stroke-width:1.5; }
+.ddRedSvg .nd .halo{ fill:var(--c); opacity:.16; }
+.ddRedSvg .nd .anillo{ fill:none; stroke:var(--c); stroke-width:1.5; opacity:0; transform-box:fill-box; transform-origin:center; }
+.ddRedSvg .nd.nuevo .anillo{ animation:ddOnda 1.8s ease-out 3; }
+@keyframes ddOnda{ 0%{ opacity:.9; transform:scale(.6); } 100%{ opacity:0; transform:scale(2.6); } }
+.ddRedSvg .nd.nuevo .dot{ stroke:#fff; stroke-width:1.8; }
+.ddRedSvg .nd:focus-visible .halo, .ddRedSvg .hub:focus-visible .disco{ stroke:#fff; stroke-width:2; opacity:1; }
+.ddRedSvg .nd.sel .esc{ transform:scale(1.55); }
+.ddRedSvg .nd.sel .halo{ opacity:.35; }
+.ddRedSvg .hub .disco{ fill:var(--void); stroke:var(--c); stroke-width:2; }
+.ddRedSvg .hub .brillo{ fill:var(--c); opacity:.18; }
+.ddRedSvg .hub text{ font:700 10px "Schibsted Grotesk", system-ui, sans-serif; fill:var(--c); text-anchor:middle; dominant-baseline:central; }
+.ddRedSvg .hub .et{ font-size:10.5px; fill:var(--white); paint-order:stroke; stroke:var(--void); stroke-width:3.5px; stroke-linejoin:round; }
+.ddRedSvg .hub.on .disco{ fill:var(--c); }
+.ddRedSvg .hub.on .num{ fill:var(--void); }
+.ddRedSvg .core .aura{ fill:url(#ddAura); animation:ddLate 4.8s ease-in-out infinite; transform-box:fill-box; transform-origin:center; }
+@keyframes ddLate{ 0%,100%{ transform:scale(.92); opacity:.75; } 50%{ transform:scale(1.08); opacity:1; } }
+.ddRedSvg .core .nucleo{ fill:url(#ddNucleo); stroke:rgba(255,255,255,.5); stroke-width:1; }
+.ddRedSvg .core text{ font:800 9.5px "Schibsted Grotesk", system-ui, sans-serif; fill:#1a1208; text-anchor:middle; dominant-baseline:central; letter-spacing:.02em; }
+.ddRedSvg.filtra .nd:not(.si) .esc{ opacity:.16; }
+.ddRedSvg.filtra .ln:not(.si), .ddRedSvg.filtra .pulso:not(.si){ stroke-opacity:.05; opacity:.05; }
+.ddRedSvg.filtra .cruz:not(.si){ stroke-opacity:.03; }
+.ddRedSvg.filtra .cruz.si{ stroke-opacity:.5; }
+.ddRedSvg.filtra .hub:not(.on):not(.si) .esc{ opacity:.35; }
+.ddRedSvg .ln.sel{ stroke-opacity:.95; stroke-width:2; }
+.ddRedSvg .cruz.sel{ stroke-opacity:.7; stroke:var(--c); }
+.ddRedSvg.entra .nd .esc{ animation:ddAparece .5s var(--ease-spring, ease) both; animation-delay:calc(var(--i) * 18ms + .25s); }
+.ddRedSvg.entra .hub .esc{ animation:ddAparece .5s var(--ease-spring, ease) both; animation-delay:calc(var(--i) * 60ms + .05s); }
+.ddRedSvg.entra .ln, .ddRedSvg.entra .eje, .ddRedSvg.entra .cruz{ animation:ddTraza .9s ease both; animation-delay:.15s; }
+@keyframes ddAparece{ from{ opacity:0; transform:scale(.2); } }
+@keyframes ddTraza{ from{ opacity:0; } }
+.ddRed.quieta *, .ddRed.quieta *::before{ animation-play-state:paused !important; }
+.ddRedCuenta{ display:flex; flex-wrap:wrap; gap:4px 10px; align-items:center; justify-content:center; margin:8px 4px 10px; font-size:.76rem; color:var(--dim); text-align:center; }
+.ddRedCuenta .nv{ color:#ffcf99; font-weight:700; }
+.ddRedDet{ min-height:20px; }
+.ddRedDet .ddHecho{ border:1px solid rgba(255,176,102,.35); background:linear-gradient(150deg, rgba(255,138,80,.10), rgba(var(--ink),.04)); animation:ddEntra .35s ease both; opacity:0; transform:translateY(6px); }
+.ddRedDet .ddHecho.ddFijo{ cursor:default; }
+.ddHecho .ddDet button, .ddHecho .ddSeg button{ width:auto; height:auto; min-height:38px; margin:0; padding:0 14px; border-radius:12px; border:1px solid var(--line); color:var(--white); font-size:.8rem; }
+.ddHecho .ddDet .ddCorr{ display:inline-flex; align-items:center; margin:2px 0 8px; }
+.ddHecho .ddSeg .pel{ border-color:rgba(255,99,99,.55); background:rgba(255,99,99,.12); color:#ff9a9a; }
+.ddRedTm{ display:flex; flex-wrap:wrap; gap:6px; margin:0 2px 8px; }
+.ddRedTm span{ display:inline-flex; align-items:center; gap:6px; padding:3px 10px; border-radius:20px; font-size:.7rem; font-weight:700; color:var(--white); background:rgba(var(--ink),.07); }
+.ddRedTm span i{ width:8px; height:8px; border-radius:50%; background:var(--c); }
+.ddRedPista{ margin:0; padding:12px 14px; border-radius:16px; border:1px dashed var(--line); font-size:.82rem; color:var(--dim); text-align:center; }
+.ddRed.vacio .ddRedCaja{ padding-bottom:16px; }
+.ddRed.vacio p{ position:relative; margin:-6px 20px 0; font-size:.86rem; color:var(--ghost); text-align:center; }
+.ddRedSvg .orb{ fill:none; stroke:rgba(var(--ink),.14); stroke-dasharray:3 5; }
+@media (prefers-reduced-motion:reduce){ .ddRedSvg *, .ddRedDet .ddHecho{ animation:none !important; transition:none !important; } .ddRedDet .ddHecho{ opacity:1; transform:none; } .ddRedSvg .pulso{ display:none; } }
 .ddDesp{ margin-bottom:10px; border-radius:18px; border:1px solid var(--line); background:var(--panel); overflow:hidden; }
 .ddDesp summary{ display:flex; align-items:center; gap:10px; min-height:52px; padding:0 16px; list-style:none; cursor:pointer; font-weight:600; color:var(--strong); }
 .ddDesp summary::-webkit-details-marker{ display:none; }
@@ -3567,7 +3691,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-18.232";
+const APP_VERSION = "2026-10-18.233";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -6102,6 +6226,59 @@ const SalidasEma = (function(){
     });
     return act;
   };
+  /* Lugares con Ema: podio de los 3 primeros según el orden elegido, el resto plegado; tocar abre la ficha del lugar */
+  const KLO = "armoni.ema.lugOrden";
+  const LUG_ORD = [["nota", "Mejor nota"], ["reciente", "Recientes"], ["visitas", "Más visitados"]];
+  let lugOrden = (() => { try{ const o = localStorage.getItem(KLO); return LUG_ORD.some(x => x[0] === o) ? o : "nota"; }catch{ return "nota"; } })(), lugTodos = false, lugVista = [];
+  const nota10 = n => String(Math.round(n * 10) / 10).replace(".", ",");
+  const visTx = l => (l.visitas || 0) + (l.visitas === 1 ? " visita" : " visitas");
+  const ordenaLug = (L, o) => L.slice().sort((a, b) => {
+    const r = (a.ultima ? diasDesde(a.ultima) : 9999) - (b.ultima ? diasDesde(b.ultima) : 9999);
+    const n = (b.puntuacion || 0) - (a.puntuacion || 0), v = (b.visitas || 0) - (a.visitas || 0);
+    return o === "nota" ? n || v || r : o === "visitas" ? v || n || r : r || n;
+  });
+  const cuando = l => { if(!l.ultima) return { v: "–", u: "" }; const d = diasDesde(l.ultima); return d === 0 ? { v: "Hoy", u: "" } : d === 1 ? { v: "Ayer", u: "" } : d < 14 ? { v: d, u: "días" } : d < 60 ? { v: Math.round(d / 7), u: "sem" } : { v: Math.round(d / 30), u: "meses" }; };
+  const metrica = (l, o) => o === "nota" ? (l.puntuacion ? { v: nota10(l.puntuacion), u: "/10" } : { v: "–", u: "sin nota" })
+    : o === "visitas" ? { v: l.visitas || 0, u: l.visitas === 1 ? "visita" : "visitas" } : cuando(l);
+  const podSub = (l, o) => o === "nota" ? visTx(l) : o === "visitas" ? (l.puntuacion ? nota10(l.puntuacion) + "/10" : l.ultima ? hace(diasDesde(l.ultima)) : "") : (l.puntuacion ? nota10(l.puntuacion) + "/10" : visTx(l));
+  const filaSub = l => [visTx(l), l.promedio ? "~" + peso(l.promedio) : "", l.ultima ? hace(diasDesde(l.ultima)) : ""].filter(Boolean).join(" · ");
+  const metHTML = m => esc(m.v) + (m.u ? '<small>' + esc(m.u) + '</small>' : '');
+  function lugInner(anim){
+    const L = lugVista = ordenaLug(lugares(), lugOrden), top = L.slice(0, 3), resto = L.slice(3);
+    const orden = top.length === 3 ? [1, 0, 2] : top.length === 2 ? [1, 0] : [0];
+    const pod = orden.map(i => { const l = top[i], m = metrica(l, lugOrden);
+      return '<button type="button" class="elPod r' + (i + 1) + '" data-lugar="' + i + '" style="--i:' + (2 - i) + '" aria-label="Puesto ' + (i + 1) + ': ' + esc(l.nombre) + ', ' + esc(m.v + " " + m.u) + '. Ver ficha">' +
+        '<span class="elPodCard">' + (i === 0 && L.length > 1 ? '<span class="elCor" aria-hidden="true">👑</span>' : '') + '<b class="elNom">' + esc(l.nombre) + '</b>' +
+        '<span class="elMet' + (lugOrden === "nota" && l.puntuacion >= 8.5 ? ' top' : '') + '">' + metHTML(m) + '</span><small class="elSub">' + esc(podSub(l, lugOrden)) + '</small></span>' +
+        '<span class="elBase" aria-hidden="true">' + (i + 1) + '</span></button>'; }).join("");
+    const filas = resto.map((l, j) => '<button type="button" class="elFila" data-lugar="' + (j + 3) + '" style="--i:' + Math.min(j, 12) + '"><span class="elRk" aria-hidden="true">' + (j + 4) + '</span><span class="elFN"><b>' + esc(l.nombre) + '</b><small>' + esc(filaSub(l)) + '</small></span><span class="elFM">' + metHTML(metrica(l, lugOrden)) + '</span></button>').join("");
+    const caras = resto.slice(0, 3).map(l => '<i>' + esc(String(l.nombre || "?").trim().charAt(0).toUpperCase()) + '</i>').join("");
+    return '<div class="elCab"><div class="mkSec">Lugares con Ema</div><small>' + L.length + (L.length === 1 ? ' lugar' : ' lugares') + '</small></div>' +
+      (L.length > 1 ? '<div class="elOrd" role="group" aria-label="Ordenar los lugares">' + LUG_ORD.map(([k, t]) => '<button type="button" data-lord="' + k + '" aria-pressed="' + (k === lugOrden) + '">' + t + '</button>').join("") + '</div>' : '') +
+      '<div class="elPodio n' + top.length + (anim ? ' elAnim' : '') + '" style="--n:' + top.length + '">' + pod + '</div>' +
+      (resto.length ? (lugTodos ? '<div class="elResto" id="elResto">' + filas + '</div>' : '') +
+        '<button type="button" class="elVer" data-lmas aria-expanded="' + lugTodos + '"' + (lugTodos ? ' aria-controls="elResto"' : '') + '>' + (lugTodos ? 'Ver menos' : '<span class="elCaras" aria-hidden="true">' + caras + '</span>Ver ' + (resto.length === 1 ? 'el otro lugar' : 'los otros ' + resto.length + ' lugares')) +
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>' : '');
+  }
+  const pintaLug = anim => { const box = document.getElementById("emaLugBox"); if(box) box.innerHTML = lugInner(anim); };
+  function fichaLugar(l, desde){
+    if(!l || document.querySelector(".elScrim")) return;
+    const pos = lugVista.indexOf(l), stat = (v, t) => '<div><b>' + v + '</b><small>' + t + '</small></div>';
+    const scrim = document.createElement("div"); scrim.className = "pgScrim elScrim";
+    scrim.innerHTML = '<div class="inWrap"><div class="pgCard inCard elFicha" role="dialog" aria-modal="true" aria-labelledby="elFT">' +
+      '<div class="elFTop"><span class="elFEmo" aria-hidden="true">' + (l.clase === "Restaurante" ? "🍽️" : "🎈") + '</span><div><small>' + (l.clase === "Restaurante" ? "Restaurante" : "Plan con Ema") + (pos >= 0 && lugVista.length > 1 ? ' · puesto ' + (pos + 1) + ' de ' + lugVista.length : '') + '</small><h3 id="elFT">' + esc(l.nombre) + '</h3></div>' +
+      (l.puntuacion ? '<span class="restNum' + (l.puntuacion >= 8.5 ? ' top' : l.puntuacion < 6 ? ' low' : '') + '" aria-label="' + l.puntuacion + ' de 10">' + nota10(l.puntuacion) + '<small>/10</small></span>' : '<span class="elSinNota">sin nota</span>') + '</div>' +
+      '<div class="elFStats">' + stat(l.visitas || 0, l.visitas === 1 ? "visita" : "visitas") + stat(l.promedio ? peso(l.promedio) : "–", "por salida") + stat(l.ultima ? esc(fechaCorta(l.ultima)) : "–", l.ultima ? hace(diasDesde(l.ultima)) : "última vez") + '</div>' +
+      (l.notas ? '<p class="elFNota">“' + esc(l.notas) + '”</p>' : '') +
+      '<div class="pgRow"><button type="button" class="pgSi" data-cierra>Listo</button></div></div></div>';
+    document.body.appendChild(scrim);
+    requestAnimationFrame(() => scrim.classList.add("on"));
+    const cierra = () => { document.removeEventListener("keydown", tecla); scrim.classList.remove("on"); setTimeout(() => scrim.remove(), 340); if(desde && desde.isConnected) desde.focus({ preventScroll: true }); };
+    const tecla = e => { if(e.key === "Escape") cierra(); };
+    document.addEventListener("keydown", tecla);
+    scrim.addEventListener("click", e => { if(e.target.closest("[data-cierra]") || !e.target.closest(".pgCard")) cierra(); });
+    setTimeout(() => { const b = scrim.querySelector("[data-cierra]"); if(b) b.focus({ preventScroll: true }); }, 60);
+  }
   function pinta(anim){
     const ms = (datos && datos.meses) || [];
     if(!datos){ stage.innerHTML = ""; return; }
@@ -6129,13 +6306,15 @@ const SalidasEma = (function(){
         (ult.length ? '<div class="emaBarras">' + barras + '</div>' : '') +
       '</div>' +
       (lug.length
-        ? '<div class="mkSec">Lugares con Ema</div><div class="emaLugares">' + lug.map(l =>
-            '<div class="emaLugar"><div class="elTop"><b>' + esc(l.nombre) + '</b>' + (l.puntuacion ? '<span class="restNum' + (l.puntuacion >= 8.5 ? ' top' : l.puntuacion < 6 ? ' low' : '') + '" aria-label="' + l.puntuacion + ' de 10">' + String(Math.round(l.puntuacion * 10) / 10).replace(".", ",") + '<small>/10</small></span>' : '') + '</div>' +
-            '<small>' + (l.visitas || 0) + (l.visitas === 1 ? ' visita' : ' visitas') + (l.promedio ? ' · ~' + peso(l.promedio) + ' por salida' : '') + (l.ultima ? ' · ' + hace(diasDesde(l.ultima)) : '') + '</small>' +
-            (l.notas ? '<p>' + esc(l.notas) + '</p>' : '') + '</div>').join("") + '</div>'
+        ? '<div class="elBox" id="emaLugBox">' + lugInner(true) + '</div>'
         : '<p class="gEmpty" style="margin-top:18px">Cuando registres una salida con su lugar (por ejemplo Pance), aparece aquí con cuánto gastan y qué tal les fue.</p>');
   }
   stage.addEventListener("click", e => {
+    const lo = e.target.closest("[data-lord]");
+    if(lo){ if(lo.dataset.lord !== lugOrden){ lugOrden = lo.dataset.lord; try{ localStorage.setItem(KLO, lugOrden); }catch{} pintaLug(true); } return; }
+    if(e.target.closest("[data-lmas]")){ lugTodos = !lugTodos; pintaLug(false); const v = stage.querySelector(".elVer"); if(v) v.focus({ preventScroll: true }); return; }
+    const lg = e.target.closest("[data-lugar]");
+    if(lg){ fichaLugar(lugVista[+lg.dataset.lugar], lg); return; }
     const ag = e.target.closest("[data-agregar]");
     if(ag){ SalidaEmaForm.abrir({ fecha: ag.dataset.agregar, agregar: true, salida: salidaDe(ag.dataset.agregar) }); return; }   // misma fecha; pregunta si es algo que faltó en un lugar ya anotado o un lugar nuevo
     const c = e.target.closest(".emaDiaChip"); if(!c || c.classList.contains("on")) return;
@@ -8188,6 +8367,8 @@ const Preguntas = (function(){
   const fechaC = f => { try{ return new Date(f + "T12:00:00").toLocaleDateString("es-CO", { day: "numeric", month: "short" }).replace(".", ""); }catch{ return f; } };
   const KD = "armoni.dudas", KS = "armoni.saber";
   let pestana = "dudas", busca = "", tema = "todo";
+  let vistaSaber = (() => { try{ return localStorage.getItem("armoni.saber.vista") || "red"; }catch{ return "red"; } })();
+  let redSel = null, redNuevos = null, redUlt = 0, redIO = null;
   const abiertosMas = new Set();   // los «Más información» abiertos no se cierran cuando la pantalla se repinta
   let revision = (() => { try{ return JSON.parse(localStorage.getItem("armoni.revision")); }catch{ return null; } })();
   /* temas para ordenar lo que Armoni sabe (se deducen del texto de cada recuerdo) */
@@ -8200,6 +8381,55 @@ const Preguntas = (function(){
     ["comida", "Comida y salidas", /restaurante|salida|almuerzo|comida|mercado|hamburgues|cine|domicilio/i]
   ];
   const sinTilde = t => String(t || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  /* ── la red de lo aprendido: colores y nombres cortos por tema, y un acomodo estable (sale igual cada vez) ── */
+  const RED_C = { familia: "#ff8fb1", carro: "#ffb066", ingresos: "#6fe0b5", ahorro: "#7ee8ff", favores: "#c6a6ff", comida: "#ffd166", otros: "#a8b2c2" };
+  const RED_N = { familia: "Familia", carro: "Carro", ingresos: "Ingresos", ahorro: "Ahorro", favores: "Favores", comida: "Comida", otros: "Otros" };
+  const hashT = t => { let h = 2166136261; for(const c of String(t)) h = Math.imul(h ^ c.charCodeAt(0), 16777619); return h >>> 0; };
+  function redPlano(lista){
+    const W = 360, H = 340, cx = 180, cy = 168;
+    const hs = TEMAS.map(x => x[0]).concat("otros").map(k => ({ k, n: lista.filter(t => temasDe(t)[0] === k).length, todos: lista.filter(t => temasDe(t).includes(k)).length })).filter(h => h.todos > 0);
+    const R = hs.length <= 1 ? 66 : hs.length === 2 ? 78 : 96;
+    hs.forEach((h, i) => { h.i = i; h.a = -Math.PI / 2 + i * 2 * Math.PI / hs.length + (hs.length === 2 ? Math.PI / 2 : 0); h.x = cx + R * Math.cos(h.a); h.y = cy + R * Math.sin(h.a) * .92; });
+    const porK = Object.fromEntries(hs.map(h => [h.k, h]));
+    const ns = lista.map((t, i) => { const tm = temasDe(t), h = porK[tm[0]], s = hashT(t), a = h.a + ((s % 1000) / 1000 - .5) * 2.4, d = 34 + (s >>> 10) % 30; return { t, i, tm, h, x: h.x + d * Math.cos(a), y: h.y + d * Math.sin(a) }; });
+    const fijos = [{ x: cx, y: cy, r: 44 }].concat(hs.map(h => ({ x: h.x, y: h.y, r: 31 })));
+    const minD = lista.length > 28 ? 21 : 26;
+    for(let it = 0; it < 260; it++) for(let a = 0; a < ns.length; a++){
+      const p = ns[a], dx = p.x - p.h.x, dy = p.y - p.h.y, d = Math.hypot(dx, dy) || .01, L = 32 + 7 * Math.sqrt(p.h.n), f = (d - L) / d * .05;
+      p.x -= dx * f; p.y -= dy * f;
+      for(let b = a + 1; b < ns.length; b++){ const q = ns[b], ex = q.x - p.x, ey = q.y - p.y, e = Math.hypot(ex, ey) || .01; if(e < minD){ const m = (minD - e) / e / 2; p.x -= ex * m; p.y -= ey * m; q.x += ex * m; q.y += ey * m; } }
+      fijos.forEach(o => { const ex = p.x - o.x, ey = p.y - o.y, e = Math.hypot(ex, ey) || .01; if(e < o.r){ const m = (o.r - e) / e; p.x += ex * m; p.y += ey * m; } });
+      p.x = Math.max(13, Math.min(W - 13, p.x)); p.y = Math.max(13, Math.min(H - 13, p.y));
+    }
+    /* el lienzo se recorta al alto que ocupa la red (con pocas cosas no queda un cuadro vacío) */
+    const ys = ns.map(n => [n.y - 14, n.y + 14]).flat().concat(hs.map(h => [h.y - 22, h.y + 34]).flat(), [cy - 44, cy + 44]);
+    const y0 = Math.max(0, Math.min(...ys) - 8), y1 = Math.min(H, Math.max(...ys) + 8);
+    const alto = Math.max(200, y1 - y0);
+    return { W, H, cx, cy, hs, ns, porK, y0: y0 - (alto - (y1 - y0)) / 2, alto };
+  }
+  function redSVG(P, nuevos, quieto){
+    const f = v => v.toFixed(1);
+    const curva = (a, b, k) => { const mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2, dx = b.x - a.x, dy = b.y - a.y; return "M" + f(a.x) + " " + f(a.y) + "Q" + f(mx - dy * k) + " " + f(my + dx * k) + " " + f(b.x) + " " + f(b.y); };
+    const C = { x: P.cx, y: P.cy };
+    const ejes = P.hs.map(h => '<path class="eje" d="' + curva(C, h, .06) + '" style="--c:' + RED_C[h.k] + '"/>').join("");
+    const lns = P.ns.map(n => '<path class="ln" data-i="' + n.i + '" d="' + curva(n.h, n, .12) + '" style="--c:' + RED_C[n.h.k] + '"/>' +
+      n.tm.slice(1).filter(k => P.porK[k]).map(k => '<path class="cruz" data-i="' + n.i + '" data-tm="' + k + '" d="' + curva(n, P.porK[k], .18) + '" style="--c:' + RED_C[k] + '"/>').join("")).join("");
+    let pul = "";
+    if(!quieto){
+      pul += P.hs.map((h, i) => '<path class="pulso eje" pathLength="100" d="' + curva(C, h, .06) + '" style="--c:' + RED_C[h.k] + ';--d:' + (-(i * 1.3) % 4.6).toFixed(2) + 's"/>').join("");
+      const paso = Math.max(1, Math.ceil(P.ns.length / 10));
+      pul += P.ns.filter(n => nuevos.has(n.t) || n.i % paso === 0).slice(0, 16).map(n => '<path class="pulso' + (nuevos.has(n.t) ? ' nuevo' : '') + '" data-i="' + n.i + '" pathLength="100" d="' + curva(n.h, n, .12) + '" style="--c:' + RED_C[n.h.k] + ';--d:' + (-((hashT(n.t) % 46) / 10)).toFixed(1) + 's;--t:' + (4.2 + (hashT(n.t) % 9) / 10).toFixed(1) + 's"/>').join("");
+    }
+    const nds = P.ns.map(n => '<g class="nd' + (nuevos.has(n.t) ? ' nuevo' : '') + '" data-nd="' + n.i + '" role="button" tabindex="0" aria-pressed="false" aria-label="' + esc(RED_N[n.tm[0]] + ': ' + n.t) + '" transform="translate(' + f(n.x) + ' ' + f(n.y) + ')" style="--c:' + RED_C[n.h.k] + ';--i:' + n.i + '">' +
+      '<circle class="hit" r="13"/><g class="esc"><circle class="halo" r="9"/><circle class="anillo" r="6"/><circle class="dot" r="' + (n.tm.length > 1 ? 5.6 : 4.8) + '"/></g></g>').join("");
+    const hubs = P.hs.map(h => '<g class="hub" data-hub="' + h.k + '" role="button" tabindex="0" aria-pressed="false" aria-label="' + esc("Tema " + RED_N[h.k] + ", " + h.todos + (h.todos === 1 ? " cosa" : " cosas") + ". Toca para filtrar") + '" transform="translate(' + f(h.x) + ' ' + f(h.y) + ')" style="--c:' + RED_C[h.k] + ';--i:' + h.i + '">' +
+      '<g class="esc"><circle class="brillo" r="20"/><circle class="disco" r="13.5"/><text class="num">' + h.todos + '</text><text class="et" y="25">' + RED_N[h.k] + '</text></g></g>').join("");
+    const core = '<g class="core" role="button" tabindex="0" aria-label="Armoni. Toca para ver todos los temas" transform="translate(' + P.cx + ' ' + P.cy + ')"><g class="esc"><circle class="aura" r="40"/><circle class="nucleo" r="22"/><text>Armoni</text></g></g>';
+    return '<svg class="ddRedSvg" viewBox="0 ' + f(P.y0) + ' ' + P.W + ' ' + f(P.alto) + '" role="group" aria-label="Red de lo que Armoni ha aprendido: ' + P.ns.length + ' cosas en ' + P.hs.length + ' temas">' +
+      '<defs><radialGradient id="ddAura"><stop offset="0" stop-color="#ffb066" stop-opacity=".55"/><stop offset=".55" stop-color="#ff8a50" stop-opacity=".16"/><stop offset="1" stop-color="#ff8a50" stop-opacity="0"/></radialGradient>' +
+      '<radialGradient id="ddNucleo" cx=".38" cy=".32"><stop offset="0" stop-color="#ffe0b8"/><stop offset=".6" stop-color="#ffb066"/><stop offset="1" stop-color="#ff7a3c"/></radialGradient></defs>' +
+      '<g>' + ejes + lns + '</g><g>' + pul + '</g>' + core + '<g>' + hubs + '</g><g>' + nds + '</g></svg>';
+  }
   const temasDe = t => { const r = TEMAS.filter(x => x[2].test(t)).map(x => x[0]); return r.length ? r : ["otros"]; };
   /* lo que Armoni ha aprendido de nuestras respuestas (copia en el celular por si se reinstala el flujo) */
   let saber = (() => { try{ return JSON.parse(localStorage.getItem(KS)) || []; }catch{ return []; } })();
@@ -8373,7 +8603,9 @@ const Preguntas = (function(){
     const chips = [["todo", "Todo"]].concat(TEMAS.map(x => [x[0], x[1]]), [["otros", "Otros"]]).filter(([k]) => k === "todo" || cuentaTema(k) > 0)
       .map(([k, n]) => '<button type="button" class="ddChip' + (tema === k ? ' on' : '') + '" data-tm="' + k + '">' + n + ' <b>' + cuentaTema(k) + '</b></button>').join("");
     const sab = '<div class="ddBusca"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4-4"/></svg><input id="ddQ" type="search" inputmode="search" enterkeyhint="search" autocomplete="off" placeholder="Buscar en lo que sabe…" value="' + esc(busca) + '"></div>' +
-      '<div class="ddChips">' + chips + '</div><div class="ddSaber" id="ddSaberL"></div>';
+      '<div class="ddChips">' + chips + '</div>' +
+      '<div class="ddVista" role="group" aria-label="Cómo ver lo aprendido"><button type="button" data-vs="red" aria-pressed="' + (vistaSaber === "red") + '"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="2.6"/><circle cx="5" cy="6" r="1.8"/><circle cx="19" cy="6" r="1.8"/><circle cx="6" cy="19" r="1.8"/><circle cx="18.5" cy="18" r="1.8"/><path d="M10 10.6 6.4 7.2M14 10.6l3.6-3.4M10.2 14 7.2 17.6M14 13.8l3.2 3"/></svg>Red</button><button type="button" data-vs="lista" aria-pressed="' + (vistaSaber === "lista") + '"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/></svg>Lista</button></div>' +
+      '<div class="ddRed" id="ddRed"></div><div class="ddSaber" id="ddSaberL"></div>';
     const hec = H.map(q => '<div class="ddHecha"><b>' + esc(limpia(q)) + '</b><em>Tú: ' + esc(q.respuesta) + '</em><button type="button" class="ddCorr" data-c="' + esc(q.id) + '">Corregir</button></div>').join("");
     const desp = (t, n, cont, abierto) => '<details class="ddDesp"' + (abierto ? ' open' : '') + '><summary><span>' + t + '</span><i>' + n + '</i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></summary><div class="ddDespIn">' + cont + '</div></details>';
     const tabs = '<div class="ddTabs" role="tablist"><button type="button" role="tab" data-t="dudas" aria-selected="' + (pestana === "dudas") + '">Dudas' + (A.length ? ' <b>' + A.length + '</b>' : '') + '</button><button type="button" role="tab" data-t="aprendizaje" aria-selected="' + (pestana === "aprendizaje") + '">Aprendizaje' + (saber.length ? ' <b>' + saber.length + '</b>' : '') + '</button></div>';
@@ -8382,26 +8614,90 @@ const Preguntas = (function(){
       (A.length ? '<div class="ddLista">' + A.map((q, i) => '<article class="ddCard" style="--i:' + Math.min(i, 8) + '">' + (q.tipo === "par" ? '<span class="ddTag">Dos registros parecidos</span>' : q.tipo === "lugar" ? '<span class="ddTag">Falta el lugar</span>' : q.tipo === "caso" ? '<span class="ddTag">Caso abierto</span>' : q.saltada ? '<span class="ddTag dif">La dejaste para después</span>' : '<span class="ddTag">Por resolver</span>') + ((q.hilo || []).length > 1 ? ' <span class="ddTag dif">En conversación</span>' : '') + '<h3>' + esc(limpia(q)) + '</h3>' + movs(q) + masInfo(q) + '<button type="button" class="ddBtn" data-id="' + esc(q.id) + '">' + (q.tipo === "lugar" || q.tipo === "par" ? "Completar" : q.tipo === "caso" || (q.hilo || []).length > 1 ? "Hablar con Armoni" : "Responder") + '</button></article>').join("") + '</div>' : '') +
       '<button type="button" class="ddBuscar" id="ddBuscar">Buscar dudas nuevas</button>' + revisionHTML()
       :
-      '<p class="ddNota">Lo que Armoni ha aprendido de tus respuestas. Toca una para ver tu respuesta, cambiarla o borrarla con la ✕.</p>' +
-      (saber.length ? sab : '<p class="ddVacio">Todavía no ha aprendido nada.</p>'));
+      '<p class="ddNota">' + (saber.length ? 'Lo que Armoni ha aprendido de tus respuestas, conectado por temas. Toca un punto para ver tu respuesta, cambiarla o borrarla con la ✕.' : 'Aquí verás lo que Armoni aprende de tus respuestas, conectado por temas.') + '</p>' +
+      (saber.length ? sab : '<div class="ddRed vacio"><div class="ddRedCaja"><svg class="ddRedSvg" viewBox="0 0 360 230" role="img" aria-label="Armoni todavía no ha aprendido nada"><defs><radialGradient id="ddAura"><stop offset="0" stop-color="#ffb066" stop-opacity=".55"/><stop offset=".55" stop-color="#ff8a50" stop-opacity=".16"/><stop offset="1" stop-color="#ff8a50" stop-opacity="0"/></radialGradient><radialGradient id="ddNucleo" cx=".38" cy=".32"><stop offset="0" stop-color="#ffe0b8"/><stop offset=".6" stop-color="#ffb066"/><stop offset="1" stop-color="#ff7a3c"/></radialGradient></defs><circle class="orb" cx="180" cy="110" r="58"/><circle class="orb" cx="180" cy="110" r="92"/><g class="core" transform="translate(180 110)"><g class="esc"><circle class="aura" r="40"/><circle class="nucleo" r="22"/><text>Armoni</text></g></g></svg><p>Todavía no ha aprendido nada. Cada vez que respondas una duda, aquí aparece una conexión nueva.</p></div></div>'));
     cuerpo.querySelectorAll(".ddMas[data-k]").forEach(d => d.addEventListener("toggle", () => { if(d.open) abiertosMas.add(d.dataset.k); else abiertosMas.delete(d.dataset.k); }));
     cuerpo.querySelectorAll("[data-t]").forEach(b => b.addEventListener("click", () => { pestana = b.dataset.t; pinta(); }));
     cuerpo.querySelectorAll(".ddCorr").forEach(b => b.addEventListener("click", () => abre(b.dataset.c)));
     cuerpo.querySelectorAll(".ddBtn").forEach(b => b.addEventListener("click", () => { const q = A.find(x => x.id === b.dataset.id); if(q && q.tipo === "lugar") abreLugar(q); else if(q && q.tipo === "par") abrePar(q); else abre(b.dataset.id); }));
     /* lista de lo que sabe: se filtra por tema y por lo que escribas, sin repintar todo (el cursor se queda en el buscador) */
+    /* la red: se arma una vez por cada versión de lo aprendido; tema, búsqueda y punto elegido solo cambian clases */
+    const pintaRed = (Rd, pasa, fila) => {
+      const firma = saber.join("\u0001");
+      if(redSel != null && !saber.includes(redSel)) redSel = null;
+      if(Rd.dataset.firma !== firma || !Rd.querySelector("svg")){
+        if(!redNuevos){
+          redNuevos = new Set();
+          let vistos = null; try{ vistos = JSON.parse(localStorage.getItem("armoni.saber.vistos")); }catch{}
+          if(Array.isArray(vistos)) saber.forEach(t => { if(!vistos.includes(t)) redNuevos.add(t); });
+        } else saber.forEach(t => { if(Rd.dataset.firma && !Rd.dataset.firma.split("\u0001").includes(t)) redNuevos.add(t); });
+        try{ localStorage.setItem("armoni.saber.vistos", JSON.stringify(saber.slice(-400))); }catch{}
+        const P = redPlano(saber), entra = !REDUCED && Date.now() - redUlt > 4000; redUlt = Date.now();
+        Rd._P = P;
+        Rd.innerHTML = '<div class="ddRedCaja">' + redSVG(P, redNuevos, REDUCED) + '</div><p class="ddRedCuenta" id="ddRedCuenta" aria-live="polite"></p><div class="ddRedDet" id="ddRedDet"></div>';
+        Rd.dataset.firma = firma;
+        const svg = Rd.querySelector("svg"); if(entra) svg.classList.add("entra");
+        if(redIO) redIO.disconnect();
+        if("IntersectionObserver" in window){ redIO = new IntersectionObserver(es => es.forEach(x => Rd.classList.toggle("quieta", !x.isIntersecting))); redIO.observe(svg); }
+      }
+      const P = Rd._P, svg = Rd.querySelector("svg"), q = sinTilde(busca).trim();
+      svg.classList.toggle("filtra", tema !== "todo" || !!q || redSel != null);
+      const si = P.ns.map(n => pasa(n.t) && (redSel == null || redSel === n.t));
+      svg.querySelectorAll("[data-nd]").forEach(g => { const i = +g.dataset.nd, sel = P.ns[i].t === redSel; g.classList.toggle("si", si[i] || sel); g.classList.toggle("sel", sel); g.setAttribute("aria-pressed", String(sel)); });
+      svg.querySelectorAll(".ln[data-i], .pulso[data-i]").forEach(l => { const i = +l.dataset.i; l.classList.toggle("si", si[i]); l.classList.toggle("sel", P.ns[i].t === redSel); });
+      svg.querySelectorAll(".cruz").forEach(l => { const i = +l.dataset.i; l.classList.toggle("si", si[i] && (tema === "todo" || l.dataset.tm === tema)); l.classList.toggle("sel", P.ns[i].t === redSel); });
+      svg.querySelectorAll("[data-hub]").forEach(h => { const on = tema === h.dataset.hub; h.classList.toggle("on", on); h.setAttribute("aria-pressed", String(on)); h.classList.toggle("si", P.ns.some((n, i) => si[i] && n.tm.includes(h.dataset.hub))); });
+      const visibles = si.filter(Boolean).length, nv = saber.filter(t => redNuevos.has(t)).length;
+      Rd.querySelector("#ddRedCuenta").innerHTML = '<span>' + saber.length + (saber.length === 1 ? ' cosa aprendida' : ' cosas aprendidas') + ' · ' + P.hs.length + (P.hs.length === 1 ? ' tema' : ' temas') + '</span>' +
+        ((tema !== "todo" || q) && redSel == null ? '<span>· mostrando ' + visibles + '</span>' : '') + (nv ? '<span class="nv">✨ ' + nv + (nv === 1 ? ' nueva' : ' nuevas') + '</span>' : '');
+      const det = Rd.querySelector("#ddRedDet");
+      if(det.dataset.s !== (redSel || "")){
+        det.dataset.s = redSel || "";
+        det.innerHTML = redSel != null
+          ? '<div class="ddRedTm">' + temasDe(redSel).map(k => '<span style="--c:' + RED_C[k] + '"><i></i>' + RED_N[k] + '</span>').join("") + '</div>' + fila(redSel, true)
+          : '<p class="ddRedPista">Toca un punto para ver qué aprendió y de cuál respuesta. Los círculos con número son los temas: tócalos para filtrar.</p>';
+        det.querySelectorAll(".ddCorr").forEach(b => b.addEventListener("click", () => abre(b.dataset.c)));
+      }
+      if(!Rd._ok){
+        Rd._ok = true;
+        const toca = el => {
+          const n = el.closest("[data-nd]"), h = el.closest("[data-hub]"), c = el.closest(".core");
+          if(n){ const t = Rd._P.ns[+n.dataset.nd].t; redSel = redSel === t ? null : t; }
+          else if(h){ tema = tema === h.dataset.hub ? "todo" : h.dataset.hub; redSel = null; }
+          else if(c){ tema = "todo"; redSel = null; }
+          else return false;
+          cuerpo.querySelectorAll("[data-tm]").forEach(x => x.classList.toggle("on", x.dataset.tm === tema));
+          cuerpo._pintaSaber();
+          if(n && redSel != null){ const d = Rd.querySelector("#ddRedDet"); if(d && d.getBoundingClientRect().bottom > innerHeight) d.scrollIntoView({ behavior: REDUCED ? "auto" : "smooth", block: "nearest" }); }
+          return true;
+        };
+        Rd.addEventListener("click", e => { if(e.target.closest("svg")) toca(e.target); });
+        Rd.addEventListener("keydown", e => { if((e.key === "Enter" || e.key === " ") && e.target.closest && e.target.closest("svg [role=button]")){ e.preventDefault(); toca(e.target); } });
+      }
+    };
     const pintaSaber = () => {
       const L = cuerpo.querySelector("#ddSaberL"); if(!L) return;
       const q = sinTilde(busca).trim();
-      const v = saber.filter(t => (tema === "todo" || temasDe(t).includes(tema)) && (!q || sinTilde(t).includes(q)));
+      const pasa = t => (tema === "todo" || temasDe(t).includes(tema)) && (!q || sinTilde(t).includes(q));
+      const v = saber.filter(pasa);
       const rel = t => { const w = new Set(sinTilde(t).split(/[^a-z0-9ñ]+/).filter(x => x.length >= 4)); return H.filter(h => { const hw = sinTilde((h.respuesta || "") + " " + (h.pregunta || "")).split(/[^a-z0-9ñ]+/).filter(x => x.length >= 4); return hw.filter(x => w.has(x)).length >= 2; }).slice(0, 2); };
-      L.innerHTML = v.length ? v.map(t => { const rs = rel(t); return '<div class="ddHecho" data-s="' + esc(t) + '"><span>' + esc(t) + '</span><button type="button" class="ddX" data-olv="' + esc(t) + '" aria-label="Borrar esto">✕</button>' +
+      const fila = (t, fijo) => { const rs = rel(t); return '<div class="ddHecho' + (fijo ? ' on ddFijo' : '') + '" data-s="' + esc(t) + '"><span>' + esc(t) + '</span><button type="button" class="ddX" data-olv="' + esc(t) + '" aria-label="Borrar esto">✕</button>' +
         '<div class="ddDet">' + (rs.length ? rs.map(h => '<small>Cuando te preguntó: «' + esc(limpia(h)) + '»</small><em>Tú respondiste: ' + esc(h.respuesta) + '</em><button type="button" class="ddCorr" data-c="' + esc(h.id) + '">Corregir esa respuesta</button>').join("") : '<small>Armoni lo aprendió de tus respuestas.</small>') +
         '<div class="ddEd" hidden><textarea maxlength="240" aria-label="Lo que Armoni sabe">' + esc(t) + '</textarea><div class="ddAcc"><button type="button" data-guarda>Guardar cambio</button><button type="button" data-cancela>Cancelar</button></div></div>' +
-        '<div class="ddAcc"><button type="button" data-edita>Modificar</button></div></div></div>'; }).join("") :
+        '<div class="ddAcc"><button type="button" data-edita>Modificar</button></div></div></div>'; };
+      const Rd = cuerpo.querySelector("#ddRed");
+      if(Rd && vistaSaber === "red"){ L.hidden = true; L.innerHTML = ""; Rd.hidden = false; pintaRed(Rd, pasa, fila); return; }
+      if(Rd){ Rd.hidden = true; if(redIO){ redIO.disconnect(); redIO = null; } Rd.innerHTML = ""; Rd.dataset.firma = ""; }
+      L.hidden = false;
+      L.innerHTML = v.length ? v.map(t => fila(t, false)).join("") :
         '<p class="ddVacio">' + (q ? 'No encontré nada con «' + esc(busca.trim()) + '».' : 'No hay nada en este tema.') + '</p>';
       L.querySelectorAll(".ddCorr").forEach(b => b.addEventListener("click", () => abre(b.dataset.c)));
     };
     pintaSaber(); cuerpo._pintaSaber = pintaSaber;
+    cuerpo.querySelectorAll("[data-vs]").forEach(b => b.addEventListener("click", () => {
+      vistaSaber = b.dataset.vs; try{ localStorage.setItem("armoni.saber.vista", vistaSaber); }catch{}
+      cuerpo.querySelectorAll("[data-vs]").forEach(x => x.setAttribute("aria-pressed", String(x === b))); pintaSaber();
+    }));
     const inQ = cuerpo.querySelector("#ddQ");
     if(inQ) inQ.addEventListener("input", () => { busca = inQ.value; pintaSaber(); });
     cuerpo.querySelectorAll("[data-tm]").forEach(b => b.addEventListener("click", () => {
@@ -8418,17 +8714,19 @@ const Preguntas = (function(){
         return;
       }
       if(e.target.closest("[data-no]")){ const g = fila.querySelector(".ddSeg"); if(g) g.remove(); return; }
-      if(e.target.closest("[data-si]")){ quita(); pide({ accion: "olvidar", texto: t }).catch(() => {}); return; }
+      if(e.target.closest("[data-si]")){ quita(); pide({ accion: "olvidar", texto: t }).catch(() => {}); if(fila.classList.contains("ddFijo")){ redSel = null; cuerpo._pintaSaber(); } return; }
       if(e.target.closest("[data-edita]")){ fila.querySelector(".ddEd").hidden = false; const ta = fila.querySelector("textarea"); ta.focus(); return; }
       if(e.target.closest("[data-cancela]")){ fila.querySelector(".ddEd").hidden = true; fila.querySelector("textarea").value = t; return; }
       if(e.target.closest("[data-guarda]")){
         const nuevo = fila.querySelector("textarea").value.trim().slice(0, 240);
         if(!nuevo || nuevo === t){ fila.querySelector(".ddEd").hidden = true; return; }
         saber = saber.map(x => x === t ? nuevo : x); try{ localStorage.setItem(KS, JSON.stringify(saber)); }catch{}
+        if(redSel === t) redSel = nuevo;
         pide({ accion: "editar", texto: t, nuevo }).catch(() => {});
         cuerpo._pintaSaber(); return;
       }
       if(e.target.closest(".ddDet")) return;
+      if(fila.classList.contains("ddFijo")) return;
       fila.classList.toggle("on");
     });
     cuerpo._ddOlvida = true;
