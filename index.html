@@ -2062,6 +2062,108 @@ button{ transition:transform var(--t-tap) var(--ease-out); }
 /* canasta: lo que ya se acabó y hay que comprar */
 .mkCanasta{ background:rgba(var(--cyan-rgb),.07); border-color:rgba(var(--cyan-rgb),.3); }
 .mkHace{ font-style:normal; color:var(--cyan); font-weight:600; }
+/* ═════════ A mercar: la canasta como tarjeta propia + modo «mercando» ═════════ */
+.mkCesta{ position:relative; overflow:hidden; padding:18px 16px 16px; margin-bottom:12px; border-radius:22px; background:var(--panel); border:1px solid rgba(var(--cyan-rgb),.32);
+  background-image:radial-gradient(120% 90% at 100% 0%, rgba(var(--cyan-rgb),.13), transparent 60%); box-shadow:0 18px 40px -26px rgba(var(--blue-rgb),.7); }
+.mkCestaCab{ display:flex; align-items:center; gap:12px; margin-bottom:12px; }
+.mkCestaIco{ width:48px; height:48px; flex:none; display:grid; place-items:center; font-size:1.7rem; border-radius:16px; background:rgba(var(--cyan-rgb),.12); border:1px solid rgba(var(--cyan-rgb),.25); }
+.mkCestaCab > div{ flex:1; min-width:0; }
+.mkCestaCab h3{ margin:0; font-size:1.15rem; letter-spacing:-.01em; line-height:1.2; }
+.mkCestaCab p{ margin:2px 0 0; font-size:.84rem; color:var(--dim); }
+.mkCestaCab p b{ color:var(--cyan); font-weight:650; }
+.mkCestaComp{ width:44px; height:44px; flex:none; display:grid; place-items:center; border-radius:14px; border:1px solid var(--line); background:rgba(var(--ink),.04); color:var(--white); cursor:pointer; }
+.mkCestaComp svg{ width:19px; height:19px; }
+.mkCestaComp:active{ transform:scale(.92); }
+.mkCesta .mkChips{ margin-bottom:14px; }
+.mkCesta .mkChips span{ font-size:.82rem; padding:5px 11px; }
+.mkCesta .mkChips span.mama{ background:rgba(255,120,80,.14); box-shadow:inset 0 0 0 1px rgba(255,120,80,.32); }
+.mkCesta .mkChips span.mama em{ font-style:normal; font-size:.68rem; color:#ffb49a; margin-left:4px; font-weight:600; }
+.mkCesta .mkChips span.mas{ background:transparent; box-shadow:inset 0 0 0 1px var(--line); color:var(--dim); }
+.mkCesta .mkChips span.ya{ opacity:.45; text-decoration:line-through; }
+.mkCestaProg{ display:flex; align-items:center; gap:10px; margin:-4px 0 12px; font-size:.8rem; color:var(--dim); }
+.mkCestaProg .mcBar{ flex:1; }
+.mkVamos{ display:flex; align-items:center; justify-content:center; gap:10px; min-height:58px; font-size:1.08rem; border-radius:18px; position:relative; overflow:hidden; }
+.mkVamos .ico{ font-size:1.35rem; line-height:1; }
+.mkVamos::after{ content:""; position:absolute; top:0; bottom:0; left:0; width:38%; background:linear-gradient(100deg, transparent, rgba(255,255,255,.5), transparent); transform:translateX(-130%) skewX(-18deg); animation:mkBrilla 3.6s ease-in-out infinite; pointer-events:none; }
+.mkHero.chico{ padding:16px 16px 16px; text-align:left; display:grid; grid-template-columns:auto 1fr; column-gap:12px; align-items:center; }
+.mkHero.chico .mkBig{ font-size:2rem; margin:0; grid-row:span 2; }
+.mkHero.chico h3{ font-size:1.05rem; margin:0; }
+.mkHero.chico p{ margin:0; font-size:.8rem; }
+.mkHero.chico > button{ grid-column:1 / -1; margin-top:14px; }
+.mkEntra .mkCesta > *{ animation:mkSube .5s cubic-bezier(.32,.72,0,1) backwards; }
+.mkEntra .mkCesta > :nth-child(2){ animation-delay:.06s; } .mkEntra .mkCesta > :nth-child(n+3){ animation-delay:.12s; }
+
+/* ── modo mercando ── */
+body.mode-mercar:has(#mkStage .mcTop) #thread{ -webkit-mask-image:none; mask-image:none; padding-bottom:0; }
+#mercarView:has(#mkStage .mcTop) .restIntro{ display:none; }
+.mcTop{ position:sticky; top:-20px; z-index:3; margin:-20px calc(-1 * var(--sp)) 6px; padding:20px var(--sp) 14px; background:linear-gradient(180deg, var(--void) 78%, transparent); }
+.mcTopFila{ display:flex; align-items:center; gap:12px; }
+.mcTopFila h3{ margin:0; flex:1; font-size:1.3rem; letter-spacing:-.01em; display:flex; align-items:center; gap:8px; }
+.mcCuenta{ font-variant-numeric:tabular-nums; font-size:1.05rem; font-weight:650; color:var(--cyan); }
+.mcCuenta small{ font-size:.8rem; color:var(--dim); font-weight:500; }
+.mcSalir{ min-height:44px; padding:0 16px; border-radius:14px; border:1px solid var(--line); background:var(--panel); color:var(--white); font:inherit; font-size:.88rem; font-weight:600; cursor:pointer; }
+.mcBar{ height:8px; border-radius:99px; background:rgba(var(--ink),.09); overflow:hidden; margin-top:10px; }
+.mkCestaProg .mcBar{ margin:0; height:6px; }
+.mcBar i{ display:block; height:100%; border-radius:inherit; background:linear-gradient(90deg, var(--cyan), var(--blue)); transition:width .5s cubic-bezier(.32,.72,0,1); }
+.mcGrupo{ display:flex; align-items:center; gap:8px; margin:16px 4px 8px; font-size:.78rem; font-weight:650; letter-spacing:.06em; text-transform:uppercase; color:var(--dim); }
+.mcGrupo .e{ font-size:1rem; }
+.mcGrupo .c{ margin-left:auto; font-variant-numeric:tabular-nums; letter-spacing:0; }
+.mcLista{ display:flex; flex-direction:column; gap:8px; }
+.mcRow{ position:relative; display:flex; align-items:center; gap:14px; width:100%; min-height:64px; padding:10px 14px 10px 12px; border-radius:18px; border:1px solid var(--line); background:var(--panel);
+  color:var(--white); font:inherit; text-align:left; cursor:pointer; -webkit-tap-highlight-color:transparent; touch-action:manipulation;
+  transition:transform .14s ease-out, background .3s, border-color .3s, opacity .3s; }
+.mcRow:active{ transform:scale(.975); }
+.mcE{ width:44px; height:44px; flex:none; display:grid; place-items:center; font-size:1.65rem; border-radius:14px; background:rgba(var(--ink),.06); transition:transform .4s cubic-bezier(.34,1.56,.64,1), filter .3s; }
+.mcN{ flex:1; min-width:0; display:flex; flex-direction:column; }
+.mcN b{ position:relative; align-self:flex-start; font-size:1.06rem; font-weight:600; line-height:1.25; }
+.mcN b::after{ content:""; position:absolute; left:-2px; right:-2px; top:55%; height:2px; border-radius:2px; background:currentColor; transform:scaleX(0); transform-origin:left; transition:transform .35s cubic-bezier(.65,0,.35,1); }
+.mcN small{ font-size:.8rem; color:var(--dim); line-height:1.3; }
+.mcC{ width:32px; height:32px; flex:none; display:grid; place-items:center; border-radius:50%; border:2px solid rgba(var(--ink),.28); color:transparent; transition:background .25s, border-color .25s, color .2s, transform .4s cubic-bezier(.34,1.56,.64,1); }
+.mcC svg{ width:18px; height:18px; stroke-dasharray:24; stroke-dashoffset:24; transition:stroke-dashoffset .3s ease-out .08s; }
+.mcRow.on{ background:rgba(var(--cyan-rgb),.06); border-color:rgba(var(--cyan-rgb),.22); }
+.mcRow.on .mcC{ background:linear-gradient(140deg, var(--cyan), var(--blue)); border-color:transparent; color:var(--on-accent); transform:scale(1.12); }
+.mcRow.on .mcC svg{ stroke-dashoffset:0; }
+.mcRow.on .mcN b{ color:var(--dim); }
+.mcRow.on .mcN b::after{ transform:scaleX(1); }
+.mcRow.on .mcE{ transform:scale(.86) rotate(-8deg); filter:grayscale(.5); }
+.mcRow.pop .mcC{ animation:mcPop .45s cubic-bezier(.34,1.56,.64,1); }
+.mcRow.pop::before{ content:""; position:absolute; right:14px; top:50%; width:32px; height:32px; margin-top:-16px; border-radius:50%; border:2px solid var(--cyan); animation:mkAnillo .55s ease-out forwards; pointer-events:none; }
+@keyframes mcPop{ 0%{ transform:scale(.6); } 60%{ transform:scale(1.3); } 100%{ transform:scale(1.12); } }
+.mcRow.sale{ animation:mcSale .32s cubic-bezier(.4,0,1,1) forwards; }
+@keyframes mcSale{ to{ opacity:0; transform:translateY(18px) scale(.94); } }
+.mcRow.llega{ animation:mcLlega .45s cubic-bezier(.32,.72,0,1) backwards; }
+@keyframes mcLlega{ from{ opacity:0; transform:translateY(-14px) scale(.96); } }
+.mcCarritoCab{ display:flex; align-items:center; gap:10px; margin:24px 4px 8px; padding-top:16px; border-top:1px dashed var(--line); font-size:.78rem; font-weight:650; letter-spacing:.06em; text-transform:uppercase; color:var(--dim); }
+.mcCarritoCab .c{ margin-left:auto; font-variant-numeric:tabular-nums; letter-spacing:0; }
+.mcCarrito .mcRow{ min-height:54px; }
+.mcVacio{ text-align:center; padding:26px 10px 6px; color:var(--dim); font-size:.9rem; }
+.mcVacio b{ display:block; font-size:2.4rem; margin-bottom:6px; }
+.mcPie{ position:sticky; bottom:0; z-index:3; margin:14px calc(-1 * var(--sp)) 0; padding:22px var(--sp) calc(14px + var(--safe-bot)); background:linear-gradient(0deg, var(--void) 72%, transparent); }
+.mcPista{ text-align:center; font-size:.86rem; color:var(--dim); margin:0; padding:12px 0; }
+.mcPie .mkBtn{ min-height:58px; font-size:1.05rem; border-radius:18px; }
+.mcPie .mkBtn.sec{ font-size:.98rem; }
+.mcFin{ position:relative; text-align:center; }
+.mcFin h4{ margin:0 0 10px; font-size:1.1rem; animation:mkSube .45s cubic-bezier(.34,1.56,.64,1) backwards; }
+.mcFin .mkBtn{ animation:mkSube .5s cubic-bezier(.34,1.56,.64,1) .08s backwards, mkLatido 2.2s ease-in-out .6s infinite; }
+.mcFin .mkConfeti{ top:10px; }
+:root[data-theme="light"] .mkCesta{ border-color:rgba(255,255,255,.12); background-image:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.015)); box-shadow:inset 0 1px 0 rgba(255,255,255,.14), 0 18px 40px -22px rgba(0,0,0,.8); }
+:root[data-theme="light"] .mcRow.on .mcC, :root[data-theme="light"] .mcBar i{ background:var(--metal); }
+@media (prefers-reduced-motion: reduce){ .mkVamos::after, .mcRow.pop::before{ display:none; } .mcRow.sale, .mcRow.llega, .mcRow.pop .mcC, .mcFin h4, .mcFin .mkBtn{ animation:none; } }
+.mkHero.chico #mkEmpezar{ animation:none; }
+.mkEntra .mkHero.chico #mkEmpezar{ animation:mkSube .5s cubic-bezier(.32,.72,0,1) .1s backwards; }
+.mkHero.chico #mkEmpezar::after{ display:none; }
+
+.mcEstado{ display:none; }
+.mcRow.nuevo{ border-color:rgba(255,176,102,.5); }
+.mcNuevo{ color:#ffb066 !important; font-weight:600; }
+.mcAvisos p{ margin:0 0 6px; padding:9px 12px; border-radius:12px; font-size:.84rem; background:rgba(var(--cyan-rgb),.08); color:var(--strong, var(--white)); }
+.mcViejo{ margin:0 0 10px; padding:12px 14px; border-radius:14px; font-size:.86rem; line-height:1.4; background:rgba(255,176,102,.1); border:1px solid rgba(255,176,102,.3); }
+.mcBorraMarcas{ display:block; margin:18px auto 4px; padding:10px 14px; border:0; background:none; color:var(--dim); font:inherit; font-size:.84rem; text-decoration:underline; text-underline-offset:3px; cursor:pointer; }
+.mcBorraMarcas[hidden]{ display:none; }
+.mcPie .mcError{ margin:0 0 10px; text-align:center; }
+.mcPie .mcAviso{ margin:0 0 10px; text-align:center; font-size:.88rem; color:var(--dim); }
+.mcPie .mkFila{ display:flex; gap:10px; } .mcPie .mkFila .mkBtn{ flex:1; }
+
 .mkCanasta .mkChips em{ font-style:normal; font-size:.7rem; color:var(--dim); margin-left:3px; }
 .duCanasta{ display:flex; align-items:center; justify-content:center; gap:8px; width:100%; margin-top:14px; padding:12px 14px; border-radius:14px; border:1px solid rgba(var(--cyan-rgb),.3); background:rgba(var(--cyan-rgb),.08); color:var(--white); font:inherit; font-size:.88rem; font-weight:600; cursor:pointer; transition:transform .15s var(--ease-out), background .3s, border-color .3s; }
 .duCanasta:active{ transform:scale(.97); }
@@ -3429,7 +3531,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-17.228";
+const APP_VERSION = "2026-10-18.229";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -10088,15 +10190,31 @@ const Mercar = (function(){
     const parcial = leePartida(ps);
     const ult = datos && datos.ultimoMercado;
     const hace = ult ? diasDesde(ult) : null;
-    let html =
-      '<div class="mkHero"><span class="mkBig">🧺</span><h3>Revisemos la casa</h3>' +
+    /* la canasta va aparte: es lo que hay que comprar (también lo que pidió mamá) y desde aquí se sale a mercar */
+    const enCesta = pendientes;
+    const mcG = mcE || leeMercando(), llevo = mcG ? Object.keys(mcG.tengo).filter(id => enCesta.some(p => p.id === id)) : [];
+    const MAXC = 8;
+    const ICO_COMP = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3M7 8l5-5 5 5"/><path d="M5 13v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5"/></svg>';
+    let html = "";
+    if(enCesta.length){
+      const chip = p => '<span class="' + (esMama(p) ? 'mama' : '') + (llevo.includes(p.id) ? ' ya' : '') + '">' + emojiMercado(baseDe(p), p.grupo) + ' ' + esc(baseDe(p)) + (esMama(p) ? '<em>mamá</em>' : '') + '</span>';
+      html +=
+        '<section class="mkCesta" aria-labelledby="mkCestaT">' +
+          '<div class="mkCestaCab"><span class="mkCestaIco" aria-hidden="true">🧺</span><div><h3 id="mkCestaT">Tu canasta</h3>' +
+            '<p><b>' + enCesta.length + (enCesta.length === 1 ? ' cosa' : ' cosas') + '</b> por comprar' + (mama.length ? ' · ' + mama.length + ' de tu mamá' : '') + '</p></div>' +
+            '<button type="button" class="mkCestaComp" id="mkCestaComp" aria-label="Compartir la lista">' + ICO_COMP + '</button></div>' +
+          '<div class="mkChips">' + enCesta.slice(0, MAXC).map(chip).join("") + (enCesta.length > MAXC ? '<span class="mas">+' + (enCesta.length - MAXC) + ' más</span>' : '') + '</div>' +
+          (llevo.length ? '<div class="mkCestaProg"><span>Llevas ' + llevo.length + ' de ' + enCesta.length + '</span><div class="mcBar"><i style="width:' + Math.round(llevo.length / enCesta.length * 100) + '%"></i></div></div>' : '') +
+          '<button type="button" class="mkBtn pri full mkVamos" id="mkVamos"><span class="ico" aria-hidden="true">🛒</span>' + (llevo.length ? 'Seguir mercando' : 'Vamos a mercar') + '</button>' +
+        '</section>';
+    }
+    html +=
+      '<div class="mkHero' + (enCesta.length ? ' chico' : '') + '"><span class="mkBig">🏠</span><h3>Revisemos la casa</h3>' +
       '<p>' + ps.length + ' cosas · un toque por cada una' + (hace != null ? ' · último mercado ' + (hace === 0 ? 'hoy' : 'hace ' + hace + (hace === 1 ? ' día' : ' días')) : '') + '</p>' +
       (parcial
         ? '<button type="button" class="mkBtn pri full" id="mkSeguir">Seguir revisión · ' + parcial.idx + '/' + parcial.cola.length + '</button>' +
           '<button type="button" class="mkBtn sec full" id="mkDescartarParcial" style="margin-top:10px">Descartar y empezar de nuevo</button>'
-        : '<button type="button" class="mkBtn pri full" id="mkEmpezar"' + (ps.length ? '' : ' disabled') + '>Empezar revisión</button>') +
-      (canasta.length ? '<div class="mkMama mkCanasta" id="mkCanastaCaja" role="button" tabindex="0" style="cursor:pointer"><b>🧺 En tu canasta</b><div class="mkChips">' + canasta.map(p => '<span>' + emojiMercado(baseDe(p), p.grupo) + ' ' + esc(baseDe(p)) + '' + '</span>').join("") + '</div></div>' : '') +
-      (mama.length ? '<div class="mkMama" id="mkMamaCaja" role="button" tabindex="0" style="cursor:pointer"><b>Tu mamá dice que se acabó:</b><div class="mkChips">' + mama.map(p => '<span>' + emojiMercado(baseDe(p), p.grupo) + ' ' + esc(baseDe(p)) + '</span>').join("") + '</div></div>' : '') +
+        : '<button type="button" class="mkBtn ' + (enCesta.length ? 'sec' : 'pri') + ' full" id="mkEmpezar"' + (ps.length ? '' : ' disabled') + '>Empezar revisión</button>') +
       '</div>';
     const ICO = {
       reg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h2l2.3 10.5h10.4L20 8H6.4"/><circle cx="9" cy="19" r="1.4"/><circle cx="17" cy="19" r="1.4"/><path d="m10 10.5 1.8 1.8 3.4-3.6"/></svg>',
@@ -10108,6 +10226,9 @@ const Mercar = (function(){
 
     stage.innerHTML = html;
     const be = document.getElementById("mkEmpezar"); if(be) be.addEventListener("click", () => empezar());
+    const bv = document.getElementById("mkVamos"); if(bv) bv.addEventListener("click", () => mercando());
+    const bc = document.getElementById("mkCestaComp");
+    if(bc) bc.addEventListener("click", () => { const t = textoLista(enCesta); if(navigator.share) navigator.share({ text: t }).catch(() => {}); else if(copiarReferencia(t)) exito("Lista copiada", "Ya la puedes pegar"); });
     const bs = document.getElementById("mkSeguir"); if(bs) bs.addEventListener("click", () => empezar(parcial));
     const bd = document.getElementById("mkDescartarParcial");
     if(bd) bd.addEventListener("click", () => { if(confirm("¿Descartar la revisión que dejaste a medias?")){ borraPartida(); inicio(); } });
@@ -10271,7 +10392,7 @@ const Mercar = (function(){
         cierra();
         exito(r && r.enCola ? "Se borrará al conectar" : "Producto borrado", baseDe(p));
         statusEl.innerHTML = "";
-        if(estado === "inicio") inicio(true);
+        if(estado === "inicio") inicio(true); else if(estado === "mercando") pintaMercando();
         if(document.body.classList.contains("mode-dura")) pintaDura(false);
       });
       si.addEventListener("click", async () => {
@@ -10680,15 +10801,21 @@ const Mercar = (function(){
       '</g></svg></div>';
   }
 
-  async function mercadoHecho(e){
-    const btn = e.currentTarget;
+  async function mercadoHecho(e, op){
+    op = op || {};
+    if(registrando) return;                        // doble toque: el segundo no hace nada
     const comprados = lista.filter(x => x.comprar).map(x => x.p);
     if(!comprados.length) return;
+    registrando = true;
+    const desde = estado;
+    estado = "guardando";                          // cargar() no repinta encima de «Guardando…»
     statusEl.innerHTML = "";
     pantallaGuardando(comprados.length);
     try{
       const hoy = fechaCompra || hoyISO();
-      await post(MERCADO_COMPRADO_URL, { ids: comprados.map(p => p.id), nombres: comprados.map(p => p.nombre), fecha: hoy });
+      await post(MERCADO_COMPRADO_URL, Object.assign({ ids: comprados.map(p => p.id), nombres: comprados.map(p => p.nombre), fecha: hoy }, op.colaId ? { colaId: op.colaId } : {}));
+      tLocal = Date.now();                         // una respuesta de cargar() pedida antes de esto ya viene vieja
+      if(op.desde === "mercando"){ mcE = null; mcError = ""; guardaMercando(); sueltaLuz(); confirmaParcial = false; }
       limpiaAcabo(comprados.map(p => p.id));
       comprados.forEach(p => { p.falta = false; p.marcadoPor = null; if(!p.ultimaCompra || hoy >= p.ultimaCompra) p.ultimaCompra = hoy; p.veces = (p.veces || 0) + 1; });
       if(datos && (!datos.ultimoMercado || hoy >= datos.ultimoMercado)) datos.ultimoMercado = hoy;
@@ -10697,11 +10824,175 @@ const Mercar = (function(){
       stage.innerHTML = '<div class="mkHecho">' + (REDUCED ? '' : confeti()) + iconoCheck() + '<h3>¡Mercado registrado!</h3><p class="gEmpty">Guardé ' + comprados.length +
         (comprados.length === 1 ? ' cosa' : ' cosas') + ' ' + (hoy === hoyISO() ? 'con la fecha de hoy' : 'con fecha del ' + new Date(+hoy.slice(0, 4), +hoy.slice(5, 7) - 1, +hoy.slice(8, 10)).toLocaleDateString('es-CO', { day: 'numeric', month: 'long' })) + '. Así aprendo cuánto te dura cada una.</p><button type="button" class="mkBtn pri full" id="mkListo">Listo</button></div>';
       document.getElementById("mkListo").addEventListener("click", () => { inicio(); cargar(); });
+      const siguen = ((datos && datos.productos) || []).filter(p => p.falta).length;
+      if(op.desde === "mercando" && siguen) stage.querySelector(".mkHecho p").insertAdjacentHTML("beforeend", " " + (siguen === 1 ? "1 cosa sigue" : siguen + " cosas siguen") + " en tu canasta.");
       if(pendiente()) stage.querySelector(".mkHecho p").insertAdjacentHTML("beforeend", " <b>Se envía al Mercado cuando el PC esté prendido.</b>");
     }catch{
-      final(comprados, false, "reintento");   // vuelve a lo que compraste, con la misma fecha, para intentar otra vez
-      statusEl.innerHTML = "No se pudo guardar. Revisa tu internet y que Tailscale esté encendido.";
+      if(op.desde === "mercando"){ estado = "mercando"; mcError = "No se pudo registrar. Tus marcas siguen guardadas: inténtalo otra vez en un momento."; pintaMercando(); vibra([30, 60, 30]); }
+      else { estado = desde; final(comprados, false, "reintento"); statusEl.innerHTML = "No se pudo guardar. Revisa tu internet y que Tailscale esté encendido."; }   // vuelve a lo que compraste, con la misma fecha
+    } finally { registrando = false; }
+  }
+
+  /* ══ VAMOS A MERCAR / ESTOY MERCANDO ══
+     En el súper ves lo que está en la canasta; tocas cada cosa al echarla al carrito («ya lo tengo»).
+     Las marcas son SOLO de este celular y no viajan a n8n hasta «Registrar»: así marcar funciona sin señal
+     y no confunde al otro celular. Se guardan en localStorage con el día del mercado, para retomar si se cierra la app.
+     mcE = { v:1, dia:"AAAA-MM-DD", rid, activo, tengo:{ id:{ n, g, v, u, t } }, vistos:[ids], nuevos:{ id:1 } }
+       n/g: nombre y grupo al marcar (por si lo borran o editan) · v/u: veces y ultimaCompra al marcar (para saber si el otro celular ya lo registró) */
+  const MKEY = "armoni.mercar.mercando";
+  let mcE = null, mcError = "", registrando = false, luzPantalla = null, tLocal = 0, avisosMc = [];
+  const nuevoMc = () => ({ v: 1, dia: hoyISO(), rid: Date.now().toString(36) + Math.random().toString(36).slice(2, 7), activo: true, tengo: {}, vistos: [], nuevos: {} });
+  function leeMercando(){
+    try{
+      const m = JSON.parse(localStorage.getItem(MKEY));
+      if(!m || m.v !== 1 || !m.tengo || typeof m.tengo !== "object" || !/^\d{4}-\d{2}-\d{2}$/.test(m.dia || "")) return null;
+      m.vistos = Array.isArray(m.vistos) ? m.vistos : []; m.nuevos = m.nuevos && typeof m.nuevos === "object" ? m.nuevos : {};
+      return m;
+    }catch{ return null; }
+  }
+  function guardaMercando(){ try{ if(mcE) localStorage.setItem(MKEY, JSON.stringify(mcE)); else localStorage.removeItem(MKEY); }catch{} }
+  const nTengo = () => mcE ? Object.keys(mcE.tengo).length : 0;
+  const firmaIds = ids => { let h = 5381; ids.slice().sort().join("|").split("").forEach(c => { h = ((h * 33) ^ c.charCodeAt(0)) >>> 0; }); return h.toString(36); };
+  const diaLargo = f => new Date(f + "T12:00:00").toLocaleDateString("es-CO", { weekday: "long", day: "numeric", month: "short" }).replace(".", "");
+
+  /* pantalla encendida mientras mercan (Wake Lock); si el navegador no lo tiene, no pasa nada */
+  async function pideLuz(){
+    if(luzPantalla || !("wakeLock" in navigator) || document.visibilityState !== "visible") return;
+    try{ luzPantalla = await navigator.wakeLock.request("screen"); luzPantalla.addEventListener("release", () => { luzPantalla = null; }); }catch{ luzPantalla = null; }
+  }
+  function sueltaLuz(){ try{ if(luzPantalla) luzPantalla.release(); }catch{} luzPantalla = null; }
+  document.addEventListener("visibilitychange", () => { if(document.visibilityState === "visible" && estado === "mercando" && document.body.classList.contains("mode-mercar")) pideLuz(); });
+  new MutationObserver(() => { if(!document.body.classList.contains("mode-mercar")) sueltaLuz(); else if(estado === "mercando") pideLuz(); })
+    .observe(document.body, { attributes: true, attributeFilter: ["class"] });
+
+  /* reconciliación con lo que llega de n8n: las marcas nunca se borran por una actualización,
+     salvo que el producto ya no exista o que el otro celular ya lo haya registrado */
+  function itemsMercando(){
+    const ps = (datos && datos.productos) || [];
+    const porId = new Map(ps.map(p => [p.id, p]));
+    Object.keys(mcE.tengo).forEach(id => {
+      const p = porId.get(id), s = mcE.tengo[id];
+      if(!p){ avisosMc.push("«" + s.n + "» se borró de la lista"); delete mcE.tengo[id]; return; }
+      const loRegistraron = !p.falta && ((p.veces || 0) > (s.v || 0) || (p.ultimaCompra || "") > (s.u || ""));
+      if(loRegistraron){ avisosMc.push(baseDe(p) + ": ya lo registró el otro celular"); delete mcE.tengo[id]; return; }
+      s.n = baseDe(p); s.g = p.grupo;          // si lo editaron, se ve con el nombre nuevo
+    });
+    const primera = !mcE.vistos.length, vistos = new Set(mcE.vistos);
+    const visibles = ps.filter(p => p.falta || mcE.tengo[p.id]);   // lo marcado se queda aunque el otro celular lo quite de la canasta: ya está en tu carrito
+    const ahora = new Set(visibles.map(p => p.id));
+    mcE.vistos.forEach(id => { const p = porId.get(id); if(!ahora.has(id) && p) avisosMc.push(baseDe(p) + " salió de la canasta (lo compraron o lo quitaron en el otro celular)"); });
+    visibles.forEach(p => { if(!primera && !vistos.has(p.id) && !mcE.tengo[p.id]){ mcE.nuevos[p.id] = 1; avisosMc.push("Se agregó " + baseDe(p) + " a la canasta"); } });
+    mcE.vistos = [...ahora];
+    guardaMercando();
+    const orden = (a, b) => ORDEN_G.indexOf(grupoDe(a)) - ORDEN_G.indexOf(grupoDe(b)) || baseDe(a).localeCompare(baseDe(b), "es");
+    return visibles.sort(orden).map(p => ({ p, tengo: !!mcE.tengo[p.id], nuevo: !!mcE.nuevos[p.id] && !mcE.tengo[p.id], fuera: !p.falta }));
+  }
+
+  function mercando(){
+    if(!mcE) mcE = leeMercando();
+    if(!mcE || (mcE.dia !== hoyISO() && !nTengo())) mcE = nuevoMc();      // de otro día y sin marcas: empieza limpio
+    mcE.activo = true; guardaMercando();
+    estado = "mercando"; statusEl.innerHTML = "";
+    pideLuz();
+    pintaMercando();
+  }
+  let confirmaParcial = false;
+  function pintaMercando(){
+    if(estado !== "mercando" || !mcE) return;
+    const items = itemsMercando();
+    const tot = items.length, n = items.filter(x => x.tengo).length, quedan = tot - n;
+    const viejo = mcE.dia !== hoyISO();
+    const avisos = avisosMc.splice(0);
+    const y = thread.scrollTop;
+    const fila = x =>
+      '<button type="button" class="mcItem mcRow' + (x.tengo ? ' on' : '') + (x.nuevo ? ' nuevo' : '') + '" data-id="' + esc(x.p.id) + '" aria-pressed="' + x.tengo + '">' +
+        '<span class="mcE" aria-hidden="true">' + emojiMercado(baseDe(x.p), x.p.grupo) + '</span>' +
+        '<span class="mcN"><b>' + esc(baseDe(x.p)) + '</b>' + (detDe(x.p) ? '<small>' + esc(detDe(x.p)) + '</small>' : esMama(x.p) ? '<small>lo pidió tu mamá</small>' : '') +
+          (x.nuevo ? '<small class="mcNuevo">Nuevo · lo agregaron ahora</small>' : x.fuera && x.tengo ? '<small>Ya no está en la canasta</small>' : '') + '</span>' +
+        '<span class="mcEstado">' + (x.tengo ? 'Ya lo tengo' : '') + '</span>' +
+        '<span class="mcC" aria-hidden="true">' + ICO_OK + '</span></button>';
+    let html = '<div class="mcTop"><div class="mcTopFila"><h3><span aria-hidden="true">🛒</span>Mercando</h3>' +
+      '<span class="mcCuenta" id="mcCuenta" aria-live="polite">' + (tot ? n + ' <small>de ' + tot + '</small>' : '') + '</span>' +
+      '<button type="button" class="mcSalir" id="mcSalir">Salir</button></div>' +
+      (tot ? '<div class="mcBar" role="progressbar" aria-valuemin="0" aria-valuemax="' + tot + '" aria-valuenow="' + n + '" aria-label="Cosas en el carrito"><i style="width:' + (n / tot * 100) + '%"></i></div>' : '') + '</div>' +
+      '<div class="mcAvisos" role="status" aria-live="polite">' + avisos.map(a => '<p>' + esc(a) + '</p>').join("") + '</div>' +
+      (viejo && n ? '<div class="mcViejo" role="alert"><b>Estas marcas son del ' + esc(diaLargo(mcE.dia)) + '.</b> Si ya hiciste ese mercado, regístralo con esa fecha; si no, borra las marcas.</div>' : '');
+    if(!tot){
+      html += '<div class="mkHecho"><p class="gEmpty">Tu canasta está vacía. Agrega lo que se acabó y vuelve.</p>' +
+        '<button type="button" class="mkBtn pri full" id="mcAgregar">Dejar algo en la canasta</button></div>';
+    } else {
+      html += '<div class="mcLista" id="mcLista">';
+      ORDEN_G.forEach(g => { const del = items.filter(x => grupoDe(x.p) === g); if(del.length) html += '<h4 class="mcGrupo"><span class="e" aria-hidden="true">' + (EMOJI_GRUPO[g] || "🛒") + '</span>' + g + '<span class="c">' + del.length + '</span></h4>' + del.map(fila).join(""); });
+      html += '<button type="button" class="mcBorraMarcas" id="mcBorrar"' + (n ? '' : ' hidden') + '>Quitar todas las marcas</button></div>';
     }
+    html += '<div class="mcPie" id="mcPie">' + piePinta(tot, n, quedan) + '</div>';
+    stage.innerHTML = html;
+    thread.scrollTop = y;
+    if(avisos.length) vibra([10, 40, 10]);
+    const ls = document.getElementById("mcLista");
+    if(ls) ls.addEventListener("click", e => { const b = e.target.closest(".mcItem"); if(b) tocaMercando(b); });
+    const ag = document.getElementById("mcAgregar"); if(ag) ag.addEventListener("click", () => abrirEditar("canasta"));
+    pieEventos();
+    document.getElementById("mcSalir").addEventListener("click", () => { if(mcE){ mcE.activo = false; if(!nTengo()) mcE = null; guardaMercando(); } sueltaLuz(); confirmaParcial = false; inicio(); });
+    const bm = document.getElementById("mcBorrar");
+    if(bm) bm.addEventListener("click", async () => {
+      if(!nTengo()) return;
+      const ok = await confirmaBorrar({ titulo: "¿Quitar todas las marcas?", detalle: "Todo vuelve a quedar sin marcar. No se registra nada y la canasta sigue igual.", boton: "Quitar marcas" });
+      if(!ok || !mcE) return;
+      mcE.tengo = {}; mcE.dia = hoyISO(); guardaMercando(); confirmaParcial = false; pintaMercando();
+    });
+  }
+  function piePinta(tot, n, quedan){
+    if(!tot) return '';
+    let h = mcError ? '<p class="inErr mcError" role="alert">' + esc(mcError) + '</p>' : '';
+    if(n && !quedan) h += '<div class="mcFin"><h4>¡Todo en el carrito! 🎉</h4><button type="button" class="mkBtn pri full mcReg" id="mcRegistrar">Registrar mercado · ' + n + '</button></div>';
+    else if(n && confirmaParcial) h += '<p class="mcAviso">Registro ' + n + (n === 1 ? ' cosa' : ' cosas') + '. ' + (quedan === 1 ? 'La otra sigue' : 'Las otras ' + quedan + ' siguen') + ' en la canasta.</p>' +
+      '<div class="mkFila"><button type="button" class="mkBtn sec" id="mcNoParcial">Seguir mercando</button><button type="button" class="mkBtn pri" id="mcRegistrar">Sí, registrar ' + n + '</button></div>';
+    else if(n) h += '<button type="button" class="mkBtn sec full" id="mcParcial">Terminar y registrar lo que llevo (' + n + ')</button>';
+    else h += '<p class="mcPista">Toca cada cosa cuando la eches al carrito.</p>';
+    return h;
+  }
+  function pieEventos(){
+    const $ = id => document.getElementById(id);
+    const r = $("mcRegistrar"); if(r) r.addEventListener("click", registraMercando);
+    const p = $("mcParcial"); if(p) p.addEventListener("click", () => { confirmaParcial = true; repintaPie(); });
+    const np = $("mcNoParcial"); if(np) np.addEventListener("click", () => { confirmaParcial = false; repintaPie(); });
+  }
+  /* actualiza el pie y el contador sin redibujar la lista (no salta bajo el dedo) */
+  function repintaPie(){
+    const items = stage.querySelectorAll(".mcItem"), tot = items.length, n = stage.querySelectorAll(".mcItem.on").length;
+    const pie = document.getElementById("mcPie"); if(!pie) return;
+    const antes = !!pie.querySelector(".mcFin");
+    pie.innerHTML = piePinta(tot, n, tot - n); pieEventos();
+    if(n && n === tot && !antes){ pie.querySelector(".mcFin").insertAdjacentHTML("afterbegin", confeti()); vibra([20, 60, 30]); }
+    const c = document.getElementById("mcCuenta"); if(c) c.innerHTML = n + " <small>de " + tot + "</small>";
+    const bm = document.getElementById("mcBorrar"); if(bm) bm.hidden = !n;
+    const bar = stage.querySelector(".mcBar"); if(bar){ bar.setAttribute("aria-valuenow", n); bar.firstElementChild.style.width = (tot ? n / tot * 100 : 0) + "%"; }
+  }
+  function tocaMercando(b){
+    if(registrando || !mcE) return;
+    const id = b.dataset.id, p = ((datos && datos.productos) || []).find(x => x.id === id); if(!p) return;
+    const on = !mcE.tengo[id];
+    if(on) mcE.tengo[id] = { n: baseDe(p), g: p.grupo, v: p.veces || 0, u: p.ultimaCompra || "", t: Date.now() };
+    else delete mcE.tengo[id];                         // tocar otra vez = deshacer
+    delete mcE.nuevos[id]; mcError = "";
+    guardaMercando();
+    vibra(on ? 15 : [6, 30, 6]);
+    b.classList.toggle("on", on); b.classList.remove("nuevo"); b.setAttribute("aria-pressed", String(on));
+    b.classList.remove("pop"); if(on){ void b.offsetWidth; b.classList.add("pop"); }
+    b.querySelector(".mcEstado").textContent = on ? "Ya lo tengo" : "";
+    const nv = b.querySelector(".mcNuevo"); if(nv) nv.remove();
+    if(!on) confirmaParcial = false;
+    repintaPie();
+  }
+  async function registraMercando(){
+    if(registrando || !mcE) return;
+    const ps = (datos && datos.productos) || [];
+    const marcados = Object.keys(mcE.tengo).map(id => ps.find(p => p.id === id)).filter(Boolean);
+    if(!marcados.length) return;
+    lista = marcados.map(p => ({ p, comprar: true }));
+    fechaCompra = mcE.dia > hoyISO() ? hoyISO() : mcE.dia;    // el día en que se mercó (normalmente hoy)
+    await mercadoHecho(null, { desde: "mercando", colaId: "mc-" + mcE.rid + "-" + firmaIds(marcados.map(p => p.id)) });
   }
 
   /* ── datos: caché al instante + consulta a la torre ── */
@@ -10711,16 +11002,19 @@ const Mercar = (function(){
     enVuelo = true;
     try{
       if(pendiente()){ await Cola.vacia(); if(pendiente()) return; }   // lo que hiciste sin conexión sube primero; mientras espere, manda lo guardado aquí
+      const t0 = Date.now();
       const res = await fetch(MERCADO_ESTADO_URL, { cache: "no-store", signal: AbortSignal.timeout ? AbortSignal.timeout(10000) : undefined });
       if(!res.ok) throw new Error("http " + res.status);
       const d = await res.json();
       /* una respuesta vacía o rara (n8n a medio arrancar) no debe borrar lo que ya se ve ni lo guardado */
       if(!d || !Array.isArray(d.productos) || (!d.productos.length && datos && datos.productos && datos.productos.length)) throw new Error("vacio");
+      if(tLocal > t0 || registrando) return;   // mientras viajaba, aquí se registró algo: esta lista ya no sirve
       const firma = x => x ? JSON.stringify([(x.productos || []).map(p => [p.id, p.nombre, p.grupo, p.falta, p.marcadoPor, p.ultimaCompra, p.duraDias, p.veces]), x.ultimoMercado]) : "";
       const cambio = firma(d) !== firma(datos);
       datos = d; aplicaAcabo(); if(cambio) guarda();
       statusEl.innerHTML = "";
       if(cambio && document.body.classList.contains("mode-dura")) pintaDura(false);
+      if(cambio && estado === "mercando" && document.body.classList.contains("mode-mercar")) pintaMercando();
       if(cambio && estado === "inicio" && document.body.classList.contains("mode-mercar")){               // nunca interrumpe un juego o una lista en curso; y nunca en mitad de la animación de entrada
         const primera = !stage.firstElementChild;      // todavía no había nada dibujado: esta sí entra con animación
         const espera = 1000 - (performance.now() - tEntra);
@@ -10733,7 +11027,8 @@ const Mercar = (function(){
   }
   function refresh(entrando){
     if(!datos){ try{ const c = JSON.parse(localStorage.getItem(KEY)); if(c && Array.isArray(c.productos)) datos = c; }catch{} }
-    if(entrando && estado !== "inicio"){      // al volver a la pantalla siempre arranca limpia, no donde la dejaste
+    if(estado === "mercando" || (entrando && estado !== "guardando" && (mcE || (mcE = leeMercando())) && mcE.activo)){ if(datos) mercando(); else { estado = "mercando"; statusEl.innerHTML = '<span class="dot" aria-hidden="true"></span>Cargando la lista…'; } cargar(); return; }   // estaban mercando: se sigue donde iban
+    if(entrando && estado !== "inicio" && estado !== "guardando"){      // al volver a la pantalla siempre arranca limpia, no donde la dejaste
       if(estado === "juego" && idx > 0) guardaPartida();
       estado = "inicio";
     }
@@ -10794,6 +11089,7 @@ const Mercar = (function(){
   function repinta(){
     if(document.body.classList.contains("mode-dura")) pintaDura(false);
     else if(estado === "inicio") inicio(true);
+    else if(estado === "mercando") pintaMercando();
   }
   function abrirCanasta(p){
     if(p.falta && !document.querySelector(".pgScrim.mkCanastaV")) traeFechas().then(c => { const n = document.querySelector(".mkCanastaV .caNota"); if(c && n && haceCanasta(p) && !/la dejaste/.test(n.textContent)) n.insertAdjacentText("beforeend", " · la dejaste " + haceCanasta(p)); });
@@ -11012,7 +11308,7 @@ const Mercar = (function(){
 
   /* mientras "A mercar" está abierta, la lista se actualiza sola: así lo que marca o desmarca mamá aparece sin salir y volver a entrar.
      cargar() nunca interrumpe un juego o una lista en curso */
-  const abierta = () => (document.body.classList.contains("mode-mercar") || document.body.classList.contains("mode-dura")) && !document.hidden && !document.body.classList.contains("asleep");
+  const abierta = () => (document.body.classList.contains("mode-mercar") || document.body.classList.contains("mode-dura")) && !document.hidden && (estado === "mercando" || !document.body.classList.contains("asleep"));
   setInterval(() => { if(abierta()) cargar(); }, 12000);
   document.addEventListener("visibilitychange", () => { if(abierta()) cargar(); });
 
