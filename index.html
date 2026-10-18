@@ -2954,6 +2954,25 @@ body.mode-mercar:has(#mkStage .mcTop) #thread{ -webkit-mask-image:none; mask-ima
 .emaAgregar{ display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1px; width:100%; min-height:52px; margin-top:12px; padding:8px 12px; border-radius:14px; border:1px dashed rgba(255,138,80,.5); background:none; color:#ffb066; font:inherit; font-size:.9rem; font-weight:650; cursor:pointer; }
 .emaAgregar small{ font-size:.72rem; font-weight:500; color:var(--dim); }
 .emaAgregar:active{ transform:scale(.98); }
+/* emaE: lápiz para editar lo ya anotado y la vista «Editar salida» */
+.emaDetCab{ align-items:center; }
+.emaDetCab b{ margin-left:auto; }
+.emaLapiz{ flex:none; display:grid; place-items:center; width:44px; height:44px; margin:-6px -6px -6px 0; padding:0; border-radius:14px; border:1px solid rgba(255,138,80,.38); background:rgba(255,138,80,.1); color:#ffb066; cursor:pointer; transition:transform .15s var(--ease-out), background .2s; }
+.emaLapiz svg{ width:19px; height:19px; }
+.emaLapiz:active{ transform:scale(.9); background:rgba(255,138,80,.2); }
+.emaLapiz:focus-visible, .eeItem:focus-visible{ outline:2px solid rgba(var(--cyan-rgb),.8); outline-offset:2px; }
+.eeGrupo{ margin-top:14px; }
+.eeItem{ width:100%; min-height:52px; font:inherit; color:var(--white); text-align:left; cursor:pointer; }
+.eeItem:active{ transform:scale(.98); }
+.eeItem[aria-disabled="true"]{ opacity:.6; cursor:default; }
+.eeIrIco{ flex:none; display:grid; place-items:center; width:30px; height:30px; border-radius:10px; color:#ffb066; background:rgba(255,138,80,.12); }
+.eeIrIco svg{ width:15px; height:15px; }
+.eeAviso{ margin:10px 2px 0; font-size:.78rem; line-height:1.35; color:var(--dim); }
+.eeSumar{ min-height:52px; margin-top:16px; border-color:rgba(255,138,80,.42); background:rgba(255,138,80,.08); }
+.eeScrim .seAgOtro{ margin-top:10px; }
+.eeBorrar{ display:inline-flex; align-items:center; justify-content:center; gap:6px; color:#ff9b9b !important; }
+.eeBorrar svg{ width:17px; height:17px; }
+.eeScrim .inLbl{ margin-top:14px; }
 .emaGastos p.emaPend{ opacity:.7; }
 /* emaB: el detalle agrupado por lugar y lo pagado en efectivo */
 .emaGrupo{ margin-top:12px; }
@@ -3664,6 +3683,7 @@ const RESUMEN_URL = N8N + "/webhook/resumen-mes";
 const TEMPORADA_URL = N8N + "/webhook/temporada";   // planes de temporada en Cali que ustedes anotan (los ven en Instagram)
 const COMFANDI_URL = N8N + "/webhook/comfandi";   // planes nuevos de Comfandi (eventos y hoteles, sin pasadías)
 const EMA_URL = N8N + "/webhook/salidas-ema";
+const MOVIMIENTO_EDITAR_URL = N8N + "/webhook/movimiento-editar";   // emaE: cambia o borra un gasto ya guardado de una salida con Ema (lápiz)
 const AHORRO_URL = N8N + "/webhook/ahorro";   // saldo del ahorro de la casa, meta y movimientos
 const PREGUNTAS_URL = N8N + "/webhook/armoni-preguntas";   // la IA que pregunta lo que no está claro y aprende
 const USO_URL = N8N + "/webhook/uso";   // junta el uso de cada celular (el tuyo y el de tu esposa) para verlo desde cualquiera
@@ -3698,7 +3718,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-18.234";
+const APP_VERSION = "2026-10-18.235";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -6205,16 +6225,17 @@ const SalidasEma = (function(){
   const salidaDe = f => { const q0 = (mesActual().salidas || []).find(z => z.fecha === f); if(q0) return q0; for(const m of ((datos && datos.meses) || [])){ const q = (m.salidas || []).find(z => z.fecha === f); if(q) return q; } return null; };
   /* los gastos de un día, agrupados por lugar en el orden en que aparecen */
   const porLugar = q => { const gr = []; ((q && q.gastos) || []).forEach(g => { const k = g.l || ""; let x = gr.find(y => y.l === k); if(!x) gr.push(x = { l: k, gastos: [], total: 0 }); x.gastos.push(g); x.total += g.m || 0; }); return gr; };
+  const LAPIZ = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/></svg>';
   function detalleHTML(q){
     if(!q) return "";
     const largo = new Date(q.fecha + "T12:00:00").toLocaleDateString("es-CO", { weekday: "long", day: "numeric", month: "long" });
     const gr = porLugar(q), ef = q.gastos.filter(EF).reduce((a, g) => a + (g.m || 0), 0);
-    return '<div class="emaDetCab"><span>' + esc(largo) + '</span><b>' + peso(q.total) + '</b></div>' +
+    return '<div class="emaDetCab"><span>' + esc(largo) + '</span><b>' + peso(q.total) + '</b><button type="button" class="emaLapiz" data-editar="' + esc(q.fecha) + '" aria-label="Editar lo anotado el ' + esc(largo) + '" title="Editar lo anotado">' + LAPIZ + '</button></div>' +
       (gr.length > 1
         ? gr.map(x => '<div class="emaGrupo"><div class="emaGrupoCab"><span>📍 ' + esc(x.l || "Sin lugar") + '</span><b>' + peso(x.total) + '</b></div><div class="emaGastos">' + x.gastos.map(g => gastoHTML(g, true)).join("") + '</div></div>').join("")
         : (gr[0] && gr[0].l ? '<div class="emaGrupoCab solo"><span>📍 ' + esc(gr[0].l) + '</span></div>' : '') + '<div class="emaGastos">' + q.gastos.map(g => gastoHTML(g, true)).join("") + '</div>') +
       (ef ? '<p class="emaEfNota">💵 ' + peso(ef) + ' en efectivo · no se descuenta del fondo</p>' : '') +
-      '<button type="button" class="emaAgregar" data-agregar="' + esc(q.fecha) + '"><span>+ Agregar a esta salida</span><small>algo que faltó u otro lugar del día</small></button>';
+      '<button type="button" class="emaAgregar" data-otra><span>+ Agregar otra salida</span><small>con su fecha y su lugar, desde cero</small></button>';   // emaE: lo que faltó en este día se suma desde el lápiz
   }
 
   /* el mes de hoy con lo que espera conexión en la cola (gastos «Con Ema» de movimiento-nuevo), sin tocar «datos» */
@@ -6322,8 +6343,9 @@ const SalidasEma = (function(){
     if(e.target.closest("[data-lmas]")){ lugTodos = !lugTodos; pintaLug(false); const v = stage.querySelector(".elVer"); if(v) v.focus({ preventScroll: true }); return; }
     const lg = e.target.closest("[data-lugar]");
     if(lg){ fichaLugar(lugVista[+lg.dataset.lugar], lg); return; }
-    const ag = e.target.closest("[data-agregar]");
-    if(ag){ SalidaEmaForm.abrir({ fecha: ag.dataset.agregar, agregar: true, salida: salidaDe(ag.dataset.agregar) }); return; }   // misma fecha; pregunta si es algo que faltó en un lugar ya anotado o un lugar nuevo
+    const ed = e.target.closest("[data-editar]");
+    if(ed){ SalidaEmaEditar.abrir(ed.dataset.editar); return; }   // emaE: lo anotado ese día, para cambiarlo o sumarle algo
+    if(e.target.closest("[data-otra]")){ SalidaEmaForm.abrir(); return; }   // otra salida: el formulario completo (fecha y lugar)
     const c = e.target.closest(".emaDiaChip"); if(!c || c.classList.contains("on")) return;
     abierta = c.dataset.f;
     stage.querySelectorAll(".emaDiaChip").forEach(x => { const on = x === c; x.classList.toggle("on", on); x.setAttribute("aria-pressed", String(on)); });
@@ -6344,10 +6366,11 @@ const SalidasEma = (function(){
       if(!res.ok) throw new Error("http " + res.status);
       const d = await res.json();
       if(!d || !Array.isArray(d.meses)) throw new Error("formato");
+      edPend().forEach(x => editaEn(d, x));   // emaE: cambios que esperan conexión
       const cambio = JSON.stringify(d) !== JSON.stringify(datos);
       datos = d; try{ localStorage.setItem(KEY, JSON.stringify(d)); }catch{}
       statusEl.innerHTML = "";
-      if(cambio) pinta(!stage.firstChild);
+      if(cambio){ pinta(!stage.firstChild); try{ document.dispatchEvent(new Event("ema-datos")); }catch{} }
       equilibrio();
       setTimeout(pidePuntaje, 400);
     }catch{
@@ -6430,6 +6453,29 @@ const SalidasEma = (function(){
     });
   }
   function nueva(){ charla = null; askEl.innerHTML = ""; abierta = null; }
+  /* emaE: aplica a «d» el cambio de un gasto ({ id, accion: "editar"|"borrar", concepto, monto, medio }) y rehace los totales */
+  function editaEn(d, e){
+    if(!d || !e || !e.id) return false;
+    let hecho = false;
+    ((d && d.meses) || []).forEach(m => { (m.salidas || []).forEach(s => {
+      const i = (s.gastos || []).findIndex(g => g.id === e.id); if(i < 0) return;
+      const g = s.gastos[i], antes = g.m || 0, efAntes = EF(g) ? antes : 0;
+      if(e.accion === "borrar") s.gastos.splice(i, 1);
+      else { if(e.concepto) g.c = e.concepto; if(e.monto > 0) g.m = e.monto; g.medio = e.medio === "efectivo" ? "efectivo" : "digital"; }
+      const ahora = e.accion === "borrar" ? 0 : g.m, efAhora = e.accion === "borrar" || !EF(g) ? 0 : g.m;
+      s.total = (s.total || 0) + ahora - antes; m.total = (m.total || 0) + ahora - antes;
+      if(s.efectivo != null) s.efectivo += efAhora - efAntes; if(m.efectivo != null) m.efectivo += efAhora - efAntes;
+      delete s.paradas;   // se vuelven a agrupar por lugar con los gastos
+      hecho = true;
+    }); const n = (m.salidas || []).length; m.salidas = (m.salidas || []).filter(s => s.gastos && s.gastos.length); if(m.salidas.length !== n){ m.dias = m.salidas.map(s => s.fecha); m.veces = m.salidas.length; } });
+    return hecho;
+  }
+  const edPend = () => { try{ return (JSON.parse(localStorage.getItem("armoni.cola")) || []).filter(x => String(x.url).includes("movimiento-editar")).map(x => JSON.parse(x.body)); }catch{ return []; } };
+  function edita(e){
+    if(!editaEn(datos, e)) return;
+    try{ localStorage.setItem(KEY, JSON.stringify(datos)); }catch{}
+    pinta(false);
+  }
 
   /* ── el guía: recibe la lista de lugares y el costo de cada salida, y recomienda según lo que pidas ── */
   function contexto(){
@@ -6488,7 +6534,7 @@ const SalidasEma = (function(){
     })));
     return Object.values(c).sort((a, b) => b.n - a.n).map(x => x.nombre);
   };
-  return { refresh, nueva, preguntar, lugares, nombres, precarga, frecuentes, salidaDe, esEfectivo: EF };
+  return { refresh, nueva, preguntar, lugares, nombres, precarga, frecuentes, salidaDe, esEfectivo: EF, edita };
 })();
 
 /* ════════════════════════════════════════════════════════════
@@ -7084,6 +7130,7 @@ const SalidaEmaForm = (function(){
     const nuevaParada = () => ({ lugar: "", puntuacion: 0, comentario: "", gastos: [], preguntado: false, fija: false });
     paradas.push(nuevaParada());
     const ag = !!(opts && opts.agregar && opts.fecha);   // «Agregar a esta salida»: la fecha ya está; no se vuelve a preguntar ni el día ni el lugar
+    const inicio = !ag ? "lugar" : opts.otroLugar ? "lugar" : opts.enLugar != null ? "gastos" : "elige";   // emaE: el lápiz puede entrar directo a un lugar ya anotado o a «otro lugar»
     const ya = ag ? ((opts && opts.salida) || SalidasEma.salidaDe(fecha)) : null;
     const yaLugares = (() => { const gr = []; ((ya && ya.gastos) || []).forEach(g => { const k = g.l || ""; let x = gr.find(y => y.l === k); if(!x) gr.push(x = { l: k, cosas: [], total: 0 }); x.cosas.push(g); x.total += g.m || 0; }); return gr; })();
     const yaDe = nombre => yaLugares.find(x => normL(x.l) === normL(nombre)) || null;
@@ -7117,13 +7164,14 @@ const SalidaEmaForm = (function(){
     const nombreLugar = p => (p.lugar.trim() && (conocido(p.lugar) || p.lugar.trim())) || (p.fija ? "esta salida" : "ese lugar");
     const efectivo = lista => lista.filter(ES_EF).reduce((a, g) => a + g.m, 0);
 
-    const cierra = () => { document.removeEventListener("keydown", tecla); scrim.classList.remove("on"); setTimeout(() => { scrim.remove(); abierta = false; }, 340); };
+    const cierra = () => { document.removeEventListener("keydown", tecla); scrim.classList.remove("on"); setTimeout(() => { scrim.remove(); abierta = false; if(opts && opts.alCerrar) opts.alCerrar(); }, 340); };   // alCerrar: vuelve a «Editar salida»
     const hayDatos = () => paradas.some(q => q.lugar.trim() || validos(q).length);   // si ya escribiste algo, un toque afuera no lo tira
     const tecla = e => { if(e.key === "Escape" && !guardando && !hayDatos()) cierra(); };
     document.addEventListener("keydown", tecla);
     scrim.addEventListener("click", e => { if(e.target === scrim && !guardando && !hayDatos()) cierra(); });
     atras.addEventListener("click", () => {
       if(guardando) return;
+      if(ag && idx === 0 && paso === inicio){ cierra(); return; }   // emaE: «Volver» en el primer paso cierra (y regresa al lápiz si vino de ahí)
       if(paso === "gastos") ir(P().fija ? "elige" : "lugar", -1);
       else if(paso === "parqueo") ir("gastos", -1);
       else if(paso === "resumen"){ ir("gastos", -1); }
@@ -7379,9 +7427,165 @@ const SalidaEmaForm = (function(){
       }
     }
 
-    ir(ag ? "elige" : "lugar", 1);
+    if(ag && opts.enLugar != null){ paradas[0].lugar = String(opts.enLugar); paradas[0].fija = true; paradas[0].preguntado = true; }   // algo que faltó en un lugar ya anotado
+    ir(inicio, 1);
   }
   document.getElementById("emaView").addEventListener("click", e => { if(e.target.closest(".emaMas")) abrir(); });
+  return { abrir, categoria: c => ES_COMIDA.test(c) ? "Salidas" : "Salidas Ema" };   // categoria: la misma regla con la que se guarda (para cuando se edita «en qué»)
+})();
+
+/* ════════════════════════════════════════════════════════════
+   EDITAR UNA SALIDA CON EMA (el lápiz del detalle): lo ya anotado ese día, lugar por lugar.
+   Tocar un gasto lo abre para cambiar cuánto, en qué y si fue digital o efectivo, o para borrarlo (tarjeta confirmaBorrar).
+   Desde aquí también se suma algo que faltó u otro lugar del mismo día (el formulario de siempre, ya con la fecha).
+   n8n: movimiento-editar (PATCH a la página de Notion; borrar = papelera). Sin conexión queda en la cola (Cola.post).
+   ════════════════════════════════════════════════════════════ */
+const SalidaEmaEditar = (function(){
+  let abierta = false;
+  const esc = t => String(t == null ? "" : t).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const peso = n => "$" + Math.round(n).toLocaleString("es-CO");
+  const fechaLarga = f => { const t = new Date(f + "T12:00:00").toLocaleDateString("es-CO", { weekday: "long", day: "numeric", month: "long" }); return t.charAt(0).toUpperCase() + t.slice(1); };
+  const fechaCorta = f => new Date(f + "T12:00:00").toLocaleDateString("es-CO", { day: "numeric", month: "short" }).replace(".", "");
+  const emo = c => /parqu/i.test(c) ? "🅿️" : /almuer|comida|restaur|desayun|cena|pizza|hamburg/i.test(c) ? "🍽️" : /helad|postre|crepe|dulce/i.test(c) ? "🍦" : /juego|ficha|lego|arkadia|salto|inflable/i.test(c) ? "🎮" : /entrada|boleta|cine|museo|zoo/i.test(c) ? "🎟️" : /uber|taxi|gasolina|transporte/i.test(c) ? "🚗" : "✨";
+  const LAPIZ = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/></svg>';
+  const EF = g => !!g && g.medio === "efectivo";
+  const porLugar = q => { const gr = []; ((q && q.gastos) || []).forEach(g => { const k = g.l || ""; let x = gr.find(y => y.l === k); if(!x) gr.push(x = { l: k, gastos: [], total: 0 }); x.gastos.push(g); x.total += g.m || 0; }); return gr; };
+
+  async function envia(cuerpo){
+    const r = await Cola.post(MOVIMIENTO_EDITAR_URL, { method: "POST", body: JSON.stringify(Object.assign({ token: MERCADO_TOKEN }, cuerpo)) }, true);
+    const j = await r.json().catch(() => ({}));
+    if(r.status === 404) throw Object.assign(new Error("flujo"), { aviso: "Falta importar y activar el flujo «movimiento-editar» en n8n." });
+    if(!r.ok || j.ok === false) throw Object.assign(new Error(j.error || "http"), { aviso: j.error === "no-existe" ? "Ese gasto ya no está en Notion. Cierra y vuelve a abrir Salidas para ver lo último." : "No se pudo guardar. Revisa tu internet y que Tailscale esté encendido." });
+    return j;
+  }
+
+  function abrir(fecha){
+    if(abierta || !/^\d{4}-\d{2}-\d{2}$/.test(fecha || "") || !SalidasEma.salidaDe(fecha)) return;
+    abierta = true;
+    let vistaAct = "lista", guardando = false, resalta = null;
+    const scrim = document.createElement("div");
+    scrim.className = "pgScrim seScrim eeScrim";
+    scrim.innerHTML =
+      '<div class="inWrap"><div class="pgCard inCard seCard fmCard fm-ema" role="dialog" aria-modal="true" aria-labelledby="eeT">' +
+        FormArmoni.cabeza("ema", "eeT", "Editar salida", '<span id="eeSub">' + esc(fechaLarga(fecha)) + '</span>') +
+        '<div class="inBody seVista"><div class="sePaso" id="eePaso"></div></div>' +
+        '<div class="pgRow" id="eeBotones"></div>' +
+      '</div></div>';
+    document.body.appendChild(scrim);
+    requestAnimationFrame(() => scrim.classList.add("on"));
+    const $ = id => scrim.querySelector("#" + id);
+    const vista = $("eePaso"), botones = $("eeBotones"), atras = scrim.querySelector(".fmVolver");
+    scrim.querySelector(".fmOrb").innerHTML = '<span class="fmEmo">' + FOTO_EMA + '</span>';
+    const salida = () => SalidasEma.salidaDe(fecha);
+    const desliza = dir => { vista.className = "sePaso " + (dir < 0 ? "deIzq" : "deDer"); void vista.offsetWidth; vista.classList.add("entra"); scrim.querySelector(".seVista").scrollTop = 0; };
+
+    const cierra = luego => {
+      document.removeEventListener("keydown", tecla); document.removeEventListener("ema-datos", alCambiar);
+      scrim.classList.remove("on");
+      setTimeout(() => { scrim.remove(); abierta = false;
+        if(luego) luego();
+        else { const l = document.querySelector('.emaLapiz[data-editar="' + fecha + '"]'); if(l) l.focus({ preventScroll: true }); }
+      }, 340);
+    };
+    const tecla = e => { if(e.key !== "Escape" || guardando || document.querySelector(".bdScrim")) return; if(vistaAct === "gasto") pintaLista(-1); else cierra(); };
+    const alCambiar = () => { if(vistaAct === "lista" && !guardando) pintaLista(0); };   // llegaron datos nuevos de n8n (por ejemplo, lo que acabas de sumar)
+    document.addEventListener("keydown", tecla);
+    document.addEventListener("ema-datos", alCambiar);
+    scrim.addEventListener("click", e => { if(e.target === scrim && vistaAct === "lista" && !guardando) cierra(); });
+    atras.addEventListener("click", () => { if(guardando) return; if(vistaAct === "gasto") pintaLista(-1); else cierra(); });
+    /* sumar con el formulario de siempre; al cerrarlo se vuelve aquí */
+    const sumar = extra => cierra(() => SalidaEmaForm.abrir(Object.assign({ fecha, agregar: true, salida: salida(), alCerrar: () => { if(SalidasEma.salidaDe(fecha)) abrir(fecha); } }, extra)));
+
+    function pintaLista(dir){
+      vistaAct = "lista";
+      const q = salida();
+      if(!q || !q.gastos.length){ cierra(); return; }
+      const gr = porLugar(q), ef = q.gastos.filter(EF).reduce((a, g) => a + (g.m || 0), 0);
+      const sinId = q.gastos.some(g => !g.id && !g.pend);
+      if(dir) desliza(dir);
+      vista.innerHTML =
+        '<p class="seContexto">Toca un gasto para cambiarlo o borrarlo</p>' +
+        '<div class="fmMonto"><span class="fmMontoLbl">Total de la salida</span><span class="fmMontoIn"><b>$</b><span class="seTotN">' + Math.round(q.total).toLocaleString("es-CO") + '</span></span><i class="fmLinea" aria-hidden="true"></i></div>' +
+        gr.map(x => '<div class="eeGrupo" role="group" aria-label="' + esc(x.l || "Sin lugar") + '"><div class="seListaCab"><span>📍 ' + esc(x.l || (gr.length > 1 ? "Sin lugar" : "Esta salida")) + '</span><b>' + peso(x.total) + '</b></div>' +
+          x.gastos.map(g => { const ok = !!g.id && !g.pend;
+            return '<button type="button" class="seItem eeItem' + (ok && g.id === resalta ? ' nuevo' : '') + '"' + (ok ? ' data-id="' + esc(g.id) + '"' : ' aria-disabled="true"') +
+              ' aria-label="' + esc((ok ? "Editar " : "") + g.c + ", " + peso(g.m) + (EF(g) ? ", en efectivo" : "") + (g.pend ? ", por enviar" : "")) + '">' +
+              '<span class="seItemEmo" aria-hidden="true">' + emo(g.c) + '</span><span class="seItemTx"><b>' + esc(g.c) + '</b>' + (g.p ? '<small>pagado el ' + esc(fechaCorta(g.p)) + '</small> ' : '') + (EF(g) ? '<small class="seEf">💵 efectivo</small>' : '') + (g.pend ? '<small>por enviar</small>' : '') + '</span>' +
+              '<em>' + peso(g.m) + '</em>' + (ok ? '<span class="eeIrIco" aria-hidden="true">' + LAPIZ + '</span>' : '') + '</button>'; }).join("") + '</div>').join("") +
+        (ef ? '<p class="seEfNota">💵 ' + peso(ef) + ' en efectivo · no se descuenta del fondo</p>' : '') +
+        (sinId ? '<p class="eeAviso">Para cambiar lo anotado falta actualizar el flujo «salidas-ema» en n8n. Igual puedes sumarle cosas.</p>' : '') +
+        '<button type="button" class="seOtroLugar eeSumar" id="eeFalto"><span aria-hidden="true">＋</span> Sumar algo que faltó</button>' +
+        '<button type="button" class="seOtroLugar seAgOtro" id="eeOtro"><span aria-hidden="true">📍</span> Otro lugar este día<small>Una parada más ese mismo día</small></button>';
+      botones.innerHTML = '<button type="button" class="pgSi" id="eeListo">Listo</button>';
+      resalta = null;
+      $("eeListo").addEventListener("click", () => cierra());
+      $("eeFalto").addEventListener("click", () => { const lugs = porLugar(salida()); sumar(lugs.length === 1 ? { enLugar: lugs[0].l } : {}); });   // un solo lugar: directo a sus gastos; varios: «¿en cuál?»
+      $("eeOtro").addEventListener("click", () => sumar({ otroLugar: true }));
+      vista.querySelectorAll(".eeItem").forEach(b => b.addEventListener("click", () => {
+        if(!b.dataset.id){ avisoOk("Todavía no", "Ese gasto se puede editar cuando termine de enviarse."); return; }
+        const g = (salida().gastos || []).find(x => x.id === b.dataset.id); if(g) pintaGasto(g);
+      }));
+    }
+
+    function pintaGasto(g){
+      vistaAct = "gasto";
+      const e = { c: g.c, m: g.m, medio: EF(g) ? "efectivo" : "digital" };
+      desliza(1);
+      vista.innerHTML =
+        '<p class="seContexto">' + esc((g.l ? g.l + " · " : "") + fechaLarga(fecha)) + '</p>' +
+        '<label class="fmMonto" for="eeMonto"><span class="fmMontoLbl">¿Cuánto pagaron?</span><span class="fmMontoIn"><b>$</b><input id="eeMonto" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="0" autocomplete="off" aria-label="Valor" value="' + e.m.toLocaleString("es-CO") + '"></span><i class="fmLinea" aria-hidden="true"></i></label>' +
+        '<div class="seMedio" role="radiogroup" aria-label="¿Cómo lo pagaron?">' + [["digital", "💳", "Digital"], ["efectivo", "💵", "Efectivo"]].map(([k, i, t]) => '<button type="button" role="radio" data-medio="' + k + '" aria-checked="' + (e.medio === k) + '" tabindex="' + (e.medio === k ? 0 : -1) + '"><span aria-hidden="true">' + i + '</span>' + t + '</button>').join("") + '</div>' +
+        '<p class="seMedioNota"' + (e.medio === "efectivo" ? '' : ' hidden') + '>En efectivo: no se descuenta del fondo</p>' +
+        '<label class="inLbl" for="eeQue">¿En qué?</label><input id="eeQue" class="seLugarIn" type="text" maxlength="60" autocomplete="off" enterkeyhint="done" value="' + esc(e.c) + '">' +
+        '<p class="inErr" id="eeErr" role="alert"></p>';
+      botones.innerHTML = '<button type="button" class="pgNo eeBorrar" id="eeBorrar">' + ICO_CANECA + 'Borrar</button><button type="button" class="pgSi" id="eeGuardar" disabled>Guardar cambios</button>';
+      const mIn = $("eeMonto"), qIn = $("eeQue"), bG = $("eeGuardar"), bB = $("eeBorrar"), err = $("eeErr"), caja = vista.querySelector(".seMedio"), notaEf = vista.querySelector(".seMedioNota");
+      const cambio = () => e.c.trim() !== g.c || e.m !== g.m || e.medio !== (EF(g) ? "efectivo" : "digital");
+      const refresca = () => { bG.disabled = !(e.c.trim() && e.m > 0 && cambio()); };
+      const marca = () => { caja.querySelectorAll("[data-medio]").forEach(b => { const on = b.dataset.medio === e.medio; b.setAttribute("aria-checked", String(on)); b.tabIndex = on ? 0 : -1; }); notaEf.hidden = e.medio !== "efectivo"; refresca(); };
+      caja.addEventListener("click", ev => { const b = ev.target.closest("[data-medio]"); if(b){ e.medio = b.dataset.medio; marca(); } });
+      caja.addEventListener("keydown", ev => { if(!/^Arrow(Left|Right|Up|Down)$/.test(ev.key)) return; ev.preventDefault(); e.medio = e.medio === "digital" ? "efectivo" : "digital"; marca(); caja.querySelector('[data-medio="' + e.medio + '"]').focus(); });
+      if(typeof ajustaMonto === "function") ajustaMonto(mIn);
+      mIn.addEventListener("input", () => { const d = mIn.value.replace(/\D/g, ""); e.m = d ? Number(d) : 0; mIn.value = e.m ? e.m.toLocaleString("es-CO") : ""; if(typeof ajustaMonto === "function") ajustaMonto(mIn); refresca(); });
+      qIn.addEventListener("input", () => { e.c = qIn.value; refresca(); });
+      [mIn, qIn].forEach(x => x.addEventListener("keydown", ev => { if(ev.key === "Enter"){ ev.preventDefault(); if(!bG.disabled) bG.click(); else if(x === mIn) qIn.focus(); } }));
+      bG.addEventListener("click", async () => {
+        if(bG.disabled || guardando) return;
+        const c = e.c.trim().replace(/\s+/g, " ").slice(0, 80);
+        const cuerpo = { id: g.id, accion: "editar", concepto: c, monto: e.m, medio: e.medio };
+        if(c.toLowerCase() !== g.c.toLowerCase()) cuerpo.categoria = SalidaEmaForm.categoria(c);   // cambió en qué fue: comer afuera = Salidas, lo demás = Salidas Ema
+        guardando = true; bG.disabled = bB.disabled = true; bG.textContent = "Guardando…"; err.textContent = "";
+        try{
+          const j = await envia(cuerpo);
+          SalidasEma.edita(cuerpo); resalta = g.id;
+          guardando = false;
+          avisoOk(j.enCola ? "Quedó en el celular" : "Listo", j.enCola ? "El cambio se envía cuando haya conexión" : c + " · " + peso(e.m) + (e.medio === "efectivo" ? " en efectivo" : ""));
+          pintaLista(-1);
+        }catch(x){
+          guardando = false; bG.textContent = "Guardar cambios"; bB.disabled = false; refresca();
+          err.textContent = (x && x.aviso) || "No se pudo guardar. Revisa tu internet y que Tailscale esté encendido.";
+        }
+      });
+      bB.addEventListener("click", async () => {
+        if(guardando) return;
+        let j = {};
+        const ok = await confirmaBorrar({
+          titulo: "¿Borrar «" + g.c + "»?",
+          detalle: peso(g.m) + (g.l ? " en " + g.l : "") + " · " + fechaLarga(fecha) + ". Se quita de esta salida y queda en la papelera de Notion (de ahí se puede recuperar).",
+          boton: "Borrar gasto",
+          accion: async () => { j = await envia({ id: g.id, accion: "borrar", concepto: "Borrar · " + g.c }); }
+        });
+        if(!ok) return;
+        SalidasEma.edita({ id: g.id, accion: "borrar" });
+        avisoOk(j.enCola ? "Quedó en el celular" : "Borrado", j.enCola ? "Se borra cuando haya conexión" : g.c + " ya no está en la salida");
+        pintaLista(-1);
+      });
+      setTimeout(() => mIn.focus({ preventScroll: true }), 380);
+    }
+
+    pintaLista(1);
+    setTimeout(() => { const b = vista.querySelector(".eeItem"); if(b) b.focus({ preventScroll: true }); }, 380);
+  }
   return { abrir };
 })();
 

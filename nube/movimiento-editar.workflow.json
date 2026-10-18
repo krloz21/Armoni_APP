@@ -1,0 +1,463 @@
+{
+  "name": "Movimiento - Editar (salidas con Ema)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "movimiento-editar",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "e5e5e5e5-0001-4eee-8eee-000000000001",
+      "name": "Recibir",
+      "webhookId": "e5e5e5e5-0002-4eee-8eee-000000000002"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Edita o borra un gasto ya guardado de una salida con Ema (el lápiz de la app)\nconst TOKEN = 'mercado-7d41c2a9e05b';\nlet b = $input.first().json.body;\nif (typeof b === 'string') { try { b = JSON.parse(b); } catch (e) { b = {}; } }\nb = b || {};\nconst falla = (error) => [{ json: { ok: false, error } }];\nif (b.token !== TOKEN) return falla('token');\nconst id = String(b.id || '').trim();\nif (!/^[0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12}$/i.test(id)) return falla('id');\nconst accion = b.accion === 'borrar' ? 'borrar' : b.accion === 'editar' ? 'editar' : '';\nif (!accion) return falla('accion');\nif (accion === 'borrar') return [{ json: { ok: true, id, accion } }];\nconst concepto = String(b.concepto || '').replace(/[<>{}\\[\\]]/g, ' ').replace(/\\s+/g, ' ').trim().slice(0, 80);\nif (!concepto) return falla('concepto');\nconst monto = Math.round(Number(b.monto));\nif (!(monto > 0) || monto > 100000000) return falla('monto');\n// «medio»: digital (sale de la cuenta) o efectivo (Monto 0 y el valor en «Efectivo», igual que movimiento-nuevo)\nconst medio = String(b.medio || '').toLowerCase() === 'efectivo' ? 'efectivo' : 'digital';\nconst categoria = ['Salidas', 'Salidas Ema'].includes(b.categoria) ? b.categoria : '';\nreturn [{ json: { ok: true, id, accion, concepto, monto, medio, categoria } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        220,
+        0
+      ],
+      "id": "e5e5e5e5-0003-4eee-8eee-000000000003",
+      "name": "Validar cambio"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "ok4",
+              "leftValue": "={{ $json.ok }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        440,
+        0
+      ],
+      "id": "e5e5e5e5-0004-4eee-8eee-000000000004",
+      "name": "¿Es válido?"
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "=https://api.notion.com/v1/pages/{{ $json.id }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "notionApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Notion-Version",
+              "value": "2022-06-28"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        660,
+        -100
+      ],
+      "id": "e5e5e5e5-0005-4eee-8eee-000000000005",
+      "name": "Leer movimiento",
+      "credentials": {
+        "notionApi": {
+          "id": "pgk4uKXwaEEnuyRO",
+          "name": "Notion account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Con la página actual de Notion arma el cambio. Solo toca gastos de salidas con Ema (así un id equivocado no cambia otra cosa)\nconst v = $('Validar cambio').first().json;\nconst pg = $input.first().json || {};\nconst falla = (error) => [{ json: { ok: false, error } }];\n// Notion no la encuentra (borrada o id malo) → 400; Notion caída o sin permiso de momento → 502 y la cola de la app reintenta\nif (pg.object !== 'page' || !pg.properties) return falla(/404|object_not_found|400|validation/i.test(JSON.stringify(pg.error || '')) || !pg.error ? 'no-existe' : 'notion');\nconst pr = pg.properties;\nconst sel = (n) => pr[n] && pr[n].select ? pr[n].select.name : null;\nconst txt = (a) => ((a || []).map(t => t.plain_text).join('') || '').trim();\nconst esEma = sel('Salida') === 'Con Ema' || sel('Categoría') === 'Salidas Ema';\nif (sel('Tipo') !== 'Gasto' || !esEma) return falla('no-es-salida');\nconst enPapelera = !!(pg.archived || pg.in_trash);\n// borrar = a la papelera de Notion (de ahí se puede recuperar)\nif (v.accion === 'borrar') return [{ json: { ok: true, id: v.id, accion: 'borrar', yaEstaba: enPapelera, cuerpo: { archived: true } } }];\nif (enPapelera) return falla('no-existe');\nconst ef = v.medio === 'efectivo';\n// regla del efectivo: Monto 0 (no toca la cuenta) y el valor en «Efectivo». Digital: el valor en Monto y «Efectivo» vacío\nconst props = { Concepto: { title: [{ text: { content: v.concepto } }] }, Monto: { number: ef ? 0 : v.monto } };\nif (pr.Efectivo || ef) props.Efectivo = { number: ef ? v.monto : null };\n// cambió en qué fue: comer afuera = Salidas; entradas, juegos, parqueadero = Salidas Ema (como lo guarda la app)\nconst cat = sel('Categoría');\nif (v.categoria && cat !== v.categoria && ['Salidas', 'Salidas Ema'].includes(cat)) {\n  props['Categoría'] = { select: { name: v.categoria } };\n  if (pr.Salida && sel('Salida') !== 'Con Ema') props.Salida = { select: { name: 'Con Ema' } };   // sigue siendo de la salida aunque deje de ser «Salidas Ema»\n}\n// la nota de efectivo que pone movimiento-nuevo se pone o se quita según el medio\nconst NOTA = 'Pagado en efectivo: no sale de la cuenta';\nconst antes = txt(pr.Notas && pr.Notas.rich_text);\nconst resto = antes.startsWith(NOTA) ? antes.slice(NOTA.length).replace(/^\\s*·\\s*/, '').trim() : antes;\nconst nueva = (ef ? NOTA + (resto ? ' · ' + resto : '') : resto).slice(0, 300);\nif (pr.Notas && nueva !== antes) props.Notas = { rich_text: nueva ? [{ text: { content: nueva } }] : [] };\nreturn [{ json: { ok: true, id: v.id, accion: 'editar', medio: v.medio, cuerpo: { properties: props } } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        880,
+        -100
+      ],
+      "id": "e5e5e5e5-0006-4eee-8eee-000000000006",
+      "name": "Armar cambio"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "ok7",
+              "leftValue": "={{ $json.ok }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1100,
+        -100
+      ],
+      "id": "e5e5e5e5-0007-4eee-8eee-000000000007",
+      "name": "¿Se puede?"
+    },
+    {
+      "parameters": {
+        "method": "PATCH",
+        "url": "=https://api.notion.com/v1/pages/{{ $json.id }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "notionApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Notion-Version",
+              "value": "2022-06-28"
+            }
+          ]
+        },
+        "options": {},
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.cuerpo) }}"
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        1320,
+        -200
+      ],
+      "id": "e5e5e5e5-0008-4eee-8eee-000000000008",
+      "name": "Guardar en Notion",
+      "credentials": {
+        "notionApi": {
+          "id": "pgk4uKXwaEEnuyRO",
+          "name": "Notion account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "// ¿Notion lo guardó? (si Notion falla, la app recibe 502 y la cola lo reintenta después)\nconst r = $input.first().json || {};\nconst a = $('Armar cambio').first().json;\nif (r.object !== 'page') return [{ json: { ok: false, error: 'notion' } }];\nreturn [{ json: { ok: true, id: a.id, accion: a.accion, medio: a.medio || null } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1540,
+        -200
+      ],
+      "id": "e5e5e5e5-0009-4eee-8eee-000000000009",
+      "name": "¿Quedó?"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "ok10",
+              "leftValue": "={{ $json.ok }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1760,
+        -200
+      ],
+      "id": "e5e5e5e5-0010-4eee-8eee-000000000010",
+      "name": "¿Guardó?"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { ok: true, id: $json.id, accion: $json.accion, medio: $json.medio } }}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        1980,
+        -300
+      ],
+      "id": "e5e5e5e5-0011-4eee-8eee-000000000011",
+      "name": "Responder bien"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { ok: false, error: $json.error } }}",
+        "options": {
+          "responseCode": 400
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        1320,
+        100
+      ],
+      "id": "e5e5e5e5-0012-4eee-8eee-000000000012",
+      "name": "Responder error"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "ok14",
+              "leftValue": "={{ $json.error === 'notion' }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1320,
+        0
+      ],
+      "id": "e5e5e5e5-0014-4eee-8eee-000000000014",
+      "name": "¿Falla de Notion?"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { ok: false, error: $json.error } }}",
+        "options": {
+          "responseCode": 502
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        1980,
+        -100
+      ],
+      "id": "e5e5e5e5-0013-4eee-8eee-000000000013",
+      "name": "Responder falla Notion"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Recibir": {
+      "main": [
+        [
+          {
+            "node": "Validar cambio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validar cambio": {
+      "main": [
+        [
+          {
+            "node": "¿Es válido?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Es válido?": {
+      "main": [
+        [
+          {
+            "node": "Leer movimiento",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Responder error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Leer movimiento": {
+      "main": [
+        [
+          {
+            "node": "Armar cambio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Armar cambio": {
+      "main": [
+        [
+          {
+            "node": "¿Se puede?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Se puede?": {
+      "main": [
+        [
+          {
+            "node": "Guardar en Notion",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "¿Falla de Notion?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Falla de Notion?": {
+      "main": [
+        [
+          {
+            "node": "Responder falla Notion",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Responder error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Guardar en Notion": {
+      "main": [
+        [
+          {
+            "node": "¿Quedó?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Quedó?": {
+      "main": [
+        [
+          {
+            "node": "¿Guardó?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Guardó?": {
+      "main": [
+        [
+          {
+            "node": "Responder bien",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Responder falla Notion",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": []
+}
