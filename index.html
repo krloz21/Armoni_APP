@@ -2443,28 +2443,28 @@ body.mode-mercar:has(#mkStage .mcTop) #thread{ -webkit-mask-image:none; mask-ima
 .ddRedSvg .hub .et{ font-size:10.5px; fill:var(--white); paint-order:stroke; stroke:var(--void); stroke-width:3.5px; stroke-linejoin:round; }
 .ddRedSvg .hub.on .disco{ fill:var(--c); }
 .ddRedSvg .hub.on .num{ fill:var(--void); }
-/* ── Armoni, el núcleo: sobrio y elegante. Solo 3 movimientos suaves (respira, una onda, un arco lento) y nada más ── */
-.ddRedSvg .core .aura{ fill:url(#ddAura); transform-origin:0 0; animation:ddRespira 5.5s ease-in-out infinite; }
-@keyframes ddRespira{ 0%,100%{ opacity:.7; transform:scale(.96); } 50%{ opacity:1; transform:scale(1.04); } }
-.ddRedSvg .core .onda{ fill:none; stroke:#ffb066; stroke-width:.7; opacity:0; transform-origin:0 0; animation:ddOndaCore 5.5s cubic-bezier(.2,.6,.3,1) infinite; }
-@keyframes ddOndaCore{ 0%{ opacity:0; transform:scale(1); } 8%{ opacity:.55; } 100%{ opacity:0; transform:scale(2.5); } }
+/* ── Armoni, el núcleo: una esfera de cristal que respira (un solo movimiento suave) ── */
+.ddRedSvg .core .aura{ fill:url(#ddAura); transform-origin:0 0; animation:ddRespira 6s ease-in-out infinite; }
+@keyframes ddRespira{ 0%,100%{ opacity:.75; transform:scale(.97); } 50%{ opacity:1; transform:scale(1.04); } }
 .ddRedSvg .core .boom{ fill:none; stroke:#ffe0b8; stroke-width:1.4; opacity:0; transform-origin:0 0; }
 .ddRedSvg .core .late{ transform-origin:0 0; }
 .ddRedSvg .core .nucleo{ fill:url(#ddNucleo); }
-.ddRedSvg .core .aA{ fill:none; stroke:#ffb066; stroke-width:1.5; }
-.ddRedSvg .core .aB{ fill:none; stroke:#ffb066; stroke-opacity:.35; stroke-width:.8; stroke-dasharray:1.2 3.6; }
-.ddRedSvg .core .aC{ fill:none; stroke:#ffb066; stroke-opacity:.16; stroke-width:.8; }
-.ddRedSvg .core .arco{ fill:none; stroke:#ffd9a8; stroke-width:1.8; stroke-linecap:round; stroke-dasharray:22 154; transform-origin:0 0; animation:ddGira 16s linear infinite; }
-.ddRedSvg .core .sinapsis{ fill:#ffb066; opacity:.9; }
-.ddRedSvg .core text{ font:700 8.6px "Schibsted Grotesk", system-ui, sans-serif; fill:#ffcf99; text-anchor:middle; dominant-baseline:central; letter-spacing:.09em; text-transform:uppercase; }
+.ddRedSvg .core .cristalC{ fill:url(#ddCristal); }
+.ddRedSvg .core .aA{ fill:none; stroke:#ffb066; stroke-opacity:.85; stroke-width:1.2; }
+.ddRedSvg .core text{ font:700 8.6px "Schibsted Grotesk", system-ui, sans-serif; fill:#ffd9a8; text-anchor:middle; dominant-baseline:central; letter-spacing:.09em; text-transform:uppercase; }
 .ddRedSvg .core:focus-visible .aA{ stroke:#fff; stroke-width:2.2; }
-/* el cerebro de fondo (apenas se ve) y las dendritas de cada neurona */
-.svYa{ display:block; margin-top:2px; padding:8px 0 2px; border:0; background:none; color:inherit; opacity:.8; font:inherit; font-size:.76rem; text-decoration:underline; text-underline-offset:2px; cursor:pointer; }
-.ddRedSvg .cerebro path{ fill:none; stroke:rgba(var(--ink),.17); stroke-width:1; stroke-linecap:round; stroke-linejoin:round; }
-.ddRedSvg .cerebro .hem{ fill:rgba(var(--ink),.025); }
-.ddRedSvg .cerebro .giro2{ stroke:rgba(var(--ink),.10); }
-.ddRedSvg .dn{ fill:none; stroke:var(--c); stroke-opacity:.5; stroke-width:.8; stroke-linecap:round; }
-.ddRedSvg .hub .dn{ stroke-opacity:.45; stroke-width:1; }
+/* temas = esferas de cristal de su color; neuronas = puntos de luz; las líneas solo aparecen al entrar */
+/* sin líneas: a los círculos no les sale nada; la pertenencia se ve por el color y la cercanía */
+.ddRedSvg .ln, .ddRedSvg .cruz, .ddRedSvg .eje, .ddRedSvg .pulso{ display:none !important; }
+.ddRedSvg .mira path{ display:none; }
+.ddRedSvg .mira .md{ stroke-dasharray:none; stroke-opacity:.55; stroke-width:1.2; }
+.ddRedSvg .hub .disco{ fill:var(--c); fill-opacity:.2; stroke:var(--c); stroke-width:1.2; }
+.ddRedSvg .hub .cristal{ fill:url(#ddCristal); }
+.ddRedSvg .hub .brillo{ opacity:.14; }
+.ddRedSvg .hub .num{ fill:var(--white); font-size:11px; }
+.ddRedSvg .hub.on .disco{ fill-opacity:.9; }
+.ddRedSvg .nd .dot{ stroke:none; }
+.ddRedSvg .nd .halo{ opacity:.2; }
 .ddRedSvg.entra .core .esc{ animation:ddAparece .7s var(--ease-spring, ease) both; }
 .ddRedSvg.filtra .nd:not(.si) .esc{ opacity:.16; }
 .ddRedSvg.filtra .ln:not(.si), .ddRedSvg.filtra .pulso:not(.si){ stroke-opacity:.05; opacity:.05; }
@@ -2495,8 +2495,6 @@ body.mode-mercar:has(#mkStage .mcTop) #thread{ -webkit-mask-image:none; mask-ima
 .ddRed.vacio p{ position:relative; margin:-6px 20px 0; font-size:.86rem; color:var(--ghost); text-align:center; }
 .ddRedSvg .orb{ fill:none; stroke:rgba(var(--ink),.14); stroke-dasharray:3 5; }
 /* ── uxd · temas y neuronas con más vida ── */
-.ddRedSvg .hub .giro{ fill:none; stroke:var(--c); stroke-opacity:.5; stroke-width:.9; stroke-dasharray:1.4 4.1; }
-.ddRedSvg .hub.on .giro{ stroke-opacity:1; }
 @keyframes ddTwk{ 0%,100%{ opacity:.1; } 50%{ opacity:.3; } }
 .ddRedSvg .nd.sel .halo{ animation:ddSelHalo 1.6s ease-in-out infinite; }
 @keyframes ddSelHalo{ 0%,100%{ opacity:.3; } 50%{ opacity:.6; } }
@@ -4161,7 +4159,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-19.244";
+const APP_VERSION = "2026-10-19.246";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -9080,30 +9078,12 @@ const Preguntas = (function(){
   }
   /* ── Armoni, el núcleo (uxd): esfera con plasma, órbitas inclinadas a distintas velocidades, partículas, latido y ondas ── */
   const RED_DEFS = '<radialGradient id="ddAura"><stop offset="0" stop-color="#ffb066" stop-opacity=".30"/><stop offset=".55" stop-color="#ff8a50" stop-opacity=".09"/><stop offset="1" stop-color="#ff8a50" stop-opacity="0"/></radialGradient>' +
-    '<radialGradient id="ddNucleo" cx=".5" cy=".4" r=".75"><stop offset="0" stop-color="#2c2015"/><stop offset=".75" stop-color="#150f0a"/><stop offset="1" stop-color="#0b0805"/></radialGradient>';
-  /* el cerebro de fondo: dos hemisferios, la fisura del medio y unos pliegues; apenas se ve y no se mueve */
-  const CEREBRO = '<g class="cerebro" aria-hidden="true">' +
-    '<path class="hem" d="M178 30C150 20 102 26 68 58C34 90 24 138 30 184C36 232 70 276 118 296C146 308 166 304 178 294C172 240 184 196 172 150C164 112 176 70 178 30Z"/>' +
-    '<path class="hem" d="M182 30C210 20 258 26 292 58C326 90 336 138 330 184C324 232 290 276 242 296C214 308 194 304 182 294C188 240 176 196 188 150C196 112 184 70 182 30Z"/>' +
-    '<path class="giro2" d="M62 118C88 96 118 104 140 84M44 176C72 150 104 160 128 138M70 236C96 212 126 220 150 198M108 60C124 76 118 100 138 112M92 270C112 250 142 256 160 238"/>' +
-    '<path class="giro2" d="M298 118C272 96 242 104 220 84M316 176C288 150 256 160 232 138M290 236C264 212 234 220 210 198M252 60C236 76 242 100 222 112M268 270C248 250 218 256 200 238"/></g>';
-  /* las dendritas: unas ramitas finas alrededor de la neurona (la forma sale del texto, siempre la misma) */
-  const dendritas = (sem, cant, r0, largo, arriba) => {
-    let d = "";
-    for(let k = 0; k < cant; k++){
-      const a = arriba ? -Math.PI + (k + .5) / cant * Math.PI + (((sem >>> (k * 2)) % 7) - 3) * .035 : ((sem % 628) / 100) + k * 2 * Math.PI / cant + (((sem >>> (k * 3)) % 9) - 4) * .05;
-      const L = largo + ((sem >>> (6 + k * 3)) % 5), c = Math.cos(a), sn = Math.sin(a), q = ((sem >>> (k + 2)) % 2 ? 1 : -1) * L * .28;
-      d += "M" + (c * r0).toFixed(1) + " " + (sn * r0).toFixed(1) + "Q" + (c * (r0 + L * .55) - sn * q).toFixed(1) + " " + (sn * (r0 + L * .55) + c * q).toFixed(1) + " " + (c * (r0 + L)).toFixed(1) + " " + (sn * (r0 + L)).toFixed(1);
-    }
-    return '<path class="dn" d="' + d + '"/>';
-  };
+    '<radialGradient id="ddNucleo" cx=".5" cy=".4" r=".75"><stop offset="0" stop-color="#3a2a1b"/><stop offset=".75" stop-color="#1b130c"/><stop offset="1" stop-color="#100a06"/></radialGradient>' +
+    '<radialGradient id="ddCristal" cx=".34" cy=".26" r=".62"><stop offset="0" stop-color="#fff" stop-opacity=".42"/><stop offset=".55" stop-color="#fff" stop-opacity=".05"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>';
   const coreSVG = (x, y, boton) =>
     '<g class="core"' + (boton ? ' role="button" tabindex="0" aria-label="Armoni, el centro de la red. Toca para ver toda la red"' : ' aria-hidden="true"') + ' transform="translate(' + x + ' ' + y + ')"><g class="esc">' +
-    '<circle class="aura" r="58"/><circle class="onda" r="28"/><circle class="boom" r="28"/>' +
-    '<circle class="aC" r="40"/><circle class="aB" r="34"/>' +
-    '<g class="late"><circle class="nucleo" r="27"/><circle class="aA" r="27"/><circle class="arco" r="31" pathLength="176" transform="rotate(-70)"/>' +
-    '<circle class="sinapsis" cx="0" cy="-34" r="1.6"/><circle class="sinapsis" cx="29.4" cy="17" r="1.2"/><circle class="sinapsis" cx="-29.4" cy="17" r="1.2"/>' +
-    '<text>Armoni</text></g></g></g>';
+    '<circle class="aura" r="52"/><circle class="boom" r="27"/>' +
+    '<g class="late"><circle class="nucleo" r="27"/><circle class="cristalC" r="27"/><circle class="aA" r="27"/><text>Armoni</text></g></g></g>';
   /* números que se escriben, código que se descifra y texto que se teclea (solo con movimiento y sin reposo) */
   const efectoHolo = raiz => {
     if(REDUCED || document.body.classList.contains("asleep")) return;
@@ -9122,21 +9102,16 @@ const Preguntas = (function(){
     const ejes = P.hs.map(h => '<path class="eje" data-k="' + h.k + '" d="' + curva(C, h, .06) + '" style="--c:' + RED_C[h.k] + '"/>').join("");
     const lns = P.ns.map(n => '<path class="ln" data-i="' + n.i + '" d="' + curva(n.h, n, .12) + '" style="--c:' + RED_C[n.h.k] + '"/>' +
       n.tm.slice(1).filter(k => P.porK[k]).map(k => '<path class="cruz" data-i="' + n.i + '" data-tm="' + k + '" d="' + curva(n, P.porK[k], .18) + '" style="--c:' + RED_C[k] + '"/>').join("")).join("");
-    let pul = "";
-    if(!quieto){
-      pul += P.hs.map((h, i) => '<path class="pulso eje" data-k="' + h.k + '" pathLength="100" d="' + curva(C, h, .06) + '" style="--c:' + RED_C[h.k] + ';--d:' + (-(i * 1.3) % 4.6).toFixed(2) + 's"/>').join("");
-      const paso = Math.max(1, Math.ceil(P.ns.length / 10));
-      pul += P.ns.filter(n => nuevos.has(n.t) || n.i % paso === 0).slice(0, 6).map(n => '<path class="pulso' + (nuevos.has(n.t) ? ' nuevo' : '') + '" data-i="' + n.i + '" pathLength="100" d="' + curva(n.h, n, .12) + '" style="--c:' + RED_C[n.h.k] + ';--d:' + (-((hashT(n.t) % 46) / 10)).toFixed(1) + 's;--t:' + (4.2 + (hashT(n.t) % 9) / 10).toFixed(1) + 's"/>').join("");
-    }
+    const pul = "";
     const nds = P.ns.map(n => '<g class="nd' + (nuevos.has(n.t) ? ' nuevo' : '') + '" data-nd="' + n.i + '" role="button" tabindex="0" aria-pressed="false" aria-label="' + esc(RED_N[n.tm[0]] + ': ' + n.t) + '" transform="translate(' + f(n.x) + ' ' + f(n.y) + ')" style="--c:' + RED_C[n.h.k] + ';--i:' + n.i + '">' +
-      '<circle class="hit" r="13"/><g class="esc">' + dendritas(hashT(n.t), 4, 4.4, 5, false) + '<circle class="halo" r="8"/><circle class="anillo" r="6"/><circle class="dot" r="' + (n.tm.length > 1 ? 4.4 : 3.7) + '"/></g></g>').join("");
+      '<circle class="hit" r="13"/><g class="esc"><circle class="halo" r="7.5"/><circle class="anillo" r="6"/><circle class="dot" r="' + (n.tm.length > 1 ? 4.2 : 3.5) + '"/></g></g>').join("");
     const hubs = P.hs.map(h => '<g class="hub" data-hub="' + h.k + '" role="button" tabindex="0" aria-pressed="false" aria-label="' + esc("Tema " + RED_N[h.k] + ", " + h.todos + (h.todos === 1 ? " cosa" : " cosas") + ". Toca para entrar") + '" transform="translate(' + f(h.x) + ' ' + f(h.y) + ')" style="--c:' + RED_C[h.k] + ';--i:' + h.i + '">' +
-      '<g class="esc">' + dendritas(hashT(h.k), 7, 14.5, 7, true) + '<circle class="brillo" r="20"/><circle class="giro" r="17.5"/><circle class="disco" r="13.5"/><text class="num">' + h.todos + '</text><text class="et" y="25">' + RED_N[h.k] + '</text></g></g>').join("");
+      '<g class="esc"><circle class="brillo" r="22"/><circle class="disco" r="14.5"/><circle class="cristal" r="14.5"/><text class="num">' + h.todos + '</text><text class="et" y="25">' + RED_N[h.k] + '</text></g></g>').join("");
     const core = coreSVG(P.cx, P.cy, true);
     const mira = '<g class="mira" aria-hidden="true"><g class="mz"><path d="M-30 -18V-30H-18M18 -30H30V-18M30 18V30H18M-18 30H-30V18"/><circle class="md" r="22"/><path class="mx" d="M-40 0h6M34 0h6M0 -40v6M0 34v6"/><text class="mt" x="31" y="-35"></text></g></g>';
     return '<svg class="ddRedSvg" viewBox="0 ' + f(P.y0) + ' ' + P.W + ' ' + f(P.alto) + '" role="group" aria-label="Red de lo que Armoni ha aprendido: ' + P.ns.length + ' cosas en ' + P.hs.length + ' temas">' +
       '<defs>' + RED_DEFS + '</defs>' +
-      CEREBRO + '<g>' + ejes + lns + '</g><g>' + pul + '</g>' + core + '<g>' + hubs + '</g><g>' + nds + '</g>' + mira + '</svg>';
+      '<g>' + ejes + lns + '</g><g>' + pul + '</g>' + core + '<g>' + hubs + '</g><g>' + nds + '</g>' + mira + '</svg>';
   }
   const temasDe = t => { const r = TEMAS.filter(x => x[2].test(t)).map(x => x[0]); return r.length ? r : ["otros"]; };
   /* lo que Armoni ha aprendido de nuestras respuestas (copia en el celular por si se reinstala el flujo) */
