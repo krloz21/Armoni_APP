@@ -2454,10 +2454,11 @@ body.mode-mercar:has(#mkStage .mcTop) #thread{ -webkit-mask-image:none; mask-ima
 .ddRedSvg .core text{ font:700 8.6px "Schibsted Grotesk", system-ui, sans-serif; fill:#ffd9a8; text-anchor:middle; dominant-baseline:central; letter-spacing:.09em; text-transform:uppercase; }
 .ddRedSvg .core:focus-visible .aA{ stroke:#fff; stroke-width:2.2; }
 /* temas = esferas de cristal de su color; neuronas = puntos de luz; las líneas solo aparecen al entrar */
-/* sin líneas: a los círculos no les sale nada; la pertenencia se ve por el color y la cercanía */
-.ddRedSvg .ln, .ddRedSvg .cruz, .ddRedSvg .eje, .ddRedSvg .pulso{ display:none !important; }
-.ddRedSvg .mira path{ display:none; }
-.ddRedSvg .mira .md{ stroke-dasharray:none; stroke-opacity:.55; stroke-width:1.2; }
+/* las conexiones: finas y suaves, de Armoni a cada tema y de cada tema a sus neuronas (sin ramitas saliendo de los círculos) */
+.ddRedSvg .ln{ stroke-opacity:.34; stroke-width:.9; }
+.ddRedSvg .eje{ stroke-opacity:.4; stroke-width:1.3; }
+.ddRedSvg .cruz{ stroke-opacity:.2; }
+.ddRedSvg .mira .mx{ display:none; }
 .ddRedSvg .hub .disco{ fill:var(--c); fill-opacity:.2; stroke:var(--c); stroke-width:1.2; }
 .ddRedSvg .hub .cristal{ fill:url(#ddCristal); }
 .ddRedSvg .hub .brillo{ opacity:.14; }
@@ -4159,7 +4160,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-19.246";
+const APP_VERSION = "2026-10-19.247";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -9102,7 +9103,12 @@ const Preguntas = (function(){
     const ejes = P.hs.map(h => '<path class="eje" data-k="' + h.k + '" d="' + curva(C, h, .06) + '" style="--c:' + RED_C[h.k] + '"/>').join("");
     const lns = P.ns.map(n => '<path class="ln" data-i="' + n.i + '" d="' + curva(n.h, n, .12) + '" style="--c:' + RED_C[n.h.k] + '"/>' +
       n.tm.slice(1).filter(k => P.porK[k]).map(k => '<path class="cruz" data-i="' + n.i + '" data-tm="' + k + '" d="' + curva(n, P.porK[k], .18) + '" style="--c:' + RED_C[k] + '"/>').join("")).join("");
-    const pul = "";
+    let pul = "";
+    if(!quieto){
+      pul += P.hs.map((h, i) => '<path class="pulso eje" data-k="' + h.k + '" pathLength="100" d="' + curva(C, h, .06) + '" style="--c:' + RED_C[h.k] + ';--d:' + (-(i * 1.3) % 4.6).toFixed(2) + 's"/>').join("");
+      const paso = Math.max(1, Math.ceil(P.ns.length / 10));
+      pul += P.ns.filter(n => nuevos.has(n.t) || n.i % paso === 0).slice(0, 6).map(n => '<path class="pulso' + (nuevos.has(n.t) ? ' nuevo' : '') + '" data-i="' + n.i + '" pathLength="100" d="' + curva(n.h, n, .12) + '" style="--c:' + RED_C[n.h.k] + ';--d:' + (-((hashT(n.t) % 46) / 10)).toFixed(1) + 's;--t:' + (4.2 + (hashT(n.t) % 9) / 10).toFixed(1) + 's"/>').join("");
+    }
     const nds = P.ns.map(n => '<g class="nd' + (nuevos.has(n.t) ? ' nuevo' : '') + '" data-nd="' + n.i + '" role="button" tabindex="0" aria-pressed="false" aria-label="' + esc(RED_N[n.tm[0]] + ': ' + n.t) + '" transform="translate(' + f(n.x) + ' ' + f(n.y) + ')" style="--c:' + RED_C[n.h.k] + ';--i:' + n.i + '">' +
       '<circle class="hit" r="13"/><g class="esc"><circle class="halo" r="7.5"/><circle class="anillo" r="6"/><circle class="dot" r="' + (n.tm.length > 1 ? 4.2 : 3.5) + '"/></g></g>').join("");
     const hubs = P.hs.map(h => '<g class="hub" data-hub="' + h.k + '" role="button" tabindex="0" aria-pressed="false" aria-label="' + esc("Tema " + RED_N[h.k] + ", " + h.todos + (h.todos === 1 ? " cosa" : " cosas") + ". Toca para entrar") + '" transform="translate(' + f(h.x) + ' ' + f(h.y) + ')" style="--c:' + RED_C[h.k] + ';--i:' + h.i + '">' +
