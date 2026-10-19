@@ -60,4 +60,6 @@ if (!movPagado(/jard/i, 'Hijo', inicioArriendo)) {
   sinPagar.push(item);
 }
 
-return [{ json: { pendientes, sinPagar } }];
+// v: 2 le avisa a la app que este código ya es el nuevo (el gas vence el 21 y sale del 17 al 21); pagados = lo que ya está registrado este mes
+const pagados = reglas.filter(r => pagado(r.keyword)).map(r => r.id);
+return [{ json: { v: 2, pendientes, sinPagar, pagados } }];

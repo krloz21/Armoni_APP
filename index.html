@@ -2459,6 +2459,7 @@ body.mode-mercar:has(#mkStage .mcTop) #thread{ -webkit-mask-image:none; mask-ima
 .ddRedSvg .core text{ font:700 8.6px "Schibsted Grotesk", system-ui, sans-serif; fill:#ffcf99; text-anchor:middle; dominant-baseline:central; letter-spacing:.09em; text-transform:uppercase; }
 .ddRedSvg .core:focus-visible .aA{ stroke:#fff; stroke-width:2.2; }
 /* el cerebro de fondo (apenas se ve) y las dendritas de cada neurona */
+.svYa{ display:block; margin-top:2px; padding:8px 0 2px; border:0; background:none; color:inherit; opacity:.8; font:inherit; font-size:.76rem; text-decoration:underline; text-underline-offset:2px; cursor:pointer; }
 .ddRedSvg .cerebro path{ fill:none; stroke:rgba(var(--ink),.17); stroke-width:1; stroke-linecap:round; stroke-linejoin:round; }
 .ddRedSvg .cerebro .hem{ fill:rgba(var(--ink),.025); }
 .ddRedSvg .cerebro .giro2{ stroke:rgba(var(--ink),.10); }
@@ -4160,7 +4161,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-18.243";
+const APP_VERSION = "2026-10-19.244";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -11005,8 +11006,10 @@ const Servicios = (function(){
       sl.className = "svSlide";
       sl.innerHTML =
         '<span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + ({ agua: '<path d="M12 3s6 6.4 6 11a6 6 0 0 1-12 0c0-4.6 6-11 6-11z"/>', gas: '<path d="M12 3c1 3.5 5 5 5 10a5 5 0 0 1-10 0c0-2 1-3 2-4 0 2 1 3 2 3 0-3-1-5 1-9z"/>', internet: '<path d="M4 9a12 12 0 0 1 16 0M7 12.5a8 8 0 0 1 10 0M10 16a4 4 0 0 1 4 0"/><circle cx="12" cy="19" r=".8"/>', arriendo: '<path d="M4 11 12 4l8 7"/><path d="M6 10v10h12V10"/><path d="M10 20v-5h4v5"/>', jardin: '<path d="M12 21v-8"/><path d="M12 13c0-4 3-7 7-7 0 4-3 7-7 7z"/><path d="M12 15c0-3-2.4-5-5.5-5 0 3 2.4 5 5.5 5z"/>', cel: '<rect x="7" y="3" width="10" height="18" rx="2.2"/><path d="M11 18h2"/>' }[/^cel_/.test(item.id) ? 'cel' : item.id] || '<path d="M13 2 3 14h7l-1 8 11-14h-7l1-6z"/>') + '</svg></span>' +
-        '<div class="txt"><b>Hace falta pagar ' + esc(item.nombre) + '</b><span>' + textoLeft(inf.left) + '</span></div>' +
+        '<div class="txt"><b>Hace falta pagar ' + esc(item.nombre) + '</b><span>' + textoLeft(inf.left) + '</span>' + (item.local ? '<button type="button" class="svYa">Ya lo pagué</button>' : '') + '</div>' +
         '<button type="button" class="go">' + (esArriendo ? "Enviar comprobante" : esJardin ? "Ya se pagó" : "Pagar") + '</button>';
+      const ya = sl.querySelector(".svYa");
+      if(ya) ya.addEventListener("click", () => { try{ const h = new Date(); localStorage.setItem("armoni.gas.pagado", h.getFullYear() + "-" + (h.getMonth() + 1)); }catch{} check(); });
       sl.querySelector(".go").addEventListener("click", async e => {
         if(esJardin){                                 // solo marca que se pagó: no abre ningún banco
           const b = e.currentTarget;
@@ -11099,11 +11102,16 @@ const Servicios = (function(){
   }
 
   async function check(){
-    let pendientes = [];
+    let pendientes = [], data = null;
     try{
       const res = await fetch(SERVICIOS_ESTADO_URL, { cache: "no-store" });
-      if(res.ok){ const data = await res.json(); pendientes = data.sinPagar || data.pendientes || []; }   // también lo ya vencido, hasta que se pague
+      if(res.ok){ data = await res.json(); pendientes = data.sinPagar || data.pendientes || []; }   // también lo ya vencido, hasta que se pague
     }catch{ /* sin conexión: seguimos solo con lo que se pueda calcular local */ }
+    /* el gas vence el 21: del 17 al 21 sale arriba como la energía. Si n8n aún no trae el código nuevo (sin «v»), se avisa desde aquí hasta que se toque «Ya lo pagué» */
+    try{
+      const h = new Date(), mes = h.getFullYear() + "-" + (h.getMonth() + 1);
+      if(h.getDate() >= 17 && h.getDate() <= 21 && !pendientes.some(x => x.id === "gas") && !(data && data.v >= 2) && localStorage.getItem("armoni.gas.pagado") !== mes) pendientes.push({ id: "gas", nombre: "el gas", local: true });
+    }catch{}
     try{ const dia = new Date().getDate(); if(dia <= 5 || (dia >= 15 && dia <= 23)) await Pagos.traePagados(); }catch{}   // solo en las ventanas de pago
     try{ pendientes = pendientes.concat(Pagos.pendientesCelulares()); }catch{}
     banner(pendientes);
