@@ -100,7 +100,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// Con la página actual de Notion arma el cambio. Solo toca gastos de salidas con Ema (así un id equivocado no cambia otra cosa)\nconst v = $('Validar cambio').first().json;\nconst pg = $input.first().json || {};\nconst falla = (error) => [{ json: { ok: false, error } }];\n// Notion no la encuentra (borrada o id malo) → 400; Notion caída o sin permiso de momento → 502 y la cola de la app reintenta\nif (pg.object !== 'page' || !pg.properties) return falla(/404|object_not_found|400|validation/i.test(JSON.stringify(pg.error || '')) || !pg.error ? 'no-existe' : 'notion');\nconst pr = pg.properties;\nconst sel = (n) => pr[n] && pr[n].select ? pr[n].select.name : null;\nconst txt = (a) => ((a || []).map(t => t.plain_text).join('') || '').trim();\nconst esEma = sel('Salida') === 'Con Ema' || sel('Categoría') === 'Salidas Ema';\nif (sel('Tipo') !== 'Gasto' || !esEma) return falla('no-es-salida');\nconst enPapelera = !!(pg.archived || pg.in_trash);\n// borrar = a la papelera de Notion (de ahí se puede recuperar)\nif (v.accion === 'borrar') return [{ json: { ok: true, id: v.id, accion: 'borrar', yaEstaba: enPapelera, cuerpo: { archived: true } } }];\nif (enPapelera) return falla('no-existe');\nconst ef = v.medio === 'efectivo';\n// regla del efectivo: Monto 0 (no toca la cuenta) y el valor en «Efectivo». Digital: el valor en Monto y «Efectivo» vacío\nconst props = { Concepto: { title: [{ text: { content: v.concepto } }] }, Monto: { number: ef ? 0 : v.monto } };\nif (pr.Efectivo || ef) props.Efectivo = { number: ef ? v.monto : null };\n// cambió en qué fue: comer afuera = Salidas; entradas, juegos, parqueadero = Salidas Ema (como lo guarda la app)\nconst cat = sel('Categoría');\nif (v.categoria && cat !== v.categoria && ['Salidas', 'Salidas Ema'].includes(cat)) {\n  props['Categoría'] = { select: { name: v.categoria } };\n  if (pr.Salida && sel('Salida') !== 'Con Ema') props.Salida = { select: { name: 'Con Ema' } };   // sigue siendo de la salida aunque deje de ser «Salidas Ema»\n}\n// la nota de efectivo que pone movimiento-nuevo se pone o se quita según el medio\nconst NOTA = 'Pagado en efectivo: no sale de la cuenta';\nconst antes = txt(pr.Notas && pr.Notas.rich_text);\nconst resto = antes.startsWith(NOTA) ? antes.slice(NOTA.length).replace(/^\\s*·\\s*/, '').trim() : antes;\nconst nueva = (ef ? NOTA + (resto ? ' · ' + resto : '') : resto).slice(0, 300);\nif (pr.Notas && nueva !== antes) props.Notas = { rich_text: nueva ? [{ text: { content: nueva } }] : [] };\nreturn [{ json: { ok: true, id: v.id, accion: 'editar', medio: v.medio, cuerpo: { properties: props } } }];\n"
+        "jsCode": "// Con la página actual de Notion arma el cambio. Solo toca gastos de salidas con Ema (así un id equivocado no cambia otra cosa)\nconst v = $('Validar cambio').first().json;\nconst pg = $input.first().json || {};\nconst falla = (error) => [{ json: { ok: false, error } }];\n// Notion no la encuentra (borrada o id malo) → 400; Notion caída o sin permiso de momento → 502 y la cola de la app reintenta\nif (pg.object !== 'page' || !pg.properties) return falla(/404|object_not_found|400|validation/i.test(JSON.stringify(pg.error || '')) || !pg.error ? 'no-existe' : 'notion');\nconst pr = pg.properties;\nconst sel = (n) => pr[n] && pr[n].select ? pr[n].select.name : null;\nconst txt = (a) => ((a || []).map(t => t.plain_text).join('') || '').trim();\nconst esEma = sel('Salida') === 'Con Ema' || sel('Categoría') === 'Salidas Ema';\nif (sel('Tipo') !== 'Gasto' || !esEma) return falla('no-es-salida');\nconst enPapelera = !!(pg.archived || pg.in_trash);\n// borrar = a la papelera de Notion (de ahí se puede recuperar)\nif (v.accion === 'borrar') return [{ json: { ok: true, id: v.id, accion: 'borrar', yaEstaba: enPapelera, cuerpo: { archived: true } } }];\nif (enPapelera) return falla('no-existe');\nconst ef = v.medio === 'efectivo';\n// regla del efectivo: Monto 0 (no toca la cuenta) y el valor en «Efectivo». Digital: el valor en Monto y «Efectivo» vacío\nconst props = { Concepto: { title: [{ text: { content: v.concepto } }] }, Monto: { number: ef ? 0 : v.monto } };\nconst hayCol = !!pr.Efectivo;   // Notion devuelve todas las columnas de la base: si «Efectivo» no viene, esa columna no existe\nif (hayCol) props.Efectivo = { number: ef ? v.monto : null };\n// cambió en qué fue: comer afuera = Salidas; entradas, juegos, parqueadero = Salidas Ema (como lo guarda la app)\nconst cat = sel('Categoría');\nif (v.categoria && cat !== v.categoria && ['Salidas', 'Salidas Ema'].includes(cat)) {\n  props['Categoría'] = { select: { name: v.categoria } };\n  if (pr.Salida && sel('Salida') !== 'Con Ema') props.Salida = { select: { name: 'Con Ema' } };   // sigue siendo de la salida aunque deje de ser «Salidas Ema»\n}\n// la nota de efectivo que pone movimiento-nuevo se pone o se quita según el medio\n// con la columna: «Pagado en efectivo: no sale de la cuenta»; sin ella (respaldo): «Pagado en efectivo $4.500: …» y el valor se lee de la nota\nconst NOTA_RE = /^Pagado en efectivo(?: \\$[\\d.]+)?: no sale de la cuenta/;\nconst NOTA = hayCol ? 'Pagado en efectivo: no sale de la cuenta' : 'Pagado en efectivo $' + String(v.monto).replace(/\\B(?=(\\d{3})+(?!\\d))/g, '.') + ': no sale de la cuenta';\nconst antes = txt(pr.Notas && pr.Notas.rich_text);\nconst m0 = antes.match(NOTA_RE);\nconst resto = m0 ? antes.slice(m0[0].length).replace(/^\\s*·\\s*/, '').trim() : antes;\nconst nueva = (ef ? NOTA + (resto ? ' · ' + resto : '') : resto).slice(0, 300);\nif (pr.Notas && nueva !== antes) props.Notas = { rich_text: nueva ? [{ text: { content: nueva } }] : [] };\nreturn [{ json: { ok: true, id: v.id, accion: 'editar', medio: v.medio, aviso: ef && !hayCol ? 'efectivo-sin-columna' : null, cuerpo: { properties: props } } }];\n"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -183,7 +183,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// ¿Notion lo guardó? (si Notion falla, la app recibe 502 y la cola lo reintenta después)\nconst r = $input.first().json || {};\nconst a = $('Armar cambio').first().json;\nif (r.object !== 'page') return [{ json: { ok: false, error: 'notion' } }];\nreturn [{ json: { ok: true, id: a.id, accion: a.accion, medio: a.medio || null } }];\n"
+        "jsCode": "// ¿Notion lo guardó? (si Notion falla, la app recibe 502 y la cola lo reintenta después)\nconst r = $input.first().json || {};\nconst a = $('Armar cambio').first().json;\nif (r.object !== 'page') {\n  // Notion rechazó la propiedad (por ejemplo, «Efectivo» no existe): se dice cuál; otra falla = 502 y la cola reintenta\n  const t = JSON.stringify(r);\n  const m = t.match(/([^\"\\\\.,:{}\\[\\]]{1,60}?) is not a property that exists/i);\n  return [{ json: m ? { ok: false, error: 'sin-columna', columna: m[1].trim() } : { ok: false, error: 'notion' } }];\n}\nreturn [{ json: { ok: true, id: a.id, accion: a.accion, medio: a.medio || null, aviso: a.aviso || null } }];\n"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -231,7 +231,7 @@
     {
       "parameters": {
         "respondWith": "json",
-        "responseBody": "={{ { ok: true, id: $json.id, accion: $json.accion, medio: $json.medio } }}",
+        "responseBody": "={{ { ok: true, id: $json.id, accion: $json.accion, medio: $json.medio, aviso: $json.aviso || null } }}",
         "options": {
           "responseCode": 200
         }
@@ -248,7 +248,7 @@
     {
       "parameters": {
         "respondWith": "json",
-        "responseBody": "={{ { ok: false, error: $json.error } }}",
+        "responseBody": "={{ { ok: false, error: $json.error, columna: $json.columna || null } }}",
         "options": {
           "responseCode": 400
         }
@@ -447,7 +447,7 @@
         ],
         [
           {
-            "node": "Responder falla Notion",
+            "node": "¿Falla de Notion?",
             "type": "main",
             "index": 0
           }

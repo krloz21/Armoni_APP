@@ -20,7 +20,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// Valida lo que manda Armoni y lo deja listo para Notion\nconst TOKEN = 'mercado-7d41c2a9e05b';\nconst CAT_GASTO = ['Alimentación', 'Salidas', 'Salidas Ema', 'Hogar', 'Carro', 'Hijo', 'Salud', 'Tarjetas', 'Ahorro', 'Otros'];   // Servicios se registra solo\nconst CAT_INGRESO = ['Hogar', 'Alimentación', 'Salidas', 'Ahorro', 'Otros'];   // Ahorro como ingreso = plata que se sacó del ahorro\nconst AUTOMATICOS = /arriendo|jard[ií]n|cuota\\s+(del\\s+)?(carro|cr[eé]dito)/i;\n\nlet b = $input.first().json.body;\nif (typeof b === 'string') { try { b = JSON.parse(b); } catch (e) { b = {}; } }\nb = b || {};\n\nconst falla = (error) => [{ json: { ok: false, error } }];\n\nif (b.token !== TOKEN) return falla('token');\n// registros que esperaron sin conexión: cada uno trae un código; si ya llegó antes, no se guarda dos veces\nconst colaId = String(b.colaId || '').slice(0, 40);\nif (colaId) {\n  const sd = $getWorkflowStaticData('global'); sd.cola = sd.cola || {};\n  if (sd.cola[colaId]) return falla('repetido');\n  sd.cola[colaId] = Date.now();\n  const ks = Object.keys(sd.cola); if (ks.length > 2000) ks.slice(0, ks.length - 2000).forEach(k => delete sd.cola[k]);\n}\nconst tipo = String(b.tipo || '');\nif (tipo !== 'Gasto' && tipo !== 'Ingreso') return falla('tipo');\nconst concepto = String(b.concepto || '').trim().slice(0, 80);\nconst categoria = String(b.categoria || '');\nconst fecha = String(b.fecha || '');\nconst monto = Math.round(Number(b.monto));\nconst notas = String(b.nota || b.notas || '').trim().slice(0, 300);\nconst lugar = String(b.lugar || '').trim().slice(0, 80);\nconst lugarId = /^[0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12}$/i.test(String(b.lugarId || '').trim()) ? String(b.lugarId).trim() : '';   // lugar que ya existe en Restaurantes: no se busca ni se crea\nconst punt = Number(b.puntuacion);\nconst puntuacion = punt >= 1 && punt <= 10 ? Math.round(punt * 2) / 2 : null;\nconst comentario = String(b.comentario || '').trim().slice(0, 200);\n// cuántos comieron (solo salidas con lugar): entero de 1 a 30\nconst pers = Math.round(Number(b.personas));\nconst personas = pers >= 1 && pers <= 30 ? pers : null;\n// Salidas Ema: si se pagó otro día (boletas compradas antes), el día en que salieron\n// «Salida»: a qué salida pertenece (la categoría dice en qué se fue la plata; esto dice con quién fue)\nconst salida = ['Con Ema', 'Pareja'].includes(b.salida) ? b.salida : (categoria === 'Salidas Ema' ? 'Con Ema' : '');\nlet fechaSalida = String(b.fechaSalida || '');\nif (!/^\\d{4}-\\d{2}-\\d{2}$/.test(fechaSalida) || fechaSalida === String(b.fecha || '') || salida !== 'Con Ema') fechaSalida = '';\n\n// «medio»: cómo se pagó. Lo pagado en EFECTIVO no es plata de la cuenta: se guarda con Monto 0 y el valor en «Efectivo»,\n// así no baja el bolsillo para gastar, ni sale en Tu mes ni en Balance, pero sí en la salida con Ema. Sin «medio» = digital (lo de siempre).\nconst medio = String(b.medio || '').toLowerCase() === 'efectivo' && tipo === 'Gasto' ? 'efectivo' : 'digital';\n\nif (!concepto) return falla('concepto');\nif (!(tipo === 'Gasto' ? CAT_GASTO : CAT_INGRESO).includes(categoria)) return falla('categoria');\nif (tipo === 'Gasto' && AUTOMATICOS.test(concepto)) return falla('Eso ya se registra solo desde su aviso');\nif (!/^\\d{4}-\\d{2}-\\d{2}$/.test(fecha)) return falla('fecha');\nif (!(monto > 0) || monto > 1000000000) return falla('monto');\n\nreturn [{ json: { ok: true, tipo, concepto, categoria, fecha, monto, notas, lugar, lugarId, puntuacion, comentario, personas, fechaSalida, salida, medio, forzar: !!b.forzar } }];\n"
+        "jsCode": "// Valida lo que manda Armoni y lo deja listo para Notion\nconst TOKEN = 'mercado-7d41c2a9e05b';\nconst CAT_GASTO = ['Alimentación', 'Salidas', 'Salidas Ema', 'Hogar', 'Carro', 'Hijo', 'Salud', 'Tarjetas', 'Ahorro', 'Otros'];   // Servicios se registra solo\nconst CAT_INGRESO = ['Hogar', 'Alimentación', 'Salidas', 'Ahorro', 'Otros'];   // Ahorro como ingreso = plata que se sacó del ahorro\nconst AUTOMATICOS = /arriendo|jard[ií]n|cuota\\s+(del\\s+)?(carro|cr[eé]dito)/i;\n\nlet b = $input.first().json.body;\nif (typeof b === 'string') { try { b = JSON.parse(b); } catch (e) { b = {}; } }\nb = b || {};\n\nconst falla = (error) => [{ json: { ok: false, error } }];\n\nif (b.token !== TOKEN) return falla('token');\n// registros que esperaron sin conexión: cada uno trae un código; si ya llegó antes, no se guarda dos veces\nconst colaId = String(b.colaId || '').slice(0, 40);\nif (colaId) {\n  const sd = $getWorkflowStaticData('global'); sd.cola = sd.cola || {};\n  // el código solo cuenta como «ya guardado» cuando el flujo TERMINÓ bien (nodo «Confirmar cola»).\n  // Si Notion falló, el nodo «Quitar de cola» lo borra y el reintento vuelve a intentarlo; un número (formato de antes) = guardado.\n  const prev = sd.cola[colaId];\n  if (prev && (typeof prev === 'number' || prev.ok || Date.now() - prev.t < 45000)) return falla('repetido');\n  sd.cola[colaId] = { t: Date.now(), ok: false };\n  const ks = Object.keys(sd.cola); if (ks.length > 2000) ks.slice(0, ks.length - 2000).forEach(k => delete sd.cola[k]);\n}\nconst tipo = String(b.tipo || '');\nif (tipo !== 'Gasto' && tipo !== 'Ingreso') return falla('tipo');\nconst concepto = String(b.concepto || '').trim().slice(0, 80);\nconst categoria = String(b.categoria || '');\nconst fecha = String(b.fecha || '');\nconst monto = Math.round(Number(b.monto));\nconst notas = String(b.nota || b.notas || '').trim().slice(0, 300);\nconst lugar = String(b.lugar || '').trim().slice(0, 80);\nconst lugarId = /^[0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12}$/i.test(String(b.lugarId || '').trim()) ? String(b.lugarId).trim() : '';   // lugar que ya existe en Restaurantes: no se busca ni se crea\nconst punt = Number(b.puntuacion);\nconst puntuacion = punt >= 1 && punt <= 10 ? Math.round(punt * 2) / 2 : null;\nconst comentario = String(b.comentario || '').trim().slice(0, 200);\n// cuántos comieron (solo salidas con lugar): entero de 1 a 30\nconst pers = Math.round(Number(b.personas));\nconst personas = pers >= 1 && pers <= 30 ? pers : null;\n// Salidas Ema: si se pagó otro día (boletas compradas antes), el día en que salieron\n// «Salida»: a qué salida pertenece (la categoría dice en qué se fue la plata; esto dice con quién fue)\nconst salida = ['Con Ema', 'Pareja'].includes(b.salida) ? b.salida : (categoria === 'Salidas Ema' ? 'Con Ema' : '');\nlet fechaSalida = String(b.fechaSalida || '');\nif (!/^\\d{4}-\\d{2}-\\d{2}$/.test(fechaSalida) || fechaSalida === String(b.fecha || '') || salida !== 'Con Ema') fechaSalida = '';\n\n// «medio»: cómo se pagó. Lo pagado en EFECTIVO no es plata de la cuenta: se guarda con Monto 0 y el valor en «Efectivo»,\n// así no baja el bolsillo para gastar, ni sale en Tu mes ni en Balance, pero sí en la salida con Ema. Sin «medio» = digital (lo de siempre).\nconst medio = String(b.medio || '').toLowerCase() === 'efectivo' && tipo === 'Gasto' ? 'efectivo' : 'digital';\n\nif (!concepto) return falla('concepto');\nif (!(tipo === 'Gasto' ? CAT_GASTO : CAT_INGRESO).includes(categoria)) return falla('categoria');\nif (tipo === 'Gasto' && AUTOMATICOS.test(concepto)) return falla('Eso ya se registra solo desde su aviso');\nif (!/^\\d{4}-\\d{2}-\\d{2}$/.test(fecha)) return falla('fecha');\nif (!(monto > 0) || monto > 1000000000) return falla('monto');\n\nreturn [{ json: { ok: true, colaId, tipo, concepto, categoria, fecha, monto, notas, lugar, lugarId, puntuacion, comentario, personas, fechaSalida, salida, medio, forzar: !!b.forzar } }];\n"
       },
       "id": "191f7681-ac7c-44ab-85d5-4f463f80723e",
       "name": "Validar movimiento",
@@ -68,7 +68,7 @@
     {
       "parameters": {
         "respondWith": "json",
-        "responseBody": "={{ { ok: true, medio: $('Validar movimiento').first().json.medio, lugarId: $('Armar datos').first().json.lugarId || null } }}",
+        "responseBody": "={{ { ok: true, medio: $('Validar movimiento').first().json.medio, lugarId: $('Armar datos').first().json.lugarId || null, aviso: $('Confirmar cola').first().json.aviso || null } }}",
         "options": {
           "responseCode": 200
         }
@@ -180,7 +180,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// Lee una propiedad venga como página completa de Notion (properties) o simplificada de n8n (property_xxx)\nconst clave = (n) => 'property_' + String(n).toLowerCase().replace(/\\s+/g, '_');\nconst txt = (a) => ((a || []).map(t => t.plain_text).join('') || '').trim();\nconst leer = (it, nombre, tipo) => {\n  const pr = it.properties && it.properties[nombre];\n  if (pr) {\n    if (tipo === 'titulo') return txt(pr.title);\n    if (tipo === 'texto') return txt(pr.rich_text);\n    if (tipo === 'numero') return pr.number != null ? pr.number : null;\n    if (tipo === 'fecha') return pr.date && pr.date.start ? pr.date.start.slice(0, 10) : null;\n    if (tipo === 'select') return pr.select ? pr.select.name : (pr.status ? pr.status.name : null);\n    if (tipo === 'relacion') return pr.relation && pr.relation[0] ? pr.relation[0].id : null;\n  }\n  let v = it[clave(nombre)];\n  if (v === undefined && tipo === 'titulo') v = it.name;\n  if (v === undefined || v === null || v === '') return null;\n  if (tipo === 'fecha') { const s = typeof v === 'object' ? (v.start || '') : String(v); return s ? s.slice(0, 10) : null; }\n  if (tipo === 'relacion') { const r = Array.isArray(v) ? v[0] : v; return r ? (typeof r === 'object' ? r.id : String(r)) : null; }\n  if (tipo === 'numero') return typeof v === 'number' ? v : (Number(v) || null);\n  return String(v);\n};\n\nconst v = $('Validar movimiento').first().json;\nconst lugs = $input.all().map(i => i.json).filter(x => x && x.id);\nconst norm = (t) => String(t || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9 ]/g, ' ').replace(/\\s+/g, ' ').trim().split(' ').map(w => w.replace(/s$/, '')).join(' ');\nconst buscado = norm(v.lugar);\n// primero el nombre exacto; si no, que uno contenga al otro como palabras completas (así «Pan» no se confunde con «Pandebono»)\nconst conPalabras = (a, b) => (' ' + a + ' ').includes(' ' + b + ' ');\nconst nombres = lugs.map(l => ({ id: l.id, n: norm(leer(l, 'Nombre', 'titulo')) })).filter(x => x.n);\nlet lugarId = (nombres.find(x => x.n === buscado) || {}).id || null;\nif (!lugarId && buscado.length > 3) {\n  const m = nombres.find(x => x.n.length > 3 && (conPalabras(x.n, buscado) || conPalabras(buscado, x.n)));\n  if (m) lugarId = m.id;\n}\n// un lugar que este flujo creó hace poco y que Notion todavía no muestra en la búsqueda (gastos en cola que llegan seguidos)\nif (!lugarId) { const sd = $getWorkflowStaticData('global'); const r = (sd.lugaresNuevos || {})[buscado]; if (r && Date.now() - r.t < 30 * 60000) lugarId = r.id; }\nreturn [{ json: { lugarId, crear: !lugarId, esEma: v.salida === 'Con Ema' || v.categoria === 'Salidas Ema', nombre: v.lugar, puntuacion: v.puntuacion, tienePuntuacion: v.puntuacion != null, comentario: v.comentario || '' } }];\n"
+        "jsCode": "// Lee una propiedad venga como página completa de Notion (properties) o simplificada de n8n (property_xxx)\nconst clave = (n) => 'property_' + String(n).toLowerCase().replace(/\\s+/g, '_');\nconst txt = (a) => ((a || []).map(t => t.plain_text).join('') || '').trim();\nconst leer = (it, nombre, tipo) => {\n  const pr = it.properties && it.properties[nombre];\n  if (pr) {\n    if (tipo === 'titulo') return txt(pr.title);\n    if (tipo === 'texto') return txt(pr.rich_text);\n    if (tipo === 'numero') return pr.number != null ? pr.number : null;\n    if (tipo === 'fecha') return pr.date && pr.date.start ? pr.date.start.slice(0, 10) : null;\n    if (tipo === 'select') return pr.select ? pr.select.name : (pr.status ? pr.status.name : null);\n    if (tipo === 'relacion') return pr.relation && pr.relation[0] ? pr.relation[0].id : null;\n  }\n  let v = it[clave(nombre)];\n  if (v === undefined && tipo === 'titulo') v = it.name;\n  if (v === undefined || v === null || v === '') return null;\n  if (tipo === 'fecha') { const s = typeof v === 'object' ? (v.start || '') : String(v); return s ? s.slice(0, 10) : null; }\n  if (tipo === 'relacion') { const r = Array.isArray(v) ? v[0] : v; return r ? (typeof r === 'object' ? r.id : String(r)) : null; }\n  if (tipo === 'numero') return typeof v === 'number' ? v : (Number(v) || null);\n  return String(v);\n};\n\nconst v = $('Validar movimiento').first().json;\nconst lugs = $input.all().map(i => i.json).filter(x => x && x.id);\nconst norm = (t) => String(t || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9 ]/g, ' ').replace(/\\s+/g, ' ').trim().split(' ').map(w => w.replace(/s$/, '')).join(' ');\nconst buscado = norm(v.lugar);\n// ¿es un sitio para comer? → «Restaurante» (sale en Restaurantes). Un parque, un centro comercial o un juego es «Plan Ema».\nconst COMIDA = /helad|paleter|restaur|pizz|burger|hamburg|sushi|asadero|caf[eé]\\b|cafeter|crepe|panader|parrilla|bistr|pasteler|arepa|empanad|comidas?\\b|postre|wok|brasa|sandwich|fritanga|yogur|waffle|batido/i;\nconst PLAN = /parque|\\bcc\\b|c\\.c\\.|centro comercial|mall|plaza|zool|granja|cine|piscina|acu[aá]tic|ecoparque|bosque|bot[aá]nic|museo|pance|r[ií]o\\b|finca|hacienda|lago|playa|ludoteca|juegos|arkadia|salto|inflable|trampol/i;\nconst esComida = COMIDA.test(v.lugar) || (v.categoria === 'Salidas' && !PLAN.test(v.lugar));\n// primero el nombre exacto; si no, que uno contenga al otro como palabras completas (así «Pan» no se confunde con «Pandebono»)\nconst conPalabras = (a, b) => (' ' + a + ' ').includes(' ' + b + ' ');\nconst nombres = lugs.map(l => ({ id: l.id, n: norm(leer(l, 'Nombre', 'titulo')) })).filter(x => x.n);\nlet lugarId = (nombres.find(x => x.n === buscado) || {}).id || null;\nif (!lugarId && buscado.length > 3) {\n  const m = nombres.find(x => x.n.length > 3 && (conPalabras(x.n, buscado) || conPalabras(buscado, x.n)));\n  if (m) lugarId = m.id;\n}\n// un lugar que este flujo creó hace poco y que Notion todavía no muestra en la búsqueda (gastos en cola que llegan seguidos)\nif (!lugarId) { const sd = $getWorkflowStaticData('global'); const r = (sd.lugaresNuevos || {})[buscado]; if (r && Date.now() - r.t < 30 * 60000) lugarId = r.id; }\nreturn [{ json: { lugarId, crear: !lugarId, esEma: (v.salida === 'Con Ema' || v.categoria === 'Salidas Ema') && !esComida, nombre: v.lugar, puntuacion: v.puntuacion, tienePuntuacion: v.puntuacion != null, comentario: v.comentario || '' } }];\n"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -302,7 +302,8 @@
           "id": "pgk4uKXwaEEnuyRO",
           "name": "Notion account"
         }
-      }
+      },
+      "onError": "continueErrorOutput"
     },
     {
       "parameters": {
@@ -342,11 +343,12 @@
           "id": "pgk4uKXwaEEnuyRO",
           "name": "Notion account"
         }
-      }
+      },
+      "onError": "continueErrorOutput"
     },
     {
       "parameters": {
-        "jsCode": "const v = $('Validar movimiento').first().json;\nlet lugarId = v.lugarId || null;\nlet creado = false;\nfor (const n of ['Crear lugar con puntuación', 'Crear lugar sin puntuación', 'Crear restaurante con puntuación', 'Crear restaurante sin puntuación']) {\n  try { const c = $(n).first(); if (c && c.json && c.json.id) { lugarId = c.json.id; creado = true; break; } } catch (e) {}\n}\n// se recuerda 30 min: si llega otro gasto del mismo lugar antes de que Notion lo indexe, no se crea dos veces\nif (creado) {\n  const norm = (t) => String(t || '').toLowerCase().normalize('NFD').replace(/[\\u0300-\\u036f]/g, '').replace(/[^a-z0-9 ]/g, ' ').replace(/\\s+/g, ' ').trim().split(' ').map(w => w.replace(/s$/, '')).join(' ');\n  const sd = $getWorkflowStaticData('global'); sd.lugaresNuevos = sd.lugaresNuevos || {};\n  for (const [k, r] of Object.entries(sd.lugaresNuevos)) if (Date.now() - r.t > 30 * 60000) delete sd.lugaresNuevos[k];\n  sd.lugaresNuevos[norm(v.lugar)] = { id: lugarId, t: Date.now() };\n}\nif (!lugarId) { try { const d = $('Decidir lugar').first(); if (d && d.json && d.json.lugarId) lugarId = d.json.lugarId; } catch (e) {} }\nconst esEfectivo = v.medio === 'efectivo';\n// efectivo: Monto queda en 0 (no toca ninguna suma de la cuenta) y el valor va en «Efectivo»\nreturn [{ json: { concepto: v.concepto, monto: v.monto, tipo: v.tipo, categoria: v.categoria, fecha: v.fecha,\n  notas: esEfectivo ? ('Pagado en efectivo: no sale de la cuenta' + (v.notas ? ' · ' + v.notas : '')).slice(0, 300) : (v.notas || ''),\n  medio: esEfectivo ? 'efectivo' : 'digital', esEfectivo, efectivo: esEfectivo ? v.monto : 0,\n  personas: v.personas != null ? v.personas : (v.categoria === 'Salidas Ema' ? 0 : null), lugarId, tieneLugar: !!lugarId, fechaSalida: v.fechaSalida || '', salida: v.salida || '' } }];\n"
+        "jsCode": "const v = $('Validar movimiento').first().json;\nlet lugarId = v.lugarId || null;\nlet creado = false;\nfor (const n of ['Crear lugar con puntuación', 'Crear lugar sin puntuación', 'Crear restaurante con puntuación', 'Crear restaurante sin puntuación']) {\n  try { const c = $(n).first(); if (c && c.json && c.json.id) { lugarId = c.json.id; creado = true; break; } } catch (e) {}\n}\n// se recuerda 30 min: si llega otro gasto del mismo lugar antes de que Notion lo indexe, no se crea dos veces\nif (creado) {\n  const norm = (t) => String(t || '').toLowerCase().normalize('NFD').replace(/[\\u0300-\\u036f]/g, '').replace(/[^a-z0-9 ]/g, ' ').replace(/\\s+/g, ' ').trim().split(' ').map(w => w.replace(/s$/, '')).join(' ');\n  const sd = $getWorkflowStaticData('global'); sd.lugaresNuevos = sd.lugaresNuevos || {};\n  for (const [k, r] of Object.entries(sd.lugaresNuevos)) if (Date.now() - r.t > 30 * 60000) delete sd.lugaresNuevos[k];\n  sd.lugaresNuevos[norm(v.lugar)] = { id: lugarId, t: Date.now() };\n}\nif (!lugarId) { try { const d = $('Decidir lugar').first(); if (d && d.json && d.json.lugarId) lugarId = d.json.lugarId; } catch (e) {} }\nconst esEfectivo = v.medio === 'efectivo';\n// respaldo (si en Notion falta la columna «Efectivo»): Monto 0 y el valor en la nota, que salidas-ema sabe leer\nconst miles = String(v.monto).replace(/\\B(?=(\\d{3})+(?!\\d))/g, '.');\nconst notasRespaldo = ('Pagado en efectivo $' + miles + ': no sale de la cuenta' + (v.notas ? ' · ' + v.notas : '')).slice(0, 300);\n// efectivo: Monto queda en 0 (no toca ninguna suma de la cuenta) y el valor va en «Efectivo»\nreturn [{ json: { concepto: v.concepto, monto: v.monto, tipo: v.tipo, categoria: v.categoria, fecha: v.fecha,\n  notas: esEfectivo ? ('Pagado en efectivo: no sale de la cuenta' + (v.notas ? ' · ' + v.notas : '')).slice(0, 300) : (v.notas || ''),\n  medio: esEfectivo ? 'efectivo' : 'digital', esEfectivo, notasRespaldo, efectivo: esEfectivo ? v.monto : 0,\n  personas: v.personas != null ? v.personas : (v.categoria === 'Salidas Ema' ? 0 : null), lugarId, tieneLugar: !!lugarId, fechaSalida: v.fechaSalida || '', salida: v.salida || '' } }];\n"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -460,7 +462,8 @@
           "id": "pgk4uKXwaEEnuyRO",
           "name": "Notion account"
         }
-      }
+      },
+      "onError": "continueErrorOutput"
     },
     {
       "parameters": {
@@ -523,7 +526,8 @@
           "id": "pgk4uKXwaEEnuyRO",
           "name": "Notion account"
         }
-      }
+      },
+      "onError": "continueErrorOutput"
     },
     {
       "parameters": {
@@ -565,7 +569,7 @@
         "operation": "update",
         "pageId": {
           "__rl": true,
-          "value": "={{ $json.id }}",
+          "value": "={{ $('Página creada').first().json.id }}",
           "mode": "id"
         },
         "propertiesUi": {
@@ -592,7 +596,8 @@
           "id": "pgk4uKXwaEEnuyRO",
           "name": "Notion account"
         }
-      }
+      },
+      "onError": "continueRegularOutput"
     },
     {
       "parameters": {
@@ -634,7 +639,7 @@
         "operation": "update",
         "pageId": {
           "__rl": true,
-          "value": "={{ $json.id }}",
+          "value": "={{ $('Página creada').first().json.id }}",
           "mode": "id"
         },
         "propertiesUi": {
@@ -660,7 +665,8 @@
           "id": "pgk4uKXwaEEnuyRO",
           "name": "Notion account"
         }
-      }
+      },
+      "onError": "continueRegularOutput"
     },
     {
       "parameters": {
@@ -868,7 +874,8 @@
           "id": "pgk4uKXwaEEnuyRO",
           "name": "Notion account"
         }
-      }
+      },
+      "onError": "continueErrorOutput"
     },
     {
       "parameters": {
@@ -908,7 +915,8 @@
           "id": "pgk4uKXwaEEnuyRO",
           "name": "Notion account"
         }
-      }
+      },
+      "onError": "continueErrorOutput"
     },
     {
       "parameters": {
@@ -1037,7 +1045,8 @@
           "id": "pgk4uKXwaEEnuyRO",
           "name": "Notion account"
         }
-      }
+      },
+      "onError": "continueErrorOutput"
     },
     {
       "parameters": {
@@ -1106,6 +1115,272 @@
           "id": "pgk4uKXwaEEnuyRO",
           "name": "Notion account"
         }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "id": "0e4a7d00-da70-4e00-9000-000000000001",
+      "name": "¿Revisar parecido?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -20976,
+        3600
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "rp1",
+              "leftValue": "={{ !$json.forzar && $json.medio !== 'efectivo' }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "0e4a7d00-da70-4e00-9000-000000000002",
+      "name": "Crear efectivo sin columna",
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 3,
+      "position": [
+        -18816,
+        4100
+      ],
+      "parameters": {
+        "resource": "databasePage",
+        "dataSourceId": {
+          "__rl": true,
+          "value": "6c565ad1-789f-41c7-8ca2-8bcfb9098a68",
+          "mode": "list",
+          "cachedResultName": "Movimientos",
+          "cachedResultUrl": "https://app.notion.com/p/922bb9e4e3d648feab56d6b2d75be29d"
+        },
+        "title": "={{ $('Armar datos').first().json.concepto }}",
+        "propertiesUi": {
+          "propertyValues": [
+            {
+              "key": "Concepto|title",
+              "title": "={{ $('Armar datos').first().json.concepto }}"
+            },
+            {
+              "key": "Monto|number",
+              "numberValue": "={{ 0 }}"
+            },
+            {
+              "key": "Tipo|select",
+              "selectValue": "={{ $('Armar datos').first().json.tipo }}"
+            },
+            {
+              "key": "Categoría|select",
+              "selectValue": "={{ $('Armar datos').first().json.categoria }}"
+            },
+            {
+              "key": "Fecha|date",
+              "includeTime": false,
+              "date": "={{ $('Armar datos').first().json.fecha }}"
+            },
+            {
+              "key": "Notas|rich_text",
+              "textContent": "={{ $('Armar datos').first().json.notasRespaldo }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "credentials": {
+        "notionApi": {
+          "id": "pgk4uKXwaEEnuyRO",
+          "name": "Notion account"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "id": "0e4a7d00-da70-4e00-9000-000000000003",
+      "name": "Crear efectivo con lugar sin columna",
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 3,
+      "position": [
+        -18816,
+        3900
+      ],
+      "parameters": {
+        "resource": "databasePage",
+        "dataSourceId": {
+          "__rl": true,
+          "value": "6c565ad1-789f-41c7-8ca2-8bcfb9098a68",
+          "mode": "list",
+          "cachedResultName": "Movimientos",
+          "cachedResultUrl": "https://app.notion.com/p/922bb9e4e3d648feab56d6b2d75be29d"
+        },
+        "title": "={{ $('Armar datos').first().json.concepto }}",
+        "propertiesUi": {
+          "propertyValues": [
+            {
+              "key": "Concepto|title",
+              "title": "={{ $('Armar datos').first().json.concepto }}"
+            },
+            {
+              "key": "Monto|number",
+              "numberValue": "={{ 0 }}"
+            },
+            {
+              "key": "Tipo|select",
+              "selectValue": "={{ $('Armar datos').first().json.tipo }}"
+            },
+            {
+              "key": "Categoría|select",
+              "selectValue": "={{ $('Armar datos').first().json.categoria }}"
+            },
+            {
+              "key": "Fecha|date",
+              "includeTime": false,
+              "date": "={{ $('Armar datos').first().json.fecha }}"
+            },
+            {
+              "key": "Notas|rich_text",
+              "textContent": "={{ $('Armar datos').first().json.notasRespaldo }}"
+            },
+            {
+              "key": "Restaurante|relation",
+              "relationValue": "={{ [$('Armar datos').first().json.lugarId] }}"
+            },
+            {
+              "key": "Personas|number",
+              "numberValue": "={{ $('Armar datos').first().json.personas }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "credentials": {
+        "notionApi": {
+          "id": "pgk4uKXwaEEnuyRO",
+          "name": "Notion account"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "id": "0e4a7d00-da70-4e00-9000-000000000004",
+      "name": "Quitar de cola",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -17600,
+        4500
+      ],
+      "parameters": {
+        "jsCode": "// Algo falló al guardar en Notion: se libera el código del registro (para que el reintento sí lo intente)\n// y se arma una respuesta clara. Si Notion dice que falta una columna, se devuelve su nombre.\nconst v = $('Validar movimiento').first().json;\nconst e = $input.first().json || {};\nif (v.colaId) { const sd = $getWorkflowStaticData('global'); if (sd.cola) delete sd.cola[v.colaId]; }\nconst txt = JSON.stringify(e);\nconst m = txt.match(/([^\"\\\\.,:{}\\[\\]]{1,60}?) is not a property that exists/i);\nconst columna = m ? m[1].trim() : '';\nconst detalle = String((e.error && e.error.message) || e.error || e.message || '').slice(0, 200);\nreturn [{ json: columna ? { ok: false, error: 'sin-columna', columna, detalle } : { ok: false, error: 'notion', detalle } }];\n"
+      }
+    },
+    {
+      "id": "0e4a7d00-da70-4e00-9000-000000000005",
+      "name": "¿Falta una columna?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -17376,
+        4500
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "fc1",
+              "leftValue": "={{ $json.error === 'sin-columna' }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "0e4a7d00-da70-4e00-9000-000000000006",
+      "name": "Responder falta columna",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        -17152,
+        4420
+      ],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { ok: false, error: $json.error, columna: $json.columna || null, detalle: $json.detalle || null } }}",
+        "options": {
+          "responseCode": 400
+        }
+      }
+    },
+    {
+      "id": "0e4a7d00-da70-4e00-9000-000000000007",
+      "name": "Responder falla de Notion",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        -17152,
+        4600
+      ],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { ok: false, error: $json.error, columna: $json.columna || null, detalle: $json.detalle || null } }}",
+        "options": {
+          "responseCode": 502
+        }
+      }
+    },
+    {
+      "id": "0e4a7d00-da70-4e00-9000-000000000008",
+      "name": "Página creada",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -18400,
+        3840
+      ],
+      "parameters": {
+        "jsCode": "// el id del movimiento recién creado (venga de la rama que venga)\nreturn [{ json: { id: $input.first().json.id } }];\n"
+      }
+    },
+    {
+      "id": "0e4a7d00-da70-4e00-9000-000000000009",
+      "name": "Confirmar cola",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -17632,
+        3840
+      ],
+      "parameters": {
+        "jsCode": "// Terminó bien: ahora sí el código del registro cuenta como guardado (un reenvío responde «repetido»)\nconst v = $('Validar movimiento').first().json;\nif (v.colaId) { const sd = $getWorkflowStaticData('global'); sd.cola = sd.cola || {}; sd.cola[v.colaId] = { t: Date.now(), ok: true }; }\nlet aviso = null;   // se usó el respaldo: en Notion falta la columna «Efectivo» (Número) en Movimientos\nfor (const n of ['Crear efectivo sin columna', 'Crear efectivo con lugar sin columna']) {\n  try { const c = $(n).first(); if (c && c.json && c.json.id) aviso = 'efectivo-sin-columna'; } catch (e) {}\n}\nreturn [{ json: { aviso } }];\n"
       }
     }
   ],
@@ -1137,7 +1412,7 @@
       "main": [
         [
           {
-            "node": "Movimientos recientes",
+            "node": "¿Revisar parecido?",
             "type": "main",
             "index": 0
           }
@@ -1246,6 +1521,13 @@
             "type": "main",
             "index": 0
           }
+        ],
+        [
+          {
+            "node": "Quitar de cola",
+            "type": "main",
+            "index": 0
+          }
         ]
       ]
     },
@@ -1254,6 +1536,13 @@
         [
           {
             "node": "Armar datos",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Quitar de cola",
             "type": "main",
             "index": 0
           }
@@ -1293,7 +1582,14 @@
       "main": [
         [
           {
-            "node": "¿Salieron otro día?",
+            "node": "Página creada",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Quitar de cola",
             "type": "main",
             "index": 0
           }
@@ -1304,7 +1600,14 @@
       "main": [
         [
           {
-            "node": "¿Salieron otro día?",
+            "node": "Página creada",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Quitar de cola",
             "type": "main",
             "index": 0
           }
@@ -1351,7 +1654,7 @@
         ],
         [
           {
-            "node": "Responder bien",
+            "node": "Confirmar cola",
             "type": "main",
             "index": 0
           }
@@ -1362,7 +1665,7 @@
       "main": [
         [
           {
-            "node": "Responder bien",
+            "node": "Confirmar cola",
             "type": "main",
             "index": 0
           }
@@ -1453,6 +1756,13 @@
             "type": "main",
             "index": 0
           }
+        ],
+        [
+          {
+            "node": "Quitar de cola",
+            "type": "main",
+            "index": 0
+          }
         ]
       ]
     },
@@ -1461,6 +1771,13 @@
         [
           {
             "node": "Armar datos",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Quitar de cola",
             "type": "main",
             "index": 0
           }
@@ -1507,7 +1824,14 @@
       "main": [
         [
           {
-            "node": "¿Salieron otro día?",
+            "node": "Página creada",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Crear efectivo con lugar sin columna",
             "type": "main",
             "index": 0
           }
@@ -1518,7 +1842,119 @@
       "main": [
         [
           {
+            "node": "Página creada",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Crear efectivo sin columna",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Revisar parecido?": {
+      "main": [
+        [
+          {
+            "node": "Movimientos recientes",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Hay lugar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Crear efectivo sin columna": {
+      "main": [
+        [
+          {
+            "node": "Página creada",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Quitar de cola",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Crear efectivo con lugar sin columna": {
+      "main": [
+        [
+          {
+            "node": "Página creada",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Quitar de cola",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Quitar de cola": {
+      "main": [
+        [
+          {
+            "node": "¿Falta una columna?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Falta una columna?": {
+      "main": [
+        [
+          {
+            "node": "Responder falta columna",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Responder falla de Notion",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Página creada": {
+      "main": [
+        [
+          {
             "node": "¿Salieron otro día?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Confirmar cola": {
+      "main": [
+        [
+          {
+            "node": "Responder bien",
             "type": "main",
             "index": 0
           }

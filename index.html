@@ -4168,7 +4168,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-23.249";
+const APP_VERSION = "2026-10-23.250";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -6215,6 +6215,7 @@ const Restaurantes = (function(){
       const lt = limpio(t);
       if(lt && !COMIDAS.some(c => c.re.test(lt))) ids.push("x:" + t.trim());
     });
+    if(!ids.length) ids.push("x:Otros");   // sin tipo de comida conocido: no se pierde, sale en «Todos» y en «Otros»
     return [...new Set(ids)];
   }
 
@@ -6442,7 +6443,7 @@ const Restaurantes = (function(){
       const stats = [
         { v: r.score > 0 ? nota10(r.score) : "—", l: "Puntuación" },
         { v: hace(r.dias) ? hace(r.dias).replace(/^./, c => c.toUpperCase()) : "—", l: "Última vez" },
-        { v: r.veces || 0, l: (r.veces === 1 ? "Visita" : "Visitas") }
+        { v: r.veces || "—", l: (r.veces === 1 ? "Visita" : "Visitas") }
       ];
       /* promedio de gasto y, debajo, con cuántas personas se come en promedio (entre paréntesis) */
       const prom = r.prom || (r.totalGastado && r.veces ? r.totalGastado / r.veces : 0);
@@ -6523,8 +6524,9 @@ const Restaurantes = (function(){
     });
   };
   /* los lugares de «Plan Ema» (parques, juegos…) no son restaurantes, pero una heladería o un café sí, aunque se hayan creado desde una salida con Ema */
-  const ES_COMIDA_LUGAR = /helad|restaur|pizz|burger|hamburg|sushi|asadero|caf[eé]\b|cafeter|crepe|panader|parrilla|bistr|pasteler|arepa|empanad|comidas?\b|postre|wok|brasa|sandwich|fritanga/i;
-  const cargar = raw => { todosItems = unePorNombre((raw || []).filter(r => String(r.property_clase || "") !== "Plan Ema" || ES_COMIDA_LUGAR.test(String(r.name || r.property_nombre || r.property_name || ""))).map(leer)); statusEl.innerHTML = ""; paint(); };
+  const ES_COMIDA_LUGAR = /helad|paleter|restaur|pizz|burger|hamburg|sushi|asadero|caf[eé]\b|cafeter|crepe|panader|parrilla|bistr|pasteler|arepa|empanad|comidas?\b|postre|wok|brasa|sandwich|fritanga|yogur|waffle|batido/i;
+  const conTipo = r => [r.property_tipo, r.property_tipo_de_comida].some(v => Array.isArray(v) ? v.length : !!v);   // si tiene «Tipo» de comida en Notion, es para comer
+  const cargar = raw => { todosItems = unePorNombre((raw || []).filter(r => String(r.property_clase || "") !== "Plan Ema" || conTipo(r) || ES_COMIDA_LUGAR.test(String(r.name || r.property_nombre || r.property_name || ""))).map(leer)); statusEl.innerHTML = ""; paint(); };
 
   async function fetchLive(anterior){
     const res = await fetch(RESTAURANTES_URL, { cache: "no-store" });
@@ -6725,7 +6727,7 @@ const SalidasEma = (function(){
   const LUG_ORD = [["nota", "Mejor nota"], ["reciente", "Recientes"], ["visitas", "Más visitados"]];
   let lugOrden = (() => { try{ const o = localStorage.getItem(KLO); return LUG_ORD.some(x => x[0] === o) ? o : "nota"; }catch{ return "nota"; } })(), lugTodos = false, lugVista = [];
   const nota10 = n => String(Math.round(n * 10) / 10).replace(".", ",");
-  const visTx = l => (l.visitas || 0) + (l.visitas === 1 ? " visita" : " visitas");
+  const visTx = l => l.visitas ? l.visitas + (l.visitas === 1 ? " visita" : " visitas") : "Sin visitas aún";
   const ordenaLug = (L, o) => L.slice().sort((a, b) => {
     const r = (a.ultima ? diasDesde(a.ultima) : 9999) - (b.ultima ? diasDesde(b.ultima) : 9999);
     const n = (b.puntuacion || 0) - (a.puntuacion || 0), v = (b.visitas || 0) - (a.visitas || 0);
@@ -6774,7 +6776,7 @@ const SalidasEma = (function(){
     scrim.innerHTML = '<div class="inWrap"><div class="pgCard inCard elFicha" role="dialog" aria-modal="true" aria-labelledby="elFT">' +
       '<div class="elFTop"><span class="elFEmo" aria-hidden="true">' + tipoLug(l) + '</span><div><small>' + (l.clase === "Restaurante" ? "Restaurante" : "Plan con Ema") + (pos >= 0 && lugVista.length > 1 && lugOrden === "nota" ? ' · puesto ' + (pos + 1) + ' de ' + lugVista.length : '') + '</small><h3 id="elFT">' + esc(l.nombre) + '</h3></div>' +
       (l.puntuacion ? '<span class="restNum' + (l.puntuacion >= 8.5 ? ' top' : l.puntuacion < 6 ? ' low' : '') + '" aria-label="' + l.puntuacion + ' de 10">' + nota10(l.puntuacion) + '<small>/10</small></span>' : '<span class="elSinNota">sin nota</span>') + '</div>' +
-      '<div class="elFStats">' + stat(l.visitas || 0, l.visitas === 1 ? "visita" : "visitas") + stat(l.promedio ? peso(l.promedio) : "–", "por salida") + stat(l.ultima ? esc(fechaCorta(l.ultima)) : "–", l.ultima ? hace(diasDesde(l.ultima)) : "última vez") + '</div>' +
+      '<div class="elFStats">' + stat(l.visitas || "–", l.visitas === 1 ? "visita" : "visitas") + stat(l.promedio ? peso(l.promedio) : "–", "por salida") + stat(l.ultima ? esc(fechaCorta(l.ultima)) : "–", l.ultima ? hace(diasDesde(l.ultima)) : "última vez") + '</div>' +
       (l.notas ? '<p class="elFNota">“' + esc(l.notas) + '”</p>' : '') +
       '<div class="pgRow"><button type="button" class="pgSi" data-cierra>Listo</button></div></div></div>';
     document.body.appendChild(scrim);
@@ -6871,7 +6873,7 @@ const SalidasEma = (function(){
   const K_EQ = "armoni.ema.equilibrio";
   function equilibrio(){
     const box = document.getElementById("emaEquilibrio"); if(!box) return;
-    const hace30 = (() => { const d = new Date(); d.setDate(d.getDate() - 30); return d.toISOString().slice(0, 10); })();
+    const hace30 = (() => { const d = new Date(); d.setDate(d.getDate() - 30); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); })();
     const diasEma = new Set(); ((datos && datos.meses) || []).forEach(m => (m.dias || []).forEach(f => { if(f >= hace30) diasEma.add(f); }));
     const diasCita = new Set(); ((datos && datos.pareja) || []).forEach(m => (m.cosas || []).forEach(c => { if(c.f >= hace30) diasCita.add(c.f); }));
     const ema = diasEma.size, citas = diasCita.size;
@@ -7579,6 +7581,16 @@ const PlanesComfandi = (function(){
 /* ════════════════════════════════════════════════════════════
    REGISTRAR UNA SALIDA CON EMA: varios lugares en el mismo día, varios gastos por lugar y la pregunta del parqueadero
    ════════════════════════════════════════════════════════════ */
+/* qué decirle a quien guarda cuando n8n responde un error: sencillo, con el paso exacto en Notion */
+const errorGuardar = (r, j, dato) => {
+  j = j || {}; const col = String(j.columna || "");
+  if(j.error === "efectivo-sin-columna" || (j.error === "sin-columna" && /efectivo/i.test(col))) return "Crea en Notion → Movimientos la columna Efectivo (Número) y vuelve a tocar Guardar.";
+  if(j.error === "sin-columna") return "Falta en Notion → Movimientos la columna «" + (col || "?") + "». Créala y vuelve a tocar Guardar.";
+  if(j.error === "notion") return "Notion no respondió. Toca Guardar otra vez: solo se envía lo que falta.";
+  if(r && r.status === 404) return "Falta importar y activar el flujo «movimiento-nuevo» en n8n.";
+  if(j.error && !/^[a-z]{3,12}$/.test(j.error)) return j.error;   // mensajes escritos para leer («Eso ya se registra solo…»); los códigos (token, monto…) no
+  return dato && dato.medio === "efectivo" ? "No se pudo guardar lo de efectivo. Revisa que en Notion → Movimientos exista la columna «Efectivo» (tipo Número) y que el flujo «movimiento-nuevo» esté actualizado y publicado en n8n." : "No se pudo guardar";
+};
 const SalidaEmaForm = (function(){
   /* Un paso a la vez, como una conversación:
      1) ¿cuándo y a dónde fueron?  2) ¿qué pagaron ahí?  3) ¿pagaron parqueadero?  4) ¿fueron a otro lugar ese día?  5) se guarda todo
@@ -7870,7 +7882,7 @@ const SalidaEmaForm = (function(){
       vista.innerHTML = '<div class="seGuardando"><svg class="seAro" viewBox="0 0 80 80" aria-hidden="true"><circle cx="40" cy="40" r="34" class="seAroBg"/><circle cx="40" cy="40" r="34" class="seAroFg" id="seAroFg" stroke-dasharray="213.6" stroke-dashoffset="192"/><text class="seAroN" id="seAroN" x="40" y="41" text-anchor="middle" dominant-baseline="central">0/' + n + '</text><path class="seCheck" d="M27 41 L36 50 L54 31"/></svg><b id="seGuardTxt">Guardando…</b><small id="seGuardSub">' + n + (n === 1 ? ' gasto' : ' gastos') + ' · ' + peso(total()) + '</small></div>';
       botones.innerHTML = "";
       const aro = $("seAroFg");
-      let sinConexion = false, flujoViejo = false;
+      let sinConexion = false, flujoViejo = false, sinColumna = false;
       try{
         for(const { p, g } of lista){
           $("seGuardTxt").textContent = "Guardando " + (k + 1) + " de " + n + "…";
@@ -7886,9 +7898,10 @@ const SalidaEmaForm = (function(){
           if(!g.cid) g.cid = Date.now().toString(36) + Math.random().toString(36).slice(2, 8);   // el mismo en cada reintento: n8n no lo duplica
           const r = await Cola.post(MOVIMIENTO_URL, { method: "POST", body: JSON.stringify(Object.assign({ token: MERCADO_TOKEN, forzar: true, colaId: g.cid }, dato)) }, true);
           const j = await r.json().catch(() => ({}));
-          if((!r.ok || j.ok === false) && j.error !== "repetido") throw new Error(j.error || (dato.medio === "efectivo" ? "No se pudo guardar lo de efectivo. Revisa que en Notion → Movimientos exista la columna «Efectivo» (tipo Número) y que el flujo «movimiento-nuevo» esté actualizado y publicado en n8n." : "No se pudo guardar"));   // «repetido»: ya había llegado y se perdió la respuesta
+          if((!r.ok || j.ok === false) && j.error !== "repetido"){ g.cid = ""; throw new Error(errorGuardar(r, j, dato)); }   // «repetido»: ya había llegado y se perdió la respuesta. Si n8n contestó un error, ese envío NO quedó: el reintento lleva código nuevo (si no, un flujo viejo respondería «repetido» y el gasto se perdería en silencio)
           if(j.enCola) sinConexion = true;
           else if(dato.medio === "efectivo" && j.medio !== "efectivo") flujoViejo = true;   // n8n viejo: lo guardó como digital
+          if(j.aviso === "efectivo-sin-columna") sinColumna = true;   // se guardó con el respaldo: falta la columna Efectivo en Notion
           if(j.lugarId) p.lugarId = j.lugarId;   // el lugar ya existe en Notion: los siguientes gastos van con su id
           if(l && !conocido(l)) p.nuevoEnviado = true;
           g.hecho = true; k++;
@@ -7898,6 +7911,7 @@ const SalidaEmaForm = (function(){
         scrim.querySelector(".seGuardando").classList.add("listo");
         $("seGuardTxt").textContent = ag ? "¡Listo, quedó sumado!" : "¡Salida guardada!";
         $("seGuardSub").textContent = sinConexion ? "Quedó en el celular · se envía cuando el PC esté prendido" : paradas.length + (paradas.length === 1 ? " lugar" : " lugares") + " · " + peso(total());
+        if(sinColumna) avisoOk("Guardado, pero ojo", "Lo de efectivo quedó anotado y no se descontó. Crea en Notion → Movimientos la columna Efectivo (Número) para que cuente bien.");
         if(flujoViejo) avisoOk("Ojo", "Lo pagado en efectivo quedó como digital: falta actualizar el flujo «movimiento-nuevo» en n8n.");
         if(document.body.classList.contains("mode-ema")) setTimeout(() => SalidasEma.refresh(), 300); else SalidasEma.precarga();
         setTimeout(cierra, REDUCED ? 600 : 1500);
@@ -10705,7 +10719,7 @@ const GastoManual = (function(){
         .then(r => r.json().catch(() => ({})).then(j => {
           /* ese pago ya estaba anotado (por ejemplo, llegó solo desde el correo de PSE): se pregunta antes de duplicarlo */
           if(j && j.error === "parecido" && j.parecido) return yaEstaba(j.parecido);
-          if(!r.ok || j.ok === false) throw new Error(j.error || (dato.medio === "efectivo" ? "No se pudo guardar lo de efectivo. Revisa que en Notion → Movimientos exista la columna «Efectivo» (tipo Número) y que el flujo «movimiento-nuevo» esté actualizado y publicado en n8n." : "No se pudo guardar")); return j;
+          if(!r.ok || j.ok === false) throw new Error(errorGuardar(r, j, dato)); return j;
         }));
       const yaEstaba = x => new Promise((ok, mal) => {
         const f = (() => { try{ return new Date(x.fecha + "T12:00:00").toLocaleDateString("es-CO", { day: "numeric", month: "short" }).replace(".", ""); }catch{ return x.fecha; } })();
@@ -10724,6 +10738,7 @@ const GastoManual = (function(){
           Frecuentes.aprende(tipo, concepto.trim(), categoria, monto);
           cierra("guardado");
           if(j && j.enCola) avisoOk("Guardado en el celular", nombre + " · " + monto$ + (dato.medio ? " · efectivo" : "") + " · se envía cuando el PC esté prendido");
+          else if(dato.medio === "efectivo" && j && j.aviso === "efectivo-sin-columna") avisoOk("Guardado, pero ojo", "Quedó anotado y no baja el presupuesto. Crea en Notion → Movimientos la columna Efectivo (Número) para que cuente bien.");
           else if(dato.medio === "efectivo" && !(j && j.medio === "efectivo")) avisoOk("Ojo", "Quedó como digital: falta actualizar el flujo «movimiento-nuevo» en n8n para el efectivo.");
           else if(dato.medio === "efectivo") avisoOk("Efectivo anotado", nombre + " · " + monto$ + " · no baja el presupuesto");
           else avisoOk((tipo === "Gasto" ? "Gasto guardado" : "Ingreso guardado"), nombre + " · " + monto$);
