@@ -4160,7 +4160,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-19.247";
+const APP_VERSION = "2026-10-23.248";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -6514,7 +6514,9 @@ const Restaurantes = (function(){
       return Object.assign({}, base, { visitasP: g.reduce((t, x) => t + (x.visitasP || 0), 0), personasTot: g.reduce((t, x) => t + (x.personasTot || 0), 0), totalGastado: g.reduce((t, x) => t + (x.totalGastado || 0), 0), veces: g.reduce((t, x) => t + (x.veces || 0), 0), dias: dias.length ? Math.min(...dias) : base.dias, nota: base.nota || (g.find(x => x.nota) || {}).nota || "" });
     });
   };
-  const cargar = raw => { todosItems = unePorNombre((raw || []).filter(r => String(r.property_clase || "") !== "Plan Ema").map(leer)); statusEl.innerHTML = ""; paint(); };
+  /* los lugares de «Plan Ema» (parques, juegos…) no son restaurantes, pero una heladería o un café sí, aunque se hayan creado desde una salida con Ema */
+  const ES_COMIDA_LUGAR = /helad|restaur|pizz|burger|hamburg|sushi|asadero|caf[eé]\b|cafeter|crepe|panader|parrilla|bistr|pasteler|arepa|empanad|comidas?\b|postre|wok|brasa|sandwich|fritanga/i;
+  const cargar = raw => { todosItems = unePorNombre((raw || []).filter(r => String(r.property_clase || "") !== "Plan Ema" || ES_COMIDA_LUGAR.test(String(r.name || r.property_nombre || r.property_name || ""))).map(leer)); statusEl.innerHTML = ""; paint(); };
 
   async function fetchLive(anterior){
     const res = await fetch(RESTAURANTES_URL, { cache: "no-store" });
@@ -7715,7 +7717,7 @@ const SalidaEmaForm = (function(){
         const nuevo = { c: "", m: 0, fp: undefined, medio: "digital" };
         vista.innerHTML =
           (ag ? '<p class="seContexto">' + esc(fechaLarga(fecha)) + '</p>' : '') +
-          '<label class="fmMonto" for="seMontoIn"><span class="fmMontoLbl">¿Cuánto pagaron?</span><span class="fmMontoIn"><b>$</b><input id="seMontoIn" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="0" autocomplete="off" aria-label="Valor"></span><i class="fmLinea" aria-hidden="true"></i></label>' +
+          '<label class="fmMonto" for="seMontoIn"><span class="fmMontoLbl">¿Cuánto pagaron?</span><span class="fmMontoIn"><b>$</b><input id="seMontoIn" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="" autocomplete="off" aria-label="Valor"></span><i class="fmLinea" aria-hidden="true"></i></label>' +
           segMedio(nuevo.medio) +
           '<label class="inLbl" for="seQue">¿En qué?</label>' +
           '<div class="seEntrada"><input id="seQue" type="text" placeholder="Helado, entradas, almuerzo…" maxlength="60" autocomplete="off" enterkeyhint="done"><button type="button" class="seMas" id="seMas" aria-label="Agregar a la salida" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button></div>' +
@@ -7790,7 +7792,7 @@ const SalidaEmaForm = (function(){
           '<div class="seParqueo"><div class="seParqEmo" aria-hidden="true">🅿️</div>' +
           '<div class="sePregunta">¿Pagaron parqueadero en <span class="seLugarNom">' + esc(nombreLugar(p)) + '</span>?</div>' +
           '<div class="seParqSi" id="seParqSi" hidden>' +
-            '<label class="fmMonto" for="seParqIn"><span class="fmMontoLbl">¿Cuánto?</span><span class="fmMontoIn"><b>$</b><input id="seParqIn" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="0" autocomplete="off" aria-label="Valor del parqueadero"></span><i class="fmLinea" aria-hidden="true"></i></label>' +
+            '<label class="fmMonto" for="seParqIn"><span class="fmMontoLbl">¿Cuánto?</span><span class="fmMontoIn"><b>$</b><input id="seParqIn" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="" autocomplete="off" aria-label="Valor del parqueadero"></span><i class="fmLinea" aria-hidden="true"></i></label>' +
             (ult.length ? '<div class="recDia seParqChips">' + ult.map(v => '<button type="button" class="recChip" data-v="' + v + '">' + peso(v) + '</button>').join("") + '</div>' : '') +
             segMedio(medioP) +
           '</div></div>';
@@ -7859,7 +7861,7 @@ const SalidaEmaForm = (function(){
           if(!g.cid) g.cid = Date.now().toString(36) + Math.random().toString(36).slice(2, 8);   // el mismo en cada reintento: n8n no lo duplica
           const r = await Cola.post(MOVIMIENTO_URL, { method: "POST", body: JSON.stringify(Object.assign({ token: MERCADO_TOKEN, forzar: true, colaId: g.cid }, dato)) }, true);
           const j = await r.json().catch(() => ({}));
-          if((!r.ok || j.ok === false) && j.error !== "repetido") throw new Error(j.error || "No se pudo guardar");   // «repetido»: ya había llegado y se perdió la respuesta
+          if((!r.ok || j.ok === false) && j.error !== "repetido") throw new Error(j.error || (dato.medio === "efectivo" ? "No se pudo guardar lo de efectivo. Revisa que en Notion → Movimientos exista la columna «Efectivo» (tipo Número) y que el flujo «movimiento-nuevo» esté actualizado y publicado en n8n." : "No se pudo guardar"));   // «repetido»: ya había llegado y se perdió la respuesta
           if(j.enCola) sinConexion = true;
           else if(dato.medio === "efectivo" && j.medio !== "efectivo") flujoViejo = true;   // n8n viejo: lo guardó como digital
           if(j.lugarId) p.lugarId = j.lugarId;   // el lugar ya existe en Notion: los siguientes gastos van con su id
@@ -7988,7 +7990,7 @@ const SalidaEmaEditar = (function(){
       desliza(1);
       vista.innerHTML =
         '<p class="seContexto">' + esc((g.l ? g.l + " · " : "") + fechaLarga(fecha)) + '</p>' +
-        '<label class="fmMonto" for="eeMonto"><span class="fmMontoLbl">¿Cuánto pagaron?</span><span class="fmMontoIn"><b>$</b><input id="eeMonto" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="0" autocomplete="off" aria-label="Valor" value="' + e.m.toLocaleString("es-CO") + '"></span><i class="fmLinea" aria-hidden="true"></i></label>' +
+        '<label class="fmMonto" for="eeMonto"><span class="fmMontoLbl">¿Cuánto pagaron?</span><span class="fmMontoIn"><b>$</b><input id="eeMonto" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="" autocomplete="off" aria-label="Valor" value="' + e.m.toLocaleString("es-CO") + '"></span><i class="fmLinea" aria-hidden="true"></i></label>' +
         '<div class="seMedio" role="radiogroup" aria-label="¿Cómo lo pagaron?">' + [["digital", "💳", "Digital"], ["efectivo", "💵", "Efectivo"]].map(([k, i, t]) => '<button type="button" role="radio" data-medio="' + k + '" aria-checked="' + (e.medio === k) + '" tabindex="' + (e.medio === k ? 0 : -1) + '"><span aria-hidden="true">' + i + '</span>' + t + '</button>').join("") + '</div>' +
         '<p class="seMedioNota"' + (e.medio === "efectivo" ? '' : ' hidden') + '>En efectivo: no se descuenta del fondo</p>' +
         '<label class="inLbl" for="eeQue">¿En qué?</label><input id="eeQue" class="seLugarIn" type="text" maxlength="60" autocomplete="off" enterkeyhint="done" value="' + esc(e.c) + '">' +
@@ -8924,7 +8926,7 @@ const Ahorro = (function(){
     alListo && alListo(ctl);
     return ctl;
   }
-  const montoIn = (id, lbl) => '<label class="fmMonto" for="' + id + '"><span class="fmMontoLbl">' + lbl + '</span><span class="fmMontoIn"><b>$</b><input id="' + id + '" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" placeholder="0"></span></label>';
+  const montoIn = (id, lbl) => '<label class="fmMonto" for="' + id + '"><span class="fmMontoLbl">' + lbl + '</span><span class="fmMontoIn"><b>$</b><input id="' + id + '" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" placeholder=""></span></label>';
   const ancho = inp => ajustaMonto(inp);   // el campo crece con el número (y achica la letra si es muy largo): nunca se corta
   const leeMonto = inp => { const v = +inp.value.replace(/\D/g, "").slice(0, 12) || 0; inp.value = v ? v.toLocaleString("es-CO") : ""; ancho(inp); return v; };
   const errorDe = e => (e && e.message) || "No se pudo guardar. Revisa tu internet y que el flujo «Ahorro» esté activo en n8n.";
@@ -10514,7 +10516,7 @@ const GastoManual = (function(){
       }
       if(paso === "cuanto"){
         vista.innerHTML =
-          '<label class="fmMonto" for="inMonto"><span class="fmMontoLbl">¿Cuánto' + (esIngreso ? ' entró' : '') + '?</span><span class="fmMontoIn"><b>$</b><input id="inMonto" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="0" autocomplete="off" enterkeyhint="next" aria-label="Valor" value="' + (monto ? monto.toLocaleString("es-CO") : "") + '"></span><i class="fmLinea" aria-hidden="true"></i></label>';
+          '<label class="fmMonto" for="inMonto"><span class="fmMontoLbl">¿Cuánto' + (esIngreso ? ' entró' : '') + '?</span><span class="fmMontoIn"><b>$</b><input id="inMonto" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="" autocomplete="off" enterkeyhint="next" aria-label="Valor" value="' + (monto ? monto.toLocaleString("es-CO") : "") + '"></span><i class="fmLinea" aria-hidden="true"></i></label>';
         botones.innerHTML = '<button type="button" class="pgSi" id="inSig">Siguiente</button>';
         if(tipo === "Gasto"){ vista.insertAdjacentHTML("beforeend", segMedioG()); ligaMedioG(); }
         const inp = $("inMonto"), sig = $("inSig");
@@ -10678,7 +10680,7 @@ const GastoManual = (function(){
         .then(r => r.json().catch(() => ({})).then(j => {
           /* ese pago ya estaba anotado (por ejemplo, llegó solo desde el correo de PSE): se pregunta antes de duplicarlo */
           if(j && j.error === "parecido" && j.parecido) return yaEstaba(j.parecido);
-          if(!r.ok || j.ok === false) throw new Error(j.error || "No se pudo guardar"); return j;
+          if(!r.ok || j.ok === false) throw new Error(j.error || (dato.medio === "efectivo" ? "No se pudo guardar lo de efectivo. Revisa que en Notion → Movimientos exista la columna «Efectivo» (tipo Número) y que el flujo «movimiento-nuevo» esté actualizado y publicado en n8n." : "No se pudo guardar")); return j;
         }));
       const yaEstaba = x => new Promise((ok, mal) => {
         const f = (() => { try{ return new Date(x.fecha + "T12:00:00").toLocaleDateString("es-CO", { day: "numeric", month: "short" }).replace(".", ""); }catch{ return x.fecha; } })();
