@@ -2227,7 +2227,7 @@ body.mode-mercar:has(#mkStage .mcTop) #thread{ -webkit-mask-image:none; mask-ima
 .emaMas .mas{ width:52px; height:52px; border-radius:18px; display:grid; place-items:center; color:#fff; background:linear-gradient(145deg, #ffb066, #ff7a4d); box-shadow:0 12px 26px -10px rgba(255,122,77,.85), inset 0 1px 0 rgba(255,255,255,.35); transition:transform .2s var(--ease-spring); }
 .emaMas .mas svg{ width:24px; height:24px; }
 .emaMas{ position:relative; }
-.emaMas small{ position:absolute; top:calc(100% + 6px); right:0; white-space:nowrap; font-size:.68rem; font-weight:700; letter-spacing:.02em; }
+.emaMas small{ white-space:nowrap; font-size:.72rem; font-weight:700; letter-spacing:.02em; }
 .emaTop{ margin-bottom:12px; }
 .emaMas:active .mas{ transform:scale(.9); }
 .emaVacio{ margin:14px 0 0; font-size:.86rem; color:var(--dim); text-align:center; }
@@ -2238,40 +2238,39 @@ body.mode-mercar:has(#mkStage .mcTop) #thread{ -webkit-mask-image:none; mask-ima
 .elCab small{ font-size:.74rem; color:var(--dim); }
 .elOrd{ display:flex; gap:6px; margin:0 -16px 14px; padding:0 16px 2px; overflow-x:auto; scrollbar-width:none; }
 .elOrd::-webkit-scrollbar{ display:none; }
-.elOrd button{ flex:none; min-height:36px; padding:0 14px; border-radius:18px; border:1px solid var(--line); background:rgba(var(--ink),.03); font:inherit; font-size:.8rem; font-weight:600; color:var(--ghost); cursor:pointer; white-space:nowrap; transition:background .25s, color .25s, border-color .25s; }
+.elOrd.elTipos{ margin-top:-6px; }
+.elOrd button{ position:relative; flex:none; min-height:36px; padding:0 14px; border-radius:18px; border:1px solid var(--line); background:rgba(var(--ink),.03); font:inherit; font-size:.8rem; font-weight:600; color:var(--ghost); cursor:pointer; white-space:nowrap; transition:background .25s, color .25s, border-color .25s; }
 .elOrd button[aria-pressed="true"]{ color:#1a1208; border-color:transparent; background:linear-gradient(140deg,#ffb066,#ff8a50); box-shadow:0 6px 16px -8px rgba(255,138,80,.8); }
-.elPodio{ display:grid; grid-template-columns:repeat(var(--n,3), minmax(0,1fr)); align-items:end; gap:8px; }
-.elPodio.n1{ width:62%; margin:0 auto; }
-.elPod{ display:flex; flex-direction:column; min-width:0; padding:0; border:0; background:none; font:inherit; color:inherit; text-align:center; cursor:pointer; -webkit-tap-highlight-color:transparent; }
-.elAnim .elPod{ animation:elSube .65s cubic-bezier(.16,1,.3,1) backwards; animation-delay:calc(var(--i,0) * 110ms); }
-@keyframes elSube{ from{ opacity:0; transform:translateY(22px); } to{ opacity:1; transform:none; } }
-.elPodCard{ position:relative; display:flex; flex-direction:column; align-items:center; gap:3px; padding:14px 6px 10px; border-radius:18px 18px 6px 6px; border:1px solid var(--line); border-bottom:0; background:linear-gradient(180deg, rgba(var(--ink),.07), rgba(var(--ink),.02)); transition:transform .2s var(--ease-spring); }
-.elPod:active .elPodCard{ transform:scale(.96); }
-.elPod:focus-visible{ outline:2px solid var(--cyan); outline-offset:3px; border-radius:18px; }
-.elNom{ font-size:.8rem; font-weight:600; line-height:1.25; color:var(--strong); display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; min-height:2.5em; overflow-wrap:anywhere; }
-.elMet{ font-size:1.3rem; font-weight:600; letter-spacing:-.02em; line-height:1.15; font-variant-numeric:tabular-nums; color:var(--strong); }
-.elMet small{ margin-left:2px; font-size:.64rem; font-weight:500; letter-spacing:0; color:var(--dim); }
-.elMet.top{ background:linear-gradient(180deg, var(--num-a), var(--cyan)); -webkit-background-clip:text; background-clip:text; color:transparent; }
-.elSub{ font-size:.68rem; color:var(--dim); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%; }
-.elBase{ display:grid; place-items:center; border-radius:6px 6px 14px 14px; font-size:1.05rem; font-weight:700; color:rgba(var(--ink),.75); }
-.elPod.r1 .elBase{ height:58px; color:#1a1208; background:linear-gradient(170deg,#ffc58a,#ff8a50); box-shadow:0 16px 30px -16px rgba(255,138,80,.95), inset 0 1px 0 rgba(255,255,255,.4); }
-.elPod.r2 .elBase{ height:40px; background:linear-gradient(170deg, rgba(var(--ink),.26), rgba(var(--ink),.09)); }
-.elPod.r3 .elBase{ height:28px; background:linear-gradient(170deg, rgba(214,150,105,.6), rgba(214,150,105,.18)); }
-.elPod.r1 .elPodCard{ border-color:rgba(255,176,102,.45); background:linear-gradient(180deg, rgba(255,138,80,.18), rgba(255,138,80,.04)); }
-.elCor{ position:absolute; top:-13px; left:50%; transform:translateX(-50%); font-size:1.05rem; line-height:1; }
-.elResto{ display:grid; grid-template-columns:minmax(0,1fr); gap:6px; margin-top:12px; }
-.elFila{ display:flex; align-items:center; gap:12px; width:100%; min-height:54px; padding:8px 14px 8px 10px; border-radius:14px; border:1px solid var(--line); background:var(--panel); font:inherit; color:inherit; text-align:left; cursor:pointer; animation:elFilaIn .4s cubic-bezier(.16,1,.3,1) backwards; animation-delay:calc(var(--i,0) * 30ms); }
-.elFila:active{ transform:scale(.985); }
-@keyframes elFilaIn{ from{ opacity:0; transform:translateY(-6px); } to{ opacity:1; transform:none; } }
-.elRk{ flex:none; width:28px; height:28px; border-radius:9px; display:grid; place-items:center; font-size:.76rem; font-weight:700; color:var(--dim); background:rgba(var(--ink),.07); }
-.elFN{ flex:1; min-width:0; }
-.elFN b{ display:block; font-size:.9rem; font-weight:600; color:var(--strong); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.elFN small{ display:block; margin-top:1px; font-size:.74rem; color:var(--dim); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.elFM{ flex:none; font-weight:600; font-variant-numeric:tabular-nums; color:var(--strong); }
-.elFM small{ margin-left:2px; font-size:.66rem; font-weight:500; color:var(--dim); }
+.elRes{ display:grid; grid-template-columns:repeat(var(--n,3), minmax(0,1fr)); gap:8px; margin:0 0 14px; }
+.elDes{ display:flex; flex-direction:column; align-items:flex-start; gap:2px; min-width:0; min-height:44px; padding:10px 10px 9px; border-radius:14px; border:1px solid rgba(255,138,80,.28); background:rgba(255,138,80,.07); font:inherit; color:inherit; text-align:left; cursor:pointer; -webkit-tap-highlight-color:transparent; }
+.elDes small{ font-size:.64rem; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:#ffb066; white-space:nowrap; }
+.elDes b{ display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; overflow-wrap:anywhere; font-size:.84rem; font-weight:600; line-height:1.25; color:var(--strong); }
+.elDes em{ font-style:normal; font-size:.76rem; color:var(--dim); font-variant-numeric:tabular-nums; }
+.elGrid{ display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:10px; }
+.elGrid.n1{ grid-template-columns:minmax(0,1fr); }
+.elCard{ display:flex; flex-direction:column; align-items:stretch; gap:6px; min-width:0; min-height:44px; padding:12px; border-radius:16px; border:1px solid var(--line); background:var(--panel); font:inherit; color:inherit; text-align:left; cursor:pointer; -webkit-tap-highlight-color:transparent; }
+.elDes:active, .elCard:active{ transform:scale(.97); }
+.elDes:focus-visible, .elCard:focus-visible{ outline:2px solid var(--cyan); outline-offset:2px; }
+.elGrid.elAnim .elCard{ animation:elFade .35s cubic-bezier(.16,1,.3,1) backwards; animation-delay:calc(var(--i,0) * 25ms); }
+@keyframes elFade{ from{ opacity:0; transform:translateY(8px); } to{ opacity:1; transform:none; } }
+.elCTop{ display:flex; align-items:center; justify-content:space-between; gap:6px; }
+.elIco{ flex:none; width:34px; height:34px; border-radius:11px; display:grid; place-items:center; font-size:1.1rem; background:rgba(255,138,80,.14); }
+.elNota{ flex:none; padding:3px 9px; border-radius:999px; font-size:.82rem; font-weight:700; font-variant-numeric:tabular-nums; white-space:nowrap; border:1px solid transparent; }
+.elNota small{ margin-left:1px; font-size:.62rem; font-weight:500; opacity:.75; }
+.elNota.top{ color:#9fe3b4; background:rgba(120,220,150,.14); border-color:rgba(120,220,150,.3); }
+.elNota.mid{ color:#ffb066; background:rgba(255,176,102,.14); border-color:rgba(255,176,102,.32); }
+.elNota.low{ color:#ff9b9b; background:rgba(255,120,120,.13); border-color:rgba(255,120,120,.3); }
+.elNota.sin{ padding:3px 8px; font-size:.7rem; font-weight:600; color:var(--dim); background:rgba(var(--ink),.06); border-color:var(--line); }
+.elNom{ display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; overflow-wrap:anywhere; font-size:.92rem; font-weight:650; line-height:1.25; color:var(--strong); }
+.elLin{ font-size:.76rem; line-height:1.3; color:var(--dim); }
+.elLin.elGas{ color:var(--ghost); font-variant-numeric:tabular-nums; }
 .elVer{ display:flex; align-items:center; justify-content:center; gap:10px; width:100%; min-height:48px; margin-top:12px; border-radius:14px; border:1px dashed rgba(var(--ink),.2); background:none; font:inherit; font-size:.86rem; font-weight:600; color:var(--ghost); cursor:pointer; }
 .elVer svg{ width:18px; height:18px; transition:transform .3s var(--ease-out); }
 .elVer[aria-expanded="true"] svg{ transform:rotate(180deg); }
+.elVacio{ margin:18px 0 0; padding:22px 18px; text-align:center; border-radius:18px; border:1px dashed rgba(var(--ink),.18); }
+.elVacio > span{ display:block; font-size:1.7rem; }
+.elVacio b{ display:block; margin-top:6px; font-size:.95rem; color:var(--strong); }
+.elVacio p{ margin:6px 0 0; font-size:.84rem; line-height:1.4; color:var(--dim); }
 .elCaras{ display:inline-flex; }
 .elCaras i{ width:24px; height:24px; margin-left:-7px; border-radius:50%; display:grid; place-items:center; font-style:normal; font-size:.66rem; font-weight:700; color:var(--strong); background:rgba(var(--ink),.14); border:2px solid var(--void); }
 .elCaras i:first-child{ margin-left:0; }
@@ -2289,7 +2288,8 @@ body.mode-mercar:has(#mkStage .mcTop) #thread{ -webkit-mask-image:none; mask-ima
 .elFStats small{ display:block; margin-top:2px; font-size:.7rem; color:var(--dim); }
 .elFNota{ margin:14px 0 0; padding:12px 14px; border-radius:14px; background:rgba(255,138,80,.08); font-size:.88rem; line-height:1.45; color:var(--ghost); }
 .elFicha .pgRow .pgSi{ background:linear-gradient(140deg,#ffb066,#ff7a4d); color:#1a1208; }
-@media (prefers-reduced-motion:reduce){ .elAnim .elPod, .elFila{ animation:none; } .elPodCard, .elVer svg{ transition:none; } }
+.elOrd button::after{ content:""; position:absolute; inset:-4px 0; }   /* el toque llega a 44px sin engordar el chip */
+@media (prefers-reduced-motion:reduce){ .elGrid.elAnim .elCard{ animation:none; } .elVer svg{ transition:none; } }
 /* ── Balance ── */
 .balPest{ display:grid; grid-template-columns:1fr 1fr; gap:4px; padding:4px; margin:0 0 14px; border-radius:16px; border:1px solid var(--line); background:var(--panel); }
 .balPest button{ padding:10px 0; border:0; border-radius:12px; background:none; color:var(--ghost); font:inherit; font-size:.9rem; font-weight:700; cursor:pointer; transition:background .25s ease, color .25s ease; }
@@ -3093,12 +3093,20 @@ body.asleep .ddHolo, body.asleep .ddHolo *, body.asleep .ddHolo::after{ animatio
 .emBar small{ font-size:.68rem; color:var(--dim); text-transform:capitalize; }
 .emaDiasTit{ margin:16px 0 8px; font-size:.72rem; font-weight:700; letter-spacing:.09em; text-transform:uppercase; color:var(--dim); }
 .emaDiasRow{ display:flex; flex-wrap:wrap; gap:8px; }
-.emaDiaChip{ display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1px; width:54px; padding:8px 0 7px; border-radius:15px; border:1px solid var(--line); background:rgba(var(--ink),.05); color:var(--white); font:inherit; cursor:pointer; transition:background .25s, border-color .25s, transform .2s var(--ease-spring); }
+.emaDiasRow.scroll{ position:relative; flex-wrap:nowrap; overflow-x:auto; margin:0 -16px; padding:0 16px 4px; scrollbar-width:none; scroll-snap-type:x proximity; }
+.emaDiasRow.scroll::-webkit-scrollbar{ display:none; }
+.emaDiasRow.scroll .emaDiaChip{ flex:none; scroll-snap-align:center; }
+.emaDiaChip{ display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1px; width:54px; min-height:56px; padding:8px 0 7px; border-radius:15px; border:1px solid var(--line); background:rgba(var(--ink),.05); color:var(--white); font:inherit; cursor:pointer; transition:background .25s, border-color .25s, transform .2s var(--ease-spring); }
 .emaDiaChip b{ font-size:1.2rem; font-weight:700; line-height:1.1; }
 .emaDiaChip small{ font-size:.66rem; text-transform:uppercase; letter-spacing:.06em; color:var(--dim); }
 .emaDiaChip:active{ transform:scale(.92); }
 .emaDiaChip.on{ background:linear-gradient(160deg, #ffb066, #ff7a4d); border-color:transparent; color:#1a0f08; box-shadow:0 10px 24px -12px rgba(255,138,80,.7); }
 .emaDiaChip.on small{ color:rgba(26,15,8,.75); }
+.emaBarrasTit{ margin:16px 0 0; padding-top:12px; border-top:1px solid var(--line); font-size:.72rem; font-weight:700; letter-spacing:.09em; text-transform:uppercase; color:var(--dim); }
+.emaBarrasTit + .emaBarras{ margin-top:8px; padding-top:0; border-top:0; justify-content:center; gap:14px; }
+.emaBarrasTit + .emaBarras .emBar{ flex:0 1 56px; }
+.emaEq .ir{ display:inline-flex; align-items:center; min-height:44px; }
+.emaEq p{ margin-bottom:0; }
 .emaDetalle{ margin-top:14px; padding:12px 14px; border-radius:16px; border:1px solid rgba(255,138,80,.28); background:rgba(255,138,80,.07); }
 .emaAgregar{ display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1px; width:100%; min-height:52px; margin-top:12px; padding:8px 12px; border-radius:14px; border:1px dashed rgba(255,138,80,.5); background:none; color:#ffb066; font:inherit; font-size:.9rem; font-weight:650; cursor:pointer; }
 .emaAgregar small{ font-size:.72rem; font-weight:500; color:var(--dim); }
@@ -3912,8 +3920,8 @@ body[class*="mode-"] #masIngreso{ display:none; }
       <section id="emaView" aria-label="Salidas Ema">
         <div class="restIntro"><h2>Salidas con Ema</h2></div>
         <div class="restStatus" id="emaStatus"></div>
-        <div id="emaEquilibrio"></div>
         <div id="emaStage"></div>
+        <div id="emaEquilibrio"></div>
         <div id="emaTemporada"></div>
         <div id="emaPlanes"></div>
         <div class="restAskHead" id="emaAskHead">
@@ -4160,7 +4168,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-23.248";
+const APP_VERSION = "2026-10-23.249";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -6677,7 +6685,8 @@ const SalidasEma = (function(){
     if(/parque|zool[oó]gic|granja|ecoparque|bosque|bot[aá]nic/.test(n)) return "🌳";
     if(/cine|cinemark|royal films|cin[eé]polis/.test(n)) return "🎬";
     if(/piscina|acu[aá]tic|aqua|balneario/.test(n)) return "🏊";
-    if(/restaurante|pizza|burger|hamburg|sushi|asadero|helader|caf[eé]|crepes|panader/.test(n)) return "🍽️";
+    if(/helader|helado|paleta/.test(n)) return "🍦";
+    if(/restaurante|pizza|burger|hamburg|sushi|asadero|caf[eé]|crepes|panader/.test(n)) return "🍽️";
     return "📍";
   };
   const chipGasto = g => '<span class="emaChip' + (EF(g) ? ' ef' : '') + (g.pend ? ' emaPend' : '') + '">' + (EF(g) ? '💵 ' : '') + esc(g.c) +
@@ -6722,36 +6731,48 @@ const SalidasEma = (function(){
     const n = (b.puntuacion || 0) - (a.puntuacion || 0), v = (b.visitas || 0) - (a.visitas || 0);
     return o === "nota" ? n || v || r : o === "visitas" ? v || n || r : r || n;
   });
-  const cuando = l => { if(!l.ultima) return { v: "–", u: "" }; const d = diasDesde(l.ultima); return d === 0 ? { v: "Hoy", u: "" } : d === 1 ? { v: "Ayer", u: "" } : d < 14 ? { v: d, u: "días" } : d < 60 ? { v: Math.round(d / 7), u: "sem" } : { v: Math.round(d / 30), u: "meses" }; };
-  const metrica = (l, o) => o === "nota" ? (l.puntuacion ? { v: nota10(l.puntuacion), u: "/10" } : { v: "–", u: "sin nota" })
-    : o === "visitas" ? { v: l.visitas || 0, u: l.visitas === 1 ? "visita" : "visitas" } : cuando(l);
-  const podSub = (l, o) => o === "nota" ? visTx(l) : o === "visitas" ? (l.puntuacion ? nota10(l.puntuacion) + "/10" : l.ultima ? hace(diasDesde(l.ultima)) : "") : (l.puntuacion ? nota10(l.puntuacion) + "/10" : visTx(l));
-  const filaSub = l => [visTx(l), l.promedio ? "~" + peso(l.promedio) : "", l.ultima ? hace(diasDesde(l.ultima)) : ""].filter(Boolean).join(" · ");
-  const metHTML = m => esc(m.v) + (m.u ? '<small>' + esc(m.u) + '</small>' : '');
+  const TIPOS = { "🏬": "Centros", "🌳": "Parques", "🎬": "Cine", "🍦": "Helados", "🍽️": "Comida", "🏊": "Agua", "🎈": "Otros" };
+  const tipoLug = l => { const i = iconoLugar(l.nombre); return i !== "📍" ? i : l.clase === "Restaurante" ? "🍽️" : "🎈"; };
+  const haceTx = f => { const d = diasDesde(f); return d < 14 ? hace(d) : d < 60 ? "hace " + Math.round(d / 7) + " sem" : "hace " + Math.round(d / 30) + " meses"; };
+  const claseNota = p => !p ? "sin" : p >= 8.5 ? "top" : p >= 7 ? "mid" : "low";
+  let lugTipo = "";
+  function tarjetaLug(l, i, k){
+    const linea = [l.visitas ? visTx(l) : "Aún sin visitas", l.ultima ? haceTx(l.ultima) : ""].filter(Boolean).join(" · ");
+    return '<button type="button" class="elCard" data-lugar="' + i + '" style="--i:' + Math.min(k, 10) + '" aria-label="' + esc(l.nombre) + ', ' + (l.puntuacion ? "nota " + nota10(l.puntuacion) + " de 10" : "sin nota") + ', ' + esc(linea) + '. Ver ficha">' +
+      '<span class="elCTop"><span class="elIco" aria-hidden="true">' + tipoLug(l) + '</span><span class="elNota ' + claseNota(l.puntuacion) + '" aria-hidden="true">' + (l.puntuacion ? nota10(l.puntuacion) + '<small>/10</small>' : 'Sin nota') + '</span></span>' +
+      '<b class="elNom">' + esc(l.nombre) + '</b><span class="elLin">' + esc(linea) + '</span>' +
+      (l.promedio ? '<span class="elLin elGas">~' + peso(l.promedio) + ' por salida</span>' : '') + '</button>';
+  }
+  /* el resumen de arriba: el favorito, el más repetido y el que más gastan (solo con datos de verdad) */
+  function resumenLug(L){
+    if(L.length < 3) return "";
+    const t = [], fav = ordenaLug(L, "nota")[0], vis = ordenaLug(L, "visitas")[0], gas = L.slice().sort((a, b) => (b.promedio || 0) - (a.promedio || 0))[0];
+    if(fav.puntuacion) t.push(["⭐ Favorito", fav, nota10(fav.puntuacion) + " de 10"]);
+    if(vis.visitas >= 2) t.push(["🔁 Más veces", vis, vis.visitas + " visitas"]);
+    if(gas.promedio) t.push(["💸 Gastan más", gas, "~" + peso(gas.promedio)]);
+    return t.length ? '<div class="elRes" style="--n:' + t.length + '">' + t.map(([r, l, v]) => '<button type="button" class="elDes" data-lugar="' + L.indexOf(l) + '"><small>' + r + '</small><b>' + esc(l.nombre) + '</b><em>' + v + '</em></button>').join("") + '</div>' : "";
+  }
   function lugInner(anim){
-    const L = lugVista = ordenaLug(lugares(), lugOrden), top = L.slice(0, 3), resto = L.slice(3);
-    const orden = top.length === 3 ? [1, 0, 2] : top.length === 2 ? [1, 0] : [0];
-    const pod = orden.map(i => { const l = top[i], m = metrica(l, lugOrden);
-      return '<button type="button" class="elPod r' + (i + 1) + '" data-lugar="' + i + '" style="--i:' + (2 - i) + '" aria-label="Puesto ' + (i + 1) + ': ' + esc(l.nombre) + ', ' + esc(m.v + " " + m.u) + '. Ver ficha">' +
-        '<span class="elPodCard">' + (i === 0 && L.length > 1 ? '<span class="elCor" aria-hidden="true">👑</span>' : '') + '<b class="elNom">' + esc(l.nombre) + '</b>' +
-        '<span class="elMet' + (lugOrden === "nota" && l.puntuacion >= 8.5 ? ' top' : '') + '">' + metHTML(m) + '</span><small class="elSub">' + esc(podSub(l, lugOrden)) + '</small></span>' +
-        '<span class="elBase" aria-hidden="true">' + (i + 1) + '</span></button>'; }).join("");
-    const filas = resto.map((l, j) => '<button type="button" class="elFila" data-lugar="' + (j + 3) + '" style="--i:' + Math.min(j, 12) + '"><span class="elRk" aria-hidden="true">' + (j + 4) + '</span><span class="elFN"><b>' + esc(l.nombre) + '</b><small>' + esc(filaSub(l)) + '</small></span><span class="elFM">' + metHTML(metrica(l, lugOrden)) + '</span></button>').join("");
-    const caras = resto.slice(0, 3).map(l => '<i>' + esc(String(l.nombre || "?").trim().charAt(0).toUpperCase()) + '</i>').join("");
-    return '<div class="elCab"><div class="mkSec">Lugares con Ema</div><small>' + L.length + (L.length === 1 ? ' lugar' : ' lugares') + '</small></div>' +
-      (L.length > 1 ? '<div class="elOrd" role="group" aria-label="Ordenar los lugares">' + LUG_ORD.map(([k, t]) => '<button type="button" data-lord="' + k + '" aria-pressed="' + (k === lugOrden) + '">' + t + '</button>').join("") + '</div>' : '') +
-      '<div class="elPodio n' + top.length + (anim ? ' elAnim' : '') + '" style="--n:' + top.length + '">' + pod + '</div>' +
-      (resto.length ? (lugTodos ? '<div class="elResto" id="elResto">' + filas + '</div>' : '') +
-        '<button type="button" class="elVer" data-lmas aria-expanded="' + lugTodos + '"' + (lugTodos ? ' aria-controls="elResto"' : '') + '>' + (lugTodos ? 'Ver menos' : '<span class="elCaras" aria-hidden="true">' + caras + '</span>Ver ' + (resto.length === 1 ? 'el otro lugar' : 'los otros ' + resto.length + ' lugares')) +
+    const L = lugVista = ordenaLug(lugares(), lugOrden), tipos = [];
+    L.forEach(l => { const t = tipoLug(l); if(!tipos.includes(t)) tipos.push(t); });
+    if(lugTipo && !tipos.includes(lugTipo)) lugTipo = "";
+    const lista = []; L.forEach((l, i) => { if(!lugTipo || tipoLug(l) === lugTipo) lista.push([l, i]); });
+    const tope = lista.length <= 8 || lugTodos ? lista.length : 6, resto = lista.slice(tope);
+    const caras = resto.slice(0, 3).map(([l]) => '<i>' + tipoLug(l) + '</i>').join("");
+    return '<div class="elCab"><div class="mkSec">Lugares con Ema</div><small>' + (lugTipo ? lista.length + " de " + L.length : L.length) + (L.length === 1 ? ' lugar' : ' lugares') + '</small></div>' + resumenLug(L) +
+      (L.length > 2 ? '<div class="elOrd" role="group" aria-label="Ordenar los lugares">' + LUG_ORD.map(([k, t]) => '<button type="button" data-lord="' + k + '" aria-pressed="' + (k === lugOrden) + '">' + t + '</button>').join("") + '</div>' : '') +
+      (L.length > 5 && tipos.length > 1 ? '<div class="elOrd elTipos" role="group" aria-label="Filtrar por tipo de lugar"><button type="button" data-ltipo="" aria-pressed="' + !lugTipo + '">Todos</button>' + tipos.map(t => '<button type="button" data-ltipo="' + t + '" aria-pressed="' + (t === lugTipo) + '">' + t + ' ' + TIPOS[t] + '</button>').join("") + '</div>' : '') +
+      '<div class="elGrid' + (lista.length === 1 ? ' n1' : '') + (anim ? ' elAnim' : '') + '" id="elGrid">' + lista.slice(0, tope).map(([l, i], k) => tarjetaLug(l, i, k)).join("") + '</div>' +
+      (resto.length || (lugTodos && lista.length > 8) ? '<button type="button" class="elVer" data-lmas aria-expanded="' + lugTodos + '" aria-controls="elGrid">' + (lugTodos ? 'Ver menos' : '<span class="elCaras" aria-hidden="true">' + caras + '</span>Ver ' + (resto.length === 1 ? 'el otro lugar' : 'los otros ' + resto.length + ' lugares')) +
         '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>' : '');
   }
-  const pintaLug = anim => { const box = document.getElementById("emaLugBox"); if(box) box.innerHTML = lugInner(anim); };
+  const pintaLug = anim => { const box = document.getElementById("emaLugBox"); if(!box) return; const f = box.querySelector(".elTipos"), x = f ? f.scrollLeft : 0; box.innerHTML = lugInner(anim); const g = box.querySelector(".elTipos"); if(g) g.scrollLeft = x; };
   function fichaLugar(l, desde){
     if(!l || document.querySelector(".elScrim")) return;
     const pos = lugVista.indexOf(l), stat = (v, t) => '<div><b>' + v + '</b><small>' + t + '</small></div>';
     const scrim = document.createElement("div"); scrim.className = "pgScrim elScrim";
     scrim.innerHTML = '<div class="inWrap"><div class="pgCard inCard elFicha" role="dialog" aria-modal="true" aria-labelledby="elFT">' +
-      '<div class="elFTop"><span class="elFEmo" aria-hidden="true">' + (l.clase === "Restaurante" ? "🍽️" : "🎈") + '</span><div><small>' + (l.clase === "Restaurante" ? "Restaurante" : "Plan con Ema") + (pos >= 0 && lugVista.length > 1 ? ' · puesto ' + (pos + 1) + ' de ' + lugVista.length : '') + '</small><h3 id="elFT">' + esc(l.nombre) + '</h3></div>' +
+      '<div class="elFTop"><span class="elFEmo" aria-hidden="true">' + tipoLug(l) + '</span><div><small>' + (l.clase === "Restaurante" ? "Restaurante" : "Plan con Ema") + (pos >= 0 && lugVista.length > 1 && lugOrden === "nota" ? ' · puesto ' + (pos + 1) + ' de ' + lugVista.length : '') + '</small><h3 id="elFT">' + esc(l.nombre) + '</h3></div>' +
       (l.puntuacion ? '<span class="restNum' + (l.puntuacion >= 8.5 ? ' top' : l.puntuacion < 6 ? ' low' : '') + '" aria-label="' + l.puntuacion + ' de 10">' + nota10(l.puntuacion) + '<small>/10</small></span>' : '<span class="elSinNota">sin nota</span>') + '</div>' +
       '<div class="elFStats">' + stat(l.visitas || 0, l.visitas === 1 ? "visita" : "visitas") + stat(l.promedio ? peso(l.promedio) : "–", "por salida") + stat(l.ultima ? esc(fechaCorta(l.ultima)) : "–", l.ultima ? hace(diasDesde(l.ultima)) : "última vez") + '</div>' +
       (l.notas ? '<p class="elFNota">“' + esc(l.notas) + '”</p>' : '') +
@@ -6777,7 +6798,7 @@ const SalidasEma = (function(){
     const chipsDias = sal.map(q => '<button type="button" class="emaDiaChip' + (q.fecha === abierta ? ' on' : '') + '" data-f="' + esc(q.fecha) + '" aria-pressed="' + (q.fecha === abierta) + '"><b>' + (+q.fecha.slice(8, 10)) + '</b><small>' + esc(diaCorto(q.fecha)) + '</small></button>').join("");
     const detalle = detalleHTML;
     const promSalida = act.veces ? act.total / act.veces : 0;
-    const lug = lugares().sort((a, b) => (a.ultima ? diasDesde(a.ultima) : 9999) - (b.ultima ? diasDesde(b.ultima) : 9999));
+    const lug = lugares();
     stage.innerHTML =
       '<div class="emaCard' + (anim ? ' emaEntra' : '') + '">' +
         '<span class="emaMes">' + esc(mesNombre(hoyM)) + '</span>' +
@@ -6786,17 +6807,21 @@ const SalidasEma = (function(){
         '<span class="emaFrase">con Ema este mes</span></div>' +
         '<button type="button" class="emaMas" aria-label="Registrar salida"><span class="mas" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span><small>Registra salida</small></button></div>' +
         (sal.length
-          ? '<div class="emaDiasTit">Los días que salieron</div><div class="emaDiasRow" role="tablist">' + chipsDias + '</div><div class="emaDetalle" id="emaDetalle">' + detalle(sal.find(q => q.fecha === abierta)) + '</div>'
-          : '<p class="emaVacio">Todavía no hay salidas este mes.</p>') +
-        (ult.length ? '<div class="emaBarras">' + barras + '</div>' : '') +
+          ? '<div class="emaDiasTit">Los días que salieron</div><div class="emaDiasRow' + (sal.length > 5 ? ' scroll' : '') + '" role="group" aria-label="Días con salida">' + chipsDias + '</div><div class="emaDetalle" id="emaDetalle">' + detalle(sal.find(q => q.fecha === abierta)) + '</div>'
+          : '<p class="emaVacio">Todavía no hay salidas este mes. Toca el + para anotar la primera.</p>') +
+        (ult.length ? '<div class="emaBarrasTit">Salidas por mes</div><div class="emaBarras">' + barras + '</div>' : '') +
       '</div>' +
       (lug.length
         ? '<div class="elBox" id="emaLugBox">' + lugInner(true) + '</div>'
-        : '<p class="gEmpty" style="margin-top:18px">Cuando registres una salida con su lugar (por ejemplo Pance), aparece aquí con cuánto gastan y qué tal les fue.</p>');
+        : '<div class="elVacio"><span aria-hidden="true">📍</span><b>Aquí van los lugares de Ema</b><p>Cuando registres una salida con su lugar (por ejemplo Pance), aparece con cuánto gastan y qué tal les fue.</p></div>');
+    const dr = stage.querySelector(".emaDiasRow.scroll"), on = dr && dr.querySelector(".on");   // con muchos días, el abierto queda a la vista
+    if(on) dr.scrollLeft = on.offsetLeft - (dr.clientWidth - on.offsetWidth) / 2;
   }
   stage.addEventListener("click", e => {
     const lo = e.target.closest("[data-lord]");
     if(lo){ if(lo.dataset.lord !== lugOrden){ lugOrden = lo.dataset.lord; try{ localStorage.setItem(KLO, lugOrden); }catch{} pintaLug(true); } return; }
+    const lt = e.target.closest("[data-ltipo]");
+    if(lt){ if(lt.dataset.ltipo !== lugTipo){ lugTipo = lt.dataset.ltipo; lugTodos = false; pintaLug(true); } return; }
     if(e.target.closest("[data-lmas]")){ lugTodos = !lugTodos; pintaLug(false); const v = stage.querySelector(".elVer"); if(v) v.focus({ preventScroll: true }); return; }
     const lg = e.target.closest("[data-lugar]");
     if(lg){ fichaLugar(lugVista[+lg.dataset.lugar], lg); return; }
@@ -6831,7 +6856,7 @@ const SalidasEma = (function(){
       equilibrio();
       setTimeout(pidePuntaje, 400);
     }catch{
-      if(!datos) statusEl.innerHTML = "No se pudo cargar. Revisa tu internet, que Tailscale esté encendido y que el flujo salidas-ema esté activo en n8n.";
+      if(!datos) statusEl.innerHTML = 'No se pudo cargar. Revisa tu internet y que Tailscale esté encendido.<button type="button" class="uxReint" onclick="SalidasEma.refresh()">Reintentar</button>';
     }
   }
   function refresh(){
