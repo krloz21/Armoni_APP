@@ -1,0 +1,10 @@
+// Nodo «Code» nuevo en el flujo del chat del Crédito Carro (webhook credito-carro-chat),
+// entre el Webhook y el AI Agent. Convierte la imagen que manda la app («imagen», data URL)
+// en un archivo para que el agente la pueda ver.
+// En el AI Agent: Options → «Automatically Passthrough Binary Images» = ON.
+const it = $input.first().json;
+const b = it.body || it;
+const out = { json: Object.assign({}, it, { chatInput: b.chatInput, sessionId: b.sessionId }) };
+const m = typeof b.imagen === 'string' && b.imagen.match(/^data:(image\/[a-z+]+);base64,(.+)$/);
+if (m) out.binary = { data: { data: m[2], mimeType: m[1], fileName: 'imagen.' + m[1].split('/')[1] } };
+return [out];

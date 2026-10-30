@@ -3506,6 +3506,17 @@ body.asleep #mkFx{ display:none; }
 #masIngreso svg{ width:18px; height:18px; }
 #masIngreso:active{ transform:scale(.88); }
 body[class*="mode-"] #masIngreso{ display:none; }
+/* Crédito: adjuntar una imagen al chat (extracto, recibo, captura del banco) */
+#credFoto{ display:none; flex:none; align-self:flex-end; width:38px; height:38px; border-radius:50%; border:1px solid rgba(var(--ink),.14); background:rgba(var(--ink),.07); color:var(--ghost); place-items:center; cursor:pointer; margin-left:-8px; }
+#credFoto svg{ width:18px; height:18px; }
+#credFoto:active{ transform:scale(.88); }
+body.mode-credito #credFoto{ display:grid; }
+#credFotoPrev{ position:relative; flex:none; align-self:flex-end; width:38px; height:38px; }
+#credFotoPrev[hidden]{ display:none; }
+#credFotoPrev img{ width:38px; height:38px; object-fit:cover; border-radius:10px; border:1px solid rgba(var(--ink),.2); }
+#credFotoPrev button{ position:absolute; top:-7px; right:-7px; width:22px; height:22px; border-radius:50%; border:0; background:#e5484d; color:#fff; font:700 14px/22px system-ui; padding:0; cursor:pointer; }
+#credFotoPrev button::before{ content:""; position:absolute; inset:-11px; }
+.msg .body img.chatFoto{ display:block; max-width:min(240px, 70vw); max-height:300px; margin:0 0 6px auto; border-radius:14px; border:1px solid rgba(var(--ink),.15); }
 .inCard{ max-height:calc(100dvh - 40px); display:flex; flex-direction:column; text-align:left; }
 .inBody{ flex:1 1 auto; min-height:0; overflow-y:auto; overflow-x:hidden; overscroll-behavior:contain; touch-action:pan-y; margin:0 -6px; padding:10px 6px; -webkit-overflow-scrolling:touch; -webkit-mask-image:linear-gradient(transparent 0, #000 10px, #000 calc(100% - 10px), transparent 100%); mask-image:linear-gradient(transparent 0, #000 10px, #000 calc(100% - 10px), transparent 100%); }
 .inBody::-webkit-scrollbar{ display:none; }
@@ -4079,6 +4090,10 @@ body[class*="mode-"] #masIngreso{ display:none; }
         <button id="masIngreso" type="button" aria-label="Registrar un gasto" title="Registrar un gasto">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
         </button>
+        <button id="credFoto" type="button" aria-label="Adjuntar una imagen" title="Adjuntar una imagen">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2.5"/><circle cx="9" cy="10" r="1.6"/><path d="M21 16l-5-5-8 8"/></svg>
+        </button>
+        <span id="credFotoPrev" hidden><img alt="Imagen adjunta"><button type="button" aria-label="Quitar la imagen">×</button></span>
         <textarea id="field" rows="1" placeholder="Escribe aquí…" autocomplete="off" enterkeyhint="send"></textarea>
         <button id="send" type="submit" disabled aria-label="Enviar">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
@@ -4168,7 +4183,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-23.250";
+const APP_VERSION = "2026-10-30.252";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -5945,7 +5960,7 @@ async function ask(text, mostrar){
     return Restaurantes.preguntar(text);
   }
   if(MODE === "credito"){
-    if(!text.trim()) return;
+    if(!text.trim() && !CreditoCarro.tieneFoto()) return;
     field.value = ""; grow(); lock();
     if(TOUCH) field.blur();
     return CreditoCarro.preguntar(text);
@@ -6035,7 +6050,7 @@ async function ask(text, mostrar){
 }
 
 function grow(){ field.style.height = "auto"; field.style.height = field.scrollHeight + "px"; }
-function lock(){ send.disabled = busy || !field.value.trim(); }
+function lock(){ send.disabled = busy || !(field.value.trim() || (MODE === "credito" && typeof CreditoCarro !== "undefined" && CreditoCarro.tieneFoto())); }
 
 field.addEventListener("input", () => { grow(); lock(); });
 keptScrolled = () => {
@@ -8154,7 +8169,23 @@ const CreditoCarro = (function(){
   const statusEl = document.getElementById("credStatus");
   const cardEl = document.getElementById("credCard");
   const askEl = document.getElementById("credAsk");
-  let datos = null, asking = false, charla = null;
+  let datos = null, asking = false, charla = null, foto = null;
+  /* la imagen adjunta: se reduce (fotos del teléfono pesan mucho) y viaja como data URL en «imagen» */
+  const fotoBtn = document.getElementById("credFoto"), fotoPrev = document.getElementById("credFotoPrev");
+  const reduceFoto = file => new Promise(ok => {
+    const im = new Image(), u = URL.createObjectURL(file);
+    im.onload = () => { const k = Math.min(1, 1600 / Math.max(im.width, im.height)); const c = document.createElement("canvas"); c.width = Math.round(im.width * k); c.height = Math.round(im.height * k); c.getContext("2d").drawImage(im, 0, 0, c.width, c.height); URL.revokeObjectURL(u); ok(c.toDataURL("image/jpeg", .82)); };
+    im.onerror = () => { URL.revokeObjectURL(u); ok(null); };
+    im.src = u;
+  });
+  const pintaFoto = () => { fotoPrev.hidden = !foto; if(foto) fotoPrev.querySelector("img").src = foto; try{ lock(); }catch{} };
+  if(fotoBtn) fotoBtn.addEventListener("click", () => {
+    const inp = document.createElement("input"); inp.type = "file"; inp.accept = "image/*";
+    inp.style.cssText = "position:fixed;left:-9999px;opacity:0"; document.body.appendChild(inp);
+    inp.addEventListener("change", async () => { const f = inp.files && inp.files[0]; inp.remove(); if(!f) return; foto = await reduceFoto(f); pintaFoto(); });
+    inp.click();
+  });
+  if(fotoPrev) fotoPrev.querySelector("button").addEventListener("click", () => { foto = null; pintaFoto(); });
 
   const esc = s => String(s ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
   const plata = n => n == null ? "—" : "$" + Math.round(n).toLocaleString("es-CO");
@@ -8250,12 +8281,14 @@ const CreditoCarro = (function(){
 
   async function preguntar(q){
     q = String(q || "").trim();
-    if(!q || asking) return;
-    asking = true;
+    const img = foto;
+    if((!q && !img) || asking) return;
+    if(!q) q = "Mira esta imagen y dime qué ves sobre el crédito del carro.";
+    asking = true; foto = null; pintaFoto();
     send.classList.add("busy"); frame.classList.add("sending"); send.disabled = true;
     Rain.send();
     if(!charla) charla = "credito-" + newId();
-    askEl.appendChild(burbuja("you", "<p>" + esc(q) + "</p>"));
+    askEl.appendChild(burbuja("you", (img ? '<img class="chatFoto" alt="Imagen enviada" src="' + img + '">' : "") + "<p>" + esc(q) + "</p>"));
     const wait = document.createElement("div");
     wait.className = "msg";
     wait.innerHTML = '<span class="state">Revisando el crédito</span>';
@@ -8268,7 +8301,7 @@ const CreditoCarro = (function(){
       const res = await fetch(CREDITO_CARRO_CHAT_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sessionId: charla, chatInput: contexto() + q })
+        body: JSON.stringify(Object.assign({ sessionId: charla, chatInput: contexto() + q + (img ? "\n\n(La familia adjuntó una imagen: analízala junto con la pregunta.)" : "") }, img ? { imagen: img } : {}))
       });
       const txt = await res.text();
       if(!res.ok){
@@ -8296,7 +8329,7 @@ const CreditoCarro = (function(){
   }
   function nueva(){ charla = null; askEl.innerHTML = ""; }
 
-  return { refresh, preguntar, nueva };
+  return { refresh, preguntar, nueva, tieneFoto: () => !!foto };
 })();
 
 /* ════════════════════════════════════════════════════════════
@@ -8414,9 +8447,12 @@ const AtGmail = (function(){
       const blob = await reducir(elegido);
       const fd = new FormData();
       fd.append("comprobante", blob, "comprobante.jpg");
-      const res = await fetch(AT_GMAIL_URL, { method:"POST", body: fd });
+      let res;
+      try{ res = await fetch(AT_GMAIL_URL, { method:"POST", body: fd, signal: AbortSignal.timeout ? AbortSignal.timeout(45000) : undefined }); }
+      catch{ throw Object.assign(new Error("red"), { aviso: "No hay conexión con la casa. Revisa tu internet y que Tailscale esté encendido." }); }
       let data = null; try{ data = await res.json(); }catch{}
-      if(!res.ok || (data && data.ok === false)) throw new Error("http " + res.status);
+      if(res.status === 404) throw Object.assign(new Error("404"), { aviso: "El flujo «AT Gmail» no está activo en n8n. Ábrelo y tócale Publish." });
+      if(!res.ok || (data && data.ok === false)) throw Object.assign(new Error("http " + res.status), { aviso: (data && data.error && String(data.error).length < 160 ? "n8n dijo: " + data.error + ". " : "") + "El flujo «AT Gmail» falló en n8n. Lo más común: la conexión de Gmail se venció. En n8n → Credentials → «Gmail account» → Reconnect, y vuelve a intentar." });
       if(typeof Servicios !== "undefined") Servicios.check();
       /* que la animación de envío se alcance a ver aunque n8n responda al instante */
       const falta = 1300 - (Date.now() - t0);
@@ -8437,7 +8473,7 @@ const AtGmail = (function(){
       box.classList.remove("busy", "done");
       q.textContent = "No se pudo enviar";
       msg.className = "err";
-      msg.textContent = "Revisa la conexión e inténtalo de nuevo. La imagen sigue elegida.";
+      msg.textContent = ((e && e.aviso) || "Revisa la conexión e inténtalo de nuevo.") + " La imagen sigue elegida.";
       row.hidden = false;   // se puede reintentar sin subirla otra vez
       scrim.querySelector("#gmSend").textContent = "Reintentar";
     }

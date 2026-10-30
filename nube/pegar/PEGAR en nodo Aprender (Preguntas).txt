@@ -1,0 +1,56 @@
+// el hilo de la conversación (para el «chat temporal» de cada duda)
+const _h = q => (q.hilo && q.hilo.length ? q.hilo : [{ r: 'a', t: q.pregunta }]);
+// referencia corta y única de cada movimiento: el FINAL del código de Notion (el inicio se repite entre páginas)
+const ref = (id) => String(id).replace(/-/g, '').slice(-10);
+// nunca se le muestran códigos a la familia: cada «ref» se cambia por el nombre del movimiento
+const limpia = (t, movs) => { let s = String(t || ''); (movs || []).forEach(m => { s = s.split(ref(m.id)).join('«' + m.concepto + '»'); }); return s.replace(/\s*\(?\b[0-9a-f]{10}\b\)?/g, '').replace(/\s{2,}/g, ' ').trim(); };
+const sd = $getWorkflowStaticData('global');
+const v = $('Validar').first().json;
+const p = sd.preguntas.find(q => q.id === v.id);
+let txt = String($input.first().json.output || '');
+const m = txt.match(/\{[\s\S]*\}/);
+let r = {};
+try { r = JSON.parse(m ? m[0] : txt); } catch (e) {}
+const validas = ['real', 'favor', 'traslado', 'duplicado', 'invertido'];
+// si la familia dice la categoría con sus palabras («está en categoría hogar»), esa manda: la IA no la puede cambiar por otra
+const sinT = t => String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+const RESP = sinT(v.respuesta);
+let dichas = ['Alimentación', 'Salidas Ema', 'Salidas', 'Hogar', 'Carro', 'Hijo', 'Salud', 'Tarjetas', 'Ahorro', 'Otros'].filter(c => new RegExp('\\b' + sinT(c) + '\\b').test(RESP));
+if (dichas.includes('Salidas Ema')) dichas = dichas.filter(c => c !== 'Salidas');
+const catDicha = dichas.length === 1 && (p.movs || []).length === 1 ? dichas[0] : null;
+let respetada = null;
+const porId8 = id8 => p.movs.find(x => ref(x.id) === String(id8).replace(/-/g, '').slice(-10));
+// lo que se corrige directo en Notion (signo al revés o categoría equivocada); lo demás solo cambia cómo cuenta en los totales
+const corregir = [];
+const CATS_OK = ['Alimentación', 'Salidas', 'Salidas Ema', 'Hogar', 'Carro', 'Hijo', 'Salud', 'Tarjetas', 'Ahorro', 'Otros'];
+for (const a of (r.movimientos || [])) {
+  const mov = porId8(a.id); const clas = validas.includes(a.clasificacion) ? a.clasificacion : null;
+  if (!mov || !clas) continue;
+  let catNueva = CATS_OK.includes(a.categoria) && a.categoria !== mov.cat ? a.categoria : null;
+  if (catDicha) { if (catNueva !== catDicha && a.categoria && a.categoria !== catDicha) respetada = catDicha; catNueva = catDicha; mov.cat = catDicha; }   // se escribe siempre en Notion: si antes la IA la había cambiado, vuelve a la que dijo la familia
+  if (clas === 'invertido') { delete sd.ajustes[mov.id]; corregir.push({ id: mov.id, tipo: mov.tipo === 'Gasto' ? 'Ingreso' : 'Gasto', categoria: catNueva || mov.cat }); continue; }
+  if (catNueva) corregir.push({ id: mov.id, tipo: mov.tipo, categoria: catNueva });
+  if (clas === 'real') { delete sd.ajustes[mov.id]; continue; }
+  sd.ajustes[mov.id] = { clas, tipo: mov.tipo, monto: mov.monto, fecha: mov.fecha, cat: mov.cat, concepto: mov.concepto, nota: String(a.nota || '').slice(0, 120) };
+}
+for (const f of (r.aprender || [])) { const t = String(f || '').trim().slice(0, 240); if (t && !sd.memoria.includes(t)) sd.memoria.push(t); }
+sd.memoria = sd.memoria.length > 150 ? sd.memoria.slice(0, 4).concat(sd.memoria.slice(-146)) : sd.memoria;
+p.hilo = (p.hilo && p.hilo.length ? p.hilo : [{ r: 'a', t: p.pregunta }]);
+p.hilo.push({ r: 'u', t: v.respuesta });
+const _msg = respetada ? ('Perfecto, queda en ' + respetada + ', como dijiste. ✓') : limpia(r.mensaje || '¡Listo, ya lo aprendí!', p.movs).slice(0, 300);
+if (respetada) { const mv = p.movs[0]; const hecho = '«' + mv.concepto + '» va en la categoría ' + respetada + ' (lo dijo la familia).'; sd.memoria = sd.memoria.filter(x => !(sinT(x).includes(sinT(mv.concepto)) && !sinT(x).includes(sinT(respetada)))); if (!sd.memoria.includes(hecho)) sd.memoria.push(hecho); }
+if (r.repreguntar) { p.pregunta = limpia(r.repreguntar, p.movs).slice(0, 300); p.opciones = []; p.estado = 'pendiente'; p.hilo.push({ r: 'a', t: p.pregunta }); }
+else { p.estado = 'respondida'; p.respuesta = v.respuesta; p.hilo.push({ r: 'a', t: _msg }); }
+// movimientos que Armoni propone registrar (la app pide confirmación antes de guardarlos)
+const CG = ['Alimentación', 'Salidas', 'Salidas Ema', 'Hogar', 'Carro', 'Hijo', 'Salud', 'Tarjetas', 'Ahorro', 'Otros'], CI = ['Hogar', 'Alimentación', 'Salidas', 'Ahorro', 'Otros'];
+const registrar = (Array.isArray(r.registrar) ? r.registrar : []).slice(0, 5).map(x => ({ tipo: x && x.tipo, concepto: String((x && x.concepto) || '').trim().slice(0, 80), categoria: x && x.categoria, monto: Math.round(Number(x && x.monto)), fecha: String((x && x.fecha) || '') }))
+  .filter(x => (x.tipo === 'Gasto' || x.tipo === 'Ingreso') && x.concepto && (x.tipo === 'Gasto' ? CG : CI).includes(x.categoria) && x.monto > 0 && /^\d{4}-\d{2}-\d{2}$/.test(x.fecha));
+if (registrar.length) p.hilo[p.hilo.length - 1].reg = registrar;
+const hoy = new Date(Date.now() - 5 * 3600 * 1000).toISOString().slice(0, 10);
+const pend = sd.preguntas.filter(q => q.estado === 'pendiente' || (q.estado === 'saltada' && (q.hasta || '') <= hoy)).slice(0, 5).map(q => ({ id: q.id, pregunta: q.pregunta, opciones: q.opciones, movs: q.movs, tipo: q.tipo || '', sug: q.sug || null, hilo: _h(q) }));
+// todas las dudas sin resolver (también las que dejaron para después) y las últimas respondidas, para la pantalla «Dudas»
+const _sd = $getWorkflowStaticData('global');
+const _lista = (_sd.preguntas || []);
+const abiertas = _lista.filter(q => q.estado === 'pendiente' || q.estado === 'saltada').map(q => ({ id: q.id, pregunta: q.pregunta, opciones: q.opciones || [], movs: q.movs || [], saltada: q.estado === 'saltada', creada: q.creada || '', tipo: q.tipo || '', sug: q.sug || null, hilo: _h(q) }));
+const hechas = _lista.filter(q => q.estado === 'respondida').slice(-8).reverse().map(q => ({ id: q.id, pregunta: q.pregunta, respuesta: q.respuesta || '', movs: q.movs || [], hilo: _h(q) }));
+return [{ json: { abiertas, hechas, saber: _sd.memoria || [], revision: _sd.revision || null, ok: true, mensaje: _msg, sigue: !!r.repreguntar, pregunta: p.pregunta, registrar, corregir, preguntas: pend, ajustes: sd.ajustes, memoria: sd.memoria.length } }];
