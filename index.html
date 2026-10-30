@@ -4183,7 +4183,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-30.252";
+const APP_VERSION = "2026-10-30.253";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -8315,7 +8315,7 @@ const CreditoCarro = (function(){
     }catch{
       falla = ["No se pudo hablar con el agente", "Revisa tu internet y que Tailscale esté encendido, y que el workflow esté publicado."];
     }
-    if(respuesta) wait.replaceWith(burbuja("bot", render(respuesta)));
+    if(respuesta){ wait.replaceWith(burbuja("bot", render(respuesta))); if(img) setTimeout(() => { fetchLive(JSON.stringify(datos)).catch(() => {}); }, 1500); }   // si con la foto se registró un pago, la tarjeta del crédito se pone al día
     else {
       const w = document.createElement("div");
       w.className = "msg";
