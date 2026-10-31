@@ -1320,6 +1320,17 @@ body[class*="mode-"] #credAviso{ display:none !important; }
 .dcCierre button{ flex:none; padding:9px 12px; border-radius:12px; border:0; background:linear-gradient(140deg, #8fc7ff, #5f8bff); color:#071226; font:inherit; font-size:.82rem; font-weight:700; cursor:pointer; }
 body[class*="mode-"] #cierreAviso{ display:none !important; }
 #cierreAviso{ width:min(100%, 42rem); margin:0 auto; }
+/* avisos de la pantalla principal: la cola (decidir / no se pudo guardar), el valor del arriendo y los flujos viejos */
+body[class*="mode-"] #colaAviso, body[class*="mode-"] #arriendoAviso, body[class*="mode-"] #flujoAviso{ display:none !important; }
+#colaAviso, #arriendoAviso, #flujoAviso{ width:min(100%, 42rem); margin:0 auto; }
+#colaAviso:empty, #arriendoAviso:empty, #flujoAviso:empty{ display:none; }
+.credAvisoBtn.colaMal{ border-color:rgba(255,120,100,.4); background:linear-gradient(130deg, rgba(255,120,100,.13), rgba(255,120,100,.04)); }
+.flujoAvisoBox{ cursor:default; }
+.credAvisoBtn .avisoX{ flex:none; width:34px; height:34px; margin:-6px -6px -6px 0; padding:0; border:0; border-radius:50%; background:rgba(var(--ink),.06); color:var(--ghost); font:inherit; font-size:.95rem; cursor:pointer; }
+#ajColaBox[hidden]{ display:none; }
+.ajCard .setRow.colaFila{ flex-wrap:wrap; gap:8px; }
+.colaFila .setTxt span{ white-space:normal; line-height:1.35; }
+.colaBtns{ display:flex; flex-wrap:wrap; justify-content:flex-end; gap:8px; width:100%; }
 .dcPro{ margin:0 0 18px; padding:14px; border-radius:22px; border:1px solid var(--line); background:radial-gradient(120% 90% at 0% 0%, rgba(143,199,255,.10), transparent 60%), var(--panel); }
 .dcProCab{ display:flex; gap:10px; align-items:flex-start; }
 .dcProIco{ font-size:1.4rem; line-height:1; }
@@ -4198,6 +4209,9 @@ body.mode-credito #credFoto{ display:grid; }
       <div id="glimBanner"></div>
       <div id="credAviso"></div>
       <div id="cierreAviso"></div>
+      <div id="colaAviso"></div>
+      <div id="arriendoAviso"></div>
+      <div id="flujoAviso"></div>
 
       <section id="welcome">
         <p class="sr">Armoni. Escribe un gasto para guardarlo, o pregunta por lo que llevan gastado.</p>
@@ -4307,6 +4321,10 @@ body.mode-credito #credFoto{ display:grid; }
         <span class="setTxt"><b>Probar aviso</b><span id="notifProbarEstado">Te manda uno ahora mismo</span></span>
         <button type="button" id="notifProbar" class="notifBtn">Enviar</button>
       </div>
+        </div>
+        <div id="ajColaBox" hidden>
+          <div class="ajGrupo">Registros sin guardar</div>
+          <div class="ajCard" id="ajCola"></div>
         </div>
         <div class="ajGrupo">Acerca de</div>
         <div class="ajCard">
@@ -4495,7 +4513,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-31.273";
+const APP_VERSION = "2026-10-31.274";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -6322,6 +6340,7 @@ async function ask(text, mostrar){
   field.value = ""; grow(); lock();
   if(TOUCH) field.blur();
   startStates();
+  let llego = false;   // true solo si Armoni respondió de verdad (el formulario de gasto lo usa para decir «guardado»)
 
   try{
     const res = await fetch(WEBHOOK_URL, {
@@ -6343,7 +6362,7 @@ async function ask(text, mostrar){
         reply = data.output || data.text || data.message || data.response || (typeof data === "string" ? data : "");
       }catch{ reply = txt; }
 
-      if(reply && String(reply).trim()) add("bot", String(reply));
+      if(reply && String(reply).trim()){ add("bot", String(reply)); llego = true; }
       else problem("Llegó una respuesta vacía",
                    "El flujo corrió pero no devolvió texto. Mira la pestaña Executions en n8n para ver qué pasó.");
     }
@@ -6359,6 +6378,7 @@ async function ask(text, mostrar){
     if(!TOUCH) field.focus();
     scheduleSleep();
   }
+  return llego;
 }
 
 function grow(){ field.style.height = "auto"; field.style.height = field.scrollHeight + "px"; }
@@ -8953,7 +8973,10 @@ const AtGmail = (function(){
       elegido = null; quitaSelector();
       say("Comprobante enviado a la inmobiliaria.", "ok");
       again.hidden = false;
-      setTimeout(valorArriendo, 400);   // ahora el valor: ¿fue el de siempre o cambió?
+      /* desde ya queda pendiente anotar el valor: si tocan «Después» o cierran la app, el aviso de la pantalla principal lo recuerda */
+      try{ if(localStorage.getItem(KM) !== periodo()) localStorage.setItem(KP, periodo()); }catch{}
+      pintaPendiente();
+      setTimeout(() => valorArriendo(), 400);   // ahora el valor: ¿fue el de siempre o cambió?
     }catch(e){
       sending = false;
       if(!scrim) return;
@@ -8967,17 +8990,34 @@ const AtGmail = (function(){
   }
 
   /* Después de mandar el comprobante: ¿el arriendo fue el valor de siempre o cambió? Se registra el gasto con su valor en Notion */
-  const KV = "armoni.arriendo.valor", KM = "armoni.arriendo.mes";
-  const mesHoy = () => { const d = new Date(); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0"); };
-  const fechaHoy = () => { const d = new Date(); return mesHoy() + "-" + String(d.getDate()).padStart(2, "0"); };
+  /* KM = el último periodo ya anotado · KP = periodo con comprobante enviado y valor sin anotar */
+  const KV = "armoni.arriendo.valor", KM = "armoni.arriendo.mes", KP = "armoni.arriendo.pendiente";
+  const dos = n => String(n).padStart(2, "0");
+  const mesHoy = () => { const d = new Date(); return d.getFullYear() + "-" + dos(d.getMonth() + 1); };
+  /* el periodo es el mes que cubre el arriendo: del día 20 en adelante ya se paga el del mes siguiente (misma regla que servicios-estado) */
+  const periodo = () => { const d = new Date(), k = d.getDate() >= 20 ? new Date(d.getFullYear(), d.getMonth() + 1, 1) : d; return k.getFullYear() + "-" + dos(k.getMonth() + 1); };
+  const MESES_AR = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
+  const nombrePer = k => MESES_AR[+String(k).slice(5, 7) - 1] || "";
+  const fechaHoy = () => { const d = new Date(); return mesHoy() + "-" + dos(d.getDate()); };
   const peso = n => "$" + Math.round(n).toLocaleString("es-CO");
-  function valorArriendo(){
-    try{ if(localStorage.getItem(KM) === mesHoy()) return; }catch{}
+  const pendiente = () => { try{ const p = localStorage.getItem(KP); return p && p !== localStorage.getItem(KM) ? p : ""; }catch{ return ""; } };
+  function pintaPendiente(){
+    const box = document.getElementById("arriendoAviso"); if(!box) return;
+    const p = pendiente();
+    box.innerHTML = p ? '<button type="button" class="credAvisoBtn"><span class="ic" aria-hidden="true">🏠</span><span class="tx"><b>Falta anotar el valor del arriendo</b><small>Ya se mandó el comprobante de ' + nombrePer(p) + ': anota cuánto fue para que quede en tus cuentas</small></span><span class="ir" aria-hidden="true">›</span></button>' : "";
+    if(p) box.firstChild.onclick = () => valorArriendo(p);
+  }
+  /* per: el periodo que se anota (el pendiente o el de ahora) */
+  function valorArriendo(per){
+    per = per || periodo();
+    try{ if(localStorage.getItem(KM) === per){ pintaPendiente(); return; } }catch{}
+    if(document.querySelector(".arScrim")) return;
+    try{ localStorage.setItem(KP, per); }catch{}   // queda pendiente hasta que se anote (si tocan «Después», sale el aviso en el inicio)
     let normal = 0; try{ normal = +localStorage.getItem(KV) || 0; }catch{}
     const sc = document.createElement("div");
-    sc.className = "pgScrim";
+    sc.className = "pgScrim arScrim";
     sc.innerHTML = '<div class="inWrap"><div class="pgCard inCard" role="dialog" aria-modal="true" aria-labelledby="arT">' +
-      '<div class="pnTop"><span class="pnEstrella" aria-hidden="true">🏠</span><small>Comprobante enviado</small><h3 id="arT">¿Cuánto fue el arriendo?</h3>' +
+      '<div class="pnTop"><span class="pnEstrella" aria-hidden="true">🏠</span><small>Comprobante de ' + nombrePer(per) + ' enviado</small><h3 id="arT">¿Cuánto fue el arriendo?</h3>' +
       '<p>' + (normal ? '¿Fue el valor de siempre o hubo variación?' : 'Anótalo para que quede el gasto en tus cuentas.') + '</p></div>' +
       '<div class="inBody">' + (normal ? '<button type="button" class="arNormal" id="arNormal">Sí, el de siempre · ' + peso(normal) + '</button><p class="fmAyuda" style="margin:0 0 6px">¿Cambió? Escribe el valor:</p>' : '') +
       '<input id="arMonto" type="text" inputmode="numeric" autocomplete="off" placeholder="Valor del arriendo">' +
@@ -8985,7 +9025,7 @@ const AtGmail = (function(){
       '<p class="inErr" id="arErr" role="alert"></p></div>' +
       '<div class="pgRow"><button type="button" class="pgNo" id="arLuego">Después</button><button type="button" class="pgSi" id="arOtro">Guardar</button></div></div></div>';
     document.body.appendChild(sc); requestAnimationFrame(() => sc.classList.add("on"));
-    const q = id => sc.querySelector("#" + id), cierra = () => { sc.classList.remove("on"); setTimeout(() => sc.remove(), 340); };
+    const q = id => sc.querySelector("#" + id), cierra = () => { sc.classList.remove("on"); setTimeout(() => sc.remove(), 340); pintaPendiente(); };
     const inp = q("arMonto");
     inp.addEventListener("input", () => { const n = inp.value.replace(/\D/g, ""); inp.value = n ? (+n).toLocaleString("es-CO") : ""; });
     q("arLuego").onclick = cierra;
@@ -8993,11 +9033,18 @@ const AtGmail = (function(){
       if(!(monto > 0)){ q("arErr").textContent = "Escribe el valor del arriendo."; return; }
       sc.querySelectorAll("button").forEach(b => b.disabled = true); q("arErr").textContent = "";
       try{
-        const r = await fetch(MOVIMIENTO_URL, { method: "POST", body: JSON.stringify({ token: MERCADO_TOKEN, tipo: "Gasto", concepto: "Arriendo", categoria: "Hogar", monto, fecha: fechaHoy(), nota: nota || "", desdeAviso: true, forzar: true }) });
+        /* colaId fijo por periodo: si el otro celular ya lo anotó (o se reintenta), n8n contesta «repetido» y no se duplica */
+        const r = await Cola.post(MOVIMIENTO_URL, { method: "POST", body: JSON.stringify({ token: MERCADO_TOKEN, tipo: "Gasto", concepto: "Arriendo", categoria: "Hogar", monto, fecha: fechaHoy(), nota: nota || "", desdeAviso: true, forzar: true, colaId: "arriendo-" + per }) });
         const j = await r.json().catch(() => ({}));
-        if(!r.ok || j.ok === false) throw new Error(j.error && String(j.error).length < 120 ? j.error : "");
-        try{ localStorage.setItem(KV, String(monto)); localStorage.setItem(KM, mesHoy()); }catch{}
-        cierra(); if(typeof avisoOk === "function") avisoOk("Arriendo anotado", peso(monto) + (nota ? " · " + nota : ""));
+        const repetido = j.error === "repetido";
+        if(!repetido && (!r.ok || j.ok === false)) throw new Error(j.error && String(j.error).length < 120 ? j.error : "");
+        try{ if(!repetido) localStorage.setItem(KV, String(monto)); localStorage.setItem(KM, per); localStorage.removeItem(KP); }catch{}
+        cierra();
+        if(typeof avisoOk === "function"){
+          if(repetido) avisoOk("Arriendo ya estaba anotado", "El de " + nombrePer(per) + " ya quedó en tus cuentas");
+          else if(j.enCola) avisoOk("Guardado en el celular", "Arriendo · " + peso(monto) + " · se envía cuando el PC esté prendido");
+          else avisoOk("Arriendo anotado", peso(monto) + (nota ? " · " + nota : ""));
+        }
       }catch(e){
         sc.querySelectorAll("button").forEach(b => b.disabled = false);
         q("arErr").textContent = /registra solo/i.test((e && e.message) || "") ? "Falta actualizar el flujo «Armoni - Agregar movimiento» en n8n." : "No pude guardarlo. Revisa la conexión e inténtalo otra vez.";
@@ -9025,8 +9072,9 @@ const AtGmail = (function(){
   }
   drop.addEventListener("click", abrirSelector);
   again.addEventListener("click", () => { reset(); abrirSelector(); });
+  TrasIntro.hacer(pintaPendiente);
 
-  return { nueva: reset };
+  return { nueva: reset, valorArriendo, pintaPendiente };
 })();
 
 /* ════════════════════════════════════════════════════════════
@@ -9364,11 +9412,73 @@ function ajustaMonto(inp){
    Si el PC está apagado o no hay internet, el gasto/ingreso/salida/ahorro se guarda aquí y se envía solo
    cuando el servidor vuelve (al abrir la app, al volver a ella o cada minuto). Cada registro lleva un código
    único: si el servidor ya lo había recibido, no se duplica. */
+/* ═════════ FLUJOS VIEJOS EN n8n ═════════
+   Cada flujo dice su «version» en la respuesta. Si viene más vieja que la que esta app necesita (o no viene),
+   sale UN aviso en la pantalla principal: «Falta actualizar «X» en n8n». La ✕ lo oculta hasta la próxima APP_VERSION. */
+const FLUJOS = {
+  "armoni-preguntas": "Armoni - Preguntas inteligentes",
+  "movimiento-nuevo": "Armoni - Agregar movimiento",
+  "movimiento-editar": "Movimiento editar",
+  "ahorro": "Armoni - Ahorro",
+  "salidas-ema": "Salidas con Ema",
+  "temporada": "Temporada",
+  "servicios-estado": "Estado Servicios"
+};
+const nombreFlujo = id => FLUJOS[id] || id;
+const flujoDeUrl = url => { const m = String(url || "").match(/\/webhook\/([^/?#]+)/); return m ? m[1] : ""; };
+const FlujoViejo = (function(){
+  const K = "armoni.flujos.viejos", KO = "armoni.flujos.oculto";
+  const lee = () => { try{ return JSON.parse(localStorage.getItem(K)) || {}; }catch{ return {}; } };
+  const graba = m => { try{ localStorage.setItem(K, JSON.stringify(m)); }catch{} };
+  const esc = t => String(t == null ? "" : t).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  /* j = la respuesta (ya leída) del flujo; devuelve true si está viejo */
+  function revisa(id, j, minVersion){
+    if(!j || typeof j !== "object") return false;
+    const v = Number(j.version) || 0, m = lee(), antes = JSON.stringify(m[id] || null);
+    if(v < (minVersion || 1)) m[id] = { v, min: minVersion || 1 }; else delete m[id];
+    if(JSON.stringify(m[id] || null) !== antes){ graba(m); pinta(); }
+    return !!m[id];
+  }
+  function pinta(){
+    const box = document.getElementById("flujoAviso"); if(!box) return;
+    let oculto = ""; try{ oculto = localStorage.getItem(KO) || ""; }catch{}
+    const ids = Object.keys(lee());
+    if(!ids.length || oculto === APP_VERSION){ box.innerHTML = ""; return; }
+    const ns = ids.map(id => "«" + esc(nombreFlujo(id)) + "»");
+    box.innerHTML = '<div class="credAvisoBtn flujoAvisoBox" role="status"><span class="ic" aria-hidden="true">🛠️</span><span class="tx"><b>Falta actualizar ' + (ns.length > 1 ? ns.slice(0, -1).join(", ") + " y " + ns[ns.length - 1] : ns[0]) + ' en n8n</b><small>' + (ns.length > 1 ? 'Esos flujos están viejos' : 'Ese flujo está viejo') + ': impórtalo de nuevo desde la carpeta «nube» y actívalo.</small></span><button type="button" class="ir avisoX" aria-label="Ocultar hasta la próxima versión">✕</button></div>';
+    box.querySelector(".avisoX").onclick = () => { try{ localStorage.setItem(KO, APP_VERSION); }catch{} pinta(); };
+  }
+  return { revisa, pinta, viejo: id => !!lee()[id] };
+})();
+/* respaldo de Dudas: el flujo «armoni-preguntas» puede devolver un «respaldo» (su memoria). Se guarda aquí y se le
+   vuelve a mandar en cada llamada, así si se reinstala el flujo no pierde lo que sabía */
+const DudasRespaldo = {
+  K: "armoni.dudas.respaldo",
+  lee(){ try{ const t = localStorage.getItem(this.K); return t ? JSON.parse(t) : undefined; }catch{ return undefined; } },
+  guarda(j){ if(j && typeof j === "object" && j.respaldo != null){ try{ localStorage.setItem(this.K, JSON.stringify(j.respaldo)); }catch{} } }
+};
+
 const Cola = (function(){
-  const K = "armoni.cola";
+  const K = "armoni.cola", KF = K + ".fallidos";
+  const MAX_INTENTOS = 8;   // con espera creciente (1, 2, 4… hasta 30 min): unas horas antes de darlo por perdido
   const lee = () => { try{ return JSON.parse(localStorage.getItem(K)) || []; }catch{ return []; } };
   const escribe = c => { try{ localStorage.setItem(K, JSON.stringify(c)); }catch{} pinta(); };
+  const leeF = () => { try{ return JSON.parse(localStorage.getItem(KF)) || []; }catch{ return []; } };
+  const escribeF = f => { try{ localStorage.setItem(KF, JSON.stringify(f.slice(-30))); }catch{} pinta(); };
   const nuevoId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+  const idDe = x => { try{ return JSON.parse(x.body).colaId || x.body; }catch{ return x.body; } };
+  const sin = (c, x) => { const id = idDe(x); return c.filter(y => idDe(y) !== id); };
+  const peso = n => "$" + Math.round(n).toLocaleString("es-CO");
+  const esc = t => String(t == null ? "" : t).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  /* 404 = el flujo aún no despierta (el PC acaba de prender) o no está importado; 408/429/5xx = problema pasajero */
+  const pasajero = st => st === 404 || st === 408 || st === 429 || st >= 500;
+  const motivo = x => {
+    const st = x.status, fl = "«" + nombreFlujo(flujoDeUrl(x.url)) + "»";
+    if(st === 404) return "Falta importar o activar el flujo " + fl + " en n8n";
+    if(st === 408 || st === 429 || st >= 500) return "El PC respondió con error (" + st + ") varias veces";
+    if(x.error && String(x.error).length < 140 && !/^\d+$/.test(String(x.error))) return "n8n dijo: " + x.error;
+    return "El flujo " + fl + " no lo aceptó" + (st ? " (" + st + ")" : "");
+  };
   let enviando = false;
   /* como fetch: si no hay conexión guarda el registro y responde «ok, en cola» para que la app siga normal */
   /* enOrden: si ya hay algo esperando, este va detrás (así una salida con varios gastos no se desordena) */
@@ -9377,44 +9487,98 @@ const Cola = (function(){
     if(!cuerpo.colaId) cuerpo.colaId = nuevoId();
     const body = JSON.stringify(cuerpo);
     try{
-      if(enOrden && lee().length) throw new Error("en orden");
+      if(enOrden && lee().some(x => !x.parecido)) throw new Error("en orden");
       return await fetch(url, Object.assign({}, opts, { body, signal: AbortSignal.timeout ? AbortSignal.timeout(15000) : undefined }));
     }catch(e){
       const c = lee(); c.push({ url, body, t: Date.now(), resumen: (cuerpo.concepto || "Registro") + (cuerpo.monto ? " · $" + Math.round(cuerpo.monto).toLocaleString("es-CO") : "") + (cuerpo.medio === "efectivo" ? " · efectivo" : "") }); escribe(c);
       return new Response(JSON.stringify({ ok: true, enCola: true }), { status: 200, headers: { "Content-Type": "application/json" } });
     }
   }
-  async function vacia(){
-    if(enviando) return; const c = lee(); if(!c.length) return;
-    enviando = true; let enviados = 0, fallidos = 0;
+  /* todos: true = el usuario lo pidió (píldora o «Reintentar»): no espera el tiempo entre intentos */
+  async function vacia(todos){
+    if(enviando) return; if(!lee().length) return;
+    enviando = true; let enviados = 0, fallidos = 0, parecidos = 0;
     try{
-      while(lee().length){
-        const x = lee()[0];
+      const ahora = Date.now();
+      for(const x0 of lee()){
+        if(x0.parecido) continue;                                    // espera que la familia decida si ya estaba
+        if(!todos && x0.proximo && x0.proximo > ahora) continue;     // todavía no le toca su reintento
+        if(!lee().some(y => idDe(y) === idDe(x0))) continue;         // ya lo quitaron mientras tanto
         let r;
-        try{ r = await fetch(x.url, { method: "POST", body: x.body, signal: AbortSignal.timeout ? AbortSignal.timeout(15000) : undefined }); }catch{ break; }   // sigue sin conexión: se intenta después
+        try{ r = await fetch(x0.url, { method: "POST", body: x0.body, signal: AbortSignal.timeout ? AbortSignal.timeout(15000) : undefined }); }catch{ break; }   // sigue sin conexión: se intenta después
         const j = await r.json().catch(() => ({}));
-        const resto = lee().slice(1);
-        if((r.ok && j.ok !== false) || j.error === "repetido") enviados++;   // «repetido»: ya había llegado, no se duplica
-        else if(r.status >= 500) break;   // el servidor tuvo un problema: se intenta después
-        else { fallidos++; try{ const f = JSON.parse(localStorage.getItem(K + ".fallidos")) || []; f.push(Object.assign({}, x, { error: j.error || r.status })); localStorage.setItem(K + ".fallidos", JSON.stringify(f.slice(-30))); }catch{} }
-        escribe(resto);
+        const c = sin(lee(), x0);
+        if((r.ok && j.ok !== false) || j.error === "repetido"){ enviados++; escribe(c); }   // «repetido»: ya había llegado, no se duplica
+        else if(j.error === "parecido" && j.parecido){ parecidos++; c.push(Object.assign({}, x0, { parecido: j.parecido })); escribe(c); }
+        else if(pasajero(r.status) && (x0.intentos || 0) + 1 < MAX_INTENTOS){
+          /* se reintenta después, y pasa al final para no tapar a los demás */
+          const n = (x0.intentos || 0) + 1;
+          c.push(Object.assign({}, x0, { intentos: n, status: r.status, proximo: Date.now() + Math.min(30, Math.pow(2, n - 1)) * 60000 })); escribe(c);
+        }
+        else { fallidos++; escribe(c); const f = leeF(); f.push(Object.assign({}, x0, { error: j.error || r.status, status: r.status, at: Date.now() })); escribeF(f); }
       }
-    } finally { enviando = false; }
+    } finally { enviando = false; pinta(); }
     if(enviados) avisoOk("Ya se enviaron", enviados + (enviados === 1 ? " registro que esperaba conexión" : " registros que esperaban conexión"));
-    if(fallidos) avisoOk("Ojo", fallidos + (fallidos === 1 ? " registro no se pudo guardar" : " registros no se pudieron guardar") + ". Revísalos en Notion.");
+    if(fallidos) avisoOk("Ojo", fallidos + (fallidos === 1 ? " registro no se pudo guardar" : " registros no se pudieron guardar") + ". Están en Ajustes → Registros sin guardar.");
+    if(parecidos) avisoOk("¿Ya estaba anotado?", parecidos === 1 ? "Un registro se parece a otro: decide en el aviso de la pantalla principal" : parecidos + " registros se parecen a otros: decide en el aviso de la pantalla principal");
     if(enviados){ try{ SalidasEma.precarga(); }catch{} try{ document.dispatchEvent(new Event("cola-enviada")); }catch{} }
   }
+  /* «Es otro, guardarlo»: vuelve a la cola con forzar y el mismo código (no se duplica si ya había llegado) */
+  function decide(id, esOtro){
+    const c = lee(), x = c.find(y => idDe(y) === id); if(!x) return;
+    const resto = sin(c, x);
+    if(esOtro){ let b = {}; try{ b = JSON.parse(x.body); }catch{} b.forzar = true; const n = Object.assign({}, x, { body: JSON.stringify(b) }); delete n.parecido; delete n.proximo; delete n.intentos; resto.push(n); escribe(resto); vacia(true); }
+    else { escribe(resto); avisoOk("No se duplicó", (x.resumen || "Registro") + " ya estaba registrado"); }
+  }
+  function reintenta(id){
+    const f = leeF(), x = f.find(y => idDe(y) === id); if(!x) return;
+    escribeF(sin(f, x));
+    const n = { url: x.url, body: x.body, t: x.t || Date.now(), resumen: x.resumen };
+    escribe(lee().concat([n])); vacia(true);
+  }
+  function descarta(id){ escribeF(leeF().filter(y => idDe(y) !== id)); }
+  const abreAjustes = () => { try{ Drawer.go("ajustes"); }catch{} setTimeout(() => { const el = document.getElementById("ajColaBox"); if(el && !el.hidden) el.scrollIntoView({ block: "start", behavior: REDUCED ? "auto" : "smooth" }); }, 250); };
   function pinta(){
-    const n = lee().length; let el = document.getElementById("colaPill");
-    if(!n){ if(el) el.remove(); return; }
-    if(!el){ el = document.createElement("button"); el.type = "button"; el.id = "colaPill"; el.addEventListener("click", () => { el.classList.add("girando"); vacia().finally(() => el && el.classList.remove("girando")); }); document.body.appendChild(el); }
-    el.innerHTML = '<i aria-hidden="true"></i>' + n + (n === 1 ? ' registro espera conexión' : ' registros esperan conexión');
+    const c = lee(), esperan = c.filter(x => !x.parecido), par = c.filter(x => x.parecido), f = leeF();
+    const n = esperan.length; let el = document.getElementById("colaPill");
+    if(!n){ if(el) el.remove(); }
+    else {
+      if(!el){ el = document.createElement("button"); el.type = "button"; el.id = "colaPill"; el.addEventListener("click", () => { el.classList.add("girando"); vacia(true).finally(() => el && el.classList.remove("girando")); }); document.body.appendChild(el); }
+      const conError = esperan.some(x => x.status);   // el PC sí contestó, pero con error
+      el.innerHTML = '<i aria-hidden="true"></i>' + n + (conError ? (n === 1 ? ' registro: el PC respondió con error, reintentando' : ' registros: el PC respondió con error, reintentando') : (n === 1 ? ' registro espera conexión' : ' registros esperan conexión'));
+    }
+    /* en la pantalla principal: lo que necesita una decisión y lo que no se pudo guardar */
+    const box = document.getElementById("colaAviso");
+    if(box){
+      box.innerHTML =
+        (par.length ? '<button type="button" class="credAvisoBtn" data-cola="par"><span class="ic" aria-hidden="true">🤔</span><span class="tx"><b>' + (par.length === 1 ? '¿Ya estaba anotado?' : par.length + ' registros: ¿ya estaban anotados?') + '</b><small>' + esc(par[0].resumen || "Registro") + (par.length > 1 ? ' y ' + (par.length - 1) + ' más' : '') + ' se parece a otro que ya está. Toca para decidir.</small></span><span class="ir" aria-hidden="true">›</span></button>' : '') +
+        (f.length ? '<button type="button" class="credAvisoBtn colaMal" data-cola="mal"><span class="ic" aria-hidden="true">⚠️</span><span class="tx"><b>' + (f.length === 1 ? 'Un registro no se pudo guardar' : f.length + ' registros no se pudieron guardar') + '</b><small>No están en Notion. Toca aquí para verlos y reintentar.</small></span><span class="ir" aria-hidden="true">›</span></button>' : '');
+      box.querySelectorAll("[data-cola]").forEach(b => b.onclick = abreAjustes);
+    }
+    /* en Ajustes → Registros sin guardar */
+    const aj = document.getElementById("ajColaBox"), lista = document.getElementById("ajCola");
+    if(aj && lista){
+      aj.hidden = !(par.length || f.length);
+      const fecha = t => { try{ return new Date(t).toLocaleDateString("es-CO", { day: "numeric", month: "short" }).replace(".", ""); }catch{ return ""; } };
+      lista.innerHTML =
+        par.map(x => { const p = x.parecido || {}; return '<div class="setRow colaFila"><span class="setTxt"><b>' + esc(x.resumen || "Registro") + '</b><span>Se parece a «' + esc(p.concepto || "otro") + '»' + (p.monto ? ' · ' + peso(p.monto) : '') + (p.fecha ? ' · ' + esc(p.fecha) : '') + (p.automatico ? ' (llegó desde PSE)' : '') + '</span></span>' +
+          '<div class="colaBtns"><button type="button" class="notifBtn" data-ya="' + esc(idDe(x)) + '">Ya estaba</button><button type="button" class="notifBtn" data-otro="' + esc(idDe(x)) + '">Es otro, guardarlo</button></div></div>'; }).join("") +
+        f.map(x => '<div class="setRow colaFila"><span class="setTxt"><b>' + esc(x.resumen || "Registro") + '</b><span>' + esc(motivo(x)) + (x.t ? ' · ' + fecha(x.t) : '') + '</span></span>' +
+          '<div class="colaBtns"><button type="button" class="notifBtn" data-desc="' + esc(idDe(x)) + '">Descartar</button><button type="button" class="notifBtn" data-reint="' + esc(idDe(x)) + '">Reintentar</button></div></div>').join("");
+      lista.onclick = e => {
+        const b = e.target.closest("button"); if(!b) return;
+        if(b.dataset.ya) decide(b.dataset.ya, false);
+        else if(b.dataset.otro) decide(b.dataset.otro, true);
+        else if(b.dataset.reint) reintenta(b.dataset.reint);
+        else if(b.dataset.desc){ if(b.dataset.seguro){ descarta(b.dataset.desc); } else { b.dataset.seguro = "1"; b.textContent = "¿Seguro? Se pierde"; setTimeout(() => { if(b.isConnected){ delete b.dataset.seguro; b.textContent = "Descartar"; } }, 4000); } }
+      };
+    }
   }
   addEventListener("online", () => setTimeout(vacia, 1500));
   document.addEventListener("visibilitychange", () => { if(document.visibilityState === "visible") setTimeout(vacia, 1200); });
   setInterval(() => { if(lee().length && !document.hidden) vacia(); }, 60000);
   TrasIntro.hacer(() => { pinta(); vacia(); });
-  return { post, vacia, cuantos: () => lee().length, pendientes: sub => lee().filter(x => x.url.includes(sub)).length };
+  return { post, vacia, pinta, cuantos: () => lee().length, pendientes: sub => lee().filter(x => x.url.includes(sub)).length, fallidos: () => leeF().length };
 })();
 /* lo último que se supo del ahorro (lo guarda la pantalla Ahorro); lo usan Balance y Tu mes */
 const ahorroGuardado = () => { try{ const d = JSON.parse(localStorage.getItem("armoni.ahorro")); return d && Array.isArray(d.cajas) ? d : null; }catch{ return null; } };
@@ -9454,7 +9618,7 @@ const Ahorro = (function(){
     const r = await fetch(AHORRO_URL, { method: "POST", body: JSON.stringify(Object.assign({ token: MERCADO_TOKEN, accion: "ver", fecha: hoyISO() }, cuerpo || {})) });
     const j = await r.json().catch(() => ({}));
     if(!r.ok || !j || j.ok === false || !Array.isArray(j.cajas)) throw new Error(j && j.error === "nombre" ? "Ponle un nombre a la cajita." : "");
-    datos = j; try{ localStorage.setItem(KEY, JSON.stringify(j)); }catch{}
+    datos = j; try{ localStorage.setItem(KEY, JSON.stringify(Object.assign({}, j, { at: Date.now() }))); }catch{}   // «at»: de cuándo es (Control IA lo refresca si es viejo)
     return j;
   }
   async function cargar(){
@@ -9629,7 +9793,9 @@ const Ahorro = (function(){
     else if(a === "meta"){ const c = cajas().find(x => x.id === b.dataset.id); if(c) nueva(c, null, "meta"); }
   });
   function refresh(){ pinta(); cargar(); }
-  return { refresh };
+  /* trae el ahorro de ahora sin pintar nada (lo usa Control IA antes de preguntar) */
+  const actualiza = () => pide().then(j => { if(document.body.classList.contains("mode-ahorro")) pinta(); return j; });
+  return { refresh, actualiza };
 })();
 
 /* ═════════ ARMONI PREGUNTA ═════════
@@ -9770,8 +9936,9 @@ const Preguntas = (function(){
     document.dispatchEvent(new CustomEvent("armoni:preguntas"));
   }
   async function pide(cuerpo){
-    const r = await fetch(PREGUNTAS_URL, { method: "POST", body: JSON.stringify(Object.assign({ token: MERCADO_TOKEN, memoria: saber, ajustes: ajustes() }, cuerpo)) });
+    const r = await fetch(PREGUNTAS_URL, { method: "POST", body: JSON.stringify(Object.assign({ token: MERCADO_TOKEN, memoria: saber, ajustes: ajustes(), respaldo: DudasRespaldo.lee() }, cuerpo)) });
     const j = await r.json().catch(() => ({}));
+    if(r.ok){ DudasRespaldo.guarda(j); FlujoViejo.revisa("armoni-preguntas", j, 3); }
     if(!r.ok || j.ok === false) throw new Error(j.error || "http");
     guarda(j); return j;
   }
@@ -10574,32 +10741,47 @@ const DudasPro = (function(){
     const q = txt.value.trim(), img = foto; if((!q && !img) || ocupado) return;
     ocupado = true; txt.value = ""; txt.style.height = ""; foto = null; prev.hidden = true; listo();
     burbuja("u", q || "Revisa esta imagen", img);
-    try{ document.dispatchEvent(new CustomEvent("dudas-enviada", { detail: { q, img: !!img } })); }catch{}
     const espera = burbuja("a", "Revisando tus cuentas…"); espera.classList.add("pensando");
     const antes = hist.slice(-8);
     hist.push({ r: "u", t: (q || "Revisa esta imagen") + (img ? " [mandé una imagen]" : "") });
     try{
+      /* el ahorro guardado en el celular puede ser de hace días: si tiene más de 1 h, se trae el de ahora (sin esperar más de 5 s) */
+      const ah0 = ahorroVisto();
+      if(!ah0 || !ah0.at || Date.now() - ah0.at > 3600000){ try{ await Promise.race([Ahorro.actualiza(), new Promise(ok => setTimeout(ok, 5000))]); }catch{} }
+      const ctx = contexto();
       const ctl = new AbortController(), to = setTimeout(() => ctl.abort(), 120000);
-      const r = await fetch(PREGUNTAS_URL, { method: "POST", signal: ctl.signal, body: JSON.stringify(Object.assign({ token: MERCADO_TOKEN, accion: "consultar", pregunta: q, historial: antes, contexto: contexto() }, img ? { imagen: img } : {})) });
+      const r = await fetch(PREGUNTAS_URL, { method: "POST", signal: ctl.signal, body: JSON.stringify(Object.assign({ token: MERCADO_TOKEN, accion: "consultar", pregunta: q, historial: antes, contexto: ctx, ahorroAt: ctx.ahorroAt, respaldo: DudasRespaldo.lee() }, img ? { imagen: img } : {})) });
       clearTimeout(to);
       const j = await r.json().catch(() => ({}));
-      if(!r.ok || !j.respuesta) throw new Error(r.status === 404 ? "flujo" : "ia");
+      if(r.ok){ DudasRespaldo.guarda(j); FlujoViejo.revisa("armoni-preguntas", j, 3); }
+      /* un flujo viejo sin «consultar» contesta 200 con la lista de pendientes: no es la red, es el flujo */
+      if(r.status === 404 || (r.ok && !j.respuesta && j.consulta !== true)) throw new Error("flujo");
+      if(!r.ok) throw new Error("ia");
+      if(!j.respuesta) throw new Error("vacia");
       espera.remove(); burbuja("a", j.respuesta); hist.push({ r: "a", t: j.respuesta });
+      /* solo ahora (la IA sí respondió) el extracto del cierre de mes cuenta como revisado */
+      try{ document.dispatchEvent(new CustomEvent("dudas-enviada", { detail: { q, img: !!img } })); }catch{}
       if(Array.isArray(j.app) && j.app.length) await hazApp(j.app);
       if(j.aprendidos || j.corregidos || j.ajustados || j.editados){ try{ Preguntas.revisar(); }catch{} }
     }catch(e){
       espera.remove();
-      burbuja("a", e && e.message === "flujo" ? "Falta actualizar el flujo «Armoni - Preguntas inteligentes» en n8n para poder conversar aquí." : "No pude responder ahora. Revisa que el PC y Tailscale estén encendidos e inténtalo otra vez.");
+      const m = e && e.message;
+      burbuja("a", m === "flujo" ? "Falta actualizar el flujo «Armoni - Preguntas inteligentes» en n8n para poder conversar aquí."
+        : m === "vacia" ? "Armoni no alcanzó a responder esta vez. Inténtalo otra vez en un momento."
+        : "No pude responder ahora. Revisa que el PC y Tailscale estén encendidos e inténtalo otra vez.");
       hist.pop();
+      /* la foto no se pierde: vuelve a quedar lista para mandarla otra vez */
+      if(img && !foto){ foto = img; prev.hidden = false; prev.querySelector("img").src = foto; }
     }
     guarda(); nueva.hidden = !hist.length; ocupado = false; listo();
   }
   const hoyISO = () => { const d = new Date(); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); };
   /* lo que la IA necesita saber del ahorro: las cajitas como las calcula Armoni (lo último que se vio en «Ahorro») */
+  const ahorroVisto = () => { try{ return JSON.parse(localStorage.getItem("armoni.ahorro")); }catch{ return null; } };
   function contexto(){
-    let ah = null; try{ ah = JSON.parse(localStorage.getItem("armoni.ahorro")); }catch{}
+    const ah = ahorroVisto();
     if(!ah || !Array.isArray(ah.cajas)) return {};
-    return { ahorro: { cuenta: ah.cuenta, paraGastar: ah.paraGastar, total: ah.total, cajas: ah.cajas.map(c => ({ id: c.id, nombre: c.nombre, saldo: c.saldo, inicial: c.inicial, inicialFecha: c.inicialFecha, tasa: c.tasa, rendimiento: c.rendimiento, meta: c.meta, gasto: !!c.gasto })) } };
+    return { ahorroAt: ah.at || undefined, ahorro: { cuenta: ah.cuenta, paraGastar: ah.paraGastar, total: ah.total, cajas: ah.cajas.map(c => ({ id: c.id, nombre: c.nombre, saldo: c.saldo, inicial: c.inicial, inicialFecha: c.inicialFecha, tasa: c.tasa, rendimiento: c.rendimiento, meta: c.meta, gasto: !!c.gasto })) } };
   }
   /* lo confirmado que vive en otros flujos: anotar un movimiento que faltaba y poner el saldo real de una cajita */
   async function hazApp(lista){
@@ -10658,7 +10840,7 @@ const DudasPro = (function(){
   document.addEventListener("dudas-enviada", e => marcaCierre(e.detail.q, e.detail.img));
   pintaCierre();
   pinta(); listo();
-  return { ia: () => seg("ia") };
+  return { ia: () => seg("ia"), pintaCierre };
 })();
 TrasIntro.hacer(() => setTimeout(() => Preguntas.revisar(), 2500));
 
@@ -11515,14 +11697,14 @@ const GastoManual = (function(){
           (tipo === "Gasto" ? '<span class="inLbl">¿Cómo lo pagaste?</span>' + segMedioG() : '') +
           '<label class="inLbl" for="inNota">Nota <span style="font-weight:400;letter-spacing:0;text-transform:none">(opcional)</span></label>' +
           '<textarea id="inNota" rows="2" placeholder="Algo que quieras recordar" maxlength="300">' + escH(nota) + '</textarea>' +
-          '<button type="button" class="inIA" id="inIA" aria-pressed="false"><i class="inIAdot" aria-hidden="true"></i><b>Pasar por Armoni</b></button>' +
+          (MODE === "chat" ? '<button type="button" class="inIA" id="inIA" aria-pressed="false"><i class="inIAdot" aria-hidden="true"></i><b>Pasar por Armoni</b></button>' : '') +   // fuera del chat principal (p. ej. Salidas) el chat no puede guardar: siempre directo
           (obligada() ? '<p class="fmAyuda">Las salidas siempre pasan por Armoni para completar el lugar y cuántos fueron.</p>' : '') +
           '<p class="inErr" id="inErr" role="alert"></p>';
         botones.innerHTML = '<button type="button" class="pgSi" id="inGuardar">Guardar</button>';
         $("inNota").addEventListener("input", e => { nota = e.target.value; });
         ligaMedioG();
         vista.querySelector(".fmResumen").addEventListener("click", e => { const b = e.target.closest("[data-ir]"); if(b){ editando = true; histResumen = historia.slice(); ir(b.dataset.ir, -1); } });
-        $("inIA").addEventListener("click", () => { if(obligada()) return; iaManual = true; iaOn = !iaOn; pintaIA(); });
+        if($("inIA")) $("inIA").addEventListener("click", () => { if(obligada()) return; iaManual = true; iaOn = !iaOn; pintaIA(); });
         $("inGuardar").addEventListener("click", guardar);
         pintaIA();
         return;
@@ -11547,10 +11729,14 @@ const GastoManual = (function(){
         (tipo === "Gasto"
           ? " Revisa si esto es una salida a comer o algo que necesite más datos (por ejemplo cuántas personas comieron, el restaurante o la puntuación): si falta algún dato, pregúntamelo antes de guardar; si no falta nada, guárdalo de una."
           : " Es plata que ENTRA (por ejemplo un salario, o alguien que me devuelve su parte al dividir una cuenta en un restaurante): guárdalo de una como ingreso. No me preguntes por personas, restaurante ni puntuación; solo pregunta si de verdad falta el concepto, el valor o la fecha.");
-      if((obligada() || iaOn) && medio !== "efectivo"){
-        Frecuentes.aprende(tipo, concepto.trim(), categoria, monto);
-        cierra("guardado");
-        ask(texto, mostrar);
+      if((obligada() || iaOn) && medio !== "efectivo" && MODE === "chat"){
+        /* se cierra como «guardado» solo cuando Armoni de verdad respondió; si no, el formulario sigue abierto con sus datos */
+        guardando = true; btn.disabled = true; btn.textContent = "Mandando a Armoni…"; err.textContent = "";
+        Promise.resolve(ask(texto, mostrar)).then(ok => {
+          if(ok){ Frecuentes.aprende(tipo, concepto.trim(), categoria, monto); cierra("guardado"); return; }
+          guardando = false; btn.disabled = false; btn.textContent = "Guardar";
+          err.textContent = "Armoni no respondió y no quedó guardado. Apaga «Pasar por Armoni» para guardarlo directo, o inténtalo otra vez.";
+        }, () => { guardando = false; btn.disabled = false; btn.textContent = "Guardar"; err.textContent = "No pude mandarlo a Armoni. Inténtalo otra vez."; });
         return;
       }
       const dato = { tipo, concepto: nombre, categoria, monto, fecha, nota: nota$ };
@@ -15025,7 +15211,22 @@ const TuMes = (function(){
 })();
 activity();
 TrasIntro.hacer(() => Servicios.check());
-document.getElementById("cerrarBtn").addEventListener("click", () => { try{ Drawer.go("chat"); }catch{} });
+TrasIntro.hacer(() => FlujoViejo.pinta());
+/* los avisos de la pantalla principal se ponen al día al volver a la app (la PWA puede quedar viva días en segundo plano)
+   y al cerrar un apartado con la ✕. Al volver a la app, como mucho cada 10 min; con la ✕, cada 30 s */
+let avisosAt = Date.now();
+function refrescaAvisos(espera){
+  if(Date.now() - avisosAt < (espera || 0)) return;
+  avisosAt = Date.now();
+  try{ Servicios.check(); }catch{}
+  try{ CreditoCarro.precarga(); }catch{}
+  try{ DudasPro.pintaCierre(); }catch{}
+  try{ AtGmail.pintaPendiente(); }catch{}
+  try{ Cola.pinta(); }catch{}
+  try{ FlujoViejo.pinta(); }catch{}
+}
+document.addEventListener("visibilitychange", () => { if(document.visibilityState === "visible") refrescaAvisos(10 * 60000); });
+document.getElementById("cerrarBtn").addEventListener("click", () => { try{ Drawer.go("chat"); }catch{} refrescaAvisos(30000); });
 TrasIntro.hacer(() => setTimeout(() => { try{ SalidasEma.precarga(); }catch{} try{ CreditoCarro.precarga(); }catch{} }, 1200));   // el aviso de citas/salidas con Ema sale en la pantalla principal
 TrasIntro.hacer(() => Glim.check());
 TrasIntro.hacer(() => TuMes.avisar());
