@@ -2825,6 +2825,10 @@ body.asleep .ddHolo, body.asleep .ddHolo *, body.asleep .ddHolo::after{ animatio
 .restCiudades button small{ opacity:.7; }
 .restCiudades button[aria-selected="true"]{ color:var(--on-accent); border-color:transparent; background:linear-gradient(140deg, var(--cyan), var(--blue)); }
 .emaEq{ display:flex; gap:12px; align-items:flex-start; margin:0 0 14px; padding:14px 14px 14px 16px; border-radius:20px; border:1px solid rgba(255,140,180,.28); background:linear-gradient(130deg, rgba(255,120,170,.10), rgba(255,176,102,.06)); animation:duSube .5s var(--ease-out) backwards; transition:opacity .3s, transform .3s; }
+/* el aviso de equilibrio (citas / salidas con Ema) vive en la pantalla principal, no dentro de las secciones */
+body[class*="mode-"] #emaEquilibrio{ display:none !important; }
+#emaEquilibrio{ width:min(100%, 42rem); margin:0 auto; }
+#emaEquilibrio .emaEq{ margin:8px 0 6px; }
 .emaEq.sale{ opacity:0; transform:translateY(-8px); }
 .emaEq .emo{ display:block; flex:none; font-size:1.5rem; line-height:1; margin-top:2px; }
 .emaEq .tx{ flex:1; min-width:0; }
@@ -3961,6 +3965,7 @@ body.mode-credito #credFoto{ display:grid; }
     <div class="inner">
 
       <div id="glimBanner"></div>
+      <div id="emaEquilibrio"></div>
 
       <section id="welcome">
         <p class="sr">Armoni. Escribe un gasto para guardarlo, o pregunta por lo que llevan gastado.</p>
@@ -3985,7 +3990,6 @@ body.mode-credito #credFoto{ display:grid; }
         <div class="restIntro"><h2>Salidas con Ema</h2></div>
         <div class="restStatus" id="emaStatus"></div>
         <div id="emaStage"></div>
-        <div id="emaEquilibrio"></div>
         <div id="emaTemporada"></div>
         <div id="emaPlanes"></div>
         <div class="restAskHead" id="emaAskHead">
@@ -4236,7 +4240,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-31.256";
+const APP_VERSION = "2026-10-31.257";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -6949,14 +6953,19 @@ const SalidasEma = (function(){
     if(ema >= 3 && citas === 0) msg = { emo: "💕", t: "Han salido " + ema + " veces con Ema este mes", p: "Ema la está pasando increíble. ¿Y si se regalan un ratico solos los dos? Una cita también le hace bien a la familia.", b: "Ver planes para ustedes dos" };
     else if(ema >= 4 && citas === 1) msg = { emo: "🌙", t: "Mucho plan en familia últimamente", p: "Llevan " + ema + " salidas con Ema y una sola cita. Quizás es buen momento para otra noche de ustedes.", b: "Ver planes para ustedes dos" };
     else if(citas >= 3 && ema === 0) msg = { emo: "🎈", t: "Ema también quiere pasear", p: "Este mes tuvieron " + citas + " citas. ¿Qué tal un plan con ella esta semana?", b: "Ver planes con Ema" };
-    let oculto = 0; try{ oculto = +localStorage.getItem(K_EQ) || 0; }catch{}
-    if(!msg || Date.now() - oculto < 7 * 864e5){ box.innerHTML = ""; return; }
-    box.innerHTML = '<div class="emaEq"><span class="emo" aria-hidden="true">' + msg.emo + '</span><div class="tx"><b>' + esc(msg.t) + '</b><p>' + esc(msg.p) + '</p><button type="button" class="ir">' + esc(msg.b) + ' →</button></div><button type="button" class="x" aria-label="Ocultar por una semana">×</button></div>';
-    box.querySelector(".x").onclick = () => { try{ localStorage.setItem(K_EQ, String(Date.now())); }catch{} box.firstChild.classList.add("sale"); setTimeout(() => { box.innerHTML = ""; }, 300); };
+    /* la ✕ lo oculta mientras siga siendo el mismo aviso de este mes; si cambia la situación, vuelve */
+    const clave = msg ? msg.emo + "|" + hace30.slice(0, 7) : "";
+    let oculto = ""; try{ oculto = localStorage.getItem(K_EQ) || ""; }catch{}
+    if(!msg || oculto === clave){ box.innerHTML = ""; return; }
+    box.innerHTML = '<div class="emaEq"><span class="emo" aria-hidden="true">' + msg.emo + '</span><div class="tx"><b>' + esc(msg.t) + '</b><p>' + esc(msg.p) + '</p><button type="button" class="ir">' + esc(msg.b) + ' →</button></div><button type="button" class="x" aria-label="Ocultar este aviso">×</button></div>';
+    box.querySelector(".x").onclick = () => { try{ localStorage.setItem(K_EQ, clave); }catch{} box.firstChild.classList.add("sale"); setTimeout(() => { box.innerHTML = ""; }, 300); };
     box.querySelector(".ir").onclick = () => {
-      const g = /Ema/.test(msg.b) ? "ema" : "dos", tab = document.querySelector('#emaPlanes [data-g="' + g + '"]');
-      if(tab) tab.click();
-      const pl = document.getElementById("emaPlanes"); if(pl) pl.scrollIntoView({ behavior: REDUCED ? "auto" : "smooth", block: "start" });
+      const g = /Ema/.test(msg.b) ? "ema" : "dos";
+      try{ Drawer.go("ema"); }catch{}
+      setTimeout(() => {   // ya en Salidas Ema: abre los planes de ustedes dos (o con Ema)
+        const tab = document.querySelector('#emaPlanes [data-g="' + g + '"]'); if(tab) tab.click();
+        const pl = document.getElementById("emaPlanes"); if(pl) pl.scrollIntoView({ behavior: REDUCED ? "auto" : "smooth", block: "start" });
+      }, 450);
     };
   }
 
@@ -7076,7 +7085,7 @@ const SalidasEma = (function(){
     lock();
   }
   const nombres = () => { const n = (datos && datos.nombres) || []; return n.length ? n : lugares().map(l => l.nombre); };
-  const precarga = () => { if(!datos){ try{ datos = JSON.parse(localStorage.getItem(KEY)); }catch{} } if(Date.now() - cargado > 60000) cargar(); };
+  const precarga = () => { if(!datos){ try{ datos = JSON.parse(localStorage.getItem(KEY)); }catch{} } try{ equilibrio(); }catch{} if(Date.now() - cargado > 60000) cargar(); };
   /* lo que más pagan en las salidas (para los atajos del registro), sin el parqueadero porque ese se pregunta aparte */
   const frecuentes = () => {
     const c = {};
@@ -14428,6 +14437,7 @@ const TuMes = (function(){
 })();
 activity();
 TrasIntro.hacer(() => Servicios.check());
+TrasIntro.hacer(() => setTimeout(() => { try{ SalidasEma.precarga(); }catch{} }, 1200));   // el aviso de citas/salidas con Ema sale en la pantalla principal
 TrasIntro.hacer(() => Glim.check());
 TrasIntro.hacer(() => TuMes.avisar());
 
