@@ -4236,7 +4236,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-31.255";
+const APP_VERSION = "2026-10-31.256";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -9866,7 +9866,7 @@ const Preguntas = (function(){
     document.body.appendChild(scrim); requestAnimationFrame(() => scrim.classList.add("on"));
     scrim.addEventListener("click", e => { if(e.target === scrim) cierra(); });
     const renombra = (m, lugar) => {
-      const pareja = /\bpareja\b/i.test(m.concepto), base = m.concepto.replace(/\s*\bpareja\b\s*$/i, "").trim();
+      const pareja = /\bpareja\b/i.test(m.concepto), base = m.concepto.replace(/\s*\b(en\s+)?pareja\b\s*$/i, "").trim();
       const sin = t => String(t).toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
       if(sin(base).includes(sin(lugar))) return "";   // ya dice el lugar: no se toca
       return (base + " · " + lugar + (pareja ? " pareja" : "")).slice(0, 80);
@@ -9932,8 +9932,8 @@ const Preguntas = (function(){
   function abreLugar(q){
     if(document.querySelector(".pgScrim.lgScrim")) return;
     const m = (q.movs || [])[0]; if(!m || !m.id) return;
-    const adivina = t => { const x = String(t || "").replace(/\bpareja\b/ig, "").replace(/^\s*(almuerzo|cena|comida|desayuno|helado|brunch|domicilio|antojo)s?\b\s*(en|de|del|donde|con)?\s*/i, "").replace(/\s{2,}/g, " ").trim(); return (x || String(t || "").replace(/\bpareja\b/ig, "").trim()).replace(/(^|[^\p{L}])(\p{L})/gu, (m, p, c) => p + c.toUpperCase()); };
-    const original = String(m.concepto || "").replace(/\bpareja\b/ig, "").replace(/\s{2,}/g, " ").trim();
+    const adivina = t => { const x = String(t || "").replace(/\b(en\s+)?pareja\b/ig, "").replace(/^\s*(almuerzo|cena|comida|desayuno|helado|brunch|domicilio|antojo)s?\b\s*(en|de|del|donde|con)?\s*/i, "").replace(/\s{2,}/g, " ").trim(); return (x || String(t || "").replace(/\b(en\s+)?pareja\b/ig, "").trim()).replace(/(^|[^\p{L}])(\p{L})/gu, (m, p, c) => p + c.toUpperCase()); };
+    const original = String(m.concepto || "").replace(/\b(en\s+)?pareja\b/ig, "").replace(/\s{2,}/g, " ").trim();
     const RATING = /(\d{1,2}(?:[.,]5)?)\s*(?:\/|de|sobre)\s*10|nota\s*[:=]?\s*(\d{1,2}(?:[.,]5)?)/i;
     const OPINA = /rico|delicios|sabros|caro|barato|econ[oó]mic|buen[oa]s?|mal[oa]s?|excelente|p[eé]sim|lento|r[aá]pid|atenci[oó]n|servicio|comida|porci[oó]n|ambiente|volver|recomend|me gust|fr[ií]o|crudo|salado|pasable|regular/i;
     const nt = String(m.notas || "");
@@ -10681,7 +10681,7 @@ const GastoManual = (function(){
   const pesoG = n => "$" + Math.round(n).toLocaleString("es-CO");
   const fechaBonita = f => f === hoy() ? "Hoy" : f === ayer() ? "Ayer" : new Date(f + "T12:00:00").toLocaleDateString("es-CO", { weekday: "short", day: "numeric", month: "short" }).replace(/\./g, "");
   const esSalidaPareja = (tipo, cat, txt) => tipo === "Gasto" && cat === "Salidas" && !/\bpareja\b/i.test(txt);
-  const conPareja = (txt, si) => (txt + (si && !/\bpareja\b/i.test(txt) ? " pareja" : "")).trim();
+  const conPareja = (txt, si) => { txt = String(txt || "").trim(); if(!si) return txt; return /\ben\s+pareja\b/i.test(txt) ? txt : /\bpareja\b/i.test(txt) ? txt.replace(/\s*\bpareja\b/i, " en pareja").trim() : txt + " en pareja"; };   // «Salida» → «Salida en pareja»
 
   function abrir(opts){
     if(abierto) return; abierto = true;
