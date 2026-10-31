@@ -1298,6 +1298,32 @@ body[class*="mode-"] #credAviso{ display:none !important; }
 
 
 /* ═════════ Tu mes: resumen estilo historia ═════════ */
+.dcPro{ margin:0 0 18px; padding:14px; border-radius:22px; border:1px solid var(--line); background:radial-gradient(120% 90% at 0% 0%, rgba(143,199,255,.10), transparent 60%), var(--panel); }
+.dcProCab{ display:flex; gap:10px; align-items:flex-start; }
+.dcProIco{ font-size:1.4rem; line-height:1; }
+.dcProCab > div{ flex:1; min-width:0; }
+.dcProCab b{ display:block; font-size:.95rem; }
+.dcProCab small{ display:block; margin-top:2px; font-size:.78rem; line-height:1.4; color:var(--ghost); }
+.dcProNueva{ flex:none; padding:5px 10px; border-radius:999px; border:1px solid var(--line); background:none; color:var(--ghost); font:inherit; font-size:.74rem; font-weight:600; cursor:pointer; }
+.dcProLog{ display:flex; flex-direction:column; gap:8px; margin-top:10px; max-height:52vh; overflow-y:auto; }
+.dcProLog:empty{ display:none; }
+.dcProMsg{ max-width:88%; padding:9px 12px; border-radius:16px; font-size:.86rem; line-height:1.45; overflow-wrap:anywhere; }
+.dcProMsg.yo{ align-self:flex-end; background:rgba(143,199,255,.16); border-bottom-right-radius:6px; }
+.dcProMsg.ar{ align-self:flex-start; background:rgba(var(--ink),.06); border-bottom-left-radius:6px; }
+.dcProMsg img{ display:block; max-width:180px; max-height:200px; margin-bottom:6px; border-radius:10px; }
+.dcProMsg p{ margin:0 0 6px; } .dcProMsg p:last-child{ margin:0; }
+.dcProMsg ul{ margin:4px 0 6px; padding-left:18px; }
+.dcProMsg.pensando{ color:var(--dim); font-style:italic; }
+.dcProPrev{ position:relative; display:inline-block; margin-top:10px; }
+.dcProPrev[hidden]{ display:none; }
+.dcProPrev img{ display:block; max-height:90px; border-radius:10px; }
+.dcProPrev button{ position:absolute; top:-8px; right:-8px; width:24px; height:24px; border-radius:50%; border:0; background:#000a; color:#fff; cursor:pointer; }
+.dcProBar{ display:flex; align-items:flex-end; gap:8px; margin-top:10px; }
+.dcProFoto, .dcProEnviar{ flex:none; display:grid; place-items:center; width:40px; height:40px; border-radius:12px; border:1px solid var(--line); background:none; color:var(--ghost); cursor:pointer; }
+.dcProFoto svg, .dcProEnviar svg{ width:20px; height:20px; }
+.dcProEnviar{ border-color:transparent; background:linear-gradient(140deg, #8fc7ff, #5f8bff); color:#071226; }
+.dcProEnviar:disabled{ opacity:.4; cursor:default; }
+#dcProTxt{ flex:1; min-height:40px; max-height:140px; padding:9px 12px; border-radius:12px; border:1px solid var(--line); background:rgba(var(--ink),.04); color:var(--white); font:inherit; font-size:.88rem; resize:none; }
 .tmSub{ margin:-6px 0 16px; text-align:center; color:var(--dim); font-size:.86rem; }
 .tmGrid{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
 /* ── Tu mes: tarjetas de vidrio sobre el negro de Armoni; cada mes conserva siempre su mismo tono ── */
@@ -4286,6 +4312,16 @@ body.mode-credito #credFoto{ display:grid; }
       <section id="dudasView" aria-label="Dudas">
         <div class="restIntro"><h2>Dudas</h2></div>
         <p class="tmSub">Lo que Armoni no entendió de tus cuentas y quiere preguntarte</p>
+        <section class="dcPro" id="dcPro" aria-label="Pregúntale a Armoni">
+          <div class="dcProCab"><span class="dcProIco" aria-hidden="true">🧠</span><div><b>Pregúntale a Armoni</b><small>Pregunta lo que sea o manda una foto (extracto, recibo, pantallazo) y la reviso contra tus cuentas</small></div><button type="button" class="dcProNueva" id="dcProNueva" hidden>Nueva</button></div>
+          <div class="dcProLog" id="dcProLog" aria-live="polite"></div>
+          <div class="dcProPrev" id="dcProPrev" hidden><img alt="Imagen adjunta"><button type="button" aria-label="Quitar la imagen">×</button></div>
+          <div class="dcProBar">
+            <label class="dcProFoto" aria-label="Adjuntar imagen"><input type="file" accept="image/*" id="dcProFile" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3"/><circle cx="9" cy="10" r="1.6"/><path d="M21 16l-5-5-8 8"/></svg></label>
+            <textarea id="dcProTxt" rows="1" placeholder="Pregunta o manda una foto…"></textarea>
+            <button type="button" class="dcProEnviar" id="dcProEnviar" aria-label="Enviar" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg></button>
+          </div>
+        </section>
         <div id="ddCuerpo"></div>
       </section>
 
@@ -4430,7 +4466,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-31.269";
+const APP_VERSION = "2026-10-31.270";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -10439,6 +10475,53 @@ const Preguntas = (function(){
   }
   insignia();
   return { revisar, abre, aplica, pinta, cuantas: () => pendientes.length, ajustes };
+})();
+
+/* «Pregúntale a Armoni» (en Dudas): conversación con la IA, con fotos, para corroborar y resolver problemas de las cuentas.
+   Cuando la familia confirma, la IA corrige la categoría o el signo, marca favores/duplicados o aprende algo. */
+const DudasPro = (function(){
+  const K = "armoni.dudas.pro";
+  const log = document.getElementById("dcProLog"), txt = document.getElementById("dcProTxt"), env = document.getElementById("dcProEnviar");
+  const file = document.getElementById("dcProFile"), prev = document.getElementById("dcProPrev"), nueva = document.getElementById("dcProNueva");
+  if(!log) return {};
+  let hist = (() => { try{ return JSON.parse(localStorage.getItem(K)) || []; }catch{ return []; } })(), foto = null, ocupado = false;
+  const esc = t => String(t == null ? "" : t).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const md = t => esc(t).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>").split(/\n{2,}/).map(p => /^\s*[-•·] /m.test(p) ? "<ul>" + p.split(/\n/).map(l => l.replace(/^\s*[-•·] /, "")).filter(Boolean).map(l => "<li>" + l + "</li>").join("") + "</ul>" : "<p>" + p.replace(/\n/g, "<br>") + "</p>").join("");
+  const guarda = () => { try{ localStorage.setItem(K, JSON.stringify(hist.slice(-20))); }catch{} };
+  const burbuja = (r, t, img) => { const d = document.createElement("div"); d.className = "dcProMsg " + (r === "u" ? "yo" : "ar"); d.innerHTML = (img ? '<img alt="Imagen enviada" src="' + img + '">' : "") + (r === "u" ? "<p>" + esc(t) + "</p>" : md(t)); log.appendChild(d); log.scrollTop = log.scrollHeight; return d; };
+  const pinta = () => { log.innerHTML = ""; hist.forEach(h => burbuja(h.r, h.t, null)); nueva.hidden = !hist.length; };
+  const listo = () => { env.disabled = ocupado || !(txt.value.trim() || foto); };
+  const reduce = f => new Promise(ok => { const im = new Image(), u = URL.createObjectURL(f); im.onload = () => { const k = Math.min(1, 1600 / Math.max(im.width, im.height)), c = document.createElement("canvas"); c.width = Math.round(im.width * k); c.height = Math.round(im.height * k); c.getContext("2d").drawImage(im, 0, 0, c.width, c.height); URL.revokeObjectURL(u); ok(c.toDataURL("image/jpeg", .85)); }; im.onerror = () => { URL.revokeObjectURL(u); ok(null); }; im.src = u; });
+  file.addEventListener("change", async () => { const f = file.files && file.files[0]; file.value = ""; if(!f) return; foto = await reduce(f); prev.hidden = !foto; if(foto) prev.querySelector("img").src = foto; listo(); });
+  prev.querySelector("button").addEventListener("click", () => { foto = null; prev.hidden = true; listo(); });
+  txt.addEventListener("input", () => { txt.style.height = "auto"; txt.style.height = Math.min(140, txt.scrollHeight) + "px"; listo(); });
+  txt.addEventListener("keydown", e => { if(e.key === "Enter" && !e.shiftKey && !matchMedia("(pointer:coarse)").matches){ e.preventDefault(); enviar(); } });
+  nueva.addEventListener("click", () => { hist = []; guarda(); pinta(); });
+  env.addEventListener("click", () => enviar());
+  async function enviar(){
+    const q = txt.value.trim(), img = foto; if((!q && !img) || ocupado) return;
+    ocupado = true; txt.value = ""; txt.style.height = ""; foto = null; prev.hidden = true; listo();
+    burbuja("u", q || "Revisa esta imagen", img);
+    const espera = burbuja("a", "Revisando tus cuentas…"); espera.classList.add("pensando");
+    const antes = hist.slice(-8);
+    hist.push({ r: "u", t: (q || "Revisa esta imagen") + (img ? " [mandé una imagen]" : "") });
+    try{
+      const ctl = new AbortController(), to = setTimeout(() => ctl.abort(), 120000);
+      const r = await fetch(PREGUNTAS_URL, { method: "POST", signal: ctl.signal, body: JSON.stringify(Object.assign({ token: MERCADO_TOKEN, accion: "consultar", pregunta: q, historial: antes }, img ? { imagen: img } : {})) });
+      clearTimeout(to);
+      const j = await r.json().catch(() => ({}));
+      if(!r.ok || !j.respuesta) throw new Error(r.status === 404 ? "flujo" : "ia");
+      espera.remove(); burbuja("a", j.respuesta); hist.push({ r: "a", t: j.respuesta });
+      if(j.aprendidos || j.corregidos || j.ajustados){ try{ Preguntas.revisar(); }catch{} }
+    }catch(e){
+      espera.remove();
+      burbuja("a", e && e.message === "flujo" ? "Falta actualizar el flujo «Armoni - Preguntas inteligentes» en n8n para poder conversar aquí." : "No pude responder ahora. Revisa que el PC y Tailscale estén encendidos e inténtalo otra vez.");
+      hist.pop();
+    }
+    guarda(); nueva.hidden = !hist.length; ocupado = false; listo();
+  }
+  pinta(); listo();
+  return {};
 })();
 TrasIntro.hacer(() => setTimeout(() => Preguntas.revisar(), 2500));
 
