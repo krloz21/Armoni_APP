@@ -1321,13 +1321,19 @@ body[class*="mode-"] #credAviso{ display:none !important; }
 body[class*="mode-"] #cierreAviso{ display:none !important; }
 #cierreAviso{ width:min(100%, 42rem); margin:0 auto; }
 /* avisos de la pantalla principal: la cola (decidir / no se pudo guardar), el valor del arriendo y los flujos viejos */
-body[class*="mode-"] #colaAviso, body[class*="mode-"] #arriendoAviso, body[class*="mode-"] #flujoAviso{ display:none !important; }
-#colaAviso, #arriendoAviso, #flujoAviso{ width:min(100%, 42rem); margin:0 auto; }
-#colaAviso:empty, #arriendoAviso:empty, #flujoAviso:empty{ display:none; }
+body[class*="mode-"] #colaAviso, body[class*="mode-"] #arriendoAviso, body[class*="mode-"] #pseAviso, body[class*="mode-"] #flujoAviso{ display:none !important; }
+#colaAviso, #arriendoAviso, #pseAviso, #flujoAviso{ width:min(100%, 42rem); margin:0 auto; }
+#colaAviso:empty, #arriendoAviso:empty, #pseAviso:empty, #flujoAviso:empty{ display:none; }
+.pseFila{ padding:12px 0; border-top:1px solid var(--line); }
+.pseFila:first-child{ border-top:0; padding-top:4px; }
+.pseFila b{ display:block; font-size:.9rem; color:var(--white); overflow-wrap:anywhere; }
+.pseFila small{ display:block; margin-top:3px; font-size:.78rem; color:var(--ghost); line-height:1.35; overflow-wrap:anywhere; }
+.pseFila .yaBtns{ margin-top:10px; }
 .credAvisoBtn.colaMal{ border-color:rgba(255,120,100,.4); background:linear-gradient(130deg, rgba(255,120,100,.13), rgba(255,120,100,.04)); }
 .flujoAvisoBox{ cursor:default; }
 .credAvisoBtn .avisoX{ flex:none; width:34px; height:34px; margin:-6px -6px -6px 0; padding:0; border:0; border-radius:50%; background:rgba(var(--ink),.06); color:var(--ghost); font:inherit; font-size:.95rem; cursor:pointer; }
 #ajColaBox[hidden]{ display:none; }
+.ahAlerta{ display:flex; gap:8px; align-items:flex-start; width:100%; margin:10px 0 0; padding:9px 12px; border-radius:14px; border:1px solid rgba(255,190,90,.25); background:rgba(255,190,90,.06); color:var(--ghost); font:inherit; font-size:.8rem; line-height:1.35; text-align:left; cursor:pointer; }
 .ajCard .setRow.colaFila{ flex-wrap:wrap; gap:8px; }
 .colaFila .setTxt span{ white-space:normal; line-height:1.35; }
 .colaBtns{ display:flex; flex-wrap:wrap; justify-content:flex-end; gap:8px; width:100%; }
@@ -4211,6 +4217,7 @@ body.mode-credito #credFoto{ display:grid; }
       <div id="cierreAviso"></div>
       <div id="colaAviso"></div>
       <div id="arriendoAviso"></div>
+      <div id="pseAviso"></div>
       <div id="flujoAviso"></div>
 
       <section id="welcome">
@@ -4480,6 +4487,7 @@ const COMFANDI_URL = N8N + "/webhook/comfandi";   // planes nuevos de Comfandi (
 const EMA_URL = N8N + "/webhook/salidas-ema";
 const MOVIMIENTO_EDITAR_URL = N8N + "/webhook/movimiento-editar";   // emaE: cambia o borra un gasto ya guardado de una salida con Ema (lápiz)
 const AHORRO_URL = N8N + "/webhook/ahorro";   // saldo del ahorro de la casa, meta y movimientos
+const PSE_NO_LEIDOS_URL = N8N + "/webhook/pse-no-leidos";   // correos de PSE que el lector no pudo leer: se anotan a mano o se descartan
 const PREGUNTAS_URL = N8N + "/webhook/armoni-preguntas";   // la IA que pregunta lo que no está claro y aprende
 const USO_URL = N8N + "/webhook/uso";   // junta el uso de cada celular (el tuyo y el de tu esposa) para verlo desde cualquiera
 const PUNTUAR_URL = N8N + "/webhook/lugar-puntuar";   // guarda la nota (1 a 10) de un lugar de las salidas   // salidas con Ema: veces por mes, gastos de cada salida y lugares
@@ -9003,14 +9011,18 @@ const AtGmail = (function(){
   const pendiente = () => { try{ const p = localStorage.getItem(KP); return p && p !== localStorage.getItem(KM) ? p : ""; }catch{ return ""; } };
   function pintaPendiente(){
     const box = document.getElementById("arriendoAviso"); if(!box) return;
-    const p = pendiente();
+    let p = pendiente();
+    try{ if(p && Servicios.arriendoEnServidor()) p = ""; }catch{}   // ya sale en el aviso de pagos de arriba
     box.innerHTML = p ? '<button type="button" class="credAvisoBtn"><span class="ic" aria-hidden="true">🏠</span><span class="tx"><b>Falta anotar el valor del arriendo</b><small>Ya se mandó el comprobante de ' + nombrePer(p) + ': anota cuánto fue para que quede en tus cuentas</small></span><span class="ir" aria-hidden="true">›</span></button>' : "";
     if(p) box.firstChild.onclick = () => valorArriendo(p);
   }
   /* per: el periodo que se anota (el pendiente o el de ahora) */
-  function valorArriendo(per){
+  /* forzado: lo pidió el aviso de servicios-estado (Notion dice que falta), aunque este celular crea que ya se anotó */
+  function valorArriendo(per, forzado){
     per = per || periodo();
-    try{ if(localStorage.getItem(KM) === per){ pintaPendiente(); return; } }catch{}
+    let yaAnotado = false; try{ yaAnotado = localStorage.getItem(KM) === per; }catch{}
+    if(yaAnotado && !forzado){ pintaPendiente(); return; }
+    const cid = "arriendo-" + per + (yaAnotado ? "-2" : "");   // Notion dice que falta aunque aquí se anotó: otro código para que no lo tome como repetido
     if(document.querySelector(".arScrim")) return;
     try{ localStorage.setItem(KP, per); }catch{}   // queda pendiente hasta que se anote (si tocan «Después», sale el aviso en el inicio)
     let normal = 0; try{ normal = +localStorage.getItem(KV) || 0; }catch{}
@@ -9034,7 +9046,7 @@ const AtGmail = (function(){
       sc.querySelectorAll("button").forEach(b => b.disabled = true); q("arErr").textContent = "";
       try{
         /* colaId fijo por periodo: si el otro celular ya lo anotó (o se reintenta), n8n contesta «repetido» y no se duplica */
-        const r = await Cola.post(MOVIMIENTO_URL, { method: "POST", body: JSON.stringify({ token: MERCADO_TOKEN, tipo: "Gasto", concepto: "Arriendo", categoria: "Hogar", monto, fecha: fechaHoy(), nota: nota || "", desdeAviso: true, forzar: true, colaId: "arriendo-" + per }) });
+        const r = await Cola.post(MOVIMIENTO_URL, { method: "POST", body: JSON.stringify({ token: MERCADO_TOKEN, tipo: "Gasto", concepto: "Arriendo", categoria: "Hogar", monto, fecha: fechaHoy(), nota: nota || "", desdeAviso: true, forzar: true, colaId: cid }) });
         const j = await r.json().catch(() => ({}));
         const repetido = j.error === "repetido";
         if(!repetido && (!r.ok || j.ok === false)) throw new Error(j.error && String(j.error).length < 120 ? j.error : "");
@@ -9424,6 +9436,8 @@ const FLUJOS = {
   "temporada": "Temporada",
   "servicios-estado": "Estado Servicios"
 };
+/* versión mínima que necesita esta app de cada flujo (súbela en el mismo commit en que cambias el flujo) */
+const FLUJO_MIN = { "armoni-preguntas": 3, "servicios-estado": 3, "movimiento-nuevo": 2, "ahorro": 2 };
 const nombreFlujo = id => FLUJOS[id] || id;
 const flujoDeUrl = url => { const m = String(url || "").match(/\/webhook\/([^/?#]+)/); return m ? m[1] : ""; };
 const FlujoViejo = (function(){
@@ -9434,7 +9448,7 @@ const FlujoViejo = (function(){
   /* j = la respuesta (ya leída) del flujo; devuelve true si está viejo */
   function revisa(id, j, minVersion){
     if(!j || typeof j !== "object") return false;
-    const v = Number(j.version) || 0, m = lee(), antes = JSON.stringify(m[id] || null);
+    const v = Number(j.version != null ? j.version : j.v) || 0, m = lee(), antes = JSON.stringify(m[id] || null);   // servicios-estado dice «v»
     if(v < (minVersion || 1)) m[id] = { v, min: minVersion || 1 }; else delete m[id];
     if(JSON.stringify(m[id] || null) !== antes){ graba(m); pinta(); }
     return !!m[id];
@@ -9448,7 +9462,12 @@ const FlujoViejo = (function(){
     box.innerHTML = '<div class="credAvisoBtn flujoAvisoBox" role="status"><span class="ic" aria-hidden="true">🛠️</span><span class="tx"><b>Falta actualizar ' + (ns.length > 1 ? ns.slice(0, -1).join(", ") + " y " + ns[ns.length - 1] : ns[0]) + ' en n8n</b><small>' + (ns.length > 1 ? 'Esos flujos están viejos' : 'Ese flujo está viejo') + ': impórtalo de nuevo desde la carpeta «nube» y actívalo.</small></span><button type="button" class="ir avisoX" aria-label="Ocultar hasta la próxima versión">✕</button></div>';
     box.querySelector(".avisoX").onclick = () => { try{ localStorage.setItem(KO, APP_VERSION); }catch{} pinta(); };
   }
-  return { revisa, pinta, viejo: id => !!lee()[id] };
+  /* para las llamadas que pasan por la Cola: si el flujo tiene versión mínima, se revisa sin gastar la respuesta */
+  function revisaRespuesta(url, r){
+    const id = flujoDeUrl(url); if(!FLUJO_MIN[id] || !r || !r.ok) return;
+    r.clone().json().then(j => revisa(id, j, FLUJO_MIN[id]), () => {});
+  }
+  return { revisa, revisaRespuesta, pinta, viejo: id => !!lee()[id] };
 })();
 /* respaldo de Dudas: el flujo «armoni-preguntas» puede devolver un «respaldo» (su memoria). Se guarda aquí y se le
    vuelve a mandar en cada llamada, así si se reinstala el flujo no pierde lo que sabía */
@@ -9488,7 +9507,9 @@ const Cola = (function(){
     const body = JSON.stringify(cuerpo);
     try{
       if(enOrden && lee().some(x => !x.parecido)) throw new Error("en orden");
-      return await fetch(url, Object.assign({}, opts, { body, signal: AbortSignal.timeout ? AbortSignal.timeout(15000) : undefined }));
+      const r = await fetch(url, Object.assign({}, opts, { body, signal: AbortSignal.timeout ? AbortSignal.timeout(15000) : undefined }));
+      FlujoViejo.revisaRespuesta(url, r);
+      return r;
     }catch(e){
       const c = lee(); c.push({ url, body, t: Date.now(), resumen: (cuerpo.concepto || "Registro") + (cuerpo.monto ? " · $" + Math.round(cuerpo.monto).toLocaleString("es-CO") : "") + (cuerpo.medio === "efectivo" ? " · efectivo" : "") }); escribe(c);
       return new Response(JSON.stringify({ ok: true, enCola: true }), { status: 200, headers: { "Content-Type": "application/json" } });
@@ -9506,6 +9527,7 @@ const Cola = (function(){
         if(!lee().some(y => idDe(y) === idDe(x0))) continue;         // ya lo quitaron mientras tanto
         let r;
         try{ r = await fetch(x0.url, { method: "POST", body: x0.body, signal: AbortSignal.timeout ? AbortSignal.timeout(15000) : undefined }); }catch{ break; }   // sigue sin conexión: se intenta después
+        FlujoViejo.revisaRespuesta(x0.url, r);
         const j = await r.json().catch(() => ({}));
         const c = sin(lee(), x0);
         if((r.ok && j.ok !== false) || j.error === "repetido"){ enviados++; escribe(c); }   // «repetido»: ya había llegado, no se duplica
@@ -9618,6 +9640,7 @@ const Ahorro = (function(){
     const r = await fetch(AHORRO_URL, { method: "POST", body: JSON.stringify(Object.assign({ token: MERCADO_TOKEN, accion: "ver", fecha: hoyISO() }, cuerpo || {})) });
     const j = await r.json().catch(() => ({}));
     if(!r.ok || !j || j.ok === false || !Array.isArray(j.cajas)) throw new Error(j && j.error === "nombre" ? "Ponle un nombre a la cajita." : "");
+    FlujoViejo.revisa("ahorro", j, 2);
     datos = j; try{ localStorage.setItem(KEY, JSON.stringify(Object.assign({}, j, { at: Date.now() }))); }catch{}   // «at»: de cuándo es (Control IA lo refresca si es viejo)
     return j;
   }
@@ -9658,6 +9681,8 @@ const Ahorro = (function(){
           '<p class="ahSub">' + (esteMes ? (esteMes > 0 ? '+' : '') + peso(esteMes) + ' este mes' : 'Sin movimientos este mes') + ' · ' + cs.length + (cs.length === 1 ? ' cajita' : ' cajitas') + '</p>') + reparto +
         '<div class="ahBtns"><button type="button" class="ahBtn mas" data-a="guardar"><span aria-hidden="true">+</span>Guardar</button><button type="button" class="ahBtn menos" data-a="sacar"><span aria-hidden="true">−</span>Sacar</button></div>' +
       '</div>' +
+      /* el flujo avisa cuando alguna cajita quedó en negativo: no cuadra con la cuenta de Nu */
+      (datos.alerta === "no-cuadra" || (Array.isArray(datos.negativas) && datos.negativas.length) ? '<button type="button" class="ahAlerta" data-a="cuadrar"><span aria-hidden="true">⚠️</span><span>' + (Array.isArray(datos.negativas) && datos.negativas.length === 1 ? 'La cajita «' + esc(datos.negativas[0].nombre) + '» quedó en negativo' : 'Alguna cajita quedó en negativo') + ': cuádrala con Nu en Dudas → Control IA</span></button>' : '') +
       '<div class="mkSec">Apartados</div><div class="ahCajas">' +
         cs.map(c => {
           const delMes = (c.movimientos || []).filter(m => m.fecha.startsWith(mes)).reduce((a, m) => a + m.monto, 0);
@@ -9789,6 +9814,7 @@ const Ahorro = (function(){
     const a = b.dataset.a;
     if(a === "guardar" || a === "sacar") mover(a);
     else if(a === "nueva") nueva(null, b.dataset.sug);
+    else if(a === "cuadrar"){ try{ Drawer.go("dudas"); DudasPro.ia(); }catch{} }
     else if(a === "caja") detalle(b.dataset.id);
     else if(a === "meta"){ const c = cajas().find(x => x.id === b.dataset.id); if(c) nueva(c, null, "meta"); }
   });
@@ -11468,6 +11494,20 @@ const GastoManual = (function(){
     const existente = () => { try{ return Restaurantes.info(lugar); }catch{ return null; } };   // el lugar ya está en Restaurantes
     const yaCalif = () => { const e = existente(); return !!(e && e.score > 0); };              // y ya tiene nota: no se vuelve a puntuar   // salidas a comer: dónde, cuántos y qué nota (van a «Restaurantes»)
     let paso = "que", guardando = false, editando = false, preguntoPareja = false, tipoSal = "";
+    let manual = false;   // «lo anoto igual»: algo que normalmente se registra solo (arriendo, jardín, cuota, servicios)
+    if(opts && opts.fecha) fecha = opts.fecha;
+    if(opts && opts.nota) nota = opts.nota;
+    /* pregunta antes de anotar algo que normalmente llega solo; «Sí» sigue con manual = true */
+    const preguntaManual = (antesDe, si, no) => {
+      const viejo = vista.querySelector(".yaEsta.manualQ"); if(viejo) viejo.remove();
+      const caja = document.createElement("div");
+      caja.className = "yaEsta manualQ";
+      caja.innerHTML = '<b>Esto normalmente se registra solo, ¿lo anoto igual?</b><span>El arriendo, el jardín, la cuota del carro y los servicios llegan solos desde su aviso o el correo del banco. Anótalo solo si esta vez no llegó.</span>' +
+        '<div class="yaBtns"><button type="button" class="pgNo" data-m="no">No</button><button type="button" class="pgSi" data-m="si">Sí, anotarlo</button></div>';
+      antesDe.after(caja);
+      caja.querySelector('[data-m="si"]').addEventListener("click", () => { caja.remove(); manual = true; si(); });
+      caja.querySelector('[data-m="no"]').addEventListener("click", () => { caja.remove(); if(no) no(); });
+    };
     const historia = [];
     let histResumen = null;   // el camino hasta el resumen: al volver de editar se recupera tal cual
     const scrim = document.createElement("div");
@@ -11563,7 +11603,7 @@ const GastoManual = (function(){
         if(recCab) recCab.addEventListener("click", () => { const on = recCab.getAttribute("aria-expanded") !== "true"; recCab.setAttribute("aria-expanded", String(on)); recCab.parentNode.classList.toggle("abierto", on); if(on) setTimeout(() => recCab.parentNode.scrollIntoView({ block: "nearest", behavior: REDUCED ? "auto" : "smooth" }), 300); });
         sig.addEventListener("click", () => {
           concepto = inp.value.trim(); if(!concepto) return;
-          if(tipo === "Gasto" && AUTOMATICOS.test(concepto)){ avisoErr("Eso ya se registra solo desde su aviso (jardín, arriendo, cuota del carro)."); return; }
+          if(tipo === "Gasto" && AUTOMATICOS.test(concepto) && !manual){ $("inErr").textContent = ""; preguntaManual($("inErr"), () => sig.click()); return; }
           const f = frec.find(x => x.concepto.trim().toLowerCase() === concepto.toLowerCase());   // escribió uno recurrente
           if(f){ usarRecurrente(f); return; }
           ir(editando ? trasEditar() : despues("que"), 1);
@@ -11740,12 +11780,15 @@ const GastoManual = (function(){
         return;
       }
       const dato = { tipo, concepto: nombre, categoria, monto, fecha, nota: nota$ };
+      if(manual) dato.manual = true;
       if(pareja) dato.salida = "Pareja";
       if(tipo === "Gasto" && medio === "efectivo" && !/\bretiro/i.test(concepto)) dato.medio = "efectivo";   // un retiro en efectivo SÍ sale de la cuenta (lo que se paga después con ese efectivo ya no)   // n8n: Monto 0 + «Efectivo» = valor (no baja el presupuesto)
       if(conLugar() && lugar.trim()){ const ex = existente(), rated = !!(ex && ex.score > 0); dato.lugar = lugar.trim(); dato.personas = personas; if(ex && ex.id) dato.lugarId = ex.id; if(!rated && puntos) dato.puntuacion = puntos; if(!rated && comentario.trim()) dato.comentario = comentario.trim(); }
       guardando = true; btn.disabled = true; btn.textContent = "Guardando…"; err.textContent = "";
       const enviar = forzar => Cola.post(MOVIMIENTO_URL, { method: "POST", body: JSON.stringify(Object.assign({ token: MERCADO_TOKEN }, dato, forzar ? { forzar: true } : {})) })
         .then(r => r.json().catch(() => ({})).then(j => {
+          /* n8n lo bloqueó porque normalmente llega solo: se pregunta y, si dicen que sí, se reenvía con manual */
+          if(j && j.codigo === "automatico" && !dato.manual) return new Promise((ok, mal) => preguntaManual(err, () => { dato.manual = true; enviar(forzar).then(ok, mal); }, () => ok({ noManual: true })));
           /* ese pago ya estaba anotado (por ejemplo, llegó solo desde el correo de PSE): se pregunta antes de duplicarlo */
           if(j && j.error === "parecido" && j.parecido) return yaEstaba(j.parecido);
           if(!r.ok || j.ok === false) throw new Error(errorGuardar(r, j, dato)); return j;
@@ -11764,8 +11807,10 @@ const GastoManual = (function(){
       enviar(false)
         .then(j => {
           if(j && j.yaEstaba){ cierra(); avisoOk("No se duplicó", nombre + " · " + monto$ + " ya estaba registrado"); return; }
+          if(j && j.noManual){ guardando = false; btn.disabled = false; btn.textContent = "Guardar"; return; }
           Frecuentes.aprende(tipo, concepto.trim(), categoria, monto);
           cierra("guardado");
+          if(opts && typeof opts.alGuardar === "function"){ try{ opts.alGuardar(j); }catch{} }
           if(j && j.enCola) avisoOk("Guardado en el celular", nombre + " · " + monto$ + (dato.medio ? " · efectivo" : "") + " · se envía cuando el PC esté prendido");
           else if(dato.medio === "efectivo" && j && j.aviso === "efectivo-sin-columna") avisoOk("Guardado, pero ojo", "Quedó anotado y no baja el presupuesto. Crea en Notion → Movimientos la columna Efectivo (Número) para que cuente bien.");
           else if(dato.medio === "efectivo" && !(j && j.medio === "efectivo")) avisoOk("Ojo", "Quedó como digital: falta actualizar el flujo «movimiento-nuevo» en n8n para el efectivo.");
@@ -11778,6 +11823,64 @@ const GastoManual = (function(){
     if(opts && opts.pago) usarRecurrente(opts.pago);   // viene de «Pagar»: ya trae el concepto, la categoría y el valor
   }
   return { abrir };
+})();
+
+/* PSE que no se pudo leer: el lector de correos guarda aquí lo que no entendió (otro formato, sin valor…).
+   Aviso en la pantalla principal; cada uno se anota a mano (formulario prellenado) o se descarta. */
+const PseNoLeidos = (function(){
+  let lista = [];
+  const esc = t => String(t == null ? "" : t).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const peso = n => "$" + Math.round(n).toLocaleString("es-CO");
+  const fechaL = f => { try{ return new Date(String(f).slice(0, 10) + "T12:00:00").toLocaleDateString("es-CO", { day: "numeric", month: "short" }).replace(".", ""); }catch{ return f || ""; } };
+  async function pide(cuerpo){
+    const r = await fetch(PSE_NO_LEIDOS_URL, { method: "POST", body: JSON.stringify(Object.assign({ token: MERCADO_TOKEN, accion: "ver" }, cuerpo)) });
+    const j = await r.json().catch(() => ({}));
+    if(!r.ok || j.ok === false) throw new Error("http " + r.status);
+    if(Array.isArray(j.noLeidos)) lista = j.noLeidos.filter(x => x && x.id);
+    return j;
+  }
+  async function check(){ try{ await pide({}); }catch{ return; } pinta(); const v = document.querySelector(".pseScrim"); if(v) pintaLista(v); }
+  function pinta(){
+    const box = document.getElementById("pseAviso"); if(!box) return;
+    const n = lista.length;
+    box.innerHTML = n ? '<button type="button" class="credAvisoBtn"><span class="ic" aria-hidden="true">📩</span><span class="tx"><b>' + (n === 1 ? 'Hay un pago PSE que no pude leer' : 'Hay ' + n + ' pagos PSE que no pude leer') + '</b><small>Toca para anotarlo a mano o descartarlo</small></span><span class="ir" aria-hidden="true">›</span></button>' : "";
+    if(n) box.firstChild.onclick = abre;
+  }
+  function pintaLista(sc){
+    const body = sc.querySelector(".inBody");
+    if(!lista.length){ cierra(sc); return; }
+    body.innerHTML = lista.map(x => '<div class="pseFila"><b>' + esc(x.concepto || x.asunto || "Pago PSE") + (x.monto ? ' · ' + peso(x.monto) : '') + '</b>' +
+      '<small>' + [x.fecha ? fechaL(x.fecha) : "", x.motivo, x.resumen && x.resumen !== x.concepto ? x.resumen : ""].filter(Boolean).map(esc).join(" · ") + '</small>' +
+      '<div class="yaBtns"><button type="button" class="pgNo" data-q="' + esc(x.id) + '">Descartar</button><button type="button" class="pgSi" data-an="' + esc(x.id) + '">Anotar a mano</button></div></div>').join("");
+  }
+  function cierra(sc){ sc.classList.remove("on"); setTimeout(() => sc.remove(), 340); }
+  function abre(){
+    if(document.querySelector(".pseScrim")) return;
+    const sc = document.createElement("div");
+    sc.className = "pgScrim pseScrim";
+    sc.innerHTML = '<div class="inWrap"><div class="pgCard inCard" role="dialog" aria-modal="true" aria-labelledby="pseT"><h3 id="pseT">Pagos PSE sin leer</h3><p class="fmAyuda" style="text-align:center;margin:4px 0 0">Llegó el correo del banco, pero no pude sacar los datos.</p><div class="inBody"></div><div class="pgRow"><button type="button" class="pgNo" data-cerrar>Cerrar</button></div></div></div>';
+    document.body.appendChild(sc); requestAnimationFrame(() => sc.classList.add("on"));
+    pintaLista(sc);
+    sc.addEventListener("click", async e => {
+      if(e.target === sc || e.target.closest("[data-cerrar]")){ cierra(sc); return; }
+      const b = e.target.closest("button"); if(!b) return;
+      if(b.dataset.q){
+        if(!b.dataset.seguro){ b.dataset.seguro = "1"; b.textContent = "¿Seguro?"; return; }
+        b.disabled = true; b.textContent = "Quitando…";
+        try{ await pide({ accion: "quitar", id: b.dataset.q }); lista = lista.filter(x => x.id !== b.dataset.q); pinta(); pintaLista(sc); }
+        catch{ b.disabled = false; b.textContent = "Descartar"; delete b.dataset.seguro; avisoOk("No se pudo quitar", "Revisa la conexión e inténtalo otra vez"); }
+      } else if(b.dataset.an){
+        const x = lista.find(y => y.id === b.dataset.an); if(!x) return;
+        cierra(sc);
+        const f = /^\d{4}-\d{2}-\d{2}/.test(String(x.fecha || "")) ? String(x.fecha).slice(0, 10) : undefined;
+        /* al guardarlo de verdad, sale de la lista (si no se guarda, sigue esperando) */
+        setTimeout(() => GastoManual.abrir({ tipo: "Gasto", pago: { concepto: x.concepto || "", categoria: "", monto: Number(x.monto) || 0, fijo: false }, fecha: f, nota: "PSE que no se pudo leer" + (x.asunto ? ": " + String(x.asunto).slice(0, 120) : ""),
+          alGuardar: () => { pide({ accion: "quitar", id: x.id }).then(pinta, () => {}); lista = lista.filter(y => y.id !== x.id); pinta(); } }), 250);
+      }
+    });
+  }
+  TrasIntro.hacer(() => setTimeout(check, 1500));
+  return { check, abre };
 })();
 
 /* «Pagar»: lleva a la página de pago de cada cosa que pagamos seguido (energía, agua, gas, internet, carro y los dos celulares).
@@ -12021,7 +12124,7 @@ const Servicios = (function(){
     const hoy = new Date(), dia = hoy.getDate();
     const ult = new Date(hoy.getFullYear(), hoy.getMonth() + 1, 0).getDate();
     let u = 0, left = 0;
-    if(id === "arriendo" || id === "jardin"){      // vencen el 3 del mes siguiente: desde el último día del mes se cuentan 3 días
+    if(id === "arriendo" || id === "arriendo_valor" || id === "jardin"){      // vencen el 3 del mes siguiente: desde el último día del mes se cuentan 3 días
       if(dia === ult){ u = 0; left = 3; } else { u = Math.min(1, dia / 3); left = 3 - dia; }   // negativo = ya venció
     } else if(VENCE[id]){
       const r = VENCE[id], hasta = r.hasta(ult);
@@ -12054,15 +12157,17 @@ const Servicios = (function(){
     function armaSlide(item, inf){
       const esArriendo = item.id === "arriendo";
       const esJardin = item.id === "jardin";
+      const esValorAr = item.id === "arriendo_valor";   // comprobante enviado, pero el gasto aún no está en Movimientos
       const sl = document.createElement("div");
       sl.className = "svSlide";
       sl.innerHTML =
         '<span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + ({ agua: '<path d="M12 3s6 6.4 6 11a6 6 0 0 1-12 0c0-4.6 6-11 6-11z"/>', gas: '<path d="M12 3c1 3.5 5 5 5 10a5 5 0 0 1-10 0c0-2 1-3 2-4 0 2 1 3 2 3 0-3-1-5 1-9z"/>', internet: '<path d="M4 9a12 12 0 0 1 16 0M7 12.5a8 8 0 0 1 10 0M10 16a4 4 0 0 1 4 0"/><circle cx="12" cy="19" r=".8"/>', arriendo: '<path d="M4 11 12 4l8 7"/><path d="M6 10v10h12V10"/><path d="M10 20v-5h4v5"/>', jardin: '<path d="M12 21v-8"/><path d="M12 13c0-4 3-7 7-7 0 4-3 7-7 7z"/><path d="M12 15c0-3-2.4-5-5.5-5 0 3 2.4 5 5.5 5z"/>', cel: '<rect x="7" y="3" width="10" height="18" rx="2.2"/><path d="M11 18h2"/>' }[/^cel_/.test(item.id) ? 'cel' : item.id] || '<path d="M13 2 3 14h7l-1 8 11-14h-7l1-6z"/>') + '</svg></span>' +
-        '<div class="txt"><b>Hace falta pagar ' + esc(item.nombre) + '</b><span>' + textoLeft(inf.left) + '</span>' + (item.local ? '<button type="button" class="svYa">Ya lo pagué</button>' : '') + '</div>' +
-        '<button type="button" class="go">' + (esArriendo ? "Enviar comprobante" : esJardin ? "Ya se pagó" : "Pagar") + '</button>';
+        '<div class="txt"><b>' + (esValorAr ? 'Falta anotar ' + esc(item.nombre || 'el valor del arriendo') : 'Hace falta pagar ' + esc(item.nombre)) + '</b><span>' + (esValorAr ? 'Ya se mandó el comprobante' : textoLeft(inf.left)) + '</span>' + (item.local ? '<button type="button" class="svYa">Ya lo pagué</button>' : '') + '</div>' +
+        '<button type="button" class="go">' + (esValorAr ? "Anotar valor" : esArriendo ? "Enviar comprobante" : esJardin ? "Ya se pagó" : "Pagar") + '</button>';
       const ya = sl.querySelector(".svYa");
       if(ya) ya.addEventListener("click", () => { try{ const h = new Date(); localStorage.setItem("armoni.gas.pagado", h.getFullYear() + "-" + (h.getMonth() + 1)); }catch{} check(); });
       sl.querySelector(".go").addEventListener("click", async e => {
+        if(esValorAr){ try{ AtGmail.valorArriendo(null, true); }catch{} return; }
         if(esJardin){                                 // solo marca que se pagó: no abre ningún banco
           const b = e.currentTarget;
           const monto = await pedirMontoJardin();
@@ -12157,7 +12262,7 @@ const Servicios = (function(){
     let pendientes = [], data = null;
     try{
       const res = await fetch(SERVICIOS_ESTADO_URL, { cache: "no-store" });
-      if(res.ok){ data = await res.json(); pendientes = data.sinPagar || data.pendientes || []; }   // también lo ya vencido, hasta que se pague
+      if(res.ok){ data = await res.json(); pendientes = data.sinPagar || data.pendientes || []; FlujoViejo.revisa("servicios-estado", data, 3); }   // también lo ya vencido, hasta que se pague
     }catch{ /* sin conexión: seguimos solo con lo que se pueda calcular local */ }
     /* el gas vence el 21: del 17 al 21 sale arriba como la energía. Si n8n aún no trae el código nuevo (sin «v»), se avisa desde aquí hasta que se toque «Ya lo pagué» */
     try{
@@ -12166,10 +12271,14 @@ const Servicios = (function(){
     }catch{}
     try{ const dia = new Date().getDate(); if(dia <= 5 || (dia >= 15 && dia <= 23)) await Pagos.traePagados(); }catch{}   // solo en las ventanas de pago
     try{ pendientes = pendientes.concat(Pagos.pendientesCelulares()); }catch{}
+    /* si el servidor ya avisa que falta el valor del arriendo, el aviso local sobra */
+    arriendoEnServidor = pendientes.some(x => x && x.id === "arriendo_valor");
+    try{ AtGmail.pintaPendiente(); }catch{}
     banner(pendientes);
   }
 
-  return { check, abrirPago };
+  let arriendoEnServidor = false;
+  return { check, abrirPago, arriendoEnServidor: () => arriendoEnServidor };
 })();
 
 /* ════════════════════════════════════════════════════════════
@@ -15222,6 +15331,7 @@ function refrescaAvisos(espera){
   try{ CreditoCarro.precarga(); }catch{}
   try{ DudasPro.pintaCierre(); }catch{}
   try{ AtGmail.pintaPendiente(); }catch{}
+  try{ PseNoLeidos.check(); }catch{}
   try{ Cola.pinta(); }catch{}
   try{ FlujoViejo.pinta(); }catch{}
 }
