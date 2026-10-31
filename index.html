@@ -4555,7 +4555,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-31.276";
+const APP_VERSION = "2026-10-31.277";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -9070,6 +9070,8 @@ const AtGmail = (function(){
   function valorArriendo(per, forzado){
     per = per || periodo();
     let yaAnotado = false; try{ yaAnotado = localStorage.getItem(KM) === per; }catch{}
+    /* si Notion (servicios-estado) dice que falta y se anotó hace más de 10 min, manda Notion: lo borraron allá y hay que anotarlo otra vez */
+    if(yaAnotado && forzado){ let t = 0; try{ t = +localStorage.getItem(KM + ".t") || 0; }catch{} if(Date.now() - t > 10 * 60000){ yaAnotado = false; try{ localStorage.removeItem(KM); }catch{} } }
     if(yaAnotado){   // ya se anotó desde este celular: no se vuelve a anotar (Notion a veces tarda en mostrarlo y eso duplicaba)
       pintaPendiente();
       if(forzado && typeof avisoOk === "function") avisoOk("El arriendo ya está anotado", "El de " + nombrePer(per) + " ya quedó en tus cuentas; puede tardar un momento en verse");
@@ -9116,7 +9118,7 @@ const AtGmail = (function(){
         j = await r.json().catch(() => ({}));
         const repetido = j.error === "repetido" || j.error === "parecido";   // «parecido» = ya hay un arriendo igual esos días
         if(!repetido && (!r.ok || j.ok === false)) throw new Error(j.error && String(j.error).length < 120 ? j.error : "");
-        try{ if(!repetido) localStorage.setItem(KV, String(monto)); localStorage.setItem(KM, per); localStorage.removeItem(KP); }catch{}
+        try{ if(!repetido) localStorage.setItem(KV, String(monto)); localStorage.setItem(KM, per); localStorage.setItem(KM + ".t", String(Date.now())); localStorage.removeItem(KP); }catch{}
         cierra();
         if(typeof avisoOk === "function"){
           if(repetido) avisoOk("Arriendo ya estaba anotado", "El de " + nombrePer(per) + " ya quedó en tus cuentas");
