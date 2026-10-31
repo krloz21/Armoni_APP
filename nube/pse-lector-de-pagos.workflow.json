@@ -74,7 +74,7 @@
     {
       "parameters": {
         "mode": "runOnceForEachItem",
-        "jsCode": "const crudo = $json.content?.[0]?.text || $json.text || '';\nconst base = $('Limpiar').item.json;\n\nlet p = null;\ntry { p = JSON.parse(crudo.replace(/```json|```/g, '').trim()); } catch (e) { p = null; }\n\nconst CATEGORIAS = ['Hogar', 'Hijo', 'Carro', 'Alimentación', 'Servicios', 'Salud', 'Salidas', 'Ahorro', 'Otros', 'Tarjetas'];\nconst fmt = n => String(n).replace(/\\B(?=(\\d{3})+(?!\\d))/g, '.');\nconst cus = (base.texto.match(/CUS:?\\s*(\\d{5,})/i) || [])[1] || null;\n\nlet valido = false, monto = null, fecha = base.fecha;\nlet concepto = String(p?.concepto || '').trim().slice(0, 60);\nlet categoria = CATEGORIAS.includes(p?.categoria) ? p.categoria : 'Otros';\n\nif (p && concepto && Number.isFinite(Number(p.monto)) && Number(p.monto) > 0 && cus) {\n  monto = Math.round(Number(p.monto));\n  valido = base.texto.includes(fmt(monto));          // el monto tiene que estar escrito en el correo\n  const m = String(p.fecha || '').match(/^(\\d{2})\\/(\\d{2})\\/(\\d{4})$/);\n  if (m && base.texto.includes(p.fecha)) fecha = m[3] + '-' + m[2] + '-' + m[1];\n}\n\n// Claro (COMCEL): Alejandra paga los dos celulares, así que no se distingue por el nombre del correo sino por el día de pago.\n// Pagado del 1 al 5 → «Celular Aleja»; cualquier otro día (el suyo es del 15 al 23) → «Celular amor» (el de Carlos).\nif (/COMCEL/i.test(base.texto) || /^celular$/i.test(concepto)) {\n  concepto = Number(String(fecha).slice(8, 10)) <= 5 ? 'Celular Aleja' : 'Celular amor';\n  categoria = 'Hogar';\n}\nreturn { json: { valido, concepto, categoria, monto, fecha, cus, notas: cus ? 'PSE · CUS ' + cus : '', messageId: base.messageId, ms: base.ms } };"
+        "jsCode": "const crudo = $json.content?.[0]?.text || $json.text || '';\nconst base = $('Limpiar').item.json;\n\nlet p = null;\ntry { p = JSON.parse(crudo.replace(/```json|```/g, '').trim()); } catch (e) { p = null; }\n\nconst CATEGORIAS = ['Hogar', 'Hijo', 'Carro', 'Alimentación', 'Servicios', 'Salud', 'Salidas', 'Ahorro', 'Otros', 'Tarjetas'];\nconst fmt = n => String(n).replace(/\\B(?=(\\d{3})+(?!\\d))/g, '.');\nconst cus = (base.texto.match(/CUS:?\\s*(\\d{5,})/i) || [])[1] || null;\nconst sin = s => String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');\n\nlet valido = false, monto = null, fecha = base.fecha, motivo = '';\nlet concepto = String(p?.concepto || '').trim().slice(0, 60);\nlet categoria = CATEGORIAS.includes(p?.categoria) ? p.categoria : 'Otros';\n\nif (!p) motivo = 'no-entendi-el-correo';\nelse if (!concepto) motivo = 'sin-concepto';\nelse if (!(Number.isFinite(Number(p.monto)) && Number(p.monto) > 0)) motivo = 'sin-monto';\nelse if (!cus) motivo = 'sin-cus';\nif (!motivo) {\n  monto = Math.round(Number(p.monto));\n  valido = base.texto.includes(fmt(monto));          // el monto tiene que estar escrito en el correo\n  if (!valido) motivo = 'monto-no-verificado';\n  const m = String(p.fecha || '').match(/^(\\d{2})\\/(\\d{2})\\/(\\d{4})$/);\n  if (m && base.texto.includes(p.fecha)) fecha = m[3] + '-' + m[2] + '-' + m[1];\n}\n\n// Servicios: siempre el mismo nombre y siempre categoría «Servicios» (así servicios-estado quita el aviso).\n// 1) por lo que escribió la IA (con o sin tilde: «Recibo energía», «Agua EMCALI»…); 2) si no, por la empresa del correo.\nconst SERV = [\n  [/\\b(energia|luz|enertotal)\\b/, 'Recibo energia'],\n  [/\\b(agua|acueducto)\\b/, 'Recibo agua'],\n  [/\\bgas(es)?\\b/, 'Recibo gas'],\n  [/\\b(internet|movistar|wifi)\\b/, 'Internet'],\n];\nconst EMPRESA = [\n  [/FIDUCIARIA DAVIVIENDA|ENERTOTAL/i, 'Recibo energia'],\n  [/GASES DE OCCIDENTE/i, 'Recibo gas'],\n  [/Pexto|Colombia Telecomunicaciones|Movistar/i, 'Internet'],\n  [/EMCALI/i, 'Recibo agua'],   // al final: EMCALI también vende energía/internet; si la IA ya dijo cuál, manda lo de la IA\n];\nconst porNombre = SERV.find(([re]) => re.test(sin(concepto)));\nconst porEmpresa = porNombre ? null : EMPRESA.find(([re]) => re.test(base.texto));\nconst serv = porNombre || porEmpresa;\nif (serv) { concepto = serv[1]; categoria = 'Servicios'; }\n\n// Claro (COMCEL): Alejandra paga los dos celulares, así que no se distingue por el nombre del correo sino por el día de pago.\n// Pagado del 1 al 5 → «Celular Aleja»; cualquier otro día (el suyo es del 15 al 23) → «Celular amor» (el de Carlos).\nif (/COMCEL/i.test(base.texto) || /^celular$/i.test(concepto)) {\n  concepto = Number(String(fecha).slice(8, 10)) <= 5 ? 'Celular Aleja' : 'Celular amor';\n  categoria = 'Hogar';\n}\nconst asunto = (base.texto.match(/^Asunto:\\s*([^.]*)/) || [])[1] || '';\nreturn { json: { valido, motivo, concepto, categoria, monto, fecha, cus, notas: cus ? 'PSE · CUS ' + cus : '', messageId: base.messageId, ms: base.ms,\n  asunto: asunto.slice(0, 120), resumen: base.texto.slice(0, 400) } };\n"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -152,7 +152,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// Pagos que pasaron la validación\nconst nuevos = $('If').all().map(i => i.json);\n// Todo lo que ya está en Movimientos\nconst filas = $input.all().map(i => i.json).filter(f => f && f.property_monto !== undefined);\nconst dias = s => Math.floor(new Date(String(s).slice(0, 10) + 'T00:00:00Z').getTime() / 86400000);\n\nconst usadas = new Set();   // cada pago anotado a mano solo \"cancela\" a un pago del correo\nconst vistos = new Set();   // el mismo pago repetido dentro de esta tanda (por CUS)\nconst salida = [];\n\nfor (const c of nuevos) {\n  const clave = c.cus || c.messageId;\n  if (vistos.has(clave)) continue;\n  vistos.add(clave);\n\n  // 1) este mismo pago (mismo CUS) ya lo registró el flujo\n  if (c.cus && filas.some(f => String(f.property_notas || '').includes(c.cus))) continue;\n\n  // 2) ya lo anotaron a mano: mismo valor en los mismos días (cada fila a mano se usa una sola vez)\n  const idx = filas.findIndex((f, i) =>\n    !usadas.has(i) &&\n    !String(f.property_notas || '').includes('PSE · CUS') &&\n    Number(f.property_monto) === c.monto &&\n    f.property_fecha?.start &&\n    Math.abs(dias(f.property_fecha.start) - dias(c.fecha)) <= 5\n  );\n  if (idx >= 0) { usadas.add(idx); continue; }\n\n  salida.push({ json: c });\n}\n\n// se crean de más antiguo a más nuevo (así \"Creado\" queda en el mismo orden que los pagos)\nsalida.sort((a, b) => String(a.json.fecha).localeCompare(String(b.json.fecha)) || (a.json.ms || 0) - (b.json.ms || 0));\nreturn salida;"
+        "jsCode": "// Pagos que pasaron la validación\nconst nuevos = $('If').all().map(i => i.json);\n// Todo lo que ya está en Movimientos\nconst filas = $input.all().map(i => i.json).filter(f => f && f.property_monto !== undefined);\nconst dias = s => Math.floor(new Date(String(s).slice(0, 10) + 'T00:00:00Z').getTime() / 86400000);\n\nconst usadas = new Set();   // cada pago anotado a mano solo \"cancela\" a un pago del correo\nconst vistos = new Set();   // el mismo pago repetido dentro de esta tanda (por CUS)\nconst salida = [];\n// si un correo que antes no se pudo leer ahora sí pasó (p. ej. al volver a correrlo a mano), sale de la lista de no leídos\nconst sd = $getWorkflowStaticData('global');\nif (Array.isArray(sd.noLeidos) && sd.noLeidos.length) {\n  const ok = new Set(nuevos.map(c => String(c.messageId || '')).concat(nuevos.map(c => String(c.cus || ''))).filter(Boolean));\n  sd.noLeidos = sd.noLeidos.filter(x => !ok.has(x.id) && !(x.cus && ok.has(String(x.cus))));\n}\n\nfor (const c of nuevos) {\n  const clave = c.cus || c.messageId;\n  if (vistos.has(clave)) continue;\n  vistos.add(clave);\n\n  // 1) este mismo pago (mismo CUS) ya lo registró el flujo\n  if (c.cus && filas.some(f => String(f.property_notas || '').includes(c.cus))) continue;\n\n  // 2) ya lo anotaron a mano: mismo valor en los mismos días (cada fila a mano se usa una sola vez)\n  const idx = filas.findIndex((f, i) =>\n    !usadas.has(i) &&\n    !String(f.property_notas || '').includes('PSE · CUS') &&\n    Number(f.property_monto) === c.monto &&\n    f.property_fecha?.start &&\n    Math.abs(dias(f.property_fecha.start) - dias(c.fecha)) <= 5\n  );\n  if (idx >= 0) { usadas.add(idx); continue; }\n\n  salida.push({ json: c });\n}\n\n// se crean de más antiguo a más nuevo (así \"Creado\" queda en el mismo orden que los pagos)\nsalida.sort((a, b) => String(a.json.fecha).localeCompare(String(b.json.fecha)) || (a.json.ms || 0) - (b.json.ms || 0));\nreturn salida;"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -496,6 +496,64 @@
       ],
       "id": "b1c2d3e4-0005-4a00-8000-00000000c005",
       "name": "Pasar cuotas del carro (a mano)"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Salida «false» del If: un correo PSE que no se pudo leer o cuyo monto no se pudo verificar.\n// No se crea ningún movimiento (podría quedar con un valor falso): se guarda en sd.noLeidos para que la app lo muestre\n// («Llegó un pago PSE que no pude leer») y la persona lo anote a mano. El correo queda SIN marcar como leído.\n// Se consulta/borra con el webhook «pse-no-leidos». Ojo: staticData solo se guarda en ejecuciones de producción (flujo activo).\nconst sd = $getWorkflowStaticData('global');\nsd.noLeidos = Array.isArray(sd.noLeidos) ? sd.noLeidos : [];\nfor (const it of $input.all()) {\n  const c = it.json || {};\n  const id = String(c.messageId || c.cus || '');\n  if (!id) continue;\n  const fila = { id, fecha: c.fecha || null, t: new Date().toISOString(), motivo: c.motivo || 'no-valido', concepto: c.concepto || null,\n    categoria: c.categoria || null, monto: c.monto || null, cus: c.cus || null, asunto: c.asunto || '', resumen: c.resumen || '' };\n  const i = sd.noLeidos.findIndex(x => x.id === id);\n  if (i >= 0) sd.noLeidos[i] = Object.assign(sd.noLeidos[i], fila); else sd.noLeidos.push(fila);\n}\nif (sd.noLeidos.length > 50) sd.noLeidos = sd.noLeidos.slice(-50);\nreturn [{ json: { ok: true, noLeidos: sd.noLeidos.length } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        6176,
+        1000
+      ],
+      "id": "3da5a62d-d427-4b83-b012-39cd2baaec54",
+      "name": "Guardar no leído"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "pse-no-leidos",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        4656,
+        1400
+      ],
+      "id": "63263f7a-99cc-428d-9707-74a238a3516c",
+      "name": "PSE no leídos",
+      "webhookId": "9dfd049e-d834-42c6-96a8-313bdd9eadd2"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Webhook «pse-no-leidos» (POST): { token, accion: 'ver' | 'quitar', id }\n// ver → la lista de correos PSE que no se pudieron leer; quitar → borra uno (ya lo anotaron a mano o no era un pago).\nlet b = $input.first().json.body;\nif (typeof b === 'string') { try { b = JSON.parse(b); } catch (e) { b = {}; } }\nb = b || {};\nconst R = (o) => [{ json: Object.assign({ flujo: 'pse', version: 2 }, o) }];\nif (b.token !== 'mercado-7d41c2a9e05b') return R({ ok: false, error: 'token' });\nconst sd = $getWorkflowStaticData('global');\nsd.noLeidos = Array.isArray(sd.noLeidos) ? sd.noLeidos : [];\nif (b.accion === 'quitar') {\n  const id = String(b.id || '');\n  if (!id) return R({ ok: false, error: 'id' });\n  sd.noLeidos = sd.noLeidos.filter(x => x.id !== id);\n}\nreturn R({ ok: true, noLeidos: sd.noLeidos.slice().reverse() });\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4880,
+        1400
+      ],
+      "id": "9ca5ef7a-e7f6-4e20-bf3f-52349248b896",
+      "name": "Lista no leídos"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        5104,
+        1400
+      ],
+      "id": "d2ea8e62-15ea-479c-8e84-8e29e615c274",
+      "name": "Responder no leídos"
     }
   ],
   "pinData": {},
@@ -549,6 +607,13 @@
         [
           {
             "node": "Movimientos recientes",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Guardar no leído",
             "type": "main",
             "index": 0
           }
@@ -686,6 +751,28 @@
         [
           {
             "node": "Crear en Pago del Carro",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PSE no leídos": {
+      "main": [
+        [
+          {
+            "node": "Lista no leídos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lista no leídos": {
+      "main": [
+        [
+          {
+            "node": "Responder no leídos",
             "type": "main",
             "index": 0
           }

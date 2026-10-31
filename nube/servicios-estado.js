@@ -6,23 +6,27 @@ const hoy = new Date(Date.now() - 5 * 60 * 60 * 1000);   // hora de Colombia
 const dia = hoy.getUTCDate();
 const ultimoDiaMes = new Date(Date.UTC(hoy.getUTCFullYear(), hoy.getUTCMonth() + 1, 0)).getUTCDate();
 
-function pagado(keyword){
-  const re = new RegExp('\\b' + keyword + '\\b', 'i');
-  return items.some(i => re.test(i.json.name || ''));
+// sin tildes ni mayúsculas: «Recibo energía», «ENERGIA», «Energia» cuentan igual
+const sin = s => String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+const fechaDe = x => { let f = x.property_fecha; f = f && (f.start || (f.date && f.date.start) || f); return Date.parse(String(f || '').slice(0, 10) + 'T00:00:00Z'); };
+const diaDe = x => { const t = fechaDe(x); return isNaN(t) ? 0 : new Date(t).getUTCDate(); };
+// el agua pagada del 1 al 5 es la factura del mes ANTERIOR (se pagó tarde): no cuenta para este mes
+function pagado(r){
+  return items.some(i => r.re.test(sin(i.json.name)) && !(r.id === 'agua' && diaDe(i.json) >= 1 && diaDe(i.json) <= 5));
 }
 
 // "pendientes" = lo que se ve en la barra de Armoni (cada pago solo dentro de su ventana)
 // "sinPagar"   = lo que usan las notificaciones push (siguen avisando, ya vencido, hasta que se pague)
 const reglas = [
-  { id: 'energia',  nombre: 'la energía',  keyword: 'energia',  desde: 3,  hasta: 10,          seguir: ultimoDiaMes },
-  { id: 'agua',     nombre: 'el agua',     keyword: 'agua',     desde: 25, hasta: ultimoDiaMes, seguir: ultimoDiaMes },
-  { id: 'gas',      nombre: 'el gas',      keyword: 'gas',      desde: 17, hasta: 21,          seguir: ultimoDiaMes },   // vence el 21
-  { id: 'internet', nombre: 'el internet', keyword: 'internet', desde: 1,  hasta: 5,           seguir: ultimoDiaMes },
+  { id: 'energia',  nombre: 'la energía',  re: /\b(energia|luz|enertotal)\b/,       desde: 3,  hasta: 10,          seguir: ultimoDiaMes },
+  { id: 'agua',     nombre: 'el agua',     re: /\b(agua|acueducto)\b/,              desde: 25, hasta: ultimoDiaMes, seguir: ultimoDiaMes },
+  { id: 'gas',      nombre: 'el gas',      re: /\bgas(es)?\b/,                      desde: 17, hasta: 21,          seguir: ultimoDiaMes },   // vence el 21
+  { id: 'internet', nombre: 'el internet', re: /\b(internet|movistar|wifi)\b/,      desde: 1,  hasta: 5,           seguir: ultimoDiaMes },
 ];
 
 const pendientes = [], sinPagar = [];
 for (const r of reglas) {
-  if (pagado(r.keyword)) continue;
+  if (pagado(r)) continue;
   const item = { id: r.id, nombre: r.nombre };
   if (dia >= r.desde && dia <= r.hasta) pendientes.push(item);
   if (dia >= r.desde && dia <= r.seguir) sinPagar.push(item);
@@ -38,15 +42,14 @@ const ultimoDiaMesAnterior = Date.UTC(hoy.getUTCFullYear(), hoy.getUTCMonth(), 0
 // Del 20 en adelante cuenta lo enviado desde el 20 de este mes; antes del 20, lo enviado desde el 20 del mes pasado.
 const inicioArriendo = dia >= 20 ? Date.UTC(hoy.getUTCFullYear(), hoy.getUTCMonth(), 20) : Date.UTC(hoy.getUTCFullYear(), hoy.getUTCMonth() - 1, 20);
 
+// si hay varias filas que dicen «arriendo», vale el «último envío» más reciente
 const yaPagado = (re, inicioVentana) => {
-  const f = fijos.find(x => re.test(x.name || ''));
-  const s = f && f.property_último_envío && f.property_último_envío.start;
+  const s = fijos.filter(x => re.test(sin(x.name))).map(x => x.property_último_envío && x.property_último_envío.start).filter(Boolean).sort().pop();
   return !!s && Date.parse(s.slice(0, 10) + 'T00:00:00Z') >= inicioVentana;
 };
 const movPagado = (re, categoria, inicioVentana) => movFijos.some(x => {
-  if (!re.test(x.name || '') || x.property_categoría !== categoria) return false;   // nombre y categoría: así «jardín plaza» (Salidas) no cuenta
-  let f = x.property_fecha; f = f && (f.start || (f.date && f.date.start) || f);
-  const t = Date.parse(String(f || '').slice(0, 10) + 'T00:00:00Z');
+  if (!re.test(sin(x.name)) || x.property_categoría !== categoria) return false;   // nombre y categoría: así «jardín plaza» (Salidas) no cuenta
+  const t = fechaDe(x);
   return !isNaN(t) && t >= inicioVentana;
 });
 
@@ -56,12 +59,20 @@ if (!arriendoPagado) {
   if (esUltimoDiaMes || dia <= 3) pendientes.push(item);
   if (dia < 20 || esUltimoDiaMes) sinPagar.push(item);   // del 20 al penúltimo día todavía no toca: no se insiste
 }
+// comprobante del arriendo enviado («último envío» en la ventana) pero sin su gasto «Arriendo» (Hogar) en Movimientos:
+// falta anotar el valor. Sin ventana: sale hasta que se anote (o hasta que empiece el periodo siguiente, el día 20).
+const arriendoRegistrado = movPagado(/arriendo/i, 'Hogar', inicioArriendo);
+if (yaPagado(/arriendo/i, inicioArriendo) && !arriendoRegistrado) {
+  const item = { id: 'arriendo_valor', nombre: 'el valor del arriendo' };
+  pendientes.push(item); sinPagar.push(item);
+}
 if (!movPagado(/jard/i, 'Hijo', inicioArriendo)) {
   const item = { id: 'jardin', nombre: 'el jardín de Emanuel' };
   if (esUltimoDiaMes || dia <= 5) pendientes.push(item);
   if (dia < 20 || esUltimoDiaMes) sinPagar.push(item);   // del 20 al penúltimo día todavía no toca: no se insiste
 }
 
-// v: 2 le avisa a la app que este código ya es el nuevo (el gas vence el 21 y sale del 17 al 21); pagados = lo que ya está registrado este mes
-const pagados = reglas.filter(r => pagado(r.keyword)).map(r => r.id);
-return [{ json: { v: 2, pendientes, sinPagar, pagados } }];
+// v: 3 = reconoce conceptos con tilde o variación, agua del 1 al 5 = mes anterior y el pendiente «arriendo_valor».
+// pagados = lo que ya está registrado este mes; arriendoRegistrado = ya está el gasto «Arriendo» (Hogar) del periodo
+const pagados = reglas.filter(r => pagado(r)).map(r => r.id);
+return [{ json: { v: 3, pendientes, sinPagar, pagados, arriendoRegistrado } }];

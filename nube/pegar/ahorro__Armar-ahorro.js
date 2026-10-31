@@ -34,11 +34,11 @@ if (v.accion === 'caja') {
   let c = v.id && sd.cajas[v.id];
   if (c) {
     if (norm(c.nombre) !== norm(v.nombre)) { c.alias = (c.alias || []).concat(c.nombre).slice(-10); c.nombre = v.nombre; }
-    if (v.inicial != null && v.inicial !== c.inicial) { c.inicial = v.inicial; c.inicialFecha = v.fecha; }
+    if (v.inicial != null && v.inicial !== c.inicial) { c.inicial = v.inicial; c.inicialFecha = v.fecha; c.inicialAt = v.fecha === hoy ? new Date().toISOString() : null; }
     if (v.meta != null) c.meta = v.meta;
   } else {
     const nuevo = Date.now().toString(36);
-    sd.cajas[nuevo] = { nombre: v.nombre, inicial: v.inicial || 0, inicialFecha: v.fecha, meta: v.meta || 0, alias: [], orden: Object.keys(sd.cajas).length };
+    sd.cajas[nuevo] = { nombre: v.nombre, inicial: v.inicial || 0, inicialFecha: v.fecha, inicialAt: v.fecha === hoy ? new Date().toISOString() : null, meta: v.meta || 0, alias: [], orden: Object.keys(sd.cajas).length };
   }
 }
 if (v.accion === 'quitar') delete sd.cajas[v.id];
@@ -67,24 +67,47 @@ if (!sd.nu2) {
   });
 }
 const ids = Object.keys(sd.cajas);
+// nombre de la cajita en el concepto («Ahorro · Casita», «Retiro · Pagos de carro»), comparado de forma flexible:
+// sin tildes ni mayúsculas, exacto o por alias; si no, uno contiene al otro; si no, por palabra clave («carro» → Pagos de carro, «casita» → Ahorro casita)
+const VACIAS = new Set(['ahorro', 'pagos', 'pago', 'para', 'de', 'del', 'la', 'el', 'los', 'las', 'y', 'cajita', 'retiro']);
+const palabras = (t) => norm(t).replace(/[^a-z0-9ñ ]/g, ' ').split(/\s+/).filter(w => w.length >= 3 && !VACIAS.has(w)).map(w => w === 'gastar' ? 'gastos' : w);
+const nombresDe = (k) => [sd.cajas[k].nombre].concat(sd.cajas[k].alias || []).map(norm).filter(Boolean);
 const deCaja = (concepto) => {
   const m = String(concepto || '').match(/·\s*(.+)$/);
   if (!m) return sd.cajas.general ? 'general' : null;   // lo de antes de las cajitas va a la cajita «Ahorro»
   const n = norm(m[1]);
-  return ids.find(k => norm(sd.cajas[k].nombre) === n || (sd.cajas[k].alias || []).some(a => norm(a) === n)) || null;
+  if (!n) return null;
+  return ids.find(k => nombresDe(k).includes(n))
+    || (n.length >= 4 ? ids.find(k => nombresDe(k).some(a => a.length >= 4 && (a.includes(n) || n.includes(a)))) : null)
+    || (() => { const ws = palabras(n); const ks = ids.filter(k => nombresDe(k).some(a => palabras(a).some(w => ws.includes(w)))); return ks.length === 1 ? ks[0] : null; })()   // una sola cajita con esa palabra; si hay dos, queda «sin cajita»
+    || null;
 };
+// ¿el movimiento cuenta después del saldo base de la cajita? Días posteriores sí; el mismo día solo si se creó en Notion
+// después del instante del ajuste (inicialAt). Sin inicialAt (saldos viejos) el mismo día cuenta, como antes.
+const despuesDe = (m, c) => {
+  if (!c.inicialFecha) return true;
+  if (m.fecha > c.inicialFecha) return true;
+  if (m.fecha < c.inicialFecha) return false;
+  if (!c.inicialAt) return true;
+  return !!m.creado && m.creado > c.inicialAt;
+};
+const creadoDe = (x) => String(x.created_time || x.createdTime || x.property_creado || '') || '';
 const movs = $input.all().map(i => i.json).filter(x => x && x.id && leer(x, 'Categoría', 'select') === 'Ahorro')
   .map(x => {
     const tipo = leer(x, 'Tipo', 'select'), monto = leer(x, 'Monto', 'numero') || 0, concepto = leer(x, 'Concepto', 'titulo') || 'Ahorro';
-    return { id: x.id, fecha: leer(x, 'Fecha', 'fecha') || '', caja: deCaja(concepto), concepto, nota: leer(x, 'Notas', 'texto') || '', monto: tipo === 'Ingreso' ? -monto : monto };
+    return { id: x.id, fecha: leer(x, 'Fecha', 'fecha') || '', creado: creadoDe(x), caja: deCaja(concepto), concepto, nota: leer(x, 'Notas', 'texto') || '', monto: tipo === 'Ingreso' ? -monto : monto };
   })
   .filter(m => m.fecha)
   .sort((a, b) => b.fecha.localeCompare(a.fecha));
-// lo pagado en EFECTIVO (propiedad «Efectivo» con valor) no sale de la cuenta: no baja el bolsillo para gastar
-const todas = $input.all().map(i => i.json).filter(x => x && x.id && !((leer(x, 'Efectivo', 'numero') || 0) > 0)).map(x => ({ tipo: leer(x, 'Tipo', 'select'), cat: leer(x, 'Categoría', 'select'), monto: leer(x, 'Monto', 'numero') || 0, fecha: leer(x, 'Fecha', 'fecha') || '', concepto: leer(x, 'Concepto', 'titulo') || '' })).filter(m => m.fecha);
+// lo pagado en EFECTIVO (propiedad «Efectivo» con valor) no sale de la cuenta: no baja el bolsillo para gastar.
+// Los «Rendimientos …» anotados a mano como ingreso no se cuentan: Armoni ya calcula el rendimiento de cada cajita.
+const esRendimiento = (m) => m.tipo === 'Ingreso' && /rendimiento/.test(norm(m.concepto));
+const todas = $input.all().map(i => i.json).filter(x => x && x.id && !((leer(x, 'Efectivo', 'numero') || 0) > 0)).map(x => ({ tipo: leer(x, 'Tipo', 'select'), cat: leer(x, 'Categoría', 'select'), monto: leer(x, 'Monto', 'numero') || 0, fecha: leer(x, 'Fecha', 'fecha') || '', creado: creadoDe(x), concepto: leer(x, 'Concepto', 'titulo') || '' }))
+  .filter(m => m.fecha && (m.tipo === 'Ingreso' || m.tipo === 'Gasto'));
+const rendimientosIgnorados = todas.filter(esRendimiento).length;
 const cajas = ids.map(k => {
   const c = sd.cajas[k];
-  const suyos = movs.filter(m => m.caja === k && (!c.inicialFecha || m.fecha >= c.inicialFecha));   // lo de antes ya estaba en «con cuánto empezó»
+  const suyos = movs.filter(m => m.caja === k && despuesDe(m, c));   // lo de antes ya estaba en «con cuánto empezó»
   // rendimiento: cada peso rinde la tasa E.A. de su apartado desde el día en que entró (o desde la fecha del saldo)
   const dd = (a, b) => Math.max(0, (Date.parse(String(b).slice(0, 10) + 'T12:00:00Z') - Date.parse(String(a).slice(0, 10) + 'T12:00:00Z')) / 864e5);
   const crece = (desde) => {
@@ -95,27 +118,30 @@ const cajas = ids.map(k => {
   };
   const base0 = (c.inicial || 0) * crece(c.inicialFecha), mov0 = suyos.reduce((a, m) => a + m.monto * crece(m.fecha), 0);
   const sinInt = (c.inicial || 0) + suyos.reduce((a, m) => a + m.monto, 0);
-  return { id: k, nombre: c.nombre, inicial: c.inicial || 0, inicialFecha: c.inicialFecha || null, meta: c.meta || 0, orden: c.orden || 0,
+  return { id: k, nombre: c.nombre, inicial: c.inicial || 0, inicialFecha: c.inicialFecha || null, inicialAt: c.inicialAt || null, meta: c.meta || 0, orden: c.orden || 0,
            tasa: c.tasa || 0, tasaHasta: c.tasaHasta || null, rendimiento: Math.round(base0 + mov0 - sinInt),
            saldo: Math.round((base0 + mov0) * 100) / 100, movimientos: suyos.slice(0, 100) };
 }).sort((a, b) => a.orden - b.orden);
-// el bolsillo para gastar: lo que entra y sale desde su fecha, menos lo que se pasó a los otros apartados;
-// las cuotas y seguros del carro se pagan del apartado «Pagos de carro».
-const bol = cajas.find(x => sd.cajas[x.id].gasto), carro = cajas.find(x => !sd.cajas[x.id].gasto && /carro/.test(norm(x.nombre)));
+// el bolsillo para gastar: lo que entra y sale desde su saldo base, menos lo que se pasó a los otros apartados.
+// TODO gasto digital (también la cuota y el seguro del carro) baja el bolsillo, como en el banco:
+// una cajita solo se mueve con «Ahorro · X» / «Retiro · X» (categoría Ahorro).
+const bol = cajas.find(x => sd.cajas[x.id].gasto);
 if (bol) {
-  const desde = bol.inicialFecha || '0000-00-00';
-  let flujo = 0, cuotas = 0;
-  todas.filter(m => m.fecha >= desde && m.cat !== 'Ahorro').forEach(m => {
-    const pagaCarro = carro && m.tipo === 'Gasto' && m.cat === 'Carro' && /cuota|cr[eé]dito|soat|seguro/i.test(m.concepto);
-    if (pagaCarro) cuotas += m.monto; else flujo += m.tipo === 'Ingreso' ? m.monto : -m.monto;
+  const cb = sd.cajas[bol.id];
+  let flujo = 0;
+  todas.filter(m => despuesDe(m, cb) && m.cat !== 'Ahorro' && !esRendimiento(m)).forEach(m => {
+    flujo += m.tipo === 'Ingreso' ? m.monto : -m.monto;
   });
-  const aOtros = movs.filter(m => m.fecha >= desde && m.caja && m.caja !== bol.id).reduce((a, m) => a + m.monto, 0);
-  bol.saldo = bol.inicial + flujo - aOtros; bol.gasto = true; bol.movimientos = [];
-  if (carro) carro.saldo -= cuotas;
+  const aOtros = movs.filter(m => despuesDe(m, cb) && m.caja && m.caja !== bol.id).reduce((a, m) => a + m.monto, 0);
+  // + el rendimiento calculado del propio bolsillo (antes se perdía y por eso se anotaba a mano)
+  bol.saldo = Math.round((bol.inicial + flujo - aOtros + (bol.rendimiento || 0)) * 100) / 100; bol.gasto = true; bol.movimientos = [];
 }
 const sueltos = movs.filter(m => !m.caja);
 const sinCaja = sueltos.reduce((a, m) => a + m.monto, 0);
 const visibles = movs.filter(m => !m.caja || (cajas.find(c => c.id === m.caja) || {}).movimientos.some(x => x.id === m.id));
 const ahorrado = cajas.filter(c => !c.gasto).reduce((a, c) => a + c.saldo, 0) + sinCaja;
 const paraGastar = bol ? bol.saldo : 0;
-return [{ json: { ok: true, total: ahorrado, cuenta: ahorrado + paraGastar, paraGastar, cajas, sinCaja, movimientos: visibles.slice(0, 200) } }];
+// alguna cajita (o el bolsillo) en negativo = los saldos no cuadran con el banco: la app pide «cuadrar con Nu»
+const negativas = cajas.filter(c => c.saldo < 0).map(c => ({ id: c.id, nombre: c.nombre, saldo: c.saldo }));
+return [{ json: { ok: true, flujo: 'ahorro', version: 2, total: ahorrado, cuenta: ahorrado + paraGastar, paraGastar, cajas, sinCaja,
+  alerta: negativas.length ? 'no-cuadra' : null, negativas, rendimientosIgnorados, movimientos: visibles.slice(0, 200) } }];
