@@ -2454,6 +2454,8 @@ body.mode-mercar:has(#mkStage .mcTop) #thread{ -webkit-mask-image:none; mask-ima
 .dcIdeas::-webkit-scrollbar{ display:none; }
 .dcIdea{ position:relative; flex:0 0 84%; box-sizing:border-box; scroll-snap-align:start; padding:14px 40px 14px 14px; border-radius:18px; border:1px solid var(--line); background:radial-gradient(120% 100% at 0% 0%, color-mix(in srgb, var(--c) 18%, transparent), transparent 65%), var(--panel); }
 .dcIdeas.uno .dcIdea{ flex-basis:100%; }
+/* en pantalla grande (web) no hay cómo deslizar de lado: las ideas se ven todas, en dos columnas */
+@media (min-width:560px){ .dcIdeas{ display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); overflow:visible; scroll-snap-type:none; } .dcIdea{ flex:none; } }
 .dcIdea .tp{ display:inline-flex; align-items:center; gap:6px; margin-bottom:6px; font-size:.68rem; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--c); }
 .dcIdea .tp i{ width:7px; height:7px; border-radius:50%; background:var(--c); }
 .dcIdea b{ display:block; font-size:.92rem; color:var(--strong); line-height:1.3; }
@@ -4234,7 +4236,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-31.254";
+const APP_VERSION = "2026-10-31.255";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
