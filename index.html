@@ -9002,8 +9002,8 @@ const AtGmail = (function(){
   const KV = "armoni.arriendo.valor", KM = "armoni.arriendo.mes", KP = "armoni.arriendo.pendiente";
   const dos = n => String(n).padStart(2, "0");
   const mesHoy = () => { const d = new Date(); return d.getFullYear() + "-" + dos(d.getMonth() + 1); };
-  /* el periodo es el mes que cubre el arriendo: del día 20 en adelante ya se paga el del mes siguiente (misma regla que servicios-estado) */
-  const periodo = () => { const d = new Date(), k = d.getDate() >= 20 ? new Date(d.getFullYear(), d.getMonth() + 1, 1) : d; return k.getFullYear() + "-" + dos(k.getMonth() + 1); };
+  /* el periodo es el mes calendario en que se paga (así lo lleva la familia): un arriendo pagado el 28-oct es de octubre */
+  const periodo = () => mesHoy();
   const MESES_AR = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
   const nombrePer = k => MESES_AR[+String(k).slice(5, 7) - 1] || "";
   const fechaHoy = () => { const d = new Date(); return mesHoy() + "-" + dos(d.getDate()); };
@@ -9013,7 +9013,7 @@ const AtGmail = (function(){
     const box = document.getElementById("arriendoAviso"); if(!box) return;
     let p = pendiente();
     try{ if(p && Servicios.arriendoEnServidor()) p = ""; }catch{}   // ya sale en el aviso de pagos de arriba
-    box.innerHTML = p ? '<button type="button" class="credAvisoBtn"><span class="ic" aria-hidden="true">🏠</span><span class="tx"><b>Falta anotar el valor del arriendo</b><small>Ya se mandó el comprobante de ' + nombrePer(p) + ': anota cuánto fue para que quede en tus cuentas</small></span><span class="ir" aria-hidden="true">›</span></button>' : "";
+    box.innerHTML = p ? '<button type="button" class="credAvisoBtn"><span class="ic" aria-hidden="true">🏠</span><span class="tx"><b>Falta anotar el valor del arriendo</b><small>Ya se mandó el comprobante (pago de ' + nombrePer(p) + '): anota cuánto fue para que quede en tus cuentas</small></span><span class="ir" aria-hidden="true">›</span></button>' : "";
     if(p) box.firstChild.onclick = () => valorArriendo(p);
   }
   /* per: el periodo que se anota (el pendiente o el de ahora) */
@@ -9029,7 +9029,7 @@ const AtGmail = (function(){
     const sc = document.createElement("div");
     sc.className = "pgScrim arScrim";
     sc.innerHTML = '<div class="inWrap"><div class="pgCard inCard" role="dialog" aria-modal="true" aria-labelledby="arT">' +
-      '<div class="pnTop"><span class="pnEstrella" aria-hidden="true">🏠</span><small>Comprobante de ' + nombrePer(per) + ' enviado</small><h3 id="arT">¿Cuánto fue el arriendo?</h3>' +
+      '<div class="pnTop"><span class="pnEstrella" aria-hidden="true">🏠</span><small>Comprobante enviado · pago de ' + nombrePer(per) + '</small><h3 id="arT">¿Cuánto fue el arriendo?</h3>' +
       '<p>' + (normal ? '¿Fue el valor de siempre o hubo variación?' : 'Anótalo para que quede el gasto en tus cuentas.') + '</p></div>' +
       '<div class="inBody">' + (normal ? '<button type="button" class="arNormal" id="arNormal">Sí, el de siempre · ' + peso(normal) + '</button><p class="fmAyuda" style="margin:0 0 6px">¿Cambió? Escribe el valor:</p>' : '') +
       '<input id="arMonto" type="text" inputmode="numeric" autocomplete="off" placeholder="Valor del arriendo">' +
@@ -9045,8 +9045,8 @@ const AtGmail = (function(){
       if(!(monto > 0)){ q("arErr").textContent = "Escribe el valor del arriendo."; return; }
       sc.querySelectorAll("button").forEach(b => b.disabled = true); q("arErr").textContent = "";
       try{
-        /* colaId fijo por periodo: si el otro celular ya lo anotó (o se reintenta), n8n contesta «repetido» y no se duplica */
-        const r = await Cola.post(MOVIMIENTO_URL, { method: "POST", body: JSON.stringify({ token: MERCADO_TOKEN, tipo: "Gasto", concepto: "Arriendo", categoria: "Hogar", monto, fecha: fechaHoy(), nota: nota || "", desdeAviso: true, forzar: true, colaId: cid }) });
+        /* colaId fijo por mes de pago: si el otro celular ya lo anotó (o se reintenta), n8n contesta «repetido» y no se duplica */
+        const r = await Cola.post(MOVIMIENTO_URL, { method: "POST", body: JSON.stringify({ token: MERCADO_TOKEN, tipo: "Gasto", concepto: "Arriendo", categoria: "Hogar", monto, fecha: per === mesHoy() ? fechaHoy() : per + "-" + dos(new Date(+per.slice(0, 4), +per.slice(5, 7), 0).getDate()), nota: nota || "", desdeAviso: true, forzar: true, colaId: cid }) });
         const j = await r.json().catch(() => ({}));
         const repetido = j.error === "repetido";
         if(!repetido && (!r.ok || j.ok === false)) throw new Error(j.error && String(j.error).length < 120 ? j.error : "");
@@ -9474,7 +9474,10 @@ const FlujoViejo = (function(){
 const DudasRespaldo = {
   K: "armoni.dudas.respaldo",
   lee(){ try{ const t = localStorage.getItem(this.K); return t ? JSON.parse(t) : undefined; }catch{ return undefined; } },
-  guarda(j){ if(j && typeof j === "object" && j.respaldo != null){ try{ localStorage.setItem(this.K, JSON.stringify(j.respaldo)); }catch{} } }
+  /* solo el formato v3; si llega null o «esperaRespaldo», se conserva el que hay */
+  guarda(j){ if(j && typeof j === "object" && j.respaldo && typeof j.respaldo === "object" && Number(j.respaldo.v) >= 3 && j.esperaRespaldo !== true){ try{ localStorage.setItem(this.K, JSON.stringify(j.respaldo)); }catch{} } },
+  /* el flujo se reinstaló y está esperando el respaldo: lo que tiene de memoria/ajustes está vacío, no se copia encima de lo local */
+  espera: j => !!(j && (j.esperaRespaldo === true || j.respaldo === null))
 };
 
 const Cola = (function(){
@@ -9945,9 +9948,10 @@ const Preguntas = (function(){
   function guarda(j){
     if(!j || j.ok === false) return;
     if(Array.isArray(j.preguntas)){ pendientes = j.preguntas; try{ localStorage.setItem(KP, JSON.stringify(pendientes)); }catch{} }
-    if(j.ajustes){ try{ localStorage.setItem(KA, JSON.stringify(j.ajustes)); }catch{} }
+    const esperando = DudasRespaldo.espera(j);   // no pisar saber/ajustes locales con los de un flujo recién reinstalado
+    if(j.ajustes && !esperando){ try{ localStorage.setItem(KA, JSON.stringify(j.ajustes)); }catch{} }
     if(Array.isArray(j.abiertas)){ dudas = { abiertas: j.abiertas, hechas: j.hechas || [] }; try{ localStorage.setItem(KD, JSON.stringify(dudas)); }catch{} }
-    if(Array.isArray(j.saber)){ saber = j.saber; try{ localStorage.setItem(KS, JSON.stringify(saber)); }catch{} }
+    if(Array.isArray(j.saber) && !esperando){ saber = j.saber; try{ localStorage.setItem(KS, JSON.stringify(saber)); }catch{} }
     if(j.revision){ revision = j.revision; try{ localStorage.setItem("armoni.revision", JSON.stringify(revision)); }catch{} }
     if(Array.isArray(j.decisiones)){
       /* las que se están guardando en este momento se quedan como las dejó la familia (no las pisa una respuesta vieja) */
@@ -9965,7 +9969,7 @@ const Preguntas = (function(){
     const r = await fetch(PREGUNTAS_URL, { method: "POST", body: JSON.stringify(Object.assign({ token: MERCADO_TOKEN, memoria: saber, ajustes: ajustes(), respaldo: DudasRespaldo.lee() }, cuerpo)) });
     const j = await r.json().catch(() => ({}));
     if(r.ok){ DudasRespaldo.guarda(j); FlujoViejo.revisa("armoni-preguntas", j, 3); }
-    if(!r.ok || j.ok === false) throw new Error(j.error || "http");
+    if(!r.ok || (j.ok === false && !j.iaFallo)) throw new Error(j.error || "http");   // «iaFallo» en revisar: la IA no alcanzó, pero no es error
     guarda(j); return j;
   }
   const hayVentana = () => document.querySelector(".pgScrim, .sheetScrim, .ws, .tmAvScrim, .cfAn, #splash");
@@ -10775,7 +10779,7 @@ const DudasPro = (function(){
       const ah0 = ahorroVisto();
       if(!ah0 || !ah0.at || Date.now() - ah0.at > 3600000){ try{ await Promise.race([Ahorro.actualiza(), new Promise(ok => setTimeout(ok, 5000))]); }catch{} }
       const ctx = contexto();
-      const ctl = new AbortController(), to = setTimeout(() => ctl.abort(), 120000);
+      const ctl = new AbortController(), to = setTimeout(() => ctl.abort(), 240000);   // puede tardar: escribe en Notion antes de responder
       const r = await fetch(PREGUNTAS_URL, { method: "POST", signal: ctl.signal, body: JSON.stringify(Object.assign({ token: MERCADO_TOKEN, accion: "consultar", pregunta: q, historial: antes, contexto: ctx, ahorroAt: ctx.ahorroAt, respaldo: DudasRespaldo.lee() }, img ? { imagen: img } : {})) });
       clearTimeout(to);
       const j = await r.json().catch(() => ({}));
@@ -10788,7 +10792,7 @@ const DudasPro = (function(){
       /* solo ahora (la IA sí respondió) el extracto del cierre de mes cuenta como revisado */
       try{ document.dispatchEvent(new CustomEvent("dudas-enviada", { detail: { q, img: !!img } })); }catch{}
       if(Array.isArray(j.app) && j.app.length) await hazApp(j.app);
-      if(j.aprendidos || j.corregidos || j.ajustados || j.editados){ try{ Preguntas.revisar(); }catch{} }
+      if(j.aprendidos || j.corregidos || j.ajustados || j.editados || j.guardados){ try{ Preguntas.revisar(); }catch{} }
     }catch(e){
       espera.remove();
       const m = e && e.message;
@@ -10798,6 +10802,7 @@ const DudasPro = (function(){
       hist.pop();
       /* la foto no se pierde: vuelve a quedar lista para mandarla otra vez */
       if(img && !foto){ foto = img; prev.hidden = false; prev.querySelector("img").src = foto; }
+      if(q && !txt.value.trim()){ txt.value = q; txt.dispatchEvent(new Event("input")); }   // y el texto también, para reintentar con un toque
     }
     guarda(); nueva.hidden = !hist.length; ocupado = false; listo();
   }
@@ -10834,7 +10839,6 @@ const DudasPro = (function(){
     if(v === "ia") pintaCierre();
   }
   vista.querySelector(".ddModo").addEventListener("click", e => { const b = e.target.closest("[data-seg]"); if(b) seg(b.dataset.seg); });
-  seg((() => { try{ return localStorage.getItem(KS) === "ia" ? "ia" : "datos"; }catch{ return "datos"; } })());
   /* cierre de mes: desde el 28 (y hasta el 7 del mes siguiente) Armoni pide el extracto del banco para validar que todo quedó registrado */
   const KC = "armoni.extracto.hecho", MES = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
   let cierreActivo = "";
@@ -10864,6 +10868,9 @@ const DudasPro = (function(){
     cierreActivo = ""; pintaCierre();
   };
   document.addEventListener("dudas-enviada", e => marcaCierre(e.detail.q, e.detail.img));
+  /* se elige la pestaña recién aquí: con «Control IA» guardada, seg() pinta el cierre y eso necesita KC/nombreMes ya definidos
+     (antes, del 28 al 7, la app se rompía al abrir si la última pestaña había sido Control IA) */
+  seg((() => { try{ return localStorage.getItem(KS) === "ia" ? "ia" : "datos"; }catch{ return "datos"; } })());
   pintaCierre();
   pinta(); listo();
   return { ia: () => seg("ia"), pintaCierre };
