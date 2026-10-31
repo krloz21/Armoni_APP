@@ -4430,7 +4430,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-31.268";
+const APP_VERSION = "2026-10-31.269";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -7209,10 +7209,11 @@ const SalidasEma = (function(){
     const hace = f => f ? diasDesde(f) : 99;
     const diasJ = diasE.concat(diasF);   // juntos: las salidas con Ema y las de familia
     const dP = hace(ult(diasP)), dE = hace(ult(diasE)), dF = hace(ult(diasJ));
-    /* alegría 0-100: mitad «hace cuánto salieron» y mitad «cuántas veces en el último mes» (la meta es una por semana) */
+    /* alegría 0-100 = cuántas veces salieron en el último mes (frente a la meta) + hace cuánto fue la última (se van poniendo tristes con los días).
+       Metas de la familia: con Ema 4 salidas al mes = lleno; en pareja 1 cita al mes ya los deja casi llenos (90). */
     const veces30 = arr => new Set(arr.filter(f => f && diasDesde(f) <= 30)).size;
-    const ale = (d, n) => Math.round(Math.max(0, 100 - d * 4) * .5 + Math.min(100, n / 4 * 100) * .5);
-    const aP = ale(dP, veces30(diasP)), aE = ale(dE, veces30(diasE)), aF = ale(dF, veces30(diasJ));
+    const ale = (d, n, meta, tope, baja) => Math.round(Math.min(100, n / meta * tope) * .6 + Math.max(0, 100 - d * baja) * .4);
+    const aP = ale(dP, veces30(diasP), 1, 90, 3), aE = ale(dE, veces30(diasE), 4, 100, 5), aF = ale(dF, veces30(diasJ), 4, 100, 5);
     const animo = a => a >= 75 ? "feliz" : a >= 50 ? "bien" : a >= 25 ? "triste" : "muytriste";
     /* cada personaje en pixel art: el dibujo es una cuadrícula de letras (cada letra un color) y la cara cambia según el ánimo */
     const PAL = { H: "#1b1410", S: "#a8714a", G: "#121212", g: "#d8eeff", B: "#3f6fb5", P: "#2b2b3a", K: "#141414",
