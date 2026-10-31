@@ -75,4 +75,8 @@ if (!movPagado(/jard/i, 'Hijo', inicioArriendo)) {
 // v: 3 = reconoce conceptos con tilde o variación, agua del 1 al 5 = mes anterior y el pendiente «arriendo_valor».
 // pagados = lo que ya está registrado este mes; arriendoRegistrado = ya está el gasto «Arriendo» (Hogar) del periodo
 const pagados = reglas.filter(r => pagado(r)).map(r => r.id);
-return [{ json: { v: 3, pendientes, sinPagar, pagados, arriendoRegistrado } }];
+// el valor de siempre del arriendo y del jardín: el último que quedó anotado (la app lo propone al preguntar)
+const ultimoValor = (re, categoria) => { const l = movFijos.filter(x => re.test(x.name || '') && x.property_categoría === categoria && Number(x.property_monto) > 0)
+  .sort((a, b) => String((b.property_fecha && (b.property_fecha.start || b.property_fecha)) || '').localeCompare(String((a.property_fecha && (a.property_fecha.start || a.property_fecha)) || ''))); return l.length ? Number(l[0].property_monto) : null; };
+const arriendoNormal = ultimoValor(/arriendo/i, 'Hogar'), jardinNormal = ultimoValor(/jard/i, 'Hijo');
+return [{ json: { v: 3, pendientes, sinPagar, pagados, arriendoRegistrado, arriendoNormal, jardinNormal } }];
