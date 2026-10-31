@@ -3289,6 +3289,61 @@ body.asleep .ddHolo, body.asleep .ddHolo *, body.asleep .ddHolo::after{ animatio
 .emaEfLey::before{ content:""; flex:none; width:6px; height:6px; border-radius:50%; border:1px solid currentColor; transform:translateY(-1px); }
 .elLin.elGas{ color:var(--dim); }
 .elLin.elGas b{ font-weight:600; color:var(--white); white-space:nowrap; }
+/* uxB: Salidas Ema sin recuadros en el texto — jerarquía tipográfica, color tenue y una sola tarjeta por bloque */
+.emaMes{ display:block; margin:0 0 14px; padding:0; border:0; border-radius:0; background:none; font-size:.7rem; font-weight:700; letter-spacing:.14em; color:rgba(255,176,102,.85); }
+.emaEmo{ width:48px; height:48px; border-radius:50%; background:rgba(255,138,80,.12); }
+.emaTx b.emaCuenta{ font-size:1.32rem; font-weight:650; letter-spacing:-.01em; }
+.emaN{ font-size:1.9rem; letter-spacing:-.02em; }
+.emaFrase{ margin-top:1px; }
+.emaMas{ gap:5px; }
+.emaMas .mas{ width:48px; height:48px; border-radius:50%; box-shadow:0 10px 22px -12px rgba(255,122,77,.9), inset 0 1px 0 rgba(255,255,255,.35); }
+.emaMas .mas svg{ width:22px; height:22px; }
+.emaMas small{ font-size:.7rem; font-weight:600; color:var(--dim); }
+.emaTop{ margin-bottom:6px; }
+.emaDiasTit{ margin:18px 0 4px; font-size:.7rem; font-weight:600; letter-spacing:.1em; color:var(--dim); }
+.emaDiasRow{ gap:4px; }
+.emaDiaChip{ position:relative; width:48px; min-height:58px; padding:6px 0 10px; border:0; border-radius:12px; background:none; box-shadow:none; color:var(--ghost); }
+.emaDiaChip b{ font-size:1.3rem; font-weight:600; letter-spacing:-.01em; }
+.emaDiaChip small{ font-size:.62rem; letter-spacing:.08em; color:var(--dim); }
+.emaDiaChip::after{ content:""; position:absolute; left:50%; bottom:3px; width:18px; height:3px; margin-left:-9px; border-radius:2px; background:linear-gradient(90deg,#ffb066,#ff7a4d); transform:scaleX(0); transition:transform .25s var(--ease-out); }
+.emaDiaChip.on{ background:none; border-color:transparent; box-shadow:none; color:var(--strong); }
+.emaDiaChip.on b{ font-weight:750; color:#ffb066; }
+.emaDiaChip.on small{ color:var(--ghost); }
+.emaDiaChip.on::after{ transform:none; }
+.emaDiaChip:focus-visible{ outline:2px solid var(--cyan); outline-offset:1px; }
+.elBox{ margin:0 0 16px; padding:18px 16px 8px; border-radius:22px; border:1px solid var(--line); background:var(--panel); text-align:left; }
+.elCab{ margin:0 0 14px; }
+.elCab .mkSec{ font-weight:600; color:var(--ghost); }
+.elCab small{ font-size:.74rem; color:var(--dim); }
+.elRes{ gap:14px; margin:0 0 16px; padding:0 0 16px; border-bottom:1px solid var(--line); }
+.elDes{ gap:3px; min-height:44px; padding:2px 0; border:0; border-radius:8px; background:none; }
+.elDes small{ font-size:.62rem; font-weight:600; letter-spacing:.06em; color:rgba(255,176,102,.85); }
+.elDes b{ font-size:.86rem; font-weight:650; }
+.elDes em{ font-size:.74rem; color:var(--dim); }
+.elOrd{ gap:20px; margin:0 -16px 6px; }
+.elOrd.elTipos{ margin-top:0; margin-bottom:12px; gap:18px; }
+.elOrd button{ min-height:34px; padding:0; border:0; border-radius:0; background:none; box-shadow:none; font-size:.82rem; font-weight:500; color:var(--dim); transition:color .25s, box-shadow .25s; }
+.elOrd button[aria-pressed="true"]{ color:var(--strong); font-weight:650; background:none; border-color:transparent; box-shadow:inset 0 -2px 0 #ff8a50; }
+.elOrd.elTipos button{ font-size:.78rem; }
+.elOrd.elTipos button[aria-pressed="true"]{ color:#ffb066; box-shadow:none; }
+.elOrd button:focus-visible{ outline:2px solid var(--cyan); outline-offset:2px; }
+.elGrid{ column-gap:18px; row-gap:0; }
+.elCard{ gap:4px; padding:14px 0 16px; border:0; border-top:1px solid var(--line); border-radius:0; background:none; }
+.elGrid > .elCard:nth-child(-n+2){ border-top:0; padding-top:6px; }
+.elGrid.n1 > .elCard{ border-top:0; }
+.elCTop{ margin-bottom:2px; }
+.elIco{ width:auto; height:auto; border-radius:0; background:none; font-size:1.25rem; line-height:1; }
+.elNota{ padding:0; border:0; border-radius:0; background:none; font-size:.95rem; font-weight:700; letter-spacing:-.01em; }
+.elNota small{ font-size:.66rem; font-weight:500; color:var(--dim); opacity:1; }
+.elNota.top{ color:#9fe3b4; background:none; }
+.elNota.mid{ color:#ffb066; background:none; }
+.elNota.low{ color:#ff9b9b; background:none; }
+.elNota.sin{ padding:0; font-size:.72rem; font-weight:500; color:var(--dim); background:none; }
+.elNom{ font-size:.94rem; }
+.elLin{ font-size:.75rem; }
+.elVer{ gap:8px; min-height:48px; margin-top:2px; border:0; border-top:1px solid var(--line); border-radius:0; font-size:.84rem; color:#ffb066; }
+.elCaras{ gap:2px; margin-right:2px; }
+.elCaras i{ width:auto; height:auto; margin-left:0; border:0; border-radius:0; background:none; font-size:.86rem; }
 .duVacio{ text-align:center; padding:26px 0; }
 @keyframes duSube{ from{ opacity:0; transform:translateY(16px) scale(.98); } to{ opacity:1; transform:none; } }
 .duEntra.duHero, .duEntra.duChips{ animation:duSube .6s var(--ease-out) backwards; }
@@ -4280,7 +4335,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-31.260";
+const APP_VERSION = "2026-10-31.261";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
