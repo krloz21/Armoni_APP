@@ -34,7 +34,9 @@ for (const r of reglas) {
 //  - push: los dos siguen avisando (ya vencidos) hasta que se paguen
 const esUltimoDiaMes = dia === ultimoDiaMes;
 const ultimoDiaMesAnterior = Date.UTC(hoy.getUTCFullYear(), hoy.getUTCMonth(), 0);
-const inicioArriendo = esUltimoDiaMes ? Date.UTC(hoy.getUTCFullYear(), hoy.getUTCMonth(), dia) : ultimoDiaMesAnterior;
+// el comprobante del arriendo (y el pago del jardín) cuenta desde el día 20: se suele mandar unos días antes de fin de mes.
+// Del 20 en adelante cuenta lo enviado desde el 20 de este mes; antes del 20, lo enviado desde el 20 del mes pasado.
+const inicioArriendo = dia >= 20 ? Date.UTC(hoy.getUTCFullYear(), hoy.getUTCMonth(), 20) : Date.UTC(hoy.getUTCFullYear(), hoy.getUTCMonth() - 1, 20);
 
 const yaPagado = (re, inicioVentana) => {
   const f = fijos.find(x => re.test(x.name || ''));
@@ -52,12 +54,12 @@ const arriendoPagado = ARRIENDO_POR_MOVIMIENTO ? movPagado(/arriendo/i, 'Hogar',
 if (!arriendoPagado) {
   const item = { id: 'arriendo', nombre: 'el arriendo' };
   if (esUltimoDiaMes || dia <= 3) pendientes.push(item);
-  sinPagar.push(item);
+  if (dia < 20 || esUltimoDiaMes) sinPagar.push(item);   // del 20 al penúltimo día todavía no toca: no se insiste
 }
 if (!movPagado(/jard/i, 'Hijo', inicioArriendo)) {
   const item = { id: 'jardin', nombre: 'el jardín de Emanuel' };
   if (esUltimoDiaMes || dia <= 5) pendientes.push(item);
-  sinPagar.push(item);
+  if (dia < 20 || esUltimoDiaMes) sinPagar.push(item);   // del 20 al penúltimo día todavía no toca: no se insiste
 }
 
 // v: 2 le avisa a la app que este código ya es el nuevo (el gas vence el 21 y sale del 17 al 21); pagados = lo que ya está registrado este mes
