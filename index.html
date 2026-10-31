@@ -4466,7 +4466,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-31.270";
+const APP_VERSION = "2026-10-31.271";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -10507,18 +10507,43 @@ const DudasPro = (function(){
     hist.push({ r: "u", t: (q || "Revisa esta imagen") + (img ? " [mandé una imagen]" : "") });
     try{
       const ctl = new AbortController(), to = setTimeout(() => ctl.abort(), 120000);
-      const r = await fetch(PREGUNTAS_URL, { method: "POST", signal: ctl.signal, body: JSON.stringify(Object.assign({ token: MERCADO_TOKEN, accion: "consultar", pregunta: q, historial: antes }, img ? { imagen: img } : {})) });
+      const r = await fetch(PREGUNTAS_URL, { method: "POST", signal: ctl.signal, body: JSON.stringify(Object.assign({ token: MERCADO_TOKEN, accion: "consultar", pregunta: q, historial: antes, contexto: contexto() }, img ? { imagen: img } : {})) });
       clearTimeout(to);
       const j = await r.json().catch(() => ({}));
       if(!r.ok || !j.respuesta) throw new Error(r.status === 404 ? "flujo" : "ia");
       espera.remove(); burbuja("a", j.respuesta); hist.push({ r: "a", t: j.respuesta });
-      if(j.aprendidos || j.corregidos || j.ajustados){ try{ Preguntas.revisar(); }catch{} }
+      if(Array.isArray(j.app) && j.app.length) await hazApp(j.app);
+      if(j.aprendidos || j.corregidos || j.ajustados || j.editados){ try{ Preguntas.revisar(); }catch{} }
     }catch(e){
       espera.remove();
       burbuja("a", e && e.message === "flujo" ? "Falta actualizar el flujo «Armoni - Preguntas inteligentes» en n8n para poder conversar aquí." : "No pude responder ahora. Revisa que el PC y Tailscale estén encendidos e inténtalo otra vez.");
       hist.pop();
     }
     guarda(); nueva.hidden = !hist.length; ocupado = false; listo();
+  }
+  const hoyISO = () => { const d = new Date(); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); };
+  /* lo que la IA necesita saber del ahorro: las cajitas como las calcula Armoni (lo último que se vio en «Ahorro») */
+  function contexto(){
+    let ah = null; try{ ah = JSON.parse(localStorage.getItem("armoni.ahorro")); }catch{}
+    if(!ah || !Array.isArray(ah.cajas)) return {};
+    return { ahorro: { cuenta: ah.cuenta, paraGastar: ah.paraGastar, total: ah.total, cajas: ah.cajas.map(c => ({ id: c.id, nombre: c.nombre, saldo: c.saldo, inicial: c.inicial, inicialFecha: c.inicialFecha, tasa: c.tasa, meta: c.meta, gasto: !!c.gasto })) } };
+  }
+  /* lo confirmado que vive en otros flujos: anotar un movimiento que faltaba y poner el saldo real de una cajita */
+  async function hazApp(lista){
+    const ok = [], mal = [];
+    for(const a of lista.slice(0, 10)){
+      try{
+        let r;
+        if(a.tipo === "crear") r = await fetch(MOVIMIENTO_URL, { method: "POST", body: JSON.stringify({ token: MERCADO_TOKEN, tipo: a.mov, concepto: a.concepto, categoria: a.categoria, monto: a.monto, fecha: a.fecha, nota: "Anotado desde «Pregúntale a Armoni»", forzar: true }) });
+        else if(a.tipo === "cajita") r = await fetch(AHORRO_URL, { method: "POST", body: JSON.stringify({ token: MERCADO_TOKEN, accion: "caja", id: a.id, nombre: a.nombre, inicial: a.saldo, fecha: hoyISO() }) });
+        else continue;
+        const j = await r.json().catch(() => ({}));
+        if(!r.ok || j.ok === false) throw 0;
+        ok.push(a.tipo === "crear" ? "«" + a.concepto + "» anotado" : "cajita «" + a.nombre + "» ajustada");
+      }catch{ mal.push(a.tipo === "crear" ? "«" + a.concepto + "»" : "la cajita «" + a.nombre + "»"); }
+    }
+    if(ok.length || mal.length) burbuja("a", (ok.length ? "✓ Hecho: " + ok.join(" · ") + "." : "") + (mal.length ? (ok.length ? "\n\n" : "") + "⚠️ No pude con " + mal.join(", ") + ". Revisa la conexión e inténtalo otra vez." : ""));
+    if(lista.some(a => a.tipo === "cajita")){ try{ Ahorro.refresh(); }catch{} }
   }
   pinta(); listo();
   return {};
