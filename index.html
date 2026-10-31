@@ -934,6 +934,7 @@ body.mode-gmail footer, body.mode-glim footer{ display:none; }
 .gmBtn:focus-visible{ outline:2px solid var(--cyan); outline-offset:2px; }
 
 /* tarjeta de resumen del crédito: reusa el estilo de la ficha de restaurante (rmTop/rmStats/rmNote) */
+.arNormal{ display:block; width:100%; min-height:50px; margin:0 0 12px; border:0; border-radius:14px; background:linear-gradient(140deg, #7fe0a6, #3fbf7f); color:#06210f; font:inherit; font-size:.95rem; font-weight:700; cursor:pointer; }
 .credVerif{ margin:0 0 12px; padding:14px; border-radius:18px; border:1px solid rgba(255,190,90,.35); background:linear-gradient(135deg, rgba(255,190,90,.12), rgba(255,190,90,.03)); }
 .credVerif b{ display:block; font-size:.92rem; }
 .credVerif p{ margin:4px 0 10px; font-size:.82rem; line-height:1.4; color:var(--ghost); }
@@ -4494,7 +4495,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-31.272";
+const APP_VERSION = "2026-10-31.273";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -8952,6 +8953,7 @@ const AtGmail = (function(){
       elegido = null; quitaSelector();
       say("Comprobante enviado a la inmobiliaria.", "ok");
       again.hidden = false;
+      setTimeout(valorArriendo, 400);   // ahora el valor: ¿fue el de siempre o cambió?
     }catch(e){
       sending = false;
       if(!scrim) return;
@@ -8962,6 +8964,48 @@ const AtGmail = (function(){
       row.hidden = false;   // se puede reintentar sin subirla otra vez
       scrim.querySelector("#gmSend").textContent = "Reintentar";
     }
+  }
+
+  /* Después de mandar el comprobante: ¿el arriendo fue el valor de siempre o cambió? Se registra el gasto con su valor en Notion */
+  const KV = "armoni.arriendo.valor", KM = "armoni.arriendo.mes";
+  const mesHoy = () => { const d = new Date(); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0"); };
+  const fechaHoy = () => { const d = new Date(); return mesHoy() + "-" + String(d.getDate()).padStart(2, "0"); };
+  const peso = n => "$" + Math.round(n).toLocaleString("es-CO");
+  function valorArriendo(){
+    try{ if(localStorage.getItem(KM) === mesHoy()) return; }catch{}
+    let normal = 0; try{ normal = +localStorage.getItem(KV) || 0; }catch{}
+    const sc = document.createElement("div");
+    sc.className = "pgScrim";
+    sc.innerHTML = '<div class="inWrap"><div class="pgCard inCard" role="dialog" aria-modal="true" aria-labelledby="arT">' +
+      '<div class="pnTop"><span class="pnEstrella" aria-hidden="true">🏠</span><small>Comprobante enviado</small><h3 id="arT">¿Cuánto fue el arriendo?</h3>' +
+      '<p>' + (normal ? '¿Fue el valor de siempre o hubo variación?' : 'Anótalo para que quede el gasto en tus cuentas.') + '</p></div>' +
+      '<div class="inBody">' + (normal ? '<button type="button" class="arNormal" id="arNormal">Sí, el de siempre · ' + peso(normal) + '</button><p class="fmAyuda" style="margin:0 0 6px">¿Cambió? Escribe el valor:</p>' : '') +
+      '<input id="arMonto" type="text" inputmode="numeric" autocomplete="off" placeholder="Valor del arriendo">' +
+      '<input id="arNota" type="text" maxlength="160" autocomplete="off" placeholder="¿Por qué cambió? (opcional)" style="margin-top:8px">' +
+      '<p class="inErr" id="arErr" role="alert"></p></div>' +
+      '<div class="pgRow"><button type="button" class="pgNo" id="arLuego">Después</button><button type="button" class="pgSi" id="arOtro">Guardar</button></div></div></div>';
+    document.body.appendChild(sc); requestAnimationFrame(() => sc.classList.add("on"));
+    const q = id => sc.querySelector("#" + id), cierra = () => { sc.classList.remove("on"); setTimeout(() => sc.remove(), 340); };
+    const inp = q("arMonto");
+    inp.addEventListener("input", () => { const n = inp.value.replace(/\D/g, ""); inp.value = n ? (+n).toLocaleString("es-CO") : ""; });
+    q("arLuego").onclick = cierra;
+    async function guarda(monto, nota){
+      if(!(monto > 0)){ q("arErr").textContent = "Escribe el valor del arriendo."; return; }
+      sc.querySelectorAll("button").forEach(b => b.disabled = true); q("arErr").textContent = "";
+      try{
+        const r = await fetch(MOVIMIENTO_URL, { method: "POST", body: JSON.stringify({ token: MERCADO_TOKEN, tipo: "Gasto", concepto: "Arriendo", categoria: "Hogar", monto, fecha: fechaHoy(), nota: nota || "", desdeAviso: true, forzar: true }) });
+        const j = await r.json().catch(() => ({}));
+        if(!r.ok || j.ok === false) throw new Error(j.error && String(j.error).length < 120 ? j.error : "");
+        try{ localStorage.setItem(KV, String(monto)); localStorage.setItem(KM, mesHoy()); }catch{}
+        cierra(); if(typeof avisoOk === "function") avisoOk("Arriendo anotado", peso(monto) + (nota ? " · " + nota : ""));
+      }catch(e){
+        sc.querySelectorAll("button").forEach(b => b.disabled = false);
+        q("arErr").textContent = /registra solo/i.test((e && e.message) || "") ? "Falta actualizar el flujo «Armoni - Agregar movimiento» en n8n." : "No pude guardarlo. Revisa la conexión e inténtalo otra vez.";
+      }
+    }
+    if(normal) q("arNormal").onclick = () => guarda(normal, "");
+    q("arOtro").onclick = () => guarda(+inp.value.replace(/\D/g, ""), q("arNota").value.trim() + (normal ? (q("arNota").value.trim() ? " · " : "") + "Antes: " + peso(normal) : ""));
+    if(!normal) setTimeout(() => inp.focus(), 350);
   }
 
   /* Cada toque crea un selector de fotos NUEVO. En el iPhone, uno que ya se abrió y se cerró sin elegir (tocando afuera)
