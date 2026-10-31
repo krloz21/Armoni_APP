@@ -796,7 +796,7 @@ body.no-gl #drawer{ background:var(--drawer-solid); }
 }
 
 /* ───────── vista de restaurantes (ocupa el lugar del chat) ───────── */
-#restView, #emaView, #creditoView, #gmailView, #glimView, #recuerdaView, #mercarView, #duraView, #mesView, #balanceView, #ahorroView, #dudasView, #ajustesView, #tempView{ display:none; padding-bottom:10px; }
+#restView, #emaView, #creditoView, #gmailView, #glimView, #recuerdaView, #mercarView, #duraView, #mesView, #balanceView, #ahorroView, #dudasView, #ajustesView, #tempView, #famView{ display:none; padding-bottom:10px; }
 #emaTemporada{ display:none; }   /* «De temporada» tiene su propio apartado: en Salidas Ema no se repite */
 body.mode-rest #restView{ display:block; }
 body.mode-ema #emaView{ display:block; }
@@ -829,6 +829,10 @@ body.mode-mes #reset{ visibility:hidden; }
 body.mode-mes footer{ display:none; }
 body.mode-dudas #dudasView{ display:block; }
 body.mode-temp #tempView{ display:block; }
+body.mode-fam #famView{ display:block; }
+body.mode-fam #welcome, body.mode-fam #messages, body.mode-fam #pending, body.mode-fam #servicioBanner, body.mode-fam #glimBanner{ display:none !important; }
+body.mode-fam #reset{ visibility:hidden; }
+body.mode-fam footer{ display:none; }
 body.mode-temp #welcome, body.mode-temp #messages, body.mode-temp #pending, body.mode-temp #servicioBanner, body.mode-temp #glimBanner{ display:none !important; }
 body.mode-temp #reset{ visibility:hidden; }
 body.mode-temp footer{ display:none; }
@@ -4087,6 +4091,10 @@ body.mode-credito #credFoto{ display:grid; }
         <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8.5 14.2c.9 1.5 2.1 2.2 3.5 2.2s2.6-.7 3.5-2.2"/><path d="M9 9.6h.01M15 9.6h.01"/></svg></span>
         <span class="txt"><b>Salidas Ema</b><span>Planes, gastos y a dónde ir</span></span>
       </button>
+      <button type="button" id="navFam">
+        <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="2.6"/><circle cx="16" cy="8" r="2.6"/><circle cx="12" cy="14.5" r="2"/><path d="M3.5 19a4.5 4.5 0 0 1 9 0M11.5 19a4.5 4.5 0 0 1 9 0"/></svg></span>
+        <span class="txt"><b>La familia</b><span>Cómo están y cuánto han salido</span></span>
+      </button>
       <button type="button" id="navTemp">
         <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2.2 4.6 5 .7-3.6 3.5.9 5-4.5-2.4-4.5 2.4.9-5L4.8 8.3l5-.7z"/></svg></span>
         <span class="txt"><b>Temporada</b><span>Festivales y planes de la ciudad</span></span>
@@ -4164,8 +4172,6 @@ body.mode-credito #credFoto{ display:grid; }
       <section id="emaView" aria-label="Salidas Ema">
         <div class="restIntro"><h2>Salidas con Ema</h2></div>
         <div id="emaEquilibrio"></div>
-        <div id="emaFamilia"></div>
-        <div id="emaMesTipos"></div>
         <div class="restStatus" id="emaStatus"></div>
         <div id="emaStage"></div>
         <div id="emaTemporada"></div>
@@ -4264,6 +4270,12 @@ body.mode-credito #credFoto{ display:grid; }
         </div>
         <div class="ajGrupo">Uso de Armoni · últimos 30 días</div>
         <div class="ajCard usoCard" id="usoCard"></div>
+      </section>
+
+      <section id="famView" aria-label="La familia">
+        <div class="restIntro"><h2>La familia</h2></div>
+        <div id="emaFamilia"></div>
+        <div id="emaMesTipos"></div>
       </section>
 
       <section id="tempView" aria-label="Temporada">
@@ -4418,7 +4430,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-31.267";
+const APP_VERSION = "2026-10-31.268";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -6351,7 +6363,7 @@ const TipoSalida = (function(){
 
 const Uso = (function(){
   const K = "armoni.uso", DIAS = 90;
-  const NOMBRES = { chat: "Arm", mercar: "Check", dura: "Duración", mes: "Tu mes", balance: "Balance", ahorro: "Ahorro", recuerda: "Recuerda", credito: "Crédito carro", glim: "Glim", rest: "Restaurantes", ema: "Salidas Ema", gmail: "AT Gmail", ajustes: "Ajustes", dudas: "Dudas", temp: "Temporada", cine: "Cine" };
+  const NOMBRES = { chat: "Arm", mercar: "Check", dura: "Duración", mes: "Tu mes", balance: "Balance", ahorro: "Ahorro", recuerda: "Recuerda", credito: "Crédito carro", glim: "Glim", rest: "Restaurantes", ema: "Salidas Ema", gmail: "AT Gmail", ajustes: "Ajustes", dudas: "Dudas", temp: "Temporada", cine: "Cine", fam: "La familia" };
   const hoy = () => { const d = new Date(); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); };
   const lee = () => { try{ return JSON.parse(localStorage.getItem(K)) || { dias: {} }; }catch{ return { dias: {} }; } };
   const guarda = d => {
@@ -7235,17 +7247,17 @@ const SalidasEma = (function(){
     ];
     const total = Math.round((aP * 2 + aE + aF) / 4), mt = animo(total), nP = veces30(diasP);
     const dias = d => d >= 99 ? "hace mucho" : d === 0 ? "hoy" : d === 1 ? "ayer" : "hace " + d + " días";
-    const frase = mt === "feliz" ? "¡La familia está feliz! Han salido juntos hace poco."
+    const frase = mt === "feliz" && aP >= 60 && aE >= 60 ? "¡La familia está feliz! Han salido juntos hace poco."
       : dP >= 14 && dF >= 14 ? "Estamos tristes: la última cita de los dos fue " + dias(dP) + " y en familia " + dias(dF) + "."
       : aP < 60 ? "Carlos y Aleja extrañan salir solos: " + (nP <= 1 ? "solo " + (nP ? "una cita" : "ninguna cita") + " en el último mes" : nP + " citas en el último mes") + " (la última " + dias(dP) + ")."
       : dE >= 14 ? "Ema quiere pasear: su última salida fue " + dias(dE) + "."
       : dF >= 14 ? "Hace falta un plan en familia: el último fue " + dias(dF) + "."
       : "Van bien, pero una salida juntos los pondría felices.";
-    box.innerHTML = '<section class="tgFam ' + mt + '"><div class="tgCab"><b>La familia</b><small>Alegría ' + total + '%</small></div>' +
+    box.innerHTML = '<section class="tgFam ' + mt + '"><div class="tgCab"><b>¿Cómo estamos?</b><small>Alegría ' + total + '%</small></div>' +
       '<div class="tgEscena">' + P.map(([n, svg, a, d], i) => '<div class="tgP" style="--i:' + i + '">' + svg + '<span class="tgN">' + n + '</span><span class="tgBar"><i style="width:' + a + '%"></i></span></div>').join("") + '</div>' +
       '<p class="tgFrase">' + esc(frase) + '</p>' +
-      (mt === "feliz" ? '' : '<div class="tgBtns"><button type="button" data-tgplan>Buscar un plan</button><button type="button" data-tgreg>Registrar salida</button></div>') + '</section>';
-    const pl = box.querySelector("[data-tgplan]"); if(pl) pl.onclick = () => { const p = document.getElementById("emaPlanes"); if(p) p.scrollIntoView({ behavior: REDUCED ? "auto" : "smooth", block: "start" }); };
+      (mt === "feliz" && aP >= 60 && aE >= 60 ? '' : '<div class="tgBtns"><button type="button" data-tgplan>Buscar un plan</button><button type="button" data-tgreg>Registrar salida</button></div>') + '</section>';
+    const pl = box.querySelector("[data-tgplan]"); if(pl) pl.onclick = () => aPlanes();
     const rg = box.querySelector("[data-tgreg]"); if(rg) rg.onclick = () => { try{ GastoManual.abrir(); }catch{ try{ SalidaEmaForm.abrir(); }catch{} } };
   }
 
@@ -7282,7 +7294,7 @@ const SalidasEma = (function(){
       mixHTML + (idea ? '<p class="smIdea">' + idea + '</p>' : '') +
       (ab ? '<ul class="smLista">' + ab[3].map(x => '<li><span class="f">' + esc(fecha(x.f)) + '</span><span class="c">' + (x.tipo ? TipoSalida.T[x.tipo][0] + ' ' : '') + esc(x.cosas.join(" · ") || (ab[0] === "ema" ? "Salida con Ema" : "Salida")) + '</span><span class="m">' + (x.total ? peso(x.total) : '') + '</span></li>').join("") + '</ul>' : '') + '</section>';
     box.querySelectorAll("[data-smt]").forEach(b => b.onclick = () => { tipoAbierto = tipoAbierto === b.dataset.smt ? "" : b.dataset.smt; pintaTipos(); });
-    const pl = box.querySelector("[data-smplan]"); if(pl) pl.onclick = () => { const p = document.getElementById("emaPlanes"); if(p) p.scrollIntoView({ behavior: REDUCED ? "auto" : "smooth", block: "start" }); };
+    const pl = box.querySelector("[data-smplan]"); if(pl) pl.onclick = () => aPlanes();
   }
 
   /* un lugar al que ya fueron con Ema y no tiene nota: sale el aviso cada vez que entras, hasta que lo puntúes */
@@ -7411,7 +7423,10 @@ const SalidasEma = (function(){
     })));
     return Object.values(c).sort((a, b) => b.n - a.n).map(x => x.nombre);
   };
-  return { refresh, nueva, preguntar, lugares, nombres, precarga, frecuentes, salidaDe, esEfectivo: EF, edita };
+  /* «La familia»: su propio apartado (alegría de los personajes y salidas del mes) */
+  function familia(){ if(!datos){ try{ datos = JSON.parse(localStorage.getItem(KEY)); }catch{} } try{ pintaFamilia(); pintaTipos(); }catch{} if(Date.now() - cargado > 30000) cargar(); }
+  const aPlanes = () => { try{ Drawer.go("ema"); }catch{} setTimeout(() => { const p = document.getElementById("emaPlanes"); if(p) p.scrollIntoView({ behavior: REDUCED ? "auto" : "smooth", block: "start" }); }, 500); };
+  return { refresh, nueva, preguntar, lugares, nombres, precarga, frecuentes, salidaDe, esEfectivo: EF, edita, familia };
 })();
 
 /* ════════════════════════════════════════════════════════════
@@ -10449,7 +10464,7 @@ const Drawer = (function(){
   const navSalidasG = document.getElementById("navSalidasG");
   const navSalidasBtn = document.getElementById("navSalidasBtn");
   const navEma = document.getElementById("navEma");
-  const navTemp = document.getElementById("navTemp");
+  const navTemp = document.getElementById("navTemp"), navFam = document.getElementById("navFam");
   const setSalidasG = on => { navSalidasG.classList.toggle("abierto", on); navSalidasBtn.setAttribute("aria-expanded", String(on)); };
   navSalidasBtn.addEventListener("click", () => setSalidasG(!navSalidasG.classList.contains("abierto")));
   const navMercarG = document.getElementById("navMercarG");
@@ -10470,9 +10485,9 @@ const Drawer = (function(){
   luz();
   navSalidasBtn.addEventListener("click", () => { setFL("armoni.nav.salidasTocado"); luz(); });
   navTemp.addEventListener("click", () => { setFL("armoni.nav.tempVisto"); luz(); });
-  const NAV = { chat: navChat, rest: navRest, ema: navEma, credito: navCredito, gmail: navGmail, glim: navGlim, recuerda: navRecuerda, mercar: navMercar, dura: navDura, mes: navMes, balance: navBalance, ahorro: navAhorro, dudas: navDudas, ajustes: navAjustes, temp: navTemp };
-  const SUB = { chat: "Presupuesto de la casa", rest: "Restaurantes", ema: "Salidas Ema", credito: "Crédito Carro", gmail: "AT Gmail", glim: "Glim", recuerda: "Recuerda", mercar: "A mercar", dura: "Duración", mes: "Tu mes", balance: "Balance", ahorro: "Ahorro", dudas: "Dudas", ajustes: "Ajustes", temp: "Temporada" };
-  const PLACEHOLDER = { chat: "Escribe aquí…", rest: "¿Qué se te antoja?", ema: "¿A dónde llevamos a Ema?", credito: "Pregúntale sobre el crédito…", gmail: "", glim: "", recuerda: "", mercar: "", dura: "", mes: "", balance: "", ahorro: "", dudas: "", ajustes: "", temp: "" };
+  const NAV = { chat: navChat, rest: navRest, ema: navEma, credito: navCredito, gmail: navGmail, glim: navGlim, recuerda: navRecuerda, mercar: navMercar, dura: navDura, mes: navMes, balance: navBalance, ahorro: navAhorro, dudas: navDudas, ajustes: navAjustes, temp: navTemp, fam: navFam };
+  const SUB = { chat: "Presupuesto de la casa", rest: "Restaurantes", ema: "Salidas Ema", credito: "Crédito Carro", gmail: "AT Gmail", glim: "Glim", recuerda: "Recuerda", mercar: "A mercar", dura: "Duración", mes: "Tu mes", balance: "Balance", ahorro: "Ahorro", dudas: "Dudas", ajustes: "Ajustes", temp: "Temporada", fam: "La familia" };
+  const PLACEHOLDER = { chat: "Escribe aquí…", rest: "¿Qué se te antoja?", ema: "¿A dónde llevamos a Ema?", credito: "Pregúntale sobre el crédito…", gmail: "", glim: "", recuerda: "", mercar: "", dura: "", mes: "", balance: "", ahorro: "", dudas: "", ajustes: "", temp: "", fam: "" };
 
   /* marca del menú */
   const m2 = document.getElementById("mark2");
@@ -10532,12 +10547,13 @@ const Drawer = (function(){
     document.body.classList.toggle("mode-dudas", mode === "dudas");
     document.body.classList.toggle("mode-ajustes", mode === "ajustes");
     document.body.classList.toggle("mode-temp", mode === "temp");
+    document.body.classList.toggle("mode-fam", mode === "fam");
     if(mode === "temp"){ setFL("armoni.nav.tempVisto"); luz(); }
     Object.entries(NAV).forEach(([m, b]) => { if(m === mode) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current"); });
     const enControl = mode === "mes" || mode === "recuerda" || mode === "balance" || mode === "ahorro";
     navControl.classList.toggle("activo", enControl);
     if(enControl) setControl(true);
-    const enSalidas = mode === "rest" || mode === "ema" || mode === "temp";
+    const enSalidas = mode === "rest" || mode === "ema" || mode === "temp" || mode === "fam";
     navSalidasG.classList.toggle("activo", enSalidas);
     if(enSalidas) setSalidasG(true);
     const enMercar = mode === "mercar" || mode === "dura";
@@ -10563,6 +10579,7 @@ const Drawer = (function(){
       if(mode === "ahorro") Ahorro.refresh();
       if(mode === "dudas") Preguntas.pinta(true);
       if(mode === "temp") Temporada.vista();
+      if(mode === "fam") SalidasEma.familia();
     }
     close(0, 1, true);   // al navegar, el menú se cierra rápido: el contenido ya está listo, no hay que esperarlo
   }
@@ -10584,6 +10601,7 @@ const Drawer = (function(){
   navAhorro.addEventListener("click", () => go("ahorro"));
   navDudas.addEventListener("click", () => go("dudas"));
   navTemp.addEventListener("click", () => go("temp"));
+  navFam.addEventListener("click", () => go("fam"));
   navAjustes.addEventListener("click", () => go("ajustes"));
 
   /* deslizar el menú hacia la izquierda lo cierra: sigue el dedo 1:1 y suelta con su velocidad */
