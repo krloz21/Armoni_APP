@@ -2247,6 +2247,15 @@ body.mode-mercar:has(#mkStage .mcTop) #thread{ -webkit-mask-image:none; mask-ima
 .emaVacio{ margin:14px 0 0; font-size:.86rem; color:var(--dim); text-align:center; }
 .emaLugares{ display:flex; flex-direction:column; gap:10px; }
 /* Lugares con Ema: podio con los 3 primeros, chips para ordenar y el resto plegado (toca uno para ver su ficha) */
+.fmTipoSal{ margin:0 0 14px; }
+.fmTipos{ display:flex; flex-wrap:wrap; gap:8px; margin-top:6px; }
+.fmTipos button{ display:inline-flex; align-items:center; gap:6px; padding:8px 12px; border-radius:999px; border:1px solid var(--line); background:none; color:var(--ghost); font:inherit; font-size:.84rem; font-weight:600; cursor:pointer; }
+.fmTipos button[aria-pressed="true"]{ color:var(--white); border-color:transparent; background:rgba(255,179,107,.18); box-shadow:inset 0 0 0 1px rgba(255,179,107,.6); }
+.smMix{ display:flex; flex-wrap:wrap; gap:6px 14px; margin:10px 4px 0; font-size:.8rem; color:var(--ghost); }
+.smMix b{ color:var(--white); font-weight:700; }
+.smIdea{ margin:10px 4px 0; padding:10px 0 0; border-top:1px solid color-mix(in srgb, var(--line) 60%, transparent); font-size:.84rem; line-height:1.45; color:var(--ghost); }
+.smIdea b{ color:var(--white); }
+.smIdea button{ display:inline; margin-left:4px; padding:0; border:0; background:none; color:#ffb36b; font:inherit; font-weight:700; cursor:pointer; }
 .smTipos{ margin:0 0 16px; }
 .smCab{ display:flex; align-items:baseline; justify-content:space-between; gap:10px; margin:0 4px 10px; }
 .smCab b{ font-size:.95rem; font-weight:650; }
@@ -4371,7 +4380,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-31.262";
+const APP_VERSION = "2026-10-31.263";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -6282,6 +6291,26 @@ let MODE = "chat";
    (solo los conteos, por la red de Tailscale) al flujo «uso» de n8n, que junta los de cada celular de la casa.
    Para revisarlas desde la consola: ArmoniUso.reporte(30) · ArmoniUso.json() · ArmoniUso.borrar().
    También se ven en Ajustes → «Uso de Armoni». Sirve para decidir qué mejorar según la tendencia. */
+/* Tipo de salida: comer, actividad, paseo, cine o antojo. Armoni lo adivina por el nombre (o el lugar) y aprende de lo que la familia elige */
+const TipoSalida = (function(){
+  const K = "armoni.salida.tipos";
+  const T = { comida: ["🍽️", "Comer"], actividad: ["🎨", "Actividad"], paseo: ["🌳", "Paseo"], cine: ["🎬", "Cine o show"], antojo: ["🍦", "Antojo"] };
+  const norm = t => String(t || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\b(en )?pareja\b/g, "").replace(/[^a-z ]/g, " ").replace(/\s+/g, " ").trim();
+  const lee = () => { try{ return JSON.parse(localStorage.getItem(K)) || {}; }catch{ return {}; } };
+  function adivina(texto){
+    const t = norm(texto), m = lee();
+    if(m[t]) return m[t];
+    if(/\bcine|cinemark|cinepolis|pelicula|teatro|concierto|musical|show|obra\b/.test(t)) return "cine";
+    if(/pintur|pintar|taller|clase|manualidad|ceramic|lego|ficha|juego|bolos|museo|trampolin|patin|karaoke|escape|didactic|dinosaurio|inflable|arte\b/.test(t)) return "actividad";
+    if(/parque|zoolog|pance|piscina|caminata|paseo|finca|\brio\b|ecoparque|mirador|playa|granja|comfandi/.test(t)) return "paseo";
+    if(/helad|paleta|cafe|postre|chuche|papita|galleta|crepe|dulce|antojo|snack|malteada|churro|mecato/.test(t)) return "antojo";
+    if(/almuerz|cena|desayun|comida|restaurante|hamburgues|pizza|parrilla|sushi|asad|brunch|pollo|arepa|empanad|bandeja|perro caliente|torito|monkeys|hunter|sss|domicilio|comer/.test(t)) return "comida";
+    return "";
+  }
+  const aprende = (texto, tipo) => { const t = norm(texto); if(!t || !T[tipo]) return; const m = lee(); m[t] = tipo; const ks = Object.keys(m); if(ks.length > 300) delete m[ks[0]]; try{ localStorage.setItem(K, JSON.stringify(m)); }catch{} };
+  return { T, adivina, aprende, de: (texto, etiqueta) => (T[etiqueta] ? etiqueta : adivina(texto)) };
+})();
+
 const Uso = (function(){
   const K = "armoni.uso", DIAS = 90;
   const NOMBRES = { chat: "Arm", mercar: "Check", dura: "Duración", mes: "Tu mes", balance: "Balance", ahorro: "Ahorro", recuerda: "Recuerda", credito: "Crédito carro", glim: "Glim", rest: "Restaurantes", ema: "Salidas Ema", gmail: "AT Gmail", ajustes: "Ajustes", dudas: "Dudas", temp: "Temporada", cine: "Cine" };
@@ -7126,19 +7155,32 @@ const SalidasEma = (function(){
     const delMes = arr => ((datos && datos[arr]) || []).find(m => m.mes === mk);
     const ema = mesActual(), par = delMes("pareja"), fam = delMes("familia");
     const fecha = f => { try{ return new Date(f + "T12:00:00").toLocaleDateString("es-CO", { weekday: "short", day: "numeric" }).replace(".", ""); }catch{ return f; } };
-    const porDia = cosas => { const d = {}; (cosas || []).forEach(x => { const q = d[x.f] || (d[x.f] = { f: x.f, cosas: [], total: 0 }); q.cosas.push(x.c); q.total += +x.m || 0; }); return Object.values(d).sort((a, b) => b.f.localeCompare(a.f)); };
+    /* el tipo de un día: si hubo algo distinto a comer (actividad, cine, paseo), cuenta como eso */
+    const PRIO = ["actividad", "cine", "paseo", "comida", "antojo"];
+    const tipoDia = ts => PRIO.find(p => ts.includes(p)) || "";
+    const porDia = cosas => { const d = {}; (cosas || []).forEach(x => { const q = d[x.f] || (d[x.f] = { f: x.f, cosas: [], total: 0, ts: [] }); q.cosas.push(x.c); q.ts.push(TipoSalida.de(x.c, x.t)); q.total += +x.m || 0; }); return Object.values(d).map(q => Object.assign(q, { tipo: tipoDia(q.ts) })).sort((a, b) => b.f.localeCompare(a.f)); };
     const T = [
       ["pareja", "💑", "En pareja", porDia(par && par.cosas)],
-      ["ema", "👧", "Con Ema", (ema.salidas || []).slice().sort((a, b) => b.fecha.localeCompare(a.fecha)).map(z => ({ f: z.fecha, total: z.total || 0, cosas: (z.paradas && z.paradas.length ? z.paradas.map(p => p.lugar).filter(Boolean) : []).concat((z.gastos || []).map(g => g.l).filter(Boolean)).filter((v, i, a) => a.indexOf(v) === i).slice(0, 3) })) ],
+      ["ema", "👧", "Con Ema", (ema.salidas || []).slice().sort((a, b) => b.fecha.localeCompare(a.fecha)).map(z => ({ f: z.fecha, total: z.total || 0, cosas: (z.paradas && z.paradas.length ? z.paradas.map(p => p.lugar).filter(Boolean) : []).concat((z.gastos || []).map(g => g.l).filter(Boolean)).filter((v, i, a) => a.indexOf(v) === i).slice(0, 3),
+        tipo: tipoDia([].concat((z.paradas || []).map(p => TipoSalida.adivina(p.lugar)), (z.gastos || []).map(g => TipoSalida.de((g.l || "") + " " + (g.c || ""), g.t)))) })) ],
       ["familia", "👨‍👩‍👦", "En familia", porDia(fam && fam.cosas)]
     ];
     const total = T.reduce((a, t) => a + t[3].length, 0);
+    /* la mezcla del mes y la sugerencia: si casi todo ha sido comer, propone algo distinto */
+    const mix = {}; T.forEach(t => t[3].forEach(x => { if(x.tipo) mix[x.tipo] = (mix[x.tipo] || 0) + 1; }));
+    const comer = mix.comida || 0, distinto = (mix.actividad || 0) + (mix.paseo || 0) + (mix.cine || 0);
+    const idea = comer >= 3 && comer >= 2 * Math.max(1, distinto)
+      ? '🎨 Llevan <b>' + comer + ' salidas a comer</b> y ' + (distinto ? 'solo <b>' + distinto + '</b>' : '<b>ninguna</b>') + ' de actividades o paseos. ¿Qué tal algo distinto esta semana: pintura, un parque o un plan de Comfandi?<button type="button" data-smplan>Ver planes →</button>'
+      : distinto >= 3 && distinto > comer ? '✨ Este mes han hecho <b>' + distinto + ' actividades y paseos</b>. ¡Muy buen balance!' : '';
+    const mixHTML = Object.keys(mix).length ? '<div class="smMix">' + Object.entries(TipoSalida.T).filter(([k]) => mix[k]).map(([k, v]) => '<span>' + v[0] + ' <b>' + mix[k] + '</b> ' + v[1].toLowerCase() + '</span>').join("") + '</div>' : '';
     if(tipoAbierto && !T.find(t => t[0] === tipoAbierto && t[3].length)) tipoAbierto = "";
     const ab = T.find(t => t[0] === tipoAbierto);
     box.innerHTML = '<section class="smTipos"><div class="smCab"><b>Salidas de ' + MES[+mk.slice(5) - 1] + '</b><small>' + (total ? total + (total === 1 ? ' salida' : ' salidas') + ' en total' : 'Todavía no han salido este mes') + '</small></div>' +
       '<div class="smFila" role="group">' + T.map(([k, ic, t, l]) => '<button type="button" data-smt="' + k + '" aria-pressed="' + (k === tipoAbierto) + '"' + (l.length ? '' : ' disabled') + '><span class="ic" aria-hidden="true">' + ic + '</span><b>' + l.length + '</b><small>' + t + '</small></button>').join("") + '</div>' +
-      (ab ? '<ul class="smLista">' + ab[3].map(x => '<li><span class="f">' + esc(fecha(x.f)) + '</span><span class="c">' + esc(x.cosas.join(" · ") || (ab[0] === "ema" ? "Salida con Ema" : "Salida")) + '</span><span class="m">' + (x.total ? peso(x.total) : '') + '</span></li>').join("") + '</ul>' : '') + '</section>';
+      mixHTML + (idea ? '<p class="smIdea">' + idea + '</p>' : '') +
+      (ab ? '<ul class="smLista">' + ab[3].map(x => '<li><span class="f">' + esc(fecha(x.f)) + '</span><span class="c">' + (x.tipo ? TipoSalida.T[x.tipo][0] + ' ' : '') + esc(x.cosas.join(" · ") || (ab[0] === "ema" ? "Salida con Ema" : "Salida")) + '</span><span class="m">' + (x.total ? peso(x.total) : '') + '</span></li>').join("") + '</ul>' : '') + '</section>';
     box.querySelectorAll("[data-smt]").forEach(b => b.onclick = () => { tipoAbierto = tipoAbierto === b.dataset.smt ? "" : b.dataset.smt; pintaTipos(); });
+    const pl = box.querySelector("[data-smplan]"); if(pl) pl.onclick = () => { const p = document.getElementById("emaPlanes"); if(p) p.scrollIntoView({ behavior: REDUCED ? "auto" : "smooth", block: "start" }); };
   }
 
   /* un lugar al que ya fueron con Ema y no tiene nota: sale el aviso cada vez que entras, hasta que lo puntúes */
@@ -10902,7 +10944,7 @@ const GastoManual = (function(){
     let lugar = "", personas = 0, puntos = 0, comentario = "", lugarVisto = false;
     const existente = () => { try{ return Restaurantes.info(lugar); }catch{ return null; } };   // el lugar ya está en Restaurantes
     const yaCalif = () => { const e = existente(); return !!(e && e.score > 0); };              // y ya tiene nota: no se vuelve a puntuar   // salidas a comer: dónde, cuántos y qué nota (van a «Restaurantes»)
-    let paso = "que", guardando = false, editando = false, preguntoPareja = false;
+    let paso = "que", guardando = false, editando = false, preguntoPareja = false, tipoSal = "";
     const historia = [];
     let histResumen = null;   // el camino hasta el resumen: al volver de editar se recupera tal cual
     const scrim = document.createElement("div");
@@ -11028,7 +11070,7 @@ const GastoManual = (function(){
         botones.innerHTML = '';
         vista.querySelector(".fmCatGrid").addEventListener("click", e => {
           const b = e.target.closest("[data-c]"); if(!b || vista.classList.contains("eligiendo")) return;
-          if(categoria !== b.dataset.c){ preguntoPareja = false; pareja = false; }
+          if(categoria !== b.dataset.c){ preguntoPareja = false; pareja = false; tipoSal = ""; }
           categoria = b.dataset.c;
           vista.querySelectorAll("[data-c]").forEach(x => x.setAttribute("aria-selected", String(x === b)));
           vista.classList.add("eligiendo"); b.classList.add("elegida");
@@ -11038,9 +11080,14 @@ const GastoManual = (function(){
         return;
       }
       if(paso === "pareja"){
-        vista.innerHTML = '<div class="seParqueo fmPareja"><div class="seParqEmo" aria-hidden="true">🍽️</div><div class="sePregunta">¿Con quién fue la salida?</div><p class="fmAyuda">Así queda bien contada: las citas en «Tu mes» y lo de Ema en su salida completa.</p>' +
+        if(!tipoSal) tipoSal = TipoSalida.adivina(concepto) || "comida";
+        vista.innerHTML = '<div class="fmTipoSal"><span class="inLbl">¿Qué fue?</span><div class="fmTipos" role="group" aria-label="Tipo de salida">' + Object.entries(TipoSalida.T).map(([k, v]) => '<button type="button" data-ts="' + k + '" aria-pressed="' + (k === tipoSal) + '"><span aria-hidden="true">' + v[0] + '</span>' + v[1] + '</button>').join("") + '</div></div>' + '<div class="seParqueo fmPareja"><div class="seParqEmo" aria-hidden="true">🍽️</div><div class="sePregunta">¿Con quién fue la salida?</div><p class="fmAyuda">Así queda bien contada: las citas en «Tu mes» y lo de Ema en su salida completa.</p>' +
           '<div class="fmQuien"><button type="button" data-q="pareja"><span><svg class="caraEma" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg></span><b>Solo los dos</b><small>Cita en pareja</small></button><button type="button" data-q="ema"><span>' + FOTO_EMA + '</span><b>Con Ema</b><small>Va a su salida</small></button><button type="button" data-q="otro"><span><svg class="caraEma" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0"/><circle cx="17" cy="9" r="2.6"/><path d="M15.5 14.2A4.5 4.5 0 0 1 21 18.5"/></svg></span><b>Otro</b><small>Amigos, trabajo…</small></button></div></div>';
         botones.innerHTML = '';
+        vista.querySelector(".fmTipos").addEventListener("click", e => {
+          const b = e.target.closest("[data-ts]"); if(!b) return;
+          tipoSal = b.dataset.ts; vista.querySelectorAll("[data-ts]").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+        });
         vista.querySelector(".fmQuien").addEventListener("click", e => {
           const b = e.target.closest("[data-q]"); if(!b) return;
           if(b.dataset.q === "ema"){
@@ -11148,7 +11195,8 @@ const GastoManual = (function(){
       if(typeof busy !== "undefined" && busy){ err.textContent = "Armoni está respondiendo otra cosa. Espera un momento y vuelve a intentarlo."; return; }
       const nombre = conPareja(concepto, pareja);
       const cuando = fecha === hoy() ? "hoy" : fecha === ayer() ? "ayer" : fecha;
-      const monto$ = pesoG(monto), nota$ = nota.trim();
+      if(conLugar() && tipoSal) TipoSalida.aprende(concepto, tipoSal);
+      const monto$ = pesoG(monto), nota$ = (nota.trim() + (conLugar() && tipoSal ? (nota.trim() ? " · " : "") + "tipo: " + tipoSal : "")).trim();
       const mostrar = (tipo === "Gasto" ? "🧾 Gasto: " : "➕ Ingreso: ") + nombre + " · " + categoria + " · " + monto$ + " · " + cuando + (nota$ ? " · " + nota$ : "");
       const texto =
         "Registra este " + (tipo === "Gasto" ? "GASTO" : "INGRESO") + " en Movimientos (Tipo: " + tipo + "). Concepto: " + nombre +
