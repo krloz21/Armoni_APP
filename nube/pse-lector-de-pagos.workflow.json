@@ -340,6 +340,162 @@
       ],
       "id": "a7000000-0000-4000-8000-000000000004",
       "name": "Revisar ahora (sin leer)"
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "operation": "getAll",
+        "dataSourceId": {
+          "__rl": true,
+          "value": "6c565ad1-789f-41c7-8ca2-8bcfb9098a68",
+          "mode": "list",
+          "cachedResultName": "Movimientos",
+          "cachedResultUrl": "https://app.notion.com/p/922bb9e4e3d648feab56d6b2d75be29d"
+        },
+        "returnAll": true,
+        "simple": false,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 3,
+      "position": [
+        6848,
+        1000
+      ],
+      "id": "b1c2d3e4-0001-4a00-8000-00000000c001",
+      "name": "Movimientos (cuotas)",
+      "executeOnce": true,
+      "credentials": {
+        "notionApi": {
+          "id": "pgk4uKXwaEEnuyRO",
+          "name": "Notion account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "operation": "getAll",
+        "dataSourceId": {
+          "__rl": true,
+          "value": "98575ff1-d176-45b2-98bd-60f057e85867",
+          "mode": "list",
+          "cachedResultName": "Pago del Carro",
+          "cachedResultUrl": "https://app.notion.com/p/3605270a91724d6a8c5224543b8bd12d"
+        },
+        "returnAll": true,
+        "simple": false,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 3,
+      "position": [
+        7072,
+        1000
+      ],
+      "id": "b1c2d3e4-0002-4a00-8000-00000000c002",
+      "name": "Pago del Carro (lista)",
+      "executeOnce": true,
+      "alwaysOutputData": false,
+      "credentials": {
+        "notionApi": {
+          "id": "pgk4uKXwaEEnuyRO",
+          "name": "Notion account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// La cuota del carro que llega por PSE (o se anota en Movimientos) también va a la tabla «Pago del Carro»,\n// calculando capital, interés, seguros y saldo a partir de la última cuota registrada.\nconst txt = (a) => ((a || []).map(t => t.plain_text).join('') || '').trim();\nconst clave = (n) => 'property_' + String(n).toLowerCase().replace(/\\s+/g, '_');\nconst leer = (it, nombre, tipo) => {\n  const pr = it.properties && it.properties[nombre];\n  if (pr) {\n    if (tipo === 'titulo') return txt(pr.title);\n    if (tipo === 'texto') return txt(pr.rich_text);\n    if (tipo === 'numero') return pr.number != null ? pr.number : null;\n    if (tipo === 'fecha') return pr.date && pr.date.start ? pr.date.start.slice(0, 10) : null;\n    if (tipo === 'select') return pr.select ? pr.select.name : null;\n  }\n  let v = it[clave(nombre)];\n  if (v === undefined && tipo === 'titulo') v = it.name;\n  if (v === undefined || v === null || v === '') return null;\n  if (tipo === 'fecha') { const s = typeof v === 'object' ? (v.start || '') : String(v); return s ? s.slice(0, 10) : null; }\n  if (tipo === 'numero') return typeof v === 'number' ? v : (Number(v) || null);\n  return String(v);\n};\nconst norm = t => String(t || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').trim();\nconst dias = s => Math.floor(new Date(String(s).slice(0, 10) + 'T00:00:00Z').getTime() / 864e5);\nconst r2 = n => Math.round(n * 100) / 100;\n\n// lo que ya está en «Pago del Carro»\nconst pagos = $input.all().map(i => i.json).filter(x => x && x.id).map(x => ({\n  n: leer(x, 'N°', 'numero') || 0, fecha: leer(x, 'Fecha', 'fecha') || '', monto: leer(x, 'Monto pagado', 'numero') || 0,\n  capital: leer(x, 'Capital', 'numero') || 0, interes: leer(x, 'Interés', 'numero') || 0, gastos: leer(x, 'Gastos y Seguros', 'numero') || 0,\n  saldo: leer(x, 'Saldo pendiente', 'numero'), notas: leer(x, 'Notas', 'texto') || ''\n})).filter(p => p.n > 0 && p.saldo != null).sort((a, b) => a.n - b.n);\nif (!pagos.length) return [];\nconst ultimo = pagos[pagos.length - 1];\nconst antes = pagos.length > 1 ? pagos[pagos.length - 2] : null;\n// la cuota fija del banco (capital + interés) y la tasa mensual salen de las cuotas que ya hay\nconst cuotaFija = Math.round(ultimo.capital + ultimo.interes);\nconst tasa = antes && antes.saldo > 0 && ultimo.interes > 0 ? ultimo.interes / antes.saldo : 0.013515;\n\n// las «Cuota del carro» de Movimientos que todavía no están en «Pago del Carro»\nconst cusDe = s => (String(s || '').match(/CUS\\s*(\\d{5,})/i) || [])[1] || '';\nconst yaCus = new Set(pagos.map(p => cusDe(p.notas)).filter(Boolean));\nconst movs = $('Movimientos (cuotas)').all().map(i => i.json).filter(x => x && x.id).map(x => ({\n  concepto: leer(x, 'Concepto', 'titulo') || '', tipo: leer(x, 'Tipo', 'select') || '', monto: leer(x, 'Monto', 'numero') || 0,\n  fecha: leer(x, 'Fecha', 'fecha') || '', notas: leer(x, 'Notas', 'texto') || ''\n})).filter(m => norm(m.concepto) === 'cuota del carro' && m.tipo === 'Gasto' && m.monto > 0 && m.fecha\n  && dias(m.fecha) - dias(ultimo.fecha) >= 15            // una cuota por mes: lo de antes ya quedó registrado\n  && !(cusDe(m.notas) && yaCus.has(cusDe(m.notas))))\n  .sort((a, b) => a.fecha.localeCompare(b.fecha));\n\nconst salida = [];\nlet saldo = ultimo.saldo, n = ultimo.n, fechaAnt = ultimo.fecha;\nfor (const m of movs) {\n  if (dias(m.fecha) - dias(fechaAnt) < 15) continue;     // dos registros del mismo mes: solo cuenta el primero\n  const interes = r2(saldo * tasa);\n  let gastos = m.monto - cuotaFija, capital = r2(cuotaFija - interes), nota = '';\n  // si el valor no se parece a la cuota normal, todo lo que pasa del interés y los seguros de siempre se toma como capital\n  if (gastos < 0 || gastos > 400000) { gastos = ultimo.gastos; capital = r2(m.monto - interes - gastos); nota = ' · valor distinto a la cuota normal: revísala'; }\n  saldo = r2(saldo - capital); n += 1; fechaAnt = m.fecha;\n  const cus = cusDe(m.notas);\n  salida.push({ json: { titulo: 'Cuota ' + n, n, fecha: m.fecha, monto: m.monto, capital, interes, gastos, saldo,\n    notas: (cus ? 'PSE · CUS ' + cus + ' · ' : '') + 'Registrada sola desde Movimientos' + nota } });\n}\nreturn salida;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        7296,
+        1000
+      ],
+      "id": "b1c2d3e4-0003-4a00-8000-00000000c003",
+      "name": "Cuotas por registrar"
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "dataSourceId": {
+          "__rl": true,
+          "value": "98575ff1-d176-45b2-98bd-60f057e85867",
+          "mode": "list",
+          "cachedResultName": "Pago del Carro",
+          "cachedResultUrl": "https://app.notion.com/p/3605270a91724d6a8c5224543b8bd12d"
+        },
+        "title": "={{ $json.titulo }}",
+        "propertiesUi": {
+          "propertyValues": [
+            {
+              "key": "N°|number",
+              "numberValue": "={{ $json.n }}"
+            },
+            {
+              "key": "Fecha|date",
+              "includeTime": false,
+              "date": "={{ $json.fecha }}"
+            },
+            {
+              "key": "Monto pagado|number",
+              "numberValue": "={{ $json.monto }}"
+            },
+            {
+              "key": "Capital|number",
+              "numberValue": "={{ $json.capital }}"
+            },
+            {
+              "key": "Interés|number",
+              "numberValue": "={{ $json.interes }}"
+            },
+            {
+              "key": "Gastos y Seguros|number",
+              "numberValue": "={{ $json.gastos }}"
+            },
+            {
+              "key": "Saldo pendiente|number",
+              "numberValue": "={{ $json.saldo }}"
+            },
+            {
+              "key": "Tipo de pago|select",
+              "selectValue": "Cuota mensual"
+            },
+            {
+              "key": "Notas|rich_text",
+              "textContent": "={{ $json.notas }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 3,
+      "position": [
+        7520,
+        1000
+      ],
+      "id": "b1c2d3e4-0004-4a00-8000-00000000c004",
+      "name": "Crear en Pago del Carro",
+      "credentials": {
+        "notionApi": {
+          "id": "pgk4uKXwaEEnuyRO",
+          "name": "Notion account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        6624,
+        1200
+      ],
+      "id": "b1c2d3e4-0005-4a00-8000-00000000c005",
+      "name": "Pasar cuotas del carro (a mano)"
     }
   ],
   "pinData": {},
@@ -461,6 +617,11 @@
             "node": "Mark a message as read",
             "type": "main",
             "index": 0
+          },
+          {
+            "node": "Movimientos (cuotas)",
+            "type": "main",
+            "index": 0
           }
         ]
       ]
@@ -481,6 +642,50 @@
         [
           {
             "node": "Correos PSE sin leer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pasar cuotas del carro (a mano)": {
+      "main": [
+        [
+          {
+            "node": "Movimientos (cuotas)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Movimientos (cuotas)": {
+      "main": [
+        [
+          {
+            "node": "Pago del Carro (lista)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pago del Carro (lista)": {
+      "main": [
+        [
+          {
+            "node": "Cuotas por registrar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cuotas por registrar": {
+      "main": [
+        [
+          {
+            "node": "Crear en Pago del Carro",
             "type": "main",
             "index": 0
           }
