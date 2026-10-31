@@ -9469,7 +9469,7 @@ const FlujoViejo = (function(){
     const ids = Object.keys(lee());
     if(!ids.length || oculto === APP_VERSION){ box.innerHTML = ""; return; }
     const ns = ids.map(id => "«" + esc(nombreFlujo(id)) + "»");
-    box.innerHTML = '<div class="credAvisoBtn flujoAvisoBox" role="status"><span class="ic" aria-hidden="true">🛠️</span><span class="tx"><b>Falta actualizar ' + (ns.length > 1 ? ns.slice(0, -1).join(", ") + " y " + ns[ns.length - 1] : ns[0]) + ' en n8n</b><small>' + (ns.length > 1 ? 'Esos flujos están viejos' : 'Ese flujo está viejo') + ': impórtalo de nuevo desde la carpeta «nube» y actívalo.</small></span><button type="button" class="ir avisoX" aria-label="Ocultar hasta la próxima versión">✕</button></div>';
+    box.innerHTML = '<div class="credAvisoBtn flujoAvisoBox" role="status"><span class="ic" aria-hidden="true">🛠️</span><span class="tx"><b>' + (ns.length > 1 ? 'Falta actualizar ' + ns.length + ' flujos en n8n' : 'Falta actualizar ' + ns[0] + ' en n8n') + '</b><small>' + (ns.length > 1 ? ns.slice(0, -1).join(", ") + " y " + ns[ns.length - 1] + ': impórtalos' : 'Ese flujo está viejo: impórtalo') + ' de nuevo desde la carpeta «nube» y actívalo.</small></span><button type="button" class="ir avisoX" aria-label="Ocultar hasta la próxima versión">✕</button></div>';
     box.querySelector(".avisoX").onclick = () => { try{ localStorage.setItem(KO, APP_VERSION); }catch{} pinta(); };
   }
   /* para las llamadas que pasan por la Cola: si el flujo tiene versión mínima, se revisa sin gastar la respuesta */
