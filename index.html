@@ -671,6 +671,11 @@ body.no-gl .bar, body.no-gl .composer{ background:var(--drawer-solid); }
 }
 #ojoBtn{ flex:none; width:34px; height:34px; margin:-2px 0 -2px auto; padding:0 !important; background:none !important; border:0 !important; border-radius:50%; color:var(--ghost); cursor:pointer; display:grid; place-items:center; transition:color .2s, background .2s; }
 #ojoBtn + #reset{ margin-left:0; }
+/* la ✕ de arriba: en cualquier apartado, cierra y vuelve a la pantalla principal */
+#cerrarBtn{ display:none; flex:none; width:34px; height:34px; margin:-2px 0 -2px 2px; padding:0 !important; border:0 !important; border-radius:50%; background:rgba(var(--ink),.06) !important; color:var(--ghost); cursor:pointer; place-items:center; transition:color .2s, background .2s; }
+#cerrarBtn svg{ width:18px; height:18px; }
+body[class*="mode-"] #cerrarBtn{ display:grid; }
+@media (hover:hover){ #cerrarBtn:hover{ color:var(--white); background:rgba(var(--ink),.12) !important; } }
 /* fuera del chat el botón de reiniciar no existe (no solo invisible): así el ojo queda pegado a la derecha, igual que en el inicio */
 body[class*="mode-"] #reset{ display:none !important; }
 #ojoBtn:hover{ color:var(--white); background:rgba(var(--ink),.06) !important; }
@@ -4096,6 +4101,9 @@ body.mode-credito #credFoto{ display:grid; }
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>
         <span class="lbl">Empezar de nuevo</span>
       </button>
+      <button id="cerrarBtn" type="button" aria-label="Cerrar este apartado" title="Cerrar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
     </div>
   </header>
 
@@ -4380,7 +4388,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-31.264";
+const APP_VERSION = "2026-10-31.265";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -14684,6 +14692,7 @@ const TuMes = (function(){
 })();
 activity();
 TrasIntro.hacer(() => Servicios.check());
+document.getElementById("cerrarBtn").addEventListener("click", () => { try{ Drawer.go("chat"); }catch{} });
 TrasIntro.hacer(() => setTimeout(() => { try{ SalidasEma.precarga(); }catch{} try{ CreditoCarro.precarga(); }catch{} }, 1200));   // el aviso de citas/salidas con Ema sale en la pantalla principal
 TrasIntro.hacer(() => Glim.check());
 TrasIntro.hacer(() => TuMes.avisar());
