@@ -4240,7 +4240,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-31.257";
+const APP_VERSION = "2026-10-31.258";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -6153,7 +6153,7 @@ let MODE = "chat";
    También se ven en Ajustes → «Uso de Armoni». Sirve para decidir qué mejorar según la tendencia. */
 const Uso = (function(){
   const K = "armoni.uso", DIAS = 90;
-  const NOMBRES = { chat: "Arm", mercar: "Check", dura: "Duración", mes: "Tu mes", balance: "Balance", ahorro: "Ahorro", recuerda: "Recuerda", credito: "Crédito carro", glim: "Glim", rest: "Restaurantes", ema: "Salidas Ema", gmail: "AT Gmail", ajustes: "Ajustes", dudas: "Dudas", temp: "Temporada" };
+  const NOMBRES = { chat: "Arm", mercar: "Check", dura: "Duración", mes: "Tu mes", balance: "Balance", ahorro: "Ahorro", recuerda: "Recuerda", credito: "Crédito carro", glim: "Glim", rest: "Restaurantes", ema: "Salidas Ema", gmail: "AT Gmail", ajustes: "Ajustes", dudas: "Dudas", temp: "Temporada", cine: "Cine" };
   const hoy = () => { const d = new Date(); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); };
   const lee = () => { try{ return JSON.parse(localStorage.getItem(K)) || { dias: {} }; }catch{ return { dias: {} }; } };
   const guarda = d => {
@@ -6203,22 +6203,33 @@ const Uso = (function(){
   }
   const equipos = () => { try{ return JSON.parse(localStorage.getItem(KE)) || null; }catch{ return null; } };
   document.addEventListener("visibilitychange", () => { if(document.visibilityState === "hidden"){ cierra(); sincroniza(true); } });
-  return { entra, accion, reporte, sincroniza, equipos, json: () => JSON.stringify(lee()), borrar: () => { try{ localStorage.removeItem(K); }catch{} } };
+  /* lo de toda la casa: este celular + los demás, sumados día por día */
+  function todaLaCasa(){
+    const eq = equipos(), suma = {}, mete = dias => Object.entries(dias || {}).forEach(([dia, ms]) => { const s = suma[dia] || (suma[dia] = {}); Object.entries(ms).forEach(([k, m]) => { const x = s[k] || (s[k] = { v: 0, s: 0 }); x.v += +m.v || 0; x.s += +m.s || 0; }); });
+    cierra(); if(actual) desde = Date.now();
+    mete(lee().dias);
+    if(eq) Object.entries(eq.equipos || {}).forEach(([k, e]) => { if(k !== eq.yo) mete(e && e.dias); });
+    return suma;
+  }
+  return { entra, accion, reporte, sincroniza, equipos, todaLaCasa, json: () => JSON.stringify(lee()), borrar: () => { try{ localStorage.removeItem(K); }catch{} } };
 })();
 window.ArmoniUso = Uso;
 /* el panel de Ajustes: barras con el tiempo de cada apartado */
-let usoVer = "yo";
+let usoVer = "casa";
 function pintaUso(){
   const box = document.getElementById("usoCard"); if(!box) return;
   const eq = Uso.equipos(), otros = eq ? Object.keys(eq.equipos || {}).filter(k => k !== eq.yo) : [];
-  if(usoVer !== "yo" && !otros.includes(usoVer)) usoVer = "yo";
-  const nombre = k => { const n = k.split(/[._\-\d]/)[0] || k; return n.charAt(0).toUpperCase() + n.slice(1); };   // usuario de Tailscale sin números: nombre.x123 → Nombre
-  const dias = usoVer === "yo" ? null : eq.equipos[usoVer].dias;
+  if(usoVer !== "yo" && usoVer !== "casa" && !otros.includes(usoVer)) usoVer = "casa";
+  /* usuario de Tailscale sin números: nombre.x123 → Nombre; los celulares sin nombre se numeran (Celular 2, Celular 3…) */
+  let nCel = 1;
+  const NOM = {}; otros.forEach(k => { const n = k.split(/[._\-\d]/)[0] || k; NOM[k] = /^cel$/i.test(n) ? "Celular " + (++nCel) : n.charAt(0).toUpperCase() + n.slice(1); });
+  const nombre = k => NOM[k] || k;
+  const dias = usoVer === "casa" ? Uso.todaLaCasa() : usoVer === "yo" ? null : eq.equipos[usoVer].dias;
   const todo = Uso.reporte(30, dias || undefined);
   const r = todo.filter(x => !x.apartado.startsWith("acción")), acc = todo.filter(x => x.apartado.startsWith("acción"));
-  const chips = otros.length ? '<div class="usoQuien" role="tablist"><button type="button" data-u="yo" aria-selected="' + (usoVer === "yo") + '">Este celular</button>' +
+  const chips = otros.length ? '<div class="usoQuien" role="tablist"><button type="button" data-u="casa" aria-selected="' + (usoVer === "casa") + '">Toda la casa</button><button type="button" data-u="yo" aria-selected="' + (usoVer === "yo") + '">Este celular</button>' +
     otros.map(k => '<button type="button" data-u="' + k.replace(/"/g, "") + '" aria-selected="' + (usoVer === k) + '">' + nombre(k).replace(/</g, "") + '</button>').join("") + '</div>' : '';
-  const visto = usoVer !== "yo" && eq.equipos[usoVer].visto ? '<p class="usoAcc">Actualizado ' + new Date(eq.equipos[usoVer].visto).toLocaleString("es-CO", { day: "numeric", month: "short", hour: "numeric", minute: "2-digit" }) + '</p>' : '';
+  const visto = usoVer === "casa" ? '<p class="usoAcc">Suma de los ' + (otros.length + 1) + ' dispositivos: lo que más usa la familia sale arriba.</p>' : usoVer !== "yo" && eq.equipos[usoVer].visto ? '<p class="usoAcc">Actualizado ' + new Date(eq.equipos[usoVer].visto).toLocaleString("es-CO", { day: "numeric", month: "short", hour: "numeric", minute: "2-digit" }) + '</p>' : '';
   if(!r.length){ box.innerHTML = chips + '<div class="setRow"><span class="setTxt"><span>Todavía no hay datos. Se van guardando mientras se usa la app.</span></span></div>'; }
   else {
     const mx = Math.max(...r.map(x => x.minutos), .1);
