@@ -839,6 +839,14 @@ body.mode-temp footer{ display:none; }
 body.mode-dudas #welcome, body.mode-dudas #messages, body.mode-dudas #pending, body.mode-dudas #servicioBanner, body.mode-dudas #glimBanner{ display:none !important; }
 body.mode-dudas #reset{ visibility:hidden; }
 body.mode-dudas footer{ display:none; }
+body.mode-dudas.dudas-ia footer{ display:block !important; }
+body.mode-dudas.dudas-ia #credFoto{ display:grid; }
+#ddIA .dcProBar{ display:none !important; }   /* en Control IA se escribe en la caja de abajo, la misma de Arm */
+#ddIA .msg.dcProMsg{ max-width:none; padding:0; margin:0 0 22px; background:none; border-radius:0; font-size:inherit; line-height:inherit; align-self:stretch; }
+#ddIA .msg.dcProMsg.pensando .body{ color:var(--dim); font-style:italic; }
+#ddIA .msg .body p{ margin:0 0 8px; } #ddIA .msg .body p:last-child{ margin:0; }
+#ddIA .msg .body ul{ margin:4px 0 8px; padding-left:20px; }
+#ddIA .dcProLog{ gap:0; }
 body.mode-ajustes #ajustesView{ display:block; }
 body.mode-ajustes #welcome, body.mode-ajustes #messages, body.mode-ajustes #pending, body.mode-ajustes #servicioBanner, body.mode-ajustes #glimBanner{ display:none !important; }
 body.mode-ajustes #reset{ visibility:hidden; }
@@ -1367,6 +1375,11 @@ body[class*="mode-"] #colaAviso, body[class*="mode-"] #arriendoAviso, body[class
 .dcProPropBtns{ display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:12px; }
 .dcProPropBtns small{ grid-column:1 / -1; font-size:.78rem; color:var(--dim); }
 .dcProProp.hecha{ opacity:.7; }
+.dcProPropBtns button{ min-height:46px; border-radius:14px; border:1px solid var(--line); background:none; color:var(--white); font:inherit; font-size:.9rem; font-weight:700; cursor:pointer; }
+.dcProPropBtns button:last-child{ border-color:transparent; background:linear-gradient(140deg, #7fe0a6, #3fbf7f); color:#06210f; }
+.dcProPropBtns button:disabled{ opacity:.5; cursor:default; }
+.smCab b{ white-space:nowrap; font-size:.95rem; }
+.smCab small{ text-align:right; line-height:1.25; }
 .dcProBar{ display:flex; align-items:flex-end; gap:8px; margin-top:10px; }
 .dcProFoto, .dcProEnviar{ flex:none; display:grid; place-items:center; width:40px; height:40px; border-radius:12px; border:1px solid var(--line); background:none; color:var(--ghost); cursor:pointer; }
 .dcProFoto svg, .dcProEnviar svg{ width:20px; height:20px; }
@@ -2369,8 +2382,15 @@ body.mode-mercar:has(#mkStage .mcTop) #thread{ -webkit-mask-image:none; mask-ima
 .tgBtns{ display:flex; gap:8px; margin-top:12px; }
 .tgBtns button{ flex:1; min-height:42px; border-radius:14px; border:1px solid var(--line); background:none; color:var(--white); font:inherit; font-size:.84rem; font-weight:650; cursor:pointer; }
 .tgBtns button:first-child{ border-color:transparent; background:linear-gradient(140deg, #ffcf7a, #ff9a5a); color:#1a1206; }
+.dcEscribe{ display:flex; gap:8px; align-items:flex-end; margin:10px 0 4px; }
+.dcEscribe textarea{ flex:1; min-height:44px; padding:10px 12px; border-radius:14px; border:1px solid var(--line); background:rgba(var(--ink),.04); color:var(--white); font:inherit; font-size:.88rem; resize:vertical; }
+.dcEscribe button{ flex:none; min-height:44px; padding:0 14px; border:0; border-radius:14px; background:linear-gradient(140deg, #8fc7ff, #5f8bff); color:#071226; font:inherit; font-size:.86rem; font-weight:700; cursor:pointer; }
 .smTipos{ margin:0 0 16px; }
-.smCab{ display:flex; align-items:baseline; justify-content:space-between; gap:10px; margin:0 4px 10px; }
+.smCab{ display:flex; align-items:center; gap:6px; margin:0 0 10px; }
+.smCab small{ margin-left:auto; }
+.smFl{ flex:none; display:grid; place-items:center; width:32px; height:32px; border:0; border-radius:50%; background:rgba(var(--ink),.06); color:var(--white); cursor:pointer; }
+.smFl svg{ width:16px; height:16px; }
+.smFl[disabled]{ opacity:.25; cursor:default; }
 .smCab b{ font-size:.95rem; font-weight:650; }
 .smCab small{ font-size:.76rem; color:var(--dim); }
 .smFila{ display:grid; grid-template-columns:repeat(3, 1fr); gap:0; border-top:1px solid var(--line); border-bottom:1px solid var(--line); }
@@ -4531,7 +4551,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-31.274";
+const APP_VERSION = "2026-10-31.275";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -6319,6 +6339,13 @@ async function ask(text, mostrar){
     if(TOUCH) field.blur();
     return SalidasEma.preguntar(text);
   }
+  if(MODE === "dudas"){   // Control IA: la caja de Arm le habla a Armoni sobre las cuentas (con fotos o el PDF del extracto)
+    if(!text.trim() && !(typeof DudasPro !== "undefined" && DudasPro.tieneAdjuntos && DudasPro.tieneAdjuntos())) return;
+    field.value = ""; grow(); lock();
+    if(TOUCH) field.blur();
+    try{ DudasPro.ia(); }catch{}
+    return DudasPro.enviarTexto(text);
+  }
   const t = text.trim();
   /* "quiero pagar la energía/el carro": abre el portal ahí mismo, sin gastar un mensaje con el agente.
      Solo cuando de verdad quieres IR a pagar: si trae un monto o dice "pagué" (pasado), es un
@@ -6400,7 +6427,7 @@ async function ask(text, mostrar){
 }
 
 function grow(){ field.style.height = "auto"; field.style.height = field.scrollHeight + "px"; }
-function lock(){ send.disabled = busy || !(field.value.trim() || (MODE === "credito" && typeof CreditoCarro !== "undefined" && CreditoCarro.tieneFoto())); }
+function lock(){ send.disabled = busy || !(field.value.trim() || (MODE === "credito" && typeof CreditoCarro !== "undefined" && CreditoCarro.tieneFoto()) || (MODE === "dudas" && typeof DudasPro !== "undefined" && DudasPro.tieneAdjuntos && DudasPro.tieneAdjuntos())); }
 
 field.addEventListener("input", () => { grow(); lock(); });
 keptScrolled = () => {
@@ -7367,11 +7394,16 @@ const SalidasEma = (function(){
 
   /* «Salidas de este mes»: cuántas veces salieron en pareja, con Ema y en familia (días distintos); tocar uno muestra cuáles */
   let tipoAbierto = "";
+  /* el mes que se está viendo en «Salidas de …» (se puede ir a los meses anteriores con las flechas) */
+  let mesVista = "";
   function pintaTipos(){
     const box = document.getElementById("emaMesTipos"); if(!box) return;
-    const mk = mesHoy(), MES = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
+    const MES = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
+    const meses = [...new Set([mesHoy()].concat(...["meses", "pareja", "familia"].map(k => ((datos && datos[k]) || []).map(m => m.mes))))].filter(Boolean).sort().reverse().slice(0, 12);
+    if(!mesVista || !meses.includes(mesVista)) mesVista = mesHoy();
+    const mk = mesVista, iMes = meses.indexOf(mk);
     const delMes = arr => ((datos && datos[arr]) || []).find(m => m.mes === mk);
-    const ema = mesActual(), par = delMes("pareja"), fam = delMes("familia");
+    const ema = mk === mesHoy() ? mesActual() : (delMes("meses") || { salidas: [] }), par = delMes("pareja"), fam = delMes("familia");
     const fecha = f => { try{ return new Date(f + "T12:00:00").toLocaleDateString("es-CO", { weekday: "short", day: "numeric" }).replace(".", ""); }catch{ return f; } };
     /* el tipo de un día: si hubo algo distinto a comer (actividad, cine, paseo), cuenta como eso */
     const PRIO = ["actividad", "cine", "paseo", "comida", "antojo"];
@@ -7393,11 +7425,13 @@ const SalidasEma = (function(){
     const mixHTML = Object.keys(mix).length ? '<div class="smMix">' + Object.entries(TipoSalida.T).filter(([k]) => mix[k]).map(([k, v]) => '<span>' + v[0] + ' <b>' + mix[k] + '</b> ' + v[1].toLowerCase() + '</span>').join("") + '</div>' : '';
     if(tipoAbierto && !T.find(t => t[0] === tipoAbierto && t[3].length)) tipoAbierto = "";
     const ab = T.find(t => t[0] === tipoAbierto);
-    box.innerHTML = '<section class="smTipos"><div class="smCab"><b>Salidas de ' + MES[+mk.slice(5) - 1] + '</b><small>' + (total ? total + (total === 1 ? ' salida' : ' salidas') + ' en total' : 'Todavía no han salido este mes') + '</small></div>' +
+    const flecha = (d, ok, t) => '<button type="button" class="smFl" data-smmes="' + d + '"' + (ok ? '' : ' disabled') + ' aria-label="' + t + '"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="' + (d > 0 ? 'M15 6l-6 6 6 6' : 'M9 6l6 6-6 6') + '"/></svg></button>';
+    box.innerHTML = '<section class="smTipos"><div class="smCab">' + flecha(1, iMes < meses.length - 1, "Mes anterior") + '<b>Salidas de ' + MES[+mk.slice(5) - 1] + (mk.slice(0, 4) !== mesHoy().slice(0, 4) ? ' ' + mk.slice(0, 4) : '') + '</b>' + flecha(-1, iMes > 0, "Mes siguiente") + '<small>' + (total ? total + (total === 1 ? ' salida' : ' salidas') + ' en total' : (mk === mesHoy() ? 'Todavía no han salido este mes' : 'Ese mes no hubo salidas')) + '</small></div>' +
       '<div class="smFila" role="group">' + T.map(([k, ic, t, l]) => '<button type="button" data-smt="' + k + '" aria-pressed="' + (k === tipoAbierto) + '"' + (l.length ? '' : ' disabled') + '><span class="ic" aria-hidden="true">' + ic + '</span><b>' + l.length + '</b><small>' + t + '</small></button>').join("") + '</div>' +
       mixHTML + (idea ? '<p class="smIdea">' + idea + '</p>' : '') +
       (ab ? '<ul class="smLista">' + ab[3].map(x => '<li><span class="f">' + esc(fecha(x.f)) + '</span><span class="c">' + (x.tipo ? TipoSalida.T[x.tipo][0] + ' ' : '') + esc(x.cosas.join(" · ") || (ab[0] === "ema" ? "Salida con Ema" : "Salida")) + '</span><span class="m">' + (x.total ? peso(x.total) : '') + '</span></li>').join("") + '</ul>' : '') + '</section>';
     box.querySelectorAll("[data-smt]").forEach(b => b.onclick = () => { tipoAbierto = tipoAbierto === b.dataset.smt ? "" : b.dataset.smt; pintaTipos(); });
+    box.querySelectorAll("[data-smmes]").forEach(b => b.onclick = () => { const m = meses[iMes + +b.dataset.smmes]; if(m){ mesVista = m; tipoAbierto = ""; pintaTipos(); } });
     const pl = box.querySelector("[data-smplan]"); if(pl) pl.onclick = () => aPlanes();
   }
 
@@ -8683,6 +8717,7 @@ const CreditoCarro = (function(){
   });
   const pintaFoto = () => { fotoPrev.hidden = !foto; if(foto) fotoPrev.querySelector("img").src = foto; try{ lock(); }catch{} };
   if(fotoBtn) fotoBtn.addEventListener("click", () => {
+    if(MODE === "dudas"){ try{ DudasPro.adjuntar(); }catch{} return; }   // en Control IA el mismo botón adjunta fotos o el PDF
     const inp = document.createElement("input"); inp.type = "file"; inp.accept = "image/*";
     inp.style.cssText = "position:fixed;left:-9999px;opacity:0"; document.body.appendChild(inp);
     inp.addEventListener("change", async () => { const f = inp.files && inp.files[0]; inp.remove(); if(!f) return; foto = await reduceFoto(f); pintaFoto(); });
@@ -10132,6 +10167,7 @@ const Preguntas = (function(){
         lst.map(o => '<button type="button" data-dc="' + id + '" data-acc="op" data-clas="' + o[0] + '">' + o[1] + '</button>').join("") +
         '<button type="button" data-dc="' + id + '" data-acc="cats"' + (dcCats === d0.id ? ' class="on" aria-expanded="true"' : ' aria-expanded="false"') + '>Otra categoría</button></div>' +
         (dcCats === d0.id ? '<div class="lst dcCats">' + cats.map(c => '<button type="button" data-dc="' + id + '" data-acc="cat" data-cat="' + esc(c) + '">' + esc(c) + '</button>').join("") + '</div>' : '') +
+        '<div class="dcEscribe"><textarea rows="2" maxlength="400" data-dctxt="' + id + '" placeholder="O cuéntale a Armoni qué pasó…"></textarea><button type="button" data-dc="' + id + '" data-acc="escribir">Enviar</button></div>' +
         '<button type="button" class="dcNo" data-dc="' + id + '" data-acc="cancelar">Cancelar</button></div>';
     }
     const acc = d0.estado === "auto" || !d0.estado
@@ -10517,6 +10553,14 @@ const Preguntas = (function(){
       if(acc === "ok"){ dcAccion(id, "confirmar"); return; }
       if(acc === "corregir"){ dcAbierta = dcAbierta === id ? null : id; dcCats = null; delete dcError[id]; pinta(); return; }
       if(acc === "cancelar"){ dcAbierta = null; dcCats = null; pinta(); return; }
+      if(acc === "escribir"){   // explicarle con sus palabras: va a Control IA con todo el contexto, y Armoni propone el cambio con «Sí, hazlo»
+        const ta = document.querySelector('[data-dctxt="' + id + '"]'), t = ta ? ta.value.trim() : ""; if(!t){ if(ta) ta.focus(); return; }
+        const d1 = (decisiones || []).find(x => x.id === id) || {};
+        const msg = "Sobre «" + (d1.concepto || "un movimiento") + "»" + (d1.monto ? " de " + peso(d1.monto) : "") + (d1.fecha ? " del " + d1.fecha : "") + ", que decidiste «" + (d1.porque || d1.clas || "") + "»" + (d1.catNueva ? " (lo pasaste a " + d1.catNueva + ")" : "") + ": " + t + ". Propónme cómo dejarlo bien.";
+        dcAbierta = null; dcCats = null; pinta();
+        try{ DudasPro.ia(); DudasPro.enviarTexto(msg); }catch{}
+        return;
+      }
       if(acc === "cats"){ dcCats = dcCats === id ? null : id; pinta(); return; }
       if(acc === "op"){ dcAccion(id, "corregir", b.dataset.clas); return; }
       if(acc === "cat"){ dcAccion(id, "corregir", "categoria", b.dataset.cat); return; }
@@ -10768,7 +10812,8 @@ const DudasPro = (function(){
   const esc = t => String(t == null ? "" : t).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
   const md = t => esc(t).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>").split(/\n{2,}/).map(p => /^\s*[-•·] /m.test(p) ? "<ul>" + p.split(/\n/).map(l => l.replace(/^\s*[-•·] /, "")).filter(Boolean).map(l => "<li>" + l + "</li>").join("") + "</ul>" : "<p>" + p.replace(/\n/g, "<br>") + "</p>").join("");
   const guarda = () => { try{ localStorage.setItem(K, JSON.stringify(hist.slice(-20))); }catch{} };
-  const burbuja = (r, t, imgs) => { const d = document.createElement("div"); d.className = "dcProMsg " + (r === "u" ? "yo" : "ar"); const ls = imgs ? [].concat(imgs) : []; d.innerHTML = (ls.length ? '<div class="dcProImgs">' + ls.map((src, i) => '<img alt="Imagen enviada ' + (i + 1) + '" src="' + src + '">').join("") + '</div>' : "") + (r === "u" ? "<p>" + esc(t) + "</p>" : md(t)); log.appendChild(d); log.scrollTop = log.scrollHeight; return d; };
+  /* los mensajes se ven como en Arm (mismas clases .msg: tú a la derecha en burbuja, Armoni como texto amplio) */
+  const burbuja = (r, t, imgs) => { const d = document.createElement("div"); d.className = "msg " + (r === "u" ? "you" : "bot") + " dcProMsg " + (r === "u" ? "yo" : "ar"); const ls = imgs ? [].concat(imgs) : []; d.innerHTML = '<div class="body">' + (ls.length ? '<div class="dcProImgs">' + ls.map((src, i) => '<img alt="Imagen enviada ' + (i + 1) + '" src="' + src + '">').join("") + '</div>' : "") + (r === "u" ? "<p>" + esc(t) + "</p>" : md(t)) + '</div>'; log.appendChild(d); try{ d.scrollIntoView({ block: "end", behavior: REDUCED ? "auto" : "smooth" }); }catch{} return d; };
   const pinta = () => { log.innerHTML = ""; hist.forEach(h => burbuja(h.r, h.t, null)); nueva.hidden = !hist.length; };
   const listo = () => { env.disabled = ocupado || !(txt.value.trim() || fotos.length); };
   /* miniaturas de lo adjunto, cada una con su × */
@@ -10941,6 +10986,7 @@ const DudasPro = (function(){
   const vista = document.getElementById("dudasView"), KS = "armoni.dudas.seg";
   function seg(v){
     vista.dataset.seg = v; vista.querySelectorAll("[data-seg]").forEach(b => b.setAttribute("aria-selected", String(b.dataset.seg === v)));
+    document.body.classList.toggle("dudas-ia", v === "ia");   // en Control IA se usa la misma caja de escribir de Arm (abajo)
     try{ localStorage.setItem(KS, v); }catch{}
     if(v === "ia") pintaCierre();
   }
@@ -10979,7 +11025,9 @@ const DudasPro = (function(){
   seg((() => { try{ return localStorage.getItem(KS) === "ia" ? "ia" : "datos"; }catch{ return "datos"; } })());
   pintaCierre();
   pinta(); listo();
-  return { ia: () => seg("ia"), pintaCierre };
+  return { ia: () => seg("ia"), pintaCierre,
+    enviarTexto: t => { txt.value = String(t || ""); txt.dispatchEvent(new Event("input")); return enviar(); },
+    adjuntar: () => file.click(), tieneAdjuntos: () => fotos.length > 0 };
 })();
 TrasIntro.hacer(() => setTimeout(() => Preguntas.revisar(), 2500));
 
@@ -11029,7 +11077,7 @@ const Drawer = (function(){
   navTemp.addEventListener("click", () => { setFL("armoni.nav.tempVisto"); luz(); });
   const NAV = { chat: navChat, rest: navRest, ema: navEma, credito: navCredito, gmail: navGmail, glim: navGlim, recuerda: navRecuerda, mercar: navMercar, dura: navDura, mes: navMes, balance: navBalance, ahorro: navAhorro, dudas: navDudas, ajustes: navAjustes, temp: navTemp, fam: navFam };
   const SUB = { chat: "Presupuesto de la casa", rest: "Restaurantes", ema: "Salidas Ema", credito: "Crédito Carro", gmail: "AT Gmail", glim: "Glim", recuerda: "Recuerda", mercar: "A mercar", dura: "Duración", mes: "Tu mes", balance: "Balance", ahorro: "Ahorro", dudas: "Dudas", ajustes: "Ajustes", temp: "Temporada", fam: "La familia" };
-  const PLACEHOLDER = { chat: "Escribe aquí…", rest: "¿Qué se te antoja?", ema: "¿A dónde llevamos a Ema?", credito: "Pregúntale sobre el crédito…", gmail: "", glim: "", recuerda: "", mercar: "", dura: "", mes: "", balance: "", ahorro: "", dudas: "", ajustes: "", temp: "", fam: "" };
+  const PLACEHOLDER = { chat: "Escribe aquí…", rest: "¿Qué se te antoja?", ema: "¿A dónde llevamos a Ema?", credito: "Pregúntale sobre el crédito…", gmail: "", glim: "", recuerda: "", mercar: "", dura: "", mes: "", balance: "", ahorro: "", dudas: "Pregúntale a Armoni o manda el extracto…", ajustes: "", temp: "", fam: "" };
 
   /* marca del menú */
   const m2 = document.getElementById("mark2");
