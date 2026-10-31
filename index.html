@@ -1298,6 +1298,27 @@ body[class*="mode-"] #credAviso{ display:none !important; }
 
 
 /* ═════════ Tu mes: resumen estilo historia ═════════ */
+.ddModo{ display:grid; grid-template-columns:1fr 1fr; gap:4px; margin:0 0 16px; padding:4px; border-radius:16px; background:rgba(var(--ink),.06); }
+.ddModo button{ min-height:42px; border:0; border-radius:12px; background:none; color:var(--ghost); font:inherit; font-size:.92rem; font-weight:650; cursor:pointer; }
+.ddModo button[aria-selected="true"]{ color:var(--white); background:var(--panel); box-shadow:0 1px 0 rgba(255,255,255,.06), 0 4px 14px rgba(0,0,0,.25); }
+#dudasView #ddIA{ display:none; }
+#dudasView[data-seg="ia"] #ddIA{ display:block; }
+#dudasView[data-seg="ia"] #ddDatos{ display:none; }
+/* Control IA: como Arm, mucho espacio para leer y la caja de escribir abajo, siempre a mano */
+#ddIA .dcPro{ display:flex; flex-direction:column; min-height:calc(100dvh - 250px); margin:0; padding:0; border:0; background:none; }
+#ddIA .dcProCab{ padding:0 2px 6px; }
+#ddIA .dcProLog{ flex:1; max-height:none; overflow:visible; gap:12px; margin-top:12px; padding-bottom:8px; }
+#ddIA .dcProMsg{ max-width:92%; padding:12px 14px; font-size:.95rem; line-height:1.55; border-radius:18px; }
+#ddIA .dcProMsg.ar{ max-width:100%; background:none; padding:4px 2px; }
+#ddIA .dcProBar{ position:sticky; bottom:0; z-index:3; margin:8px -4px 0; padding:10px 4px calc(10px + env(safe-area-inset-bottom)); background:linear-gradient(to top, var(--bg, #000) 70%, transparent); }
+#ddIA #dcProTxt{ min-height:48px; font-size:.95rem; border-radius:16px; }
+#ddIA .dcProFoto, #ddIA .dcProEnviar{ width:48px; height:48px; border-radius:16px; }
+.dcCierre{ display:flex; gap:12px; align-items:center; margin:0 0 14px; padding:12px 14px; border-radius:18px; border:1px solid rgba(143,199,255,.35); background:linear-gradient(130deg, rgba(143,199,255,.12), rgba(143,199,255,.03)); }
+.dcCierre .tx{ flex:1; min-width:0; font-size:.84rem; line-height:1.4; color:var(--ghost); }
+.dcCierre .tx b{ display:block; color:var(--white); font-size:.9rem; }
+.dcCierre button{ flex:none; padding:9px 12px; border-radius:12px; border:0; background:linear-gradient(140deg, #8fc7ff, #5f8bff); color:#071226; font:inherit; font-size:.82rem; font-weight:700; cursor:pointer; }
+body[class*="mode-"] #cierreAviso{ display:none !important; }
+#cierreAviso{ width:min(100%, 42rem); margin:0 auto; }
 .dcPro{ margin:0 0 18px; padding:14px; border-radius:22px; border:1px solid var(--line); background:radial-gradient(120% 90% at 0% 0%, rgba(143,199,255,.10), transparent 60%), var(--panel); }
 .dcProCab{ display:flex; gap:10px; align-items:flex-start; }
 .dcProIco{ font-size:1.4rem; line-height:1; }
@@ -4133,7 +4154,7 @@ body.mode-credito #credFoto{ display:grid; }
       </button>
       <button type="button" id="navDudas">
         <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8.5 8.5 0 0 1-12.4 7.6L3 21l1.4-5.6A8.5 8.5 0 1 1 21 12z"/><path d="M9.6 9.4a2.5 2.5 0 0 1 4.8.8c0 1.7-2.4 2-2.4 3.4M12 16.4h.01"/></svg></span>
-        <span class="txt"><b>Dudas</b><span>Lo que Armoni quiere preguntarte</span></span>
+        <span class="txt"><b>Dudas</b><span>Datos y Control IA</span></span>
         <span class="navBadge" id="navDudasN" hidden></span>
       </button>
       <button type="button" id="navAjustes">
@@ -4175,6 +4196,7 @@ body.mode-credito #credFoto{ display:grid; }
 
       <div id="glimBanner"></div>
       <div id="credAviso"></div>
+      <div id="cierreAviso"></div>
 
       <section id="welcome">
         <p class="sr">Armoni. Escribe un gasto para guardarlo, o pregunta por lo que llevan gastado.</p>
@@ -4311,9 +4333,15 @@ body.mode-credito #credFoto{ display:grid; }
 
       <section id="dudasView" aria-label="Dudas">
         <div class="restIntro"><h2>Dudas</h2></div>
+        <div class="ddModo" role="tablist" aria-label="Dudas"><button type="button" role="tab" data-seg="datos" aria-selected="true">Datos</button><button type="button" role="tab" data-seg="ia" aria-selected="false">Control IA</button></div>
+        <div id="ddDatos">
         <p class="tmSub">Lo que Armoni no entendió de tus cuentas y quiere preguntarte</p>
-        <section class="dcPro" id="dcPro" aria-label="Pregúntale a Armoni">
-          <div class="dcProCab"><span class="dcProIco" aria-hidden="true">🧠</span><div><b>Pregúntale a Armoni</b><small>Pregunta lo que sea o manda una foto (extracto, recibo, pantallazo) y la reviso contra tus cuentas</small></div><button type="button" class="dcProNueva" id="dcProNueva" hidden>Nueva</button></div>
+        <div id="ddCuerpo"></div>
+        </div>
+        <div id="ddIA">
+        <div id="dcCierre"></div>
+        <section class="dcPro" id="dcPro" aria-label="Control IA">
+          <div class="dcProCab"><span class="dcProIco" aria-hidden="true">🧠</span><div><b>Control IA</b><small>Pregúntale lo que sea de tus cuentas o mándale fotos (extracto, recibo, pantallazo): las revisa contra lo registrado y, si le dices que sí, lo deja exacto</small></div><button type="button" class="dcProNueva" id="dcProNueva" hidden>Nueva</button></div>
           <div class="dcProLog" id="dcProLog" aria-live="polite"></div>
           <div class="dcProPrev" id="dcProPrev" hidden><img alt="Imagen adjunta"><button type="button" aria-label="Quitar la imagen">×</button></div>
           <div class="dcProBar">
@@ -4322,7 +4350,7 @@ body.mode-credito #credFoto{ display:grid; }
             <button type="button" class="dcProEnviar" id="dcProEnviar" aria-label="Enviar" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg></button>
           </div>
         </section>
-        <div id="ddCuerpo"></div>
+        </div>
       </section>
 
       <section id="ahorroView" aria-label="Ahorro">
@@ -4466,7 +4494,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-31.271";
+const APP_VERSION = "2026-10-31.272";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -10502,6 +10530,7 @@ const DudasPro = (function(){
     const q = txt.value.trim(), img = foto; if((!q && !img) || ocupado) return;
     ocupado = true; txt.value = ""; txt.style.height = ""; foto = null; prev.hidden = true; listo();
     burbuja("u", q || "Revisa esta imagen", img);
+    try{ document.dispatchEvent(new CustomEvent("dudas-enviada", { detail: { q, img: !!img } })); }catch{}
     const espera = burbuja("a", "Revisando tus cuentas…"); espera.classList.add("pensando");
     const antes = hist.slice(-8);
     hist.push({ r: "u", t: (q || "Revisa esta imagen") + (img ? " [mandé una imagen]" : "") });
@@ -10526,7 +10555,7 @@ const DudasPro = (function(){
   function contexto(){
     let ah = null; try{ ah = JSON.parse(localStorage.getItem("armoni.ahorro")); }catch{}
     if(!ah || !Array.isArray(ah.cajas)) return {};
-    return { ahorro: { cuenta: ah.cuenta, paraGastar: ah.paraGastar, total: ah.total, cajas: ah.cajas.map(c => ({ id: c.id, nombre: c.nombre, saldo: c.saldo, inicial: c.inicial, inicialFecha: c.inicialFecha, tasa: c.tasa, meta: c.meta, gasto: !!c.gasto })) } };
+    return { ahorro: { cuenta: ah.cuenta, paraGastar: ah.paraGastar, total: ah.total, cajas: ah.cajas.map(c => ({ id: c.id, nombre: c.nombre, saldo: c.saldo, inicial: c.inicial, inicialFecha: c.inicialFecha, tasa: c.tasa, rendimiento: c.rendimiento, meta: c.meta, gasto: !!c.gasto })) } };
   }
   /* lo confirmado que vive en otros flujos: anotar un movimiento que faltaba y poner el saldo real de una cajita */
   async function hazApp(lista){
@@ -10545,8 +10574,47 @@ const DudasPro = (function(){
     if(ok.length || mal.length) burbuja("a", (ok.length ? "✓ Hecho: " + ok.join(" · ") + "." : "") + (mal.length ? (ok.length ? "\n\n" : "") + "⚠️ No pude con " + mal.join(", ") + ". Revisa la conexión e inténtalo otra vez." : ""));
     if(lista.some(a => a.tipo === "cajita")){ try{ Ahorro.refresh(); }catch{} }
   }
+  /* Datos | Control IA */
+  const vista = document.getElementById("dudasView"), KS = "armoni.dudas.seg";
+  function seg(v){
+    vista.dataset.seg = v; vista.querySelectorAll("[data-seg]").forEach(b => b.setAttribute("aria-selected", String(b.dataset.seg === v)));
+    try{ localStorage.setItem(KS, v); }catch{}
+    if(v === "ia") pintaCierre();
+  }
+  vista.querySelector(".ddModo").addEventListener("click", e => { const b = e.target.closest("[data-seg]"); if(b) seg(b.dataset.seg); });
+  seg((() => { try{ return localStorage.getItem(KS) === "ia" ? "ia" : "datos"; }catch{ return "datos"; } })());
+  /* cierre de mes: desde el 28 (y hasta el 7 del mes siguiente) Armoni pide el extracto del banco para validar que todo quedó registrado */
+  const KC = "armoni.extracto.hecho", MES = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
+  let cierreActivo = "";
+  function cierrePendiente(){
+    const d = new Date(), dia = d.getDate();
+    let k = "";
+    if(dia >= 28) k = d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0");
+    else if(dia <= 7){ const p = new Date(d.getFullYear(), d.getMonth() - 1, 1); k = p.getFullYear() + "-" + String(p.getMonth() + 1).padStart(2, "0"); }
+    if(!k) return "";
+    let hechos = []; try{ hechos = JSON.parse(localStorage.getItem(KC)) || []; }catch{}
+    return hechos.includes(k) ? "" : k;
+  }
+  const nombreMes = k => MES[+k.slice(5) - 1];
+  function pintaCierre(){
+    const k = cierrePendiente(), box = document.getElementById("dcCierre"), main = document.getElementById("cierreAviso");
+    if(box) box.innerHTML = k ? '<div class="dcCierre"><span aria-hidden="true">📄</span><span class="tx"><b>Cierre de ' + nombreMes(k) + '</b>Sube el extracto de Nu (pantallazos o PDF en foto) y reviso que todo esté registrado y que las cajitas cuadren.</span><button type="button" data-cierre>Subir extracto</button></div>' : "";
+    if(main) main.innerHTML = k ? '<button type="button" class="credAvisoBtn"><span class="ic" aria-hidden="true">📄</span><span class="tx"><b>Cierre de ' + nombreMes(k) + '</b><small>Armoni necesita el extracto del banco para validar que todo quedó registrado</small></span><span class="ir" aria-hidden="true">›</span></button>' : "";
+    const b = box && box.querySelector("[data-cierre]");
+    if(b) b.onclick = () => { cierreActivo = k; if(!txt.value.trim()){ txt.value = "Este es el extracto de " + nombreMes(k) + ". Valida que todo esté registrado y que las cajitas cuadren."; txt.dispatchEvent(new Event("input")); } file.click(); };
+    if(main && main.firstChild) main.firstChild.onclick = () => { try{ Drawer.go("dudas"); }catch{} seg("ia"); setTimeout(() => { const c = document.querySelector("#dcCierre [data-cierre]"); if(c) c.focus(); }, 300); };
+  }
+  /* si mandan una imagen con el cierre activo (o diciendo «extracto»), ese mes queda revisado */
+  const marcaCierre = (q, img) => {
+    const k = cierrePendiente(); if(!k || !img || !(cierreActivo === k || /extracto/i.test(q))) return;
+    let h = []; try{ h = JSON.parse(localStorage.getItem(KC)) || []; }catch{}
+    if(!h.includes(k)){ h.push(k); try{ localStorage.setItem(KC, JSON.stringify(h.slice(-24))); }catch{} }
+    cierreActivo = ""; pintaCierre();
+  };
+  document.addEventListener("dudas-enviada", e => marcaCierre(e.detail.q, e.detail.img));
+  pintaCierre();
   pinta(); listo();
-  return {};
+  return { ia: () => seg("ia") };
 })();
 TrasIntro.hacer(() => setTimeout(() => Preguntas.revisar(), 2500));
 
@@ -11443,7 +11511,7 @@ const GastoManual = (function(){
       }
       const dato = { tipo, concepto: nombre, categoria, monto, fecha, nota: nota$ };
       if(pareja) dato.salida = "Pareja";
-      if(tipo === "Gasto" && medio === "efectivo") dato.medio = "efectivo";   // n8n: Monto 0 + «Efectivo» = valor (no baja el presupuesto)
+      if(tipo === "Gasto" && medio === "efectivo" && !/\bretiro/i.test(concepto)) dato.medio = "efectivo";   // un retiro en efectivo SÍ sale de la cuenta (lo que se paga después con ese efectivo ya no)   // n8n: Monto 0 + «Efectivo» = valor (no baja el presupuesto)
       if(conLugar() && lugar.trim()){ const ex = existente(), rated = !!(ex && ex.score > 0); dato.lugar = lugar.trim(); dato.personas = personas; if(ex && ex.id) dato.lugarId = ex.id; if(!rated && puntos) dato.puntuacion = puntos; if(!rated && comentario.trim()) dato.comentario = comentario.trim(); }
       guardando = true; btn.disabled = true; btn.textContent = "Guardando…"; err.textContent = "";
       const enviar = forzar => Cola.post(MOVIMIENTO_URL, { method: "POST", body: JSON.stringify(Object.assign({ token: MERCADO_TOKEN }, dato, forzar ? { forzar: true } : {})) })
