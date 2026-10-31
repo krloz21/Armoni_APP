@@ -4380,7 +4380,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-31.263";
+const APP_VERSION = "2026-10-31.264";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -7158,7 +7158,7 @@ const SalidasEma = (function(){
     /* el tipo de un día: si hubo algo distinto a comer (actividad, cine, paseo), cuenta como eso */
     const PRIO = ["actividad", "cine", "paseo", "comida", "antojo"];
     const tipoDia = ts => PRIO.find(p => ts.includes(p)) || "";
-    const porDia = cosas => { const d = {}; (cosas || []).forEach(x => { const q = d[x.f] || (d[x.f] = { f: x.f, cosas: [], total: 0, ts: [] }); q.cosas.push(x.c); q.ts.push(TipoSalida.de(x.c, x.t)); q.total += +x.m || 0; }); return Object.values(d).map(q => Object.assign(q, { tipo: tipoDia(q.ts) })).sort((a, b) => b.f.localeCompare(a.f)); };
+    const porDia = cosas => { const d = {}; (cosas || []).forEach(x => { const q = d[x.f] || (d[x.f] = { f: x.f, cosas: [], total: 0, ts: [] }); const nom = x.l || x.c; if(!q.cosas.includes(nom)) q.cosas.push(nom); q.ts.push(TipoSalida.de((x.l || "") + " " + x.c, x.t));   // se muestra dónde fue (si quedó el lugar) y si no, qué fue q.total += +x.m || 0; }); return Object.values(d).map(q => Object.assign(q, { tipo: tipoDia(q.ts) })).sort((a, b) => b.f.localeCompare(a.f)); };
     const T = [
       ["pareja", "💑", "En pareja", porDia(par && par.cosas)],
       ["ema", "👧", "Con Ema", (ema.salidas || []).slice().sort((a, b) => b.fecha.localeCompare(a.fecha)).map(z => ({ f: z.fecha, total: z.total || 0, cosas: (z.paradas && z.paradas.length ? z.paradas.map(p => p.lugar).filter(Boolean) : []).concat((z.gastos || []).map(g => g.l).filter(Boolean)).filter((v, i, a) => a.indexOf(v) === i).slice(0, 3),
