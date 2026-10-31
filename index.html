@@ -925,6 +925,20 @@ body.mode-gmail footer, body.mode-glim footer{ display:none; }
 .gmBtn:focus-visible{ outline:2px solid var(--cyan); outline-offset:2px; }
 
 /* tarjeta de resumen del crédito: reusa el estilo de la ficha de restaurante (rmTop/rmStats/rmNote) */
+.credVerif{ margin:0 0 12px; padding:14px; border-radius:18px; border:1px solid rgba(255,190,90,.35); background:linear-gradient(135deg, rgba(255,190,90,.12), rgba(255,190,90,.03)); }
+.credVerif b{ display:block; font-size:.92rem; }
+.credVerif p{ margin:4px 0 10px; font-size:.82rem; line-height:1.4; color:var(--ghost); }
+.credVerifBtns{ display:flex; gap:8px; flex-wrap:wrap; }
+.credVerifBtns button{ flex:1 1 140px; min-height:40px; padding:8px 12px; border-radius:12px; border:1px solid var(--line); background:var(--panel); color:var(--white); font:inherit; font-size:.82rem; font-weight:650; cursor:pointer; }
+.credVerifBtns button:first-child{ border-color:transparent; background:linear-gradient(140deg, #ffcf7a, #ff9a5a); color:#1a1206; }
+body[class*="mode-"] #credAviso{ display:none !important; }
+#credAviso{ width:min(100%, 42rem); margin:0 auto; }
+.credAvisoBtn{ display:flex; align-items:center; gap:12px; width:100%; margin:8px 0 6px; padding:12px 14px; border-radius:18px; border:1px solid rgba(255,190,90,.35); background:linear-gradient(130deg, rgba(255,190,90,.12), rgba(255,190,90,.04)); color:var(--white); font:inherit; text-align:left; cursor:pointer; }
+.credAvisoBtn .ic{ font-size:1.4rem; }
+.credAvisoBtn .tx{ flex:1; min-width:0; }
+.credAvisoBtn b{ display:block; font-size:.9rem; }
+.credAvisoBtn small{ display:block; margin-top:2px; font-size:.78rem; color:var(--ghost); line-height:1.35; }
+.credAvisoBtn .ir{ font-size:1.4rem; color:var(--dim); }
 .credCard{ background:var(--panel); border:1px solid var(--line); border-radius:22px; padding:18px 16px; margin-bottom:6px; }
 .credCard .rmTop{ padding-right:0; }
 .credCard .rmNote p.bien{ color:#8fe6a8; }
@@ -3966,6 +3980,7 @@ body.mode-credito #credFoto{ display:grid; }
 
       <div id="glimBanner"></div>
       <div id="emaEquilibrio"></div>
+      <div id="credAviso"></div>
 
       <section id="welcome">
         <p class="sr">Armoni. Escribe un gasto para guardarlo, o pregunta por lo que llevan gastado.</p>
@@ -4240,7 +4255,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-31.258";
+const APP_VERSION = "2026-10-31.259";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -8301,6 +8316,17 @@ const CreditoCarro = (function(){
         '<p style="margin-top:8px;color:var(--dim);font-size:.82rem">Cuota teórica sin seguros: ' + plata(r.cuotaTeoricaSinSeguros) + ' · Faltan ' + cuotasFaltan + ' cuotas</p>' +
       '</div></div>';
 
+    const pv = (d && d.porVerificar) || [];
+    if(pv.length){
+      const ult = pv[pv.length - 1], MES = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
+      const mes = ult.fecha ? MES[+String(ult.fecha).slice(5, 7) - 1] : "";
+      cardEl.insertAdjacentHTML("afterbegin", '<div class="credVerif"><b>Llegó el pago' + (mes ? ' de ' + mes : '') + ' por PSE</b><p>Armoni registró la cuota ' + esc(ult.numero || "") + ' de ' + plata(ult.monto || 0) + ' y calculó el capital y el interés. Para que quede exacta, sube la foto del extracto del banco o escríbeme los valores.</p>' +
+        '<div class="credVerifBtns"><button type="button" data-cv="foto">Subir foto del extracto</button><button type="button" data-cv="texto">Escribir los valores</button></div></div>');
+      cardEl.querySelector('[data-cv="foto"]').onclick = () => { if(fotoBtn) fotoBtn.click(); };
+      cardEl.querySelector('[data-cv="texto"]').onclick = () => { field.value = "Los valores exactos de la cuota " + (ult.numero || "") + (mes ? " de " + mes : "") + " son: capital $ , interés $ , seguros $ , saldo $ "; field.dispatchEvent(new Event("input")); field.focus(); };
+    }
+    try{ document.dispatchEvent(new Event("credito-datos")); }catch{}
+
     requestAnimationFrame(() => {
       const fg = cardEl.querySelector(".fg");
       if(fg) requestAnimationFrame(() => { fg.style.strokeDashoffset = (circ * (1 - pct)).toFixed(1); });
@@ -8341,8 +8367,7 @@ const CreditoCarro = (function(){
 
   function contexto(){
     if(!datos) return "";
-    return "[Resumen actual del crédito, ya calculado, real vs. el plan ideal:\n" + JSON.stringify(datos.resumen) +
-      "\nDetalle de cada cuota pagada:\n" + JSON.stringify(datos.pagos) + "]\n\n";
+    return "[Resumen actual del crédito, ya calculado, real vs. el plan ideal:\n" + JSON.stringify(datos.resumen) + "]\n\n";   // el detalle de cada cuota lo pone el flujo, directo de Notion
   }
 
   function burbuja(who, html){
@@ -8369,7 +8394,7 @@ const CreditoCarro = (function(){
     wait.scrollIntoView({ block: "center", behavior: REDUCED ? "auto" : "smooth" });
 
     if(!datos){ try{ await fetchLive(); }catch{} }
-    let respuesta = null, falla = null;
+    let respuesta = null, falla = null, guardado = false;
     try{
       const res = await fetch(CREDITO_CARRO_CHAT_URL, {
         method: "POST",
@@ -8381,14 +8406,14 @@ const CreditoCarro = (function(){
         falla = ["El agente respondió con un error (" + res.status + ")", "Revisa Executions en n8n para ver qué nodo falló."];
       } else {
         let reply = "";
-        try{ let d = JSON.parse(txt); if(Array.isArray(d)) d = d[0] || {}; reply = d.output || d.text || d.message || d.response || ""; }catch{ reply = txt; }
+        try{ let d = JSON.parse(txt); if(Array.isArray(d)) d = d[0] || {}; reply = d.output || d.text || d.message || d.response || ""; if(d.guardado) guardado = true; }catch{ reply = txt; }
         if(String(reply).trim()) respuesta = String(reply);
         else falla = ["El agente respondió vacío", "Revisa que Respond to Webhook esté en First Incoming Item."];
       }
     }catch{
       falla = ["No se pudo hablar con el agente", "Revisa tu internet y que Tailscale esté encendido, y que el workflow esté publicado."];
     }
-    if(respuesta){ wait.replaceWith(burbuja("bot", render(respuesta))); if(img) setTimeout(() => { fetchLive(JSON.stringify(datos)).catch(() => {}); }, 1500); }   // si con la foto se registró un pago, la tarjeta del crédito se pone al día
+    if(respuesta){ wait.replaceWith(burbuja("bot", render(respuesta))); if(img || guardado) setTimeout(() => { fetchLive(JSON.stringify(datos)).catch(() => {}); }, 1500); }   // si con la foto se registró un pago, la tarjeta del crédito se pone al día
     else {
       const w = document.createElement("div");
       w.className = "msg";
@@ -8402,7 +8427,18 @@ const CreditoCarro = (function(){
   }
   function nueva(){ charla = null; askEl.innerHTML = ""; }
 
-  return { refresh, preguntar, nueva, tieneFoto: () => !!foto };
+  /* al abrir la app: trae el estado del crédito en segundo plano (sin IA) para avisar en la pantalla principal si falta confirmar una cuota */
+  function precarga(){ const c = readCache(); if(c && c.datos) datos = datos || c.datos; if(c && Date.now() - (c.at || 0) < 10 * 60000) return aviso(); fetch(CREDITO_CARRO_URL, { cache: "no-store" }).then(r => r.ok ? r.json() : null).then(j => { if(j){ writeCache(j); datos = j; } aviso(); }).catch(() => aviso()); }
+  function aviso(){
+    const box = document.getElementById("credAviso"); if(!box) return;
+    const c = readCache(), pv = (c && c.datos && c.datos.porVerificar) || [];
+    if(!pv.length){ box.innerHTML = ""; return; }
+    const ult = pv[pv.length - 1];
+    box.innerHTML = '<button type="button" class="credAvisoBtn"><span class="ic" aria-hidden="true">🚗</span><span class="tx"><b>Llegó el pago del carro</b><small>Falta confirmar los valores exactos de la cuota ' + esc(ult.numero || "") + ': sube la foto del extracto</small></span><span class="ir" aria-hidden="true">›</span></button>';
+    box.firstChild.onclick = () => { try{ Drawer.go("credito"); }catch{} };
+  }
+  document.addEventListener("credito-datos", aviso);
+  return { refresh, preguntar, nueva, precarga, tieneFoto: () => !!foto };
 })();
 
 /* ════════════════════════════════════════════════════════════
@@ -14448,7 +14484,7 @@ const TuMes = (function(){
 })();
 activity();
 TrasIntro.hacer(() => Servicios.check());
-TrasIntro.hacer(() => setTimeout(() => { try{ SalidasEma.precarga(); }catch{} }, 1200));   // el aviso de citas/salidas con Ema sale en la pantalla principal
+TrasIntro.hacer(() => setTimeout(() => { try{ SalidasEma.precarga(); }catch{} try{ CreditoCarro.precarga(); }catch{} }, 1200));   // el aviso de citas/salidas con Ema sale en la pantalla principal
 TrasIntro.hacer(() => Glim.check());
 TrasIntro.hacer(() => TuMes.avisar());
 
