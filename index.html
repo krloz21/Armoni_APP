@@ -3264,6 +3264,22 @@ body[class*="mode-"] #emaEquilibrio{ display:none !important; }
 .emaGastos p em{ font-style:normal; color:var(--white); }
 @keyframes emaSube{ from{ opacity:0; transform:translateY(14px); } to{ opacity:1; transform:none; } }
 .emaEntra{ animation:emaSube .6s var(--ease-out) backwards; }
+/* uxval: los valores de Salidas Ema. Cifras proporcionales (con tabular-nums esta letra separa el punto: «$36 . 000»),
+   un solo total grande por día, los parciales pequeños y tenues, y el efectivo como etiqueta discreta */
+.emaDetCab{ align-items:center; gap:10px; }
+.emaDetCab > span{ flex:1 1 auto; min-width:0; line-height:1.3; }
+.emaDetCab b.emaTot{ margin-left:0; font-size:1.42rem; font-weight:650; line-height:1.1; letter-spacing:-.02em; color:var(--strong); white-space:nowrap; }
+.emaDetCab b, .emaPCab span, .emaChip em, .elLin.elGas, .elDes em, .elNota, .elFStats b, .elFTop .restNum{ font-variant-numeric:normal; font-feature-settings:normal; }
+.emaPCab span{ font-size:.82rem; font-weight:600; color:var(--ghost); white-space:nowrap; }
+.emaChip{ gap:6px; }
+.emaChip em{ font-weight:600; color:var(--white); white-space:nowrap; }
+.emaChip.ef{ background:rgba(var(--ink),.06); border-color:var(--line); color:var(--ghost); }
+.emaChip.ef em{ color:var(--white); }
+.emaChip .emaEfTag{ align-self:center; padding:0 6px; border-radius:6px; font-size:.62rem; font-weight:600; line-height:1.5; letter-spacing:.03em; color:var(--dim); border:1px solid rgba(var(--ink),.16); }
+.emaEfLey{ display:flex; align-items:baseline; gap:8px; margin:12px 0 0; padding-top:10px; border-top:1px solid var(--line); font-size:.74rem; line-height:1.4; color:var(--dim); }
+.emaEfLey::before{ content:""; flex:none; width:6px; height:6px; border-radius:50%; border:1px solid currentColor; transform:translateY(-1px); }
+.elLin.elGas{ color:var(--dim); }
+.elLin.elGas b{ font-weight:600; color:var(--white); white-space:nowrap; }
 .duVacio{ text-align:center; padding:26px 0; }
 @keyframes duSube{ from{ opacity:0; transform:translateY(16px) scale(.98); } to{ opacity:1; transform:none; } }
 .duEntra.duHero, .duEntra.duChips{ animation:duSube .6s var(--ease-out) backwards; }
@@ -4255,7 +4271,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-31.259";
+const APP_VERSION = "2026-10-31.260";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -6789,18 +6805,26 @@ const SalidasEma = (function(){
     if(/restaurante|pizza|burger|hamburg|sushi|asadero|caf[eé]|crepes|panader/.test(n)) return "🍽️";
     return "📍";
   };
-  const chipGasto = g => '<span class="emaChip' + (EF(g) ? ' ef' : '') + (g.pend ? ' emaPend' : '') + '">' + (EF(g) ? '💵 ' : '') + esc(g.c) +
-    (g.p ? ' <small class="emaAntes">pagado el ' + esc(fechaCorta(g.p)) + '</small>' : '') + (g.pend ? ' <small>· por enviar</small>' : '') + ' <em>' + peso(g.m) + '</em></span>';
+  const chipGasto = g => '<span class="emaChip' + (EF(g) ? ' ef' : '') + (g.pend ? ' emaPend' : '') + '">' + esc(g.c) +
+    (g.p ? ' <small class="emaAntes">pagado el ' + esc(fechaCorta(g.p)) + '</small>' : '') + (g.pend ? ' <small>· por enviar</small>' : '') + (g.m ? ' <em>' + peso(g.m) + '</em>' : '') +
+    (EF(g) ? ' <small class="emaEfTag">efectivo</small>' : '') + '</span>';
   function detalleHTML(q){
     if(!q) return "";
     const largo = new Date(q.fecha + "T12:00:00").toLocaleDateString("es-CO", { weekday: "long", day: "numeric", month: "long" });
     const gr = porLugar(q), ef = q.gastos.filter(EF).reduce((a, g) => a + (g.m || 0), 0), nLug = gr.filter(x => x.l).length;
-    return '<div class="emaDetCab"><span>' + esc(largo) + '</span><b>' + peso(q.total) + '</b><button type="button" class="emaLapiz" data-editar="' + esc(q.fecha) + '" aria-label="Editar lo anotado el ' + esc(largo) + '" title="Editar lo anotado">' + LAPIZ + '</button></div>' +
+    /* el total de un lugar solo se muestra si no repite otro número: hay más de un lugar y ese lugar tiene más de un gasto */
+    const sumaLug = x => gr.length > 1 && x.gastos.length > 1 && x.total ? '<span>' + peso(x.total) + '</span>' : '';
+    /* efectivo: si es todo, o lugares enteros, se nombra sin repetir el monto que ya está arriba */
+    const grEf = gr.filter(x => x.l && x.gastos.every(EF)), nomEf = grEf.map(x => esc(x.l));
+    const efTx = !ef ? "" : ef >= q.total ? "Todo se pagó en efectivo"
+      : grEf.length && grEf.reduce((a, x) => a + x.total, 0) === ef ? "Lo de " + (nomEf.length > 1 ? nomEf.slice(0, -1).join(", ") + " y " + nomEf[nomEf.length - 1] : nomEf[0]) + " fue en efectivo"
+      : peso(ef) + " en efectivo";
+    return '<div class="emaDetCab"><span>' + esc(largo) + '</span>' + (q.total ? '<b class="emaTot">' + peso(q.total) + '</b>' : '') + '<button type="button" class="emaLapiz" data-editar="' + esc(q.fecha) + '" aria-label="Editar lo anotado el ' + esc(largo) + '" title="Editar lo anotado">' + LAPIZ + '</button></div>' +
       (nLug ? '<p class="emaDetSub">' + (nLug === 1 ? "1 lugar" : nLug + " lugares") + ' · el recorrido del día</p>' : '') +
       '<div class="emaRuta">' + gr.map(x => '<div class="emaParada"><span class="emaPIco" aria-hidden="true">' + (x.l ? iconoLugar(x.l) : "🧾") + '</span>' +
-        '<div class="emaPCab"><b>' + esc(x.l || "Otros gastos") + '</b><span>' + peso(x.total) + '</span></div>' +
+        '<div class="emaPCab"><b>' + esc(x.l || "Otros gastos") + '</b>' + sumaLug(x) + '</div>' +
         '<div class="emaChips">' + x.gastos.map(chipGasto).join("") + '</div></div>').join("") + '</div>' +
-      (ef ? '<p class="emaEfNota">💵 ' + peso(ef) + ' en efectivo · no se descuenta del fondo</p>' : '') +
+      (efTx ? '<p class="emaEfLey">' + efTx + ' · no se descuenta del fondo</p>' : '') +
       '<button type="button" class="emaAgregar" data-otra><span>+ Agregar otra salida</span><small>con su fecha y su lugar, desde cero</small></button>';   // emaE: lo que faltó en este día se suma desde el lápiz
   }
 
@@ -6841,7 +6865,7 @@ const SalidasEma = (function(){
     return '<button type="button" class="elCard" data-lugar="' + i + '" style="--i:' + Math.min(k, 10) + '" aria-label="' + esc(l.nombre) + ', ' + (l.puntuacion ? "nota " + nota10(l.puntuacion) + " de 10" : "sin nota") + ', ' + esc(linea) + '. Ver ficha">' +
       '<span class="elCTop"><span class="elIco" aria-hidden="true">' + tipoLug(l) + '</span><span class="elNota ' + claseNota(l.puntuacion) + '" aria-hidden="true">' + (l.puntuacion ? nota10(l.puntuacion) + '<small>/10</small>' : 'Sin nota') + '</span></span>' +
       '<b class="elNom">' + esc(l.nombre) + '</b><span class="elLin">' + esc(linea) + '</span>' +
-      (l.promedio ? '<span class="elLin elGas">~' + peso(l.promedio) + ' por salida</span>' : '') + '</button>';
+      (l.promedio ? '<span class="elLin elGas"><b>≈ ' + peso(l.promedio) + '</b> por salida</span>' : '') + '</button>';
   }
   /* el resumen de arriba: el favorito, el más repetido y el que más gastan (solo con datos de verdad) */
   function resumenLug(L){
@@ -6849,7 +6873,7 @@ const SalidasEma = (function(){
     const t = [], fav = ordenaLug(L, "nota")[0], vis = ordenaLug(L, "visitas")[0], gas = L.slice().sort((a, b) => (b.promedio || 0) - (a.promedio || 0))[0];
     if(fav.puntuacion) t.push(["⭐ Favorito", fav, nota10(fav.puntuacion) + " de 10"]);
     if(vis.visitas >= 2) t.push(["🔁 Más veces", vis, vis.visitas + " visitas"]);
-    if(gas.promedio) t.push(["💸 Gastan más", gas, "~" + peso(gas.promedio)]);
+    if(gas.promedio) t.push(["💸 Gastan más", gas, "≈ " + peso(gas.promedio)]);
     return t.length ? '<div class="elRes" style="--n:' + t.length + '">' + t.map(([r, l, v]) => '<button type="button" class="elDes" data-lugar="' + L.indexOf(l) + '"><small>' + r + '</small><b>' + esc(l.nombre) + '</b><em>' + v + '</em></button>').join("") + '</div>' : "";
   }
   function lugInner(anim){
