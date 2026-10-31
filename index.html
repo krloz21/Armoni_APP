@@ -4555,7 +4555,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-31.277";
+const APP_VERSION = "2026-10-31.278";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -9098,6 +9098,9 @@ const AtGmail = (function(){
     inp.addEventListener("input", () => { const n = inp.value.replace(/\D/g, ""); inp.value = n ? (+n).toLocaleString("es-CO") : ""; });
     /* la fecha del pago: la elige la familia (Hoy, Ayer u otra); sin fecha no se guarda */
     let fechaPago = "";
+    /* un código por cada vez que se abre esta ventana (los reintentos de la cola lo reusan): si se borró en Notion y se vuelve a anotar, no lo toma como repetido.
+       Que no quede doble entre los dos celulares lo cuida n8n mirando Notion (mismo valor esos días = «ya estaba») */
+    const idEnvio = "arriendo-" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
     const isoDe = d => d.getFullYear() + "-" + dos(d.getMonth() + 1) + "-" + dos(d.getDate());
     const marcaDia = () => { sc.querySelectorAll("[data-ard]").forEach(b => { const d = new Date(); d.setDate(d.getDate() - +b.dataset.ard); b.setAttribute("aria-pressed", String(isoDe(d) === fechaPago)); }); const o = q("arFecha"); o.closest(".arOtra").setAttribute("aria-pressed", String(!!fechaPago && ![...sc.querySelectorAll("[data-ard]")].some(b => b.getAttribute("aria-pressed") === "true"))); };
     sc.querySelectorAll("[data-ard]").forEach(b => b.onclick = () => { const d = new Date(); d.setDate(d.getDate() - +b.dataset.ard); fechaPago = isoDe(d); q("arFecha").value = ""; marcaDia(); q("arErr").textContent = ""; });
@@ -9111,12 +9114,12 @@ const AtGmail = (function(){
       sc.querySelectorAll("button").forEach(b => b.disabled = true); q("arErr").textContent = "";
       try{
         /* colaId fijo por mes de pago: si el otro celular ya lo anotó (o se reintenta), n8n contesta «repetido» y no se duplica */
-        const manda = forzar => Cola.post(MOVIMIENTO_URL, { method: "POST", body: JSON.stringify(Object.assign({ token: MERCADO_TOKEN, tipo: "Gasto", concepto: "Arriendo", categoria: "Hogar", monto, fecha: fechaPago, nota: nota || "", desdeAviso: true, colaId: "arriendo-" + fechaPago.slice(0, 7) + (forzar ? "-f" : "") }, forzar ? { forzar: true } : {})) });   // sin «forzar»: si ya hay un arriendo igual esos días, n8n lo detecta y no se duplica
+        const manda = forzar => Cola.post(MOVIMIENTO_URL, { method: "POST", body: JSON.stringify(Object.assign({ token: MERCADO_TOKEN, tipo: "Gasto", concepto: "Arriendo", categoria: "Hogar", monto, fecha: fechaPago, nota: nota || "", desdeAviso: true, colaId: idEnvio + (forzar ? "-f" : "") }, forzar ? { forzar: true } : {})) });   // sin «forzar»: si ya hay un arriendo igual esos días, n8n lo detecta y no se duplica
         let r = await manda(false), j = r && typeof r.clone === "function" ? await r.clone().json().catch(() => ({})) : {};
         /* «parecido» con un arriendo de OTRO mes (p. ej. el del 30 del mes pasado) no es repetido: se guarda igual */
         if(j.error === "parecido" && j.parecido && String(j.parecido.fecha || "").slice(0, 7) !== fechaPago.slice(0, 7)){ r = await manda(true); }
         j = await r.json().catch(() => ({}));
-        const repetido = j.error === "repetido" || j.error === "parecido";   // «parecido» = ya hay un arriendo igual esos días
+        const repetido = j.error === "repetido" || j.error === "parecido";   // «parecido» = n8n encontró en Notion un arriendo igual esos días
         if(!repetido && (!r.ok || j.ok === false)) throw new Error(j.error && String(j.error).length < 120 ? j.error : "");
         try{ if(!repetido) localStorage.setItem(KV, String(monto)); localStorage.setItem(KM, per); localStorage.setItem(KM + ".t", String(Date.now())); localStorage.removeItem(KP); }catch{}
         cierra();
@@ -12463,6 +12466,8 @@ const Servicios = (function(){
     try{ pendientes = pendientes.concat(Pagos.pendientesCelulares()); }catch{}
     /* si el servidor ya avisa que falta el valor del arriendo, el aviso local sobra */
     arriendoEnServidor = pendientes.some(x => x && x.id === "arriendo_valor");
+    /* Notion ya tiene el arriendo del mes (lo anotó cualquiera de los dos celulares): el aviso de este celular se quita */
+    if(data && data.arriendoRegistrado === true){ try{ localStorage.removeItem("armoni.arriendo.pendiente"); }catch{} try{ AtGmail.pintaPendiente(); }catch{} }
     try{ AtGmail.pintaPendiente(); }catch{}
     banner(pendientes);
   }
