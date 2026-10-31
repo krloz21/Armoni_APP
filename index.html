@@ -3274,6 +3274,17 @@ body.asleep .ddHolo, body.asleep .ddHolo *, body.asleep .ddHolo::after{ animatio
 .emaChip.ef{ background:rgba(var(--ink),.06); border-color:var(--line); color:var(--ghost); }
 .emaChip.ef em{ color:var(--white); }
 .emaChip .emaEfTag{ align-self:center; padding:0 6px; border-radius:6px; font-size:.62rem; font-weight:600; line-height:1.5; letter-spacing:.03em; color:var(--dim); border:1px solid rgba(var(--ink),.16); }
+/* uxA: los gastos de cada lugar como recibo: sin pastillas, sin cajas, valores alineados a la derecha */
+.emaRec{ list-style:none; margin:4px 0 0; padding:0; }
+.emaRec li{ display:flex; align-items:baseline; justify-content:space-between; gap:12px; padding:5px 0; font-size:.86rem; line-height:1.35; }
+.emaRec li + li{ border-top:1px solid rgba(var(--ink),.05); }
+.emaRec li > span{ min-width:0; color:var(--ghost); overflow-wrap:anywhere; }
+.emaRec li > em{ flex:none; font-style:normal; font-weight:550; color:var(--white); white-space:nowrap; font-variant-numeric:normal; font-feature-settings:normal; }
+.emaRec small{ font-size:.74rem; font-weight:400; color:var(--dim); }
+.emaRec li.emaPend{ opacity:.7; }
+.emaPCab b .emaRecEf{ font-size:.74rem; font-weight:400; letter-spacing:0; color:var(--dim); }
+.emaEfLey{ border-top-color:rgba(var(--ink),.06); }
+.emaEfLey::before{ width:4px; height:4px; border:0; background:currentColor; opacity:.7; transform:translateY(-2px); }
 .emaEfLey{ display:flex; align-items:baseline; gap:8px; margin:12px 0 0; padding-top:10px; border-top:1px solid var(--line); font-size:.74rem; line-height:1.4; color:var(--dim); }
 .emaEfLey::before{ content:""; flex:none; width:6px; height:6px; border-radius:50%; border:1px solid currentColor; transform:translateY(-1px); }
 .elLin.elGas{ color:var(--dim); }
@@ -6803,9 +6814,10 @@ const SalidasEma = (function(){
     if(/restaurante|pizza|burger|hamburg|sushi|asadero|caf[eé]|crepes|panader/.test(n)) return "🍽️";
     return "📍";
   };
-  const chipGasto = g => '<span class="emaChip' + (EF(g) ? ' ef' : '') + (g.pend ? ' emaPend' : '') + '">' + esc(g.c) +
-    (g.p ? ' <small class="emaAntes">pagado el ' + esc(fechaCorta(g.p)) + '</small>' : '') + (g.pend ? ' <small>· por enviar</small>' : '') + (g.m ? ' <em>' + peso(g.m) + '</em>' : '') +
-    (EF(g) ? ' <small class="emaEfTag">efectivo</small>' : '') + '</span>';
+  /* uxA: cada gasto es una línea de recibo: concepto tenue a la izquierda, valor a la derecha; «efectivo» como texto, sin caja */
+  const chipGasto = (g, efLugar) => '<li' + (g.pend ? ' class="emaPend"' : '') + '><span>' + esc(g.c) +
+    (g.p ? ' <small class="emaAntes">· pagado el ' + esc(fechaCorta(g.p)) + '</small>' : '') + (g.pend ? ' <small>· por enviar</small>' : '') +
+    (EF(g) && !efLugar ? ' <small class="emaRecEf">· efectivo</small>' : '') + '</span>' + (g.m ? '<em>' + peso(g.m) + '</em>' : '') + '</li>';
   function detalleHTML(q){
     if(!q) return "";
     const largo = new Date(q.fecha + "T12:00:00").toLocaleDateString("es-CO", { weekday: "long", day: "numeric", month: "long" });
@@ -6814,14 +6826,15 @@ const SalidasEma = (function(){
     const sumaLug = x => gr.length > 1 && x.gastos.length > 1 && x.total ? '<span>' + peso(x.total) + '</span>' : '';
     /* efectivo: si es todo, o lugares enteros, se nombra sin repetir el monto que ya está arriba */
     const grEf = gr.filter(x => x.l && x.gastos.every(EF)), nomEf = grEf.map(x => esc(x.l));
+    const todoEf = !!ef && ef >= q.total, efLug = x => !!x.l && x.gastos.length > 0 && x.gastos.every(EF);   // uxA: si el lugar entero fue en efectivo se dice una vez, junto al nombre
     const efTx = !ef ? "" : ef >= q.total ? "Todo se pagó en efectivo"
       : grEf.length && grEf.reduce((a, x) => a + x.total, 0) === ef ? "Lo de " + (nomEf.length > 1 ? nomEf.slice(0, -1).join(", ") + " y " + nomEf[nomEf.length - 1] : nomEf[0]) + " fue en efectivo"
       : peso(ef) + " en efectivo";
     return '<div class="emaDetCab"><span>' + esc(largo) + '</span>' + (q.total ? '<b class="emaTot">' + peso(q.total) + '</b>' : '') + '<button type="button" class="emaLapiz" data-editar="' + esc(q.fecha) + '" aria-label="Editar lo anotado el ' + esc(largo) + '" title="Editar lo anotado">' + LAPIZ + '</button></div>' +
       (nLug ? '<p class="emaDetSub">' + (nLug === 1 ? "1 lugar" : nLug + " lugares") + ' · el recorrido del día</p>' : '') +
       '<div class="emaRuta">' + gr.map(x => '<div class="emaParada"><span class="emaPIco" aria-hidden="true">' + (x.l ? iconoLugar(x.l) : "🧾") + '</span>' +
-        '<div class="emaPCab"><b>' + esc(x.l || "Otros gastos") + '</b>' + sumaLug(x) + '</div>' +
-        '<div class="emaChips">' + x.gastos.map(chipGasto).join("") + '</div></div>').join("") + '</div>' +
+        '<div class="emaPCab"><b>' + esc(x.l || "Otros gastos") + (efLug(x) && !todoEf ? ' <small class="emaRecEf">· efectivo</small>' : '') + '</b>' + sumaLug(x) + '</div>' +
+        '<ul class="emaRec">' + x.gastos.map(g => chipGasto(g, efLug(x) || todoEf)).join("") + '</ul></div>').join("") + '</div>' +
       (efTx ? '<p class="emaEfLey">' + efTx + ' · no se descuenta del fondo</p>' : '') +
       '<button type="button" class="emaAgregar" data-otra><span>+ Agregar otra salida</span><small>con su fecha y su lugar, desde cero</small></button>';   // emaE: lo que faltó en este día se suma desde el lápiz
   }
