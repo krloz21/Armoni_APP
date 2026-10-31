@@ -2247,6 +2247,41 @@ body.mode-mercar:has(#mkStage .mcTop) #thread{ -webkit-mask-image:none; mask-ima
 .emaVacio{ margin:14px 0 0; font-size:.86rem; color:var(--dim); text-align:center; }
 .emaLugares{ display:flex; flex-direction:column; gap:10px; }
 /* Lugares con Ema: podio con los 3 primeros, chips para ordenar y el resto plegado (toca uno para ver su ficha) */
+.smTipos{ margin:0 0 16px; }
+.smCab{ display:flex; align-items:baseline; justify-content:space-between; gap:10px; margin:0 4px 10px; }
+.smCab b{ font-size:.95rem; font-weight:650; }
+.smCab small{ font-size:.76rem; color:var(--dim); }
+.smFila{ display:grid; grid-template-columns:repeat(3, 1fr); gap:0; border-top:1px solid var(--line); border-bottom:1px solid var(--line); }
+.smFila button{ display:flex; flex-direction:column; align-items:center; gap:2px; padding:12px 4px; border:0; background:none; color:var(--white); font:inherit; cursor:pointer; position:relative; }
+.smFila button + button::before{ content:""; position:absolute; left:0; top:14px; bottom:14px; border-left:1px solid var(--line); }
+.smFila .ic{ font-size:1.15rem; }
+.smFila b{ font-size:1.5rem; font-weight:700; line-height:1.1; }
+.smFila small{ font-size:.74rem; color:var(--ghost); }
+.smFila button[disabled]{ opacity:.45; cursor:default; }
+.smFila button[aria-pressed="true"] b{ color:#ffb36b; }
+.smFila button[aria-pressed="true"]::after{ content:""; position:absolute; left:30%; right:30%; bottom:0; height:2px; border-radius:2px; background:#ffb36b; }
+.smLista{ list-style:none; margin:4px 0 0; padding:0; }
+.smLista li{ display:flex; align-items:baseline; gap:10px; padding:9px 4px; border-bottom:1px solid color-mix(in srgb, var(--line) 60%, transparent); font-size:.84rem; }
+.smLista .f{ flex:none; width:58px; color:var(--dim); font-size:.78rem; text-transform:capitalize; }
+.smLista .c{ flex:1; min-width:0; color:var(--ghost); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.smLista .m{ flex:none; font-weight:600; }
+.elToggle{ display:flex; align-items:center; gap:12px; width:100%; padding:14px 4px; border:0; border-top:1px solid var(--line); border-bottom:1px solid var(--line); background:none; color:var(--white); font:inherit; text-align:left; cursor:pointer; }
+.elToggle .elTIco{ font-size:1.2rem; }
+.elToggle .elTTx{ flex:1; min-width:0; }
+.elToggle b{ display:block; font-size:.95rem; font-weight:650; }
+.elToggle small{ display:block; margin-top:2px; font-size:.78rem; color:var(--dim); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.elToggle svg{ width:18px; height:18px; color:var(--dim); transition:transform .25s var(--ease-out); }
+.elToggle[aria-expanded="true"] svg{ transform:rotate(90deg); }
+.elLista{ list-style:none; margin:0; padding:0; }
+.elLista button{ display:flex; align-items:center; gap:12px; width:100%; padding:11px 4px; border:0; border-bottom:1px solid color-mix(in srgb, var(--line) 60%, transparent); background:none; color:var(--white); font:inherit; text-align:left; cursor:pointer; }
+.elLista.elAnim button{ animation:duSube .35s var(--ease-out) backwards; animation-delay:calc(var(--i, 0) * 30ms); }
+.elLista .elIco{ font-size:1.1rem; width:24px; text-align:center; }
+.elLTx{ flex:1; min-width:0; }
+.elLTx b{ display:block; font-size:.9rem; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.elLTx small{ display:block; margin-top:1px; font-size:.76rem; color:var(--dim); }
+.elLNota{ font-size:.95rem; font-weight:700; }
+.elLNota.top{ color:#8fe6a8; } .elLNota.mid{ color:#ffb36b; } .elLNota.low{ color:var(--late); } .elLNota.sin{ color:var(--dim); }
+#emaLugBox.elBox{ padding:0; border:0; background:none; box-shadow:none; }
 .elCab{ display:flex; align-items:baseline; justify-content:space-between; gap:10px; margin:22px 4px 10px; }
 .elCab .mkSec{ margin:0; }
 .elCab small{ font-size:.74rem; color:var(--dim); }
@@ -4083,6 +4118,7 @@ body.mode-credito #credFoto{ display:grid; }
       <section id="emaView" aria-label="Salidas Ema">
         <div class="restIntro"><h2>Salidas con Ema</h2></div>
         <div id="emaEquilibrio"></div>
+        <div id="emaMesTipos"></div>
         <div class="restStatus" id="emaStatus"></div>
         <div id="emaStage"></div>
         <div id="emaTemporada"></div>
@@ -4335,7 +4371,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-31.261";
+const APP_VERSION = "2026-10-31.262";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -6942,19 +6978,18 @@ const SalidasEma = (function(){
     if(gas.promedio) t.push(["💸 Gastan más", gas, "≈ " + peso(gas.promedio)]);
     return t.length ? '<div class="elRes" style="--n:' + t.length + '">' + t.map(([r, l, v]) => '<button type="button" class="elDes" data-lugar="' + L.indexOf(l) + '"><small>' + r + '</small><b>' + esc(l.nombre) + '</b><em>' + v + '</em></button>').join("") + '</div>' : "";
   }
+  /* Lugares con Ema: plegado por defecto (una sola línea); al abrirlo, una lista sencilla ordenada por nota. Tocar uno abre su ficha */
+  let lugAbierto = false;
   function lugInner(anim){
-    const L = lugVista = ordenaLug(lugares(), lugOrden), tipos = [];
-    L.forEach(l => { const t = tipoLug(l); if(!tipos.includes(t)) tipos.push(t); });
-    if(lugTipo && !tipos.includes(lugTipo)) lugTipo = "";
-    const lista = []; L.forEach((l, i) => { if(!lugTipo || tipoLug(l) === lugTipo) lista.push([l, i]); });
-    const tope = lista.length <= 8 || lugTodos ? lista.length : 6, resto = lista.slice(tope);
-    const caras = resto.slice(0, 3).map(([l]) => '<i>' + tipoLug(l) + '</i>').join("");
-    return '<div class="elCab"><div class="mkSec">Lugares con Ema</div><small>' + (lugTipo ? lista.length + " de " + L.length : L.length) + (L.length === 1 ? ' lugar' : ' lugares') + '</small></div>' + resumenLug(L) +
-      (L.length > 2 ? '<div class="elOrd" role="group" aria-label="Ordenar los lugares">' + LUG_ORD.map(([k, t]) => '<button type="button" data-lord="' + k + '" aria-pressed="' + (k === lugOrden) + '">' + t + '</button>').join("") + '</div>' : '') +
-      (L.length > 5 && tipos.length > 1 ? '<div class="elOrd elTipos" role="group" aria-label="Filtrar por tipo de lugar"><button type="button" data-ltipo="" aria-pressed="' + !lugTipo + '">Todos</button>' + tipos.map(t => '<button type="button" data-ltipo="' + t + '" aria-pressed="' + (t === lugTipo) + '">' + t + ' ' + TIPOS[t] + '</button>').join("") + '</div>' : '') +
-      '<div class="elGrid' + (lista.length === 1 ? ' n1' : '') + (anim ? ' elAnim' : '') + '" id="elGrid">' + lista.slice(0, tope).map(([l, i], k) => tarjetaLug(l, i, k)).join("") + '</div>' +
-      (resto.length || (lugTodos && lista.length > 8) ? '<button type="button" class="elVer" data-lmas aria-expanded="' + lugTodos + '" aria-controls="elGrid">' + (lugTodos ? 'Ver menos' : '<span class="elCaras" aria-hidden="true">' + caras + '</span>Ver ' + (resto.length === 1 ? 'el otro lugar' : 'los otros ' + resto.length + ' lugares')) +
-        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>' : '');
+    const L = lugVista = ordenaLug(lugares(), "nota");
+    const cab = '<button type="button" class="elToggle" data-ltoggle aria-expanded="' + lugAbierto + '"><span class="elTIco" aria-hidden="true">📍</span><span class="elTTx"><b>Lugares con Ema</b><small>' + L.length + (L.length === 1 ? ' lugar' : ' lugares') + (L[0] && L[0].puntuacion ? ' · favorito: ' + esc(L[0].nombre) : '') + '</small></span>' +
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>';
+    if(!lugAbierto) return cab;
+    return cab + '<ul class="elLista' + (anim ? ' elAnim' : '') + '">' + L.map((l, i) => {
+      const sub = [l.visitas ? visTx(l) : "Aún sin visitas", l.promedio ? "≈ " + peso(l.promedio) + " por salida" : ""].filter(Boolean).join(" · ");
+      return '<li><button type="button" data-lugar="' + i + '" style="--i:' + Math.min(i, 10) + '"><span class="elIco" aria-hidden="true">' + tipoLug(l) + '</span><span class="elLTx"><b>' + esc(l.nombre) + '</b><small>' + sub + '</small></span>' +
+        '<span class="elLNota ' + claseNota(l.puntuacion) + '">' + (l.puntuacion ? nota10(l.puntuacion) : '–') + '</span></button></li>';
+    }).join("") + '</ul>';
   }
   const pintaLug = anim => { const box = document.getElementById("emaLugBox"); if(!box) return; const f = box.querySelector(".elTipos"), x = f ? f.scrollLeft : 0; box.innerHTML = lugInner(anim); const g = box.querySelector(".elTipos"); if(g) g.scrollLeft = x; };
   function fichaLugar(l, desde){
@@ -7008,6 +7043,7 @@ const SalidasEma = (function(){
     if(on) dr.scrollLeft = on.offsetLeft - (dr.clientWidth - on.offsetWidth) / 2;
   }
   stage.addEventListener("click", e => {
+    if(e.target.closest("[data-ltoggle]")){ lugAbierto = !lugAbierto; pintaLug(true); return; }
     const lo = e.target.closest("[data-lord]");
     if(lo){ if(lo.dataset.lord !== lugOrden){ lugOrden = lo.dataset.lord; try{ localStorage.setItem(KLO, lugOrden); }catch{} pintaLug(true); } return; }
     const lt = e.target.closest("[data-ltipo]");
@@ -7069,6 +7105,7 @@ const SalidasEma = (function(){
     if(ema >= 3 && citas === 0) msg = { emo: "💕", t: "Han salido " + ema + " veces con Ema este mes", p: "Ema la está pasando increíble. ¿Y si se regalan un ratico solos los dos? Una cita también le hace bien a la familia.", b: "Ver planes para ustedes dos" };
     else if(ema >= 4 && citas === 1) msg = { emo: "🌙", t: "Mucho plan en familia últimamente", p: "Llevan " + ema + " salidas con Ema y una sola cita. Quizás es buen momento para otra noche de ustedes.", b: "Ver planes para ustedes dos" };
     else if(citas >= 3 && ema === 0) msg = { emo: "🎈", t: "Ema también quiere pasear", p: "Este mes tuvieron " + citas + " citas. ¿Qué tal un plan con ella esta semana?", b: "Ver planes con Ema" };
+    try{ pintaTipos(); }catch{}
     /* fijo: sale mientras la situación siga así (no tiene ✕); se va solo cuando salgan los dos */
     if(!msg){ box.innerHTML = ""; return; }
     box.innerHTML = '<div class="emaEq"><span class="emo" aria-hidden="true">' + msg.emo + '</span><div class="tx"><b>' + esc(msg.t) + '</b><p>' + esc(msg.p) + '</p><button type="button" class="ir">' + esc(msg.b) + ' →</button></div></div>';
@@ -7079,6 +7116,29 @@ const SalidasEma = (function(){
         const pl = document.getElementById("emaPlanes"); if(pl) pl.scrollIntoView({ behavior: REDUCED ? "auto" : "smooth", block: "start" });
       }, 450);
     };
+  }
+
+  /* «Salidas de este mes»: cuántas veces salieron en pareja, con Ema y en familia (días distintos); tocar uno muestra cuáles */
+  let tipoAbierto = "";
+  function pintaTipos(){
+    const box = document.getElementById("emaMesTipos"); if(!box) return;
+    const mk = mesHoy(), MES = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
+    const delMes = arr => ((datos && datos[arr]) || []).find(m => m.mes === mk);
+    const ema = mesActual(), par = delMes("pareja"), fam = delMes("familia");
+    const fecha = f => { try{ return new Date(f + "T12:00:00").toLocaleDateString("es-CO", { weekday: "short", day: "numeric" }).replace(".", ""); }catch{ return f; } };
+    const porDia = cosas => { const d = {}; (cosas || []).forEach(x => { const q = d[x.f] || (d[x.f] = { f: x.f, cosas: [], total: 0 }); q.cosas.push(x.c); q.total += +x.m || 0; }); return Object.values(d).sort((a, b) => b.f.localeCompare(a.f)); };
+    const T = [
+      ["pareja", "💑", "En pareja", porDia(par && par.cosas)],
+      ["ema", "👧", "Con Ema", (ema.salidas || []).slice().sort((a, b) => b.fecha.localeCompare(a.fecha)).map(z => ({ f: z.fecha, total: z.total || 0, cosas: (z.paradas && z.paradas.length ? z.paradas.map(p => p.lugar).filter(Boolean) : []).concat((z.gastos || []).map(g => g.l).filter(Boolean)).filter((v, i, a) => a.indexOf(v) === i).slice(0, 3) })) ],
+      ["familia", "👨‍👩‍👦", "En familia", porDia(fam && fam.cosas)]
+    ];
+    const total = T.reduce((a, t) => a + t[3].length, 0);
+    if(tipoAbierto && !T.find(t => t[0] === tipoAbierto && t[3].length)) tipoAbierto = "";
+    const ab = T.find(t => t[0] === tipoAbierto);
+    box.innerHTML = '<section class="smTipos"><div class="smCab"><b>Salidas de ' + MES[+mk.slice(5) - 1] + '</b><small>' + (total ? total + (total === 1 ? ' salida' : ' salidas') + ' en total' : 'Todavía no han salido este mes') + '</small></div>' +
+      '<div class="smFila" role="group">' + T.map(([k, ic, t, l]) => '<button type="button" data-smt="' + k + '" aria-pressed="' + (k === tipoAbierto) + '"' + (l.length ? '' : ' disabled') + '><span class="ic" aria-hidden="true">' + ic + '</span><b>' + l.length + '</b><small>' + t + '</small></button>').join("") + '</div>' +
+      (ab ? '<ul class="smLista">' + ab[3].map(x => '<li><span class="f">' + esc(fecha(x.f)) + '</span><span class="c">' + esc(x.cosas.join(" · ") || (ab[0] === "ema" ? "Salida con Ema" : "Salida")) + '</span><span class="m">' + (x.total ? peso(x.total) : '') + '</span></li>').join("") + '</ul>' : '') + '</section>';
+    box.querySelectorAll("[data-smt]").forEach(b => b.onclick = () => { tipoAbierto = tipoAbierto === b.dataset.smt ? "" : b.dataset.smt; pintaTipos(); });
   }
 
   /* un lugar al que ya fueron con Ema y no tiene nota: sale el aviso cada vez que entras, hasta que lo puntúes */
@@ -7673,7 +7733,7 @@ const Temporada = (function(){
 const PlanesComfandi = (function(){
   const box = document.getElementById("emaPlanes");
   const KEY = "armoni.comfandi", KV = "armoni.comfandi.vistos";
-  let datos = null, grupo = null;
+  let datos = null, grupo = null, gruposUlt = null;
   const esc = t => String(t == null ? "" : t).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
   const vistos = () => { try{ return JSON.parse(localStorage.getItem(KV)) || []; }catch{ return []; } };
   const esNuevo = p => p.desde && Date.now() - p.desde < 10 * 864e5 && !vistos().includes(p.id);
@@ -7688,6 +7748,7 @@ const PlanesComfandi = (function(){
     const G = { ema: ps.filter(p => conEma(p) && p.tipo !== "pasadia"), pasa: ps.filter(p => p.tipo === "pasadia"), dos: ps.filter(p => !conEma(p) && p.tipo !== "pasadia") };
     if(!grupo || !G[grupo].length) grupo = G.ema.length ? "ema" : "dos";
     const nuevos = k => G[k].filter(esNuevo).length;
+    gruposUlt = G;
     box.innerHTML =
       '<div class="cfHead"><div class="mkSec">Planes en Comfandi</div>' + (datos.revisado ? '<small>' + esc(hace(Date.parse(datos.revisado))) + '</small>' : '') + '</div>' +
       '<div class="cfTabs" role="tablist">' + [["ema", "🎈 Con Ema"], ["pasa", "🚗 Pasadías"], ["dos", "💑 Ustedes dos"]].filter(([k]) => G[k].length).map(([k, t]) =>
@@ -7709,7 +7770,12 @@ const PlanesComfandi = (function(){
     if(fl){ const l = lista(); if(l) l.scrollBy({ left: +fl.dataset.flecha * Math.max(180, l.clientWidth * .8), behavior: "smooth" }); return; }
     if(e.target.closest(".cfLista[data-arrastro]")){ e.preventDefault(); return; }
     const t = e.target.closest("[data-g]");
-    if(t){ grupo = t.dataset.g; pinta(); return; }
+    if(t){   // al tocar la pestaña, lo nuevo de ella ya se vio: el número se quita
+      grupo = t.dataset.g;
+      const v = vistos(); ((gruposUlt && gruposUlt[grupo]) || []).forEach(p => { if(esNuevo(p) && !v.includes(p.id)) v.push(p.id); });
+      try{ localStorage.setItem(KV, JSON.stringify(v.slice(-300))); }catch{}
+      pinta(); return;
+    }
     const a = e.target.closest(".cfPlan");
     if(a){ const v = vistos(); if(!v.includes(a.dataset.id)){ v.push(a.dataset.id); try{ localStorage.setItem(KV, JSON.stringify(v.slice(-300))); }catch{} } setTimeout(pinta, 400); }
   });
