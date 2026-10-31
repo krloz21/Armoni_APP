@@ -1,0 +1,237 @@
+{
+  "name": "Estado Servicios",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "servicios-estado",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        1424,
+        512
+      ],
+      "id": "75dd97a8-ed0a-4905-a7ef-08c1f9e9afba",
+      "name": "Webhook",
+      "webhookId": "44566899-c29a-4435-b96b-eb33f85ad095"
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "operation": "getAll",
+        "dataSourceId": {
+          "__rl": true,
+          "value": "6c565ad1-789f-41c7-8ca2-8bcfb9098a68",
+          "mode": "list",
+          "cachedResultName": "Movimientos",
+          "cachedResultUrl": "https://app.notion.com/p/922bb9e4e3d648feab56d6b2d75be29d"
+        },
+        "returnAll": true,
+        "filterType": "manual",
+        "matchType": "allFilters",
+        "filters": {
+          "conditions": [
+            {
+              "key": "Categoría|select",
+              "condition": "equals",
+              "optionValue": "Servicios"
+            },
+            {
+              "key": "Fecha|date",
+              "condition": "on_or_after",
+              "dateValue": "={{ $now.startOf('month').toISODate() }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 3,
+      "position": [
+        1648,
+        512
+      ],
+      "id": "997b8216-31a1-496b-b42e-279b3e99a041",
+      "name": "Movimientos",
+      "alwaysOutputData": true,
+      "credentials": {
+        "notionApi": {
+          "id": "pgk4uKXwaEEnuyRO",
+          "name": "Notion account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "operation": "getAll",
+        "dataSourceId": {
+          "__rl": true,
+          "value": "8d9ebbbf-a8e8-4556-b171-9a3ef6e74f0a",
+          "mode": "list",
+          "cachedResultName": "Arriendo",
+          "cachedResultUrl": "https://app.notion.com/p/dda115b1d3f848118c060b953322b15b"
+        },
+        "returnAll": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 3,
+      "position": [
+        1872,
+        512
+      ],
+      "id": "194dab57-9cfd-4c74-ba81-2db9a88b82c7",
+      "name": "Get many database pages1",
+      "executeOnce": true,
+      "alwaysOutputData": true,
+      "credentials": {
+        "notionApi": {
+          "id": "pgk4uKXwaEEnuyRO",
+          "name": "Notion account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "operation": "getAll",
+        "dataSourceId": {
+          "__rl": true,
+          "value": "6c565ad1-789f-41c7-8ca2-8bcfb9098a68",
+          "mode": "list",
+          "cachedResultName": "Movimientos",
+          "cachedResultUrl": "https://app.notion.com/p/922bb9e4e3d648feab56d6b2d75be29d"
+        },
+        "returnAll": true,
+        "filterType": "manual",
+        "matchType": "allFilters",
+        "filters": {
+          "conditions": [
+            {
+              "key": "Fecha|date",
+              "condition": "on_or_after",
+              "dateValue": "={{ $now.startOf('month').minus({ months: 1 }).plus({ days: 19 }).toISODate() }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 3,
+      "position": [
+        2096,
+        512
+      ],
+      "id": "1a2aa27e-a9cf-4a13-b21d-f3197e9b1593",
+      "name": "Movimientos recientes",
+      "alwaysOutputData": true,
+      "executeOnce": true,
+      "credentials": {
+        "notionApi": {
+          "id": "pgk4uKXwaEEnuyRO",
+          "name": "Notion account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $('Movimientos').all();                                   // servicios del mes (categoría Servicios)\nconst fijos = $('Get many database pages1').all().map(i => i.json);       // base Arriendo (último envío)\nconst movFijos = $input.all().map(i => i.json);                           // movimientos que dicen «jard…» o «arriendo» (nodo Movimientos recientes)\nconst ARRIENDO_POR_MOVIMIENTO = false;   // ponlo en true cuando el arriendo también cree su movimiento en Notion\nconst hoy = new Date(Date.now() - 5 * 60 * 60 * 1000);   // hora de Colombia\nconst dia = hoy.getUTCDate();\nconst ultimoDiaMes = new Date(Date.UTC(hoy.getUTCFullYear(), hoy.getUTCMonth() + 1, 0)).getUTCDate();\n\nfunction pagado(keyword){\n  const re = new RegExp('\\\\b' + keyword + '\\\\b', 'i');\n  return items.some(i => re.test(i.json.name || ''));\n}\n\n// \"pendientes\" = lo que se ve en la barra de Armoni (cada pago solo dentro de su ventana)\n// \"sinPagar\"   = lo que usan las notificaciones push (siguen avisando, ya vencido, hasta que se pague)\nconst reglas = [\n  { id: 'energia',  nombre: 'la energía',  keyword: 'energia',  desde: 3,  hasta: 10,          seguir: ultimoDiaMes },\n  { id: 'agua',     nombre: 'el agua',     keyword: 'agua',     desde: 25, hasta: ultimoDiaMes, seguir: ultimoDiaMes },\n  { id: 'gas',      nombre: 'el gas',      keyword: 'gas',      desde: 17, hasta: 21,          seguir: ultimoDiaMes },   // vence el 21\n  { id: 'internet', nombre: 'el internet', keyword: 'internet', desde: 1,  hasta: 5,           seguir: ultimoDiaMes },\n];\n\nconst pendientes = [], sinPagar = [];\nfor (const r of reglas) {\n  if (pagado(r.keyword)) continue;\n  const item = { id: r.id, nombre: r.nombre };\n  if (dia >= r.desde && dia <= r.hasta) pendientes.push(item);\n  if (dia >= r.desde && dia <= r.seguir) sinPagar.push(item);\n}\n\n// jardín: pagado si existe su movimiento en Movimientos (si lo borras, el aviso vuelve).\n// arriendo: con «último envío» (o, si activas ARRIENDO_POR_MOVIMIENTO, también por su movimiento).\n//  - barra de Armoni: arriendo del último día del mes al día 3; jardín del último día del mes al día 5\n//  - push: los dos siguen avisando (ya vencidos) hasta que se paguen\nconst esUltimoDiaMes = dia === ultimoDiaMes;\nconst ultimoDiaMesAnterior = Date.UTC(hoy.getUTCFullYear(), hoy.getUTCMonth(), 0);\n// el comprobante del arriendo (y el pago del jardín) cuenta desde el día 20: se suele mandar unos días antes de fin de mes.\n// Del 20 en adelante cuenta lo enviado desde el 20 de este mes; antes del 20, lo enviado desde el 20 del mes pasado.\nconst inicioArriendo = dia >= 20 ? Date.UTC(hoy.getUTCFullYear(), hoy.getUTCMonth(), 20) : Date.UTC(hoy.getUTCFullYear(), hoy.getUTCMonth() - 1, 20);\n\nconst yaPagado = (re, inicioVentana) => {\n  const f = fijos.find(x => re.test(x.name || ''));\n  const s = f && f.property_último_envío && f.property_último_envío.start;\n  return !!s && Date.parse(s.slice(0, 10) + 'T00:00:00Z') >= inicioVentana;\n};\nconst movPagado = (re, categoria, inicioVentana) => movFijos.some(x => {\n  if (!re.test(x.name || '') || x.property_categoría !== categoria) return false;   // nombre y categoría: así «jardín plaza» (Salidas) no cuenta\n  let f = x.property_fecha; f = f && (f.start || (f.date && f.date.start) || f);\n  const t = Date.parse(String(f || '').slice(0, 10) + 'T00:00:00Z');\n  return !isNaN(t) && t >= inicioVentana;\n});\n\nconst arriendoPagado = ARRIENDO_POR_MOVIMIENTO ? movPagado(/arriendo/i, 'Hogar', inicioArriendo) : yaPagado(/arriendo/i, inicioArriendo);\nif (!arriendoPagado) {\n  const item = { id: 'arriendo', nombre: 'el arriendo' };\n  if (esUltimoDiaMes || dia <= 3) pendientes.push(item);\n  if (dia < 20 || esUltimoDiaMes) sinPagar.push(item);   // del 20 al penúltimo día todavía no toca: no se insiste\n}\nif (!movPagado(/jard/i, 'Hijo', inicioArriendo)) {\n  const item = { id: 'jardin', nombre: 'el jardín de Emanuel' };\n  if (esUltimoDiaMes || dia <= 5) pendientes.push(item);\n  if (dia < 20 || esUltimoDiaMes) sinPagar.push(item);   // del 20 al penúltimo día todavía no toca: no se insiste\n}\n\n// v: 2 le avisa a la app que este código ya es el nuevo (el gas vence el 21 y sale del 17 al 21); pagados = lo que ya está registrado este mes\nconst pagados = reglas.filter(r => pagado(r.keyword)).map(r => r.id);\nreturn [{ json: { v: 2, pendientes, sinPagar, pagados } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2320,
+        512
+      ],
+      "id": "c9ac2836-da27-484c-a535-78746d9ae135",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        2544,
+        512
+      ],
+      "id": "33af8bea-b835-4270-9d4b-d9029a061b94",
+      "name": "Respond to Webhook"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Movimientos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Movimientos": {
+      "main": [
+        [
+          {
+            "node": "Get many database pages1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many database pages1": {
+      "main": [
+        [
+          {
+            "node": "Movimientos recientes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Movimientos recientes": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "772c622d-a2a0-4eba-bd6d-0c1cdb37984f",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "558d88703fb65b2d0e44613bc35916258b0f0bf983c5d4730c00c424b77ca36a"
+  },
+  "nodeGroups": [],
+  "id": "7kNhiOtN9faXPdD7",
+  "tags": []
+}
