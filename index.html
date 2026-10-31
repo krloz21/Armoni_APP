@@ -942,6 +942,10 @@ body.mode-gmail footer, body.mode-glim footer{ display:none; }
 .gmBtn:focus-visible{ outline:2px solid var(--cyan); outline-offset:2px; }
 
 /* tarjeta de resumen del crédito: reusa el estilo de la ficha de restaurante (rmTop/rmStats/rmNote) */
+.arDias{ display:flex; gap:8px; flex-wrap:wrap; }
+.arDias button, .arOtra{ position:relative; display:inline-flex; align-items:center; min-height:42px; padding:0 14px; border-radius:12px; border:1px solid var(--line); background:none; color:var(--ghost); font:inherit; font-size:.86rem; font-weight:650; cursor:pointer; }
+.arDias button[aria-pressed="true"], .arOtra[aria-pressed="true"]{ color:var(--white); border-color:transparent; background:rgba(255,179,107,.18); box-shadow:inset 0 0 0 1px rgba(255,179,107,.6); }
+.arOtra input{ position:absolute; inset:0; opacity:0; width:100%; cursor:pointer; }
 .arNormal{ display:block; width:100%; min-height:50px; margin:0 0 12px; border:0; border-radius:14px; background:linear-gradient(140deg, #7fe0a6, #3fbf7f); color:#06210f; font:inherit; font-size:.95rem; font-weight:700; cursor:pointer; }
 .credVerif{ margin:0 0 12px; padding:14px; border-radius:18px; border:1px solid rgba(255,190,90,.35); background:linear-gradient(135deg, rgba(255,190,90,.12), rgba(255,190,90,.03)); }
 .credVerif b{ display:block; font-size:.92rem; }
@@ -4551,7 +4555,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-31.275";
+const APP_VERSION = "2026-10-31.276";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -9066,17 +9070,22 @@ const AtGmail = (function(){
   function valorArriendo(per, forzado){
     per = per || periodo();
     let yaAnotado = false; try{ yaAnotado = localStorage.getItem(KM) === per; }catch{}
-    if(yaAnotado && !forzado){ pintaPendiente(); return; }
-    const cid = "arriendo-" + per + (yaAnotado ? "-2" : "");   // Notion dice que falta aunque aquí se anotó: otro código para que no lo tome como repetido
+    if(yaAnotado){   // ya se anotó desde este celular: no se vuelve a anotar (Notion a veces tarda en mostrarlo y eso duplicaba)
+      pintaPendiente();
+      if(forzado && typeof avisoOk === "function") avisoOk("El arriendo ya está anotado", "El de " + nombrePer(per) + " ya quedó en tus cuentas; puede tardar un momento en verse");
+      return;
+    }
+    const cid = "arriendo-" + per;
     if(document.querySelector(".arScrim")) return;
     try{ localStorage.setItem(KP, per); }catch{}   // queda pendiente hasta que se anote (si tocan «Después», sale el aviso en el inicio)
     let normal = 0; try{ normal = +localStorage.getItem(KV) || 0; }catch{}
     const sc = document.createElement("div");
     sc.className = "pgScrim arScrim";
     sc.innerHTML = '<div class="inWrap"><div class="pgCard inCard" role="dialog" aria-modal="true" aria-labelledby="arT">' +
-      '<div class="pnTop"><span class="pnEstrella" aria-hidden="true">🏠</span><small>Comprobante enviado · pago de ' + nombrePer(per) + '</small><h3 id="arT">¿Cuánto fue el arriendo?</h3>' +
+      '<div class="pnTop"><span class="pnEstrella" aria-hidden="true">🏠</span><small>Comprobante enviado · pago de ' + nombrePer(per) + '</small><h3 id="arT">Anotemos el arriendo</h3>' +
       '<p>' + (normal ? '¿Fue el valor de siempre o hubo variación?' : 'Anótalo para que quede el gasto en tus cuentas.') + '</p></div>' +
-      '<div class="inBody">' + (normal ? '<button type="button" class="arNormal" id="arNormal">Sí, el de siempre · ' + peso(normal) + '</button><p class="fmAyuda" style="margin:0 0 6px">¿Cambió? Escribe el valor:</p>' : '') +
+      '<div class="inBody"><p class="fmAyuda" style="margin:0 0 6px;text-align:left">1. ¿Qué día hiciste el pago?</p><div class="arDias"><button type="button" data-ard="0">Hoy</button><button type="button" data-ard="1">Ayer</button><label class="arOtra"><span>Otra fecha</span><input type="date" id="arFecha"></label></div>' +
+      '<p class="fmAyuda" style="margin:14px 0 6px;text-align:left">2. ¿Cuánto fue?</p>' + (normal ? '<button type="button" class="arNormal" id="arNormal">Sí, el de siempre · ' + peso(normal) + '</button><p class="fmAyuda" style="margin:0 0 6px;text-align:left">¿Cambió? Escribe el valor:</p>' : '') +
       '<input id="arMonto" type="text" inputmode="numeric" autocomplete="off" placeholder="Valor del arriendo">' +
       '<input id="arNota" type="text" maxlength="160" autocomplete="off" placeholder="¿Por qué cambió? (opcional)" style="margin-top:8px">' +
       '<p class="inErr" id="arErr" role="alert"></p></div>' +
@@ -9085,15 +9094,27 @@ const AtGmail = (function(){
     const q = id => sc.querySelector("#" + id), cierra = () => { sc.classList.remove("on"); setTimeout(() => sc.remove(), 340); pintaPendiente(); };
     const inp = q("arMonto");
     inp.addEventListener("input", () => { const n = inp.value.replace(/\D/g, ""); inp.value = n ? (+n).toLocaleString("es-CO") : ""; });
+    /* la fecha del pago: la elige la familia (Hoy, Ayer u otra); sin fecha no se guarda */
+    let fechaPago = "";
+    const isoDe = d => d.getFullYear() + "-" + dos(d.getMonth() + 1) + "-" + dos(d.getDate());
+    const marcaDia = () => { sc.querySelectorAll("[data-ard]").forEach(b => { const d = new Date(); d.setDate(d.getDate() - +b.dataset.ard); b.setAttribute("aria-pressed", String(isoDe(d) === fechaPago)); }); const o = q("arFecha"); o.closest(".arOtra").setAttribute("aria-pressed", String(!!fechaPago && ![...sc.querySelectorAll("[data-ard]")].some(b => b.getAttribute("aria-pressed") === "true"))); };
+    sc.querySelectorAll("[data-ard]").forEach(b => b.onclick = () => { const d = new Date(); d.setDate(d.getDate() - +b.dataset.ard); fechaPago = isoDe(d); q("arFecha").value = ""; marcaDia(); q("arErr").textContent = ""; });
+    q("arFecha").max = isoDe(new Date());
+    q("arFecha").addEventListener("change", e => { fechaPago = /^\d{4}-\d{2}-\d{2}$/.test(e.target.value) ? e.target.value : ""; marcaDia(); q("arErr").textContent = ""; });
     q("arLuego").onclick = cierra;
     async function guarda(monto, nota){
+      if(!fechaPago){ q("arErr").textContent = "Elige qué día hiciste el pago."; return; }
       if(!(monto > 0)){ q("arErr").textContent = "Escribe el valor del arriendo."; return; }
+      per = fechaPago.slice(0, 7);   // va en el mes en que se pagó
       sc.querySelectorAll("button").forEach(b => b.disabled = true); q("arErr").textContent = "";
       try{
         /* colaId fijo por mes de pago: si el otro celular ya lo anotó (o se reintenta), n8n contesta «repetido» y no se duplica */
-        const r = await Cola.post(MOVIMIENTO_URL, { method: "POST", body: JSON.stringify({ token: MERCADO_TOKEN, tipo: "Gasto", concepto: "Arriendo", categoria: "Hogar", monto, fecha: per === mesHoy() ? fechaHoy() : per + "-" + dos(new Date(+per.slice(0, 4), +per.slice(5, 7), 0).getDate()), nota: nota || "", desdeAviso: true, forzar: true, colaId: cid }) });
-        const j = await r.json().catch(() => ({}));
-        const repetido = j.error === "repetido";
+        const manda = forzar => Cola.post(MOVIMIENTO_URL, { method: "POST", body: JSON.stringify(Object.assign({ token: MERCADO_TOKEN, tipo: "Gasto", concepto: "Arriendo", categoria: "Hogar", monto, fecha: fechaPago, nota: nota || "", desdeAviso: true, colaId: "arriendo-" + fechaPago.slice(0, 7) + (forzar ? "-f" : "") }, forzar ? { forzar: true } : {})) });   // sin «forzar»: si ya hay un arriendo igual esos días, n8n lo detecta y no se duplica
+        let r = await manda(false), j = r && typeof r.clone === "function" ? await r.clone().json().catch(() => ({})) : {};
+        /* «parecido» con un arriendo de OTRO mes (p. ej. el del 30 del mes pasado) no es repetido: se guarda igual */
+        if(j.error === "parecido" && j.parecido && String(j.parecido.fecha || "").slice(0, 7) !== fechaPago.slice(0, 7)){ r = await manda(true); }
+        j = await r.json().catch(() => ({}));
+        const repetido = j.error === "repetido" || j.error === "parecido";   // «parecido» = ya hay un arriendo igual esos días
         if(!repetido && (!r.ok || j.ok === false)) throw new Error(j.error && String(j.error).length < 120 ? j.error : "");
         try{ if(!repetido) localStorage.setItem(KV, String(monto)); localStorage.setItem(KM, per); localStorage.removeItem(KP); }catch{}
         cierra();
