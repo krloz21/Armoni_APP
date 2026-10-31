@@ -2268,8 +2268,8 @@ body.mode-mercar:has(#mkStage .mcTop) #thread{ -webkit-mask-image:none; mask-ima
 .tgCab small{ font-size:.78rem; color:var(--dim); }
 .tgEscena{ display:flex; justify-content:center; align-items:flex-end; gap:6px; padding:6px 0 2px; }
 .tgP{ display:flex; flex-direction:column; align-items:center; gap:4px; width:96px; }
-.tgCuerpo{ width:84px; height:88px; overflow:visible; transform-origin:50% 100%; }
-.tgCuerpo.peq{ width:66px; height:70px; }
+.tgCuerpo{ width:72px; height:117px; overflow:visible; transform-origin:50% 100%; image-rendering:pixelated; }
+.tgCuerpo.peq{ width:56px; height:76px; }
 .tgCuerpo.feliz{ animation:tgSalta 1.6s ease-in-out infinite; animation-delay:calc(var(--i) * .25s); }
 .tgCuerpo.bien{ animation:tgRespira 3s ease-in-out infinite; }
 .tgCuerpo.triste{ animation:tgBalancea 4s ease-in-out infinite; filter:saturate(.75); }
@@ -4418,7 +4418,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-31.266";
+const APP_VERSION = "2026-10-31.267";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -7202,27 +7202,36 @@ const SalidasEma = (function(){
     const ale = (d, n) => Math.round(Math.max(0, 100 - d * 4) * .5 + Math.min(100, n / 4 * 100) * .5);
     const aP = ale(dP, veces30(diasP)), aE = ale(dE, veces30(diasE)), aF = ale(dF, veces30(diasJ));
     const animo = a => a >= 75 ? "feliz" : a >= 50 ? "bien" : a >= 25 ? "triste" : "muytriste";
-    /* cada personaje: cuerpo redondo con cara que cambia según el ánimo */
-    const cara = (color, a, extra, pequeno) => {
-      const m = animo(a), ojos = m === "feliz" ? '<path d="M27 40q4-5 8 0M45 40q4-5 8 0" fill="none" stroke="#1d1420" stroke-width="3" stroke-linecap="round"/>'
-        : m === "muytriste" ? '<path d="M27 41h8M45 41h8" stroke="#1d1420" stroke-width="3" stroke-linecap="round"/>'
-        : '<circle cx="31" cy="40" r="3.4" fill="#1d1420"/><circle cx="49" cy="40" r="3.4" fill="#1d1420"/>';
-      const boca = m === "feliz" ? '<path d="M31 50q9 9 18 0" fill="#7a2235" stroke="#1d1420" stroke-width="2.6" stroke-linejoin="round"/>'
-        : m === "bien" ? '<path d="M32 52q8 5 16 0" fill="none" stroke="#1d1420" stroke-width="2.8" stroke-linecap="round"/>'
-        : m === "triste" ? '<path d="M33 55q7-5 14 0" fill="none" stroke="#1d1420" stroke-width="2.8" stroke-linecap="round"/>'
-        : '<path d="M32 56q8-7 16 0" fill="none" stroke="#1d1420" stroke-width="2.8" stroke-linecap="round"/>';
-      const lagrima = m === "muytriste" || m === "triste" ? '<path class="tgLag" d="M53 45q2.5 4 0 6q-2.5-2 0-6z" fill="#7cc8ff"/>' : '';
-      const mejillas = m === "feliz" || m === "bien" ? '<circle cx="24" cy="49" r="4" fill="#ff7aa0" opacity=".45"/><circle cx="56" cy="49" r="4" fill="#ff7aa0" opacity=".45"/>' : '';
-      const corazon = m === "feliz" ? '<path class="tgCor" d="M62 12c2-4 8-3 8 2 0 4-8 9-8 9s-8-5-8-9c0-5 6-6 8-2z" fill="#ff6b9a"/>' : m === "muytriste" ? '<path class="tgNube" d="M58 18a5 5 0 0 1 9-3 4 4 0 0 1 5 6h-15a4 4 0 0 1 1-3z" fill="#8a93a6"/>' : '';
-      return '<svg class="tgCuerpo ' + m + (pequeno ? ' peq' : '') + '" viewBox="0 0 80 84" aria-hidden="true">' + corazon + extra + '<ellipse cx="40" cy="48" rx="28" ry="28" fill="' + color + '"/><ellipse cx="40" cy="80" rx="20" ry="3" fill="rgba(0,0,0,.25)"/>' + mejillas + ojos + lagrima + boca + '</svg>';
+    /* cada personaje en pixel art: el dibujo es una cuadrícula de letras (cada letra un color) y la cara cambia según el ánimo */
+    const PAL = { H: "#1b1410", S: "#a8714a", G: "#121212", g: "#d8eeff", B: "#3f6fb5", P: "#2b2b3a", K: "#141414",
+      L: "#4a2a1a", A: "#e0aa82", R: "#e86a9a", E: "#f0c09a", Y: "#8a5a2b", T: "#ffcf4a", Q: "#5a4636" };
+    const SPR = {
+      carlos: { m: ["....HHHHHHHH....","...HHHHHHHHHH...","..HHHHHHHHHHHH..","..HSSSSSSSSSSH..","..SSSSSSSSSSSS..",".SSGGGSSSSGGGSS.",".SGgggGGGGgggGS.",".SSGGGSSSSGGGSS.","..SSSSSSSSSSSS..","..SSSSSSSSSSSS..","..SSSSSSSSSSSS..","...SSSSSSSSSS...",".....SSSSSS.....","...BBBBBBBBBB...","..BBBBBBBBBBBB..",".SBBBBBBBBBBBBS.",".SBBBBBBBBBBBBS.","...PPPPPPPPPP...","...PPPP..PPPP...","...KKKK..KKKK..."],
+        ojos: [[4, 6], [11, 6]], boca: [7, 10], mej: [[2, 9], [13, 9]] },
+      aleja: { m: ["....LLLLLLLL....","...LLLLLLLLLL...","..LLLLLLLLLLLL..","..LLAAAAAAAALL..",".LLAAAAAAAAAALL.",".LAAAAAAAAAAAAL.",".LAAAAAAAAAAAAL.",".LAAAAAAAAAAAAL.",".LAAAAAAAAAAAAL.",".LLAAAAAAAAAALL.",".LLAAAAAAAAAALL.",".LL.AAAAAAAA.LL.",".LL...AAAA...LL.",".L.RRRRRRRRRR.L.","..RRRRRRRRRRRR..",".ARRRRRRRRRRRRA.",".ARRRRRRRRRRRRA.","...QQQQQQQQQQ...","...QQQQ..QQQQ...","...KKKK..KKKK..."],
+        ojos: [[5, 6], [10, 6]], boca: [7, 10], mej: [[3, 8], [12, 8]] },
+      ema: { m: ["....YY......","...YYYYY....","..YYYYYYYY..",".YEEEEEEEEY.",".EEEEEEEEEE.",".EEEEEEEEEE.",".EEEEEEEEEE.",".EEEEEEEEEE.","..EEEEEEEE..","..TTTTTTTT..",".ETTTTTTTTE.","..TTTTTTTT..","..PPP..PPP..","..KKK..KKK.."],
+        ojos: [[3, 5], [8, 5]], boca: [5, 7], mej: [[2, 6], [9, 6]] }
     };
-    const pelo = '<path d="M14 42c-2-20 14-30 26-30s28 8 26 30c-4-10-10-16-26-16S18 32 14 42z" fill="#3a2016"/><circle cx="40" cy="12" r="8" fill="#3a2016"/>';
-    const gorra = '<path d="M14 38c2-16 14-22 26-22s24 6 26 22c-8-6-16-8-26-8s-18 2-26 8z" fill="#22324a"/>';
-    const mono = '<path d="M30 22c4-8 16-8 20 0" fill="none" stroke="#3a2016" stroke-width="4" stroke-linecap="round"/><circle cx="40" cy="18" r="4" fill="#ff8fb1"/>';
+    const cara = (quien, a) => {
+      const sp = SPR[quien], m = animo(a), w = sp.m[0].length, h = sp.m.length, px = [];
+      sp.m.forEach((fila, y) => [...fila].forEach((c, x) => { if(PAL[c]) px.push([x, y, PAL[c]]); }));
+      const pon = (x, y, c) => px.push([x, y, c]);
+      const [o1, o2] = sp.ojos, [bx, by] = sp.boca, D = "#120c10";
+      if(m === "feliz" || m === "muytriste"){ pon(o1[0], o1[1], D); pon(o1[0] + 1, o1[1], D); pon(o2[0] - 1, o2[1], D); pon(o2[0], o2[1], D); }   // ojos cerrados (riendo o muy tristes)
+      else { pon(o1[0], o1[1], D); pon(o2[0], o2[1], D); }
+      if(m === "feliz"){ pon(bx - 1, by, D); pon(bx + 2, by, D); pon(bx, by + 1, D); pon(bx + 1, by + 1, D); sp.mej.forEach(([x, y]) => pon(x, y, "#ff7aa0")); }
+      else if(m === "bien"){ pon(bx, by, D); pon(bx + 1, by, D); }
+      else { pon(bx, by, D); pon(bx + 1, by, D); pon(bx - 1, by + 1, D); pon(bx + 2, by + 1, D); pon(o2[0], o2[1] + 2, "#5fb6ff"); }
+      const sobre = m === "feliz" ? '<g class="tgCor" fill="#ff5c8a"><rect x="' + (w - 3) + '" y="-4" width="1" height="1"/><rect x="' + (w - 1) + '" y="-4" width="1" height="1"/><rect x="' + (w - 4) + '" y="-3" width="5" height="1"/><rect x="' + (w - 3) + '" y="-2" width="3" height="1"/><rect x="' + (w - 2) + '" y="-1" width="1" height="1"/></g>'
+        : m === "muytriste" ? '<g class="tgNube" fill="#8a93a6"><rect x="' + (w - 4) + '" y="-4" width="3" height="1"/><rect x="' + (w - 5) + '" y="-3" width="5" height="2"/><rect x="' + (w - 4) + '" y="-1" width="1" height="1" fill="#5fb6ff"/><rect x="' + (w - 2) + '" y="0" width="1" height="1" fill="#5fb6ff"/></g>' : '';
+      return '<svg class="tgCuerpo ' + m + (quien === "ema" ? ' peq' : '') + '" viewBox="-1 -5 ' + (w + 2) + ' ' + (h + 6) + '" shape-rendering="crispEdges" aria-hidden="true">' + sobre +
+        px.map(([x, y, c]) => '<rect x="' + x + '" y="' + y + '" width="1" height="1" fill="' + c + '"/>').join("") + '<rect x="2" y="' + h + '" width="' + (w - 4) + '" height="1" fill="rgba(0,0,0,.28)"/></svg>';
+    };
     const P = [
-      ["Carlos", cara("#8fc7ff", aP, gorra), aP, dP],
-      ["Aleja", cara("#ffb3cf", aP, pelo), aP, dP],
-      ["Ema", cara("#ffd66b", aE, mono, true), aE, dE]
+      ["Carlos", cara("carlos", aP), aP, dP],
+      ["Aleja", cara("aleja", aP), aP, dP],
+      ["Ema", cara("ema", aE), aE, dE]
     ];
     const total = Math.round((aP * 2 + aE + aF) / 4), mt = animo(total), nP = veces30(diasP);
     const dias = d => d >= 99 ? "hace mucho" : d === 0 ? "hoy" : d === 1 ? "ayer" : "hace " + d + " días";
