@@ -2408,6 +2408,57 @@ body.mode-mercar:has(#mkStage .mcTop) #thread{ -webkit-mask-image:none; mask-ima
 .ddTabs button[aria-selected="true"]{ color:#1a1208; background:linear-gradient(140deg,#ffb066,#ff8a50); box-shadow:0 4px 14px -6px rgba(255,138,80,.7); }
 .ddTabs b{ display:inline-block; min-width:20px; margin-left:4px; padding:1px 6px; border-radius:10px; font-size:.72rem; color:#fff; background:rgba(var(--ink),.22); }
 .ddTabs button[aria-selected="true"] b{ background:rgba(26,18,8,.28); }
+/* «Armoni decidió»: tres pestañas, tarjetas de lo que resolvió solo, medidor de autonomía y franja «Armoni notó» */
+.ddTabs.tres{ grid-template-columns:1fr 1.25fr 1.1fr; }
+.ddTabs.tres button{ padding:0 4px; font-size:.82rem; white-space:nowrap; }
+.ddTabs.tres b{ margin-left:3px; padding:1px 5px; min-width:18px; }
+.dcAuto{ padding:16px; margin-bottom:14px; border-radius:22px; border:1px solid var(--line); background:radial-gradient(120% 100% at 100% 0%, rgba(126,232,255,.14), transparent 60%), var(--panel); }
+.dcAuto > b{ display:block; font-size:1rem; color:var(--strong); }
+.dcPuntos{ display:flex; gap:5px; margin:10px 0 8px; }
+.dcPuntos i{ flex:1; height:8px; border-radius:4px; background:rgba(var(--ink),.12); }
+.dcPuntos i.on{ background:linear-gradient(140deg,#ffb066,#ff8a50); }
+.dcAuto .t{ display:block; font-size:.8rem; color:var(--ghost); line-height:1.4; }
+.dcNivel{ display:grid; grid-template-columns:repeat(3,1fr); gap:3px; margin-top:14px; padding:3px; border-radius:13px; background:rgba(var(--ink),.07); }
+.dcNivel button{ min-height:38px; border:0; border-radius:10px; background:none; font:inherit; font-size:.8rem; font-weight:700; color:var(--dim); cursor:pointer; }
+.dcNivel button[aria-checked="true"]{ color:#1a1208; background:linear-gradient(140deg,#ffb066,#ff8a50); }
+.dcNivel button:disabled{ cursor:default; }
+.dcAyuda{ margin:8px 2px 0; font-size:.78rem; color:var(--ghost); line-height:1.4; }
+.dcCard h3{ margin-bottom:4px; }
+.dcDato{ display:flex; justify-content:space-between; gap:10px; font-size:.8rem; color:var(--dim); }
+.dcDato b{ font-variant-numeric:tabular-nums; color:var(--strong); }
+.dcDato b.mas{ color:#6fe0b5; }
+.dcDijo{ margin:12px 0 0; padding:10px 12px; border-radius:14px; background:rgba(255,138,80,.10); font-size:.9rem; font-weight:600; color:var(--strong); }
+.dcDijo small{ display:block; margin-bottom:2px; font-size:.7rem; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:#ffcf99; }
+.dcConf{ display:flex; align-items:center; gap:10px; margin:10px 2px 0; font-size:.74rem; color:var(--dim); }
+.dcConf span{ flex:1; height:6px; border-radius:3px; background:rgba(var(--ink),.1); overflow:hidden; }
+.dcConf span i{ display:block; height:100%; border-radius:3px; background:var(--c,#ffb066); }
+.dcPq{ margin:10px 2px 0; font-size:.84rem; line-height:1.45; color:var(--ghost); }
+.dcAcc{ display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:14px; }
+.dcAcc .ddBtn{ min-height:44px; }
+.dcBien{ min-height:44px; border-radius:14px; border:1px solid rgba(111,224,181,.45); background:rgba(25,158,112,.14); font:inherit; font-weight:700; color:#6fe0b5; cursor:pointer; }
+.dcCambia{ display:block; margin:12px 0 0 auto; min-height:36px; padding:0 14px; border-radius:12px; border:1px solid var(--line); background:none; font:inherit; font-size:.8rem; font-weight:600; color:var(--ghost); cursor:pointer; }
+.dcCard button:disabled{ opacity:.55; cursor:default; }
+.ddTag.dcOk{ color:#6fe0b5; background:rgba(25,158,112,.16); }
+.ddTag.dcCo{ color:#c6a6ff; background:rgba(198,166,255,.14); }
+.dcOps{ margin-top:12px; padding-top:12px; border-top:1px solid var(--line); }
+.dcOps p{ margin:0 2px 8px; font-size:.84rem; font-weight:600; color:var(--strong); }
+.dcOps .lst{ display:flex; flex-wrap:wrap; gap:8px; }
+.dcOps button{ min-height:40px; padding:0 14px; border-radius:12px; border:1px solid var(--line); background:rgba(var(--ink),.04); font:inherit; font-size:.82rem; font-weight:600; color:var(--white); cursor:pointer; }
+.dcOps button.on{ border-color:#ff8a50; color:#ffb066; }
+.dcOps .dcCats{ margin-top:10px; }
+.dcOps .dcNo{ margin-top:10px; border:0; background:none; color:var(--dim); padding:0 4px; }
+.dcLista.quieto .ddCard{ animation:none; opacity:1; transform:none; }
+.dcNoto{ margin-bottom:14px; }
+.dcNoto .ddGrupo{ margin:0 4px 8px; }
+.dcIdeas{ display:flex; gap:10px; overflow-x:auto; scroll-snap-type:x mandatory; padding-bottom:4px; scrollbar-width:none; -webkit-overflow-scrolling:touch; }
+.dcIdeas::-webkit-scrollbar{ display:none; }
+.dcIdea{ position:relative; flex:0 0 84%; box-sizing:border-box; scroll-snap-align:start; padding:14px 40px 14px 14px; border-radius:18px; border:1px solid var(--line); background:radial-gradient(120% 100% at 0% 0%, color-mix(in srgb, var(--c) 18%, transparent), transparent 65%), var(--panel); }
+.dcIdeas.uno .dcIdea{ flex-basis:100%; }
+.dcIdea .tp{ display:inline-flex; align-items:center; gap:6px; margin-bottom:6px; font-size:.68rem; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--c); }
+.dcIdea .tp i{ width:7px; height:7px; border-radius:50%; background:var(--c); }
+.dcIdea b{ display:block; font-size:.92rem; color:var(--strong); line-height:1.3; }
+.dcIdea p{ margin:4px 0 0; font-size:.82rem; line-height:1.4; color:var(--ghost); }
+.dcIdea .x{ position:absolute; top:6px; right:6px; width:34px; height:34px; border:0; border-radius:50%; background:none; color:var(--dim); font-size:.9rem; cursor:pointer; }
 .ddNota{ margin:0 4px 12px; font-size:.82rem; color:var(--ghost); }
 .ddVacio{ margin:0; font-size:.84rem; color:var(--dim); }
 /* aprendizaje como red neuronal (ux1) */
@@ -4183,7 +4234,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-30.253";
+const APP_VERSION = "2026-10-31.254";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -9117,6 +9168,22 @@ const Preguntas = (function(){
   let vistaSaber = (() => { try{ return localStorage.getItem("armoni.saber.vista") || "red"; }catch{ return "red"; } })();
   let redSel = null, redNuevos = null, redUlt = 0, redIO = null, redHub = null, redEsc = false;   // redHub: el tema al que «entró» la cámara
   const abiertosMas = new Set();   // los «Más información» abiertos no se cierran cuando la pantalla se repinta
+  /* «Armoni decidió»: lo que resolvió solo (y por qué), las ideas que notó y qué tanto decide sin preguntar */
+  const lee = (k, d) => { try{ const v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; }catch{ return d; } };
+  const graba = (k, v) => { try{ localStorage.setItem(k, JSON.stringify(v)); }catch{} };
+  let decisiones = (() => { const v = lee("armoni.decisiones", null); return Array.isArray(v) ? v : null; })();   // null = flujo viejo, todavía no decide solo
+  let ideas = (() => { const v = lee("armoni.ideas", []); return Array.isArray(v) ? v : []; })();
+  let autonomia = (() => { const v = lee("armoni.autonomia", null); return v && typeof v === "object" ? v : null; })();
+  const NIVELES = {
+    prudente: { n: "Prudente", t: "Decide solo cuando no hay ninguna duda. Te pregunta más seguido." },
+    normal:   { n: "Normal",   t: "Decide lo que está claro y te pregunta lo dudoso." },
+    atrevido: { n: "Atrevido", t: "Se le mide a decidir más cosas. Te pregunta poquito." }
+  };
+  let nivel = (() => { const v = lee("armoni.nivel", "normal"); return NIVELES[v] ? v : "normal"; })();
+  let ideasOcultas = (() => { const v = lee("armoni.ideas.ocultas", []); return Array.isArray(v) ? v : []; })();
+  let dcCorr = (() => { const v = lee("armoni.dc.corr", {}); return v && typeof v === "object" ? v : {}; })();   // lo que la familia corrigió (por si el flujo no lo devuelve)
+  let dcAbierta = null, dcCats = null, dcQuieto = false, dcRevAbierto = false, nivelOcupado = false, nivelError = "";
+  const dcOcupadas = new Set(), dcError = {};
   let revision = (() => { try{ return JSON.parse(localStorage.getItem("armoni.revision")); }catch{ return null; } })();
   /* temas para ordenar lo que Armoni sabe (se deducen del texto de cada recuerdo) */
   const TEMAS = [
@@ -9212,6 +9279,15 @@ const Preguntas = (function(){
     if(Array.isArray(j.abiertas)){ dudas = { abiertas: j.abiertas, hechas: j.hechas || [] }; try{ localStorage.setItem(KD, JSON.stringify(dudas)); }catch{} }
     if(Array.isArray(j.saber)){ saber = j.saber; try{ localStorage.setItem(KS, JSON.stringify(saber)); }catch{} }
     if(j.revision){ revision = j.revision; try{ localStorage.setItem("armoni.revision", JSON.stringify(revision)); }catch{} }
+    if(Array.isArray(j.decisiones)){
+      /* las que se están guardando en este momento se quedan como las dejó la familia (no las pisa una respuesta vieja) */
+      const loc = {}; (decisiones || []).forEach(d => { if(d && dcOcupadas.has(d.id)) loc[d.id] = d; });
+      decisiones = j.decisiones.filter(d => d && d.id).map(d => loc[d.id] || d); graba("armoni.decisiones", decisiones);
+    }
+    if(Array.isArray(j.ideas)){ ideas = j.ideas.filter(x => x && (x.titulo || x.texto)); graba("armoni.ideas", ideas); }
+    if(j.autonomia && typeof j.autonomia === "object"){ autonomia = j.autonomia; graba("armoni.autonomia", autonomia); }
+    const nv = j.nivel || (j.autonomia && j.autonomia.nivel);
+    if(!nivelOcupado && NIVELES[nv]){ nivel = nv; graba("armoni.nivel", nivel); }
     insignia(); if(document.body.classList.contains("mode-dudas")) pinta();
     document.dispatchEvent(new CustomEvent("armoni:preguntas"));
   }
@@ -9343,6 +9419,119 @@ const Preguntas = (function(){
     });
     return { meses: out, n, total };
   }
+  /* ── «Armoni decidió»: tarjetas de lo que resolvió solo; ✓ «Bien» o «Corregir» y aprende para la próxima ── */
+  const CATS_DC = ["Alimentación", "Salidas", "Hogar", "Carro", "Hijo", "Salud", "Servicios", "Tarjetas", "Ahorro", "Otros"];
+  const dcVer = d => Object.assign({}, d, d.estado === "corregida" && dcCorr[d.id] ? dcCorr[d.id] : {});   // cómo quedó (con la corrección de la familia)
+  const dicho = d => {
+    const ing = d.tipo === "Ingreso";
+    if(d.clas === "favor") return "No cuenta: fue un favor";
+    if(d.clas === "traslado") return "No cuenta: fue un traslado entre cuentas";
+    if(d.clas === "duplicado") return "Era duplicado, no lo cuento";
+    if(d.clas === "invertido") return ing ? "Estaba al revés: lo cuento como gasto" : "Estaba al revés: lo cuento como ingreso";
+    if(d.clas === "categoria") return "Lo pasé a " + (d.catNueva || d.cat || "otra categoría");
+    return ing ? "Lo conté como ingreso real" : "Lo conté como gasto real";
+  };
+  const dcCard = (d0, i) => {
+    const d = dcVer(d0), id = esc(d0.id), ing = d0.tipo === "Ingreso", ocup = dcOcupadas.has(d0.id);
+    const conf = Math.max(0, Math.min(100, Math.round(+d0.conf || 0)));
+    const tag = d0.estado === "confirmada" ? '<span class="ddTag dcOk">✓ Confirmaste</span>' : d0.estado === "corregida" ? '<span class="ddTag dcCo">Lo corregiste</span>' : '<span class="ddTag">Decidió solo</span>';
+    const fuente = { regla: "Regla clara", memoria: "Por lo que ya sabe", ia: "Lo analizó" }[d0.fuente];
+    const dato = [d0.fecha ? fechaC(d0.fecha) : "", d0.cat || ""].filter(Boolean).join(" · ");
+    const monto = +d0.monto > 0 ? '<b class="' + (ing ? 'mas' : '') + '">' + (ing ? '+' : '−') + peso(d0.monto) + '</b>' : '';
+    let ops = "";
+    if(dcAbierta === d0.id){
+      const real = ing ? "Ingreso real" : "Gasto real";
+      const lst = [["real", real], ["favor", "Favor"], ["traslado", "Traslado"], ["duplicado", "Duplicado"], ["invertido", ing ? "Era un gasto" : "Era un ingreso"]].filter(o => o[0] !== d.clas);
+      const cats = CATS_DC.concat((decisiones || []).map(x => x.cat).filter(Boolean)).filter((c, k, a) => a.indexOf(c) === k && c !== (d.catNueva || d.cat));
+      ops = '<div class="dcOps" role="group" aria-label="¿Qué era en realidad?"><p>¿Qué era en realidad?</p><div class="lst">' +
+        lst.map(o => '<button type="button" data-dc="' + id + '" data-acc="op" data-clas="' + o[0] + '">' + o[1] + '</button>').join("") +
+        '<button type="button" data-dc="' + id + '" data-acc="cats"' + (dcCats === d0.id ? ' class="on" aria-expanded="true"' : ' aria-expanded="false"') + '>Otra categoría</button></div>' +
+        (dcCats === d0.id ? '<div class="lst dcCats">' + cats.map(c => '<button type="button" data-dc="' + id + '" data-acc="cat" data-cat="' + esc(c) + '">' + esc(c) + '</button>').join("") + '</div>' : '') +
+        '<button type="button" class="dcNo" data-dc="' + id + '" data-acc="cancelar">Cancelar</button></div>';
+    }
+    const acc = d0.estado === "auto" || !d0.estado
+      ? (dcAbierta === d0.id ? '' : '<div class="dcAcc"><button type="button" class="dcBien" data-dc="' + id + '" data-acc="ok"' + (ocup ? ' disabled' : '') + '>✓ Bien</button><button type="button" class="ddBtn" data-dc="' + id + '" data-acc="corregir"' + (ocup ? ' disabled' : '') + '>Corregir</button></div>')
+      : (dcAbierta === d0.id ? '' : '<button type="button" class="dcCambia" data-dc="' + id + '" data-acc="corregir"' + (ocup ? ' disabled' : '') + '>' + (ocup ? 'Guardando…' : 'Cambiar') + '</button>');
+    return '<article class="ddCard dcCard" style="--i:' + Math.min(i, 8) + '"' + (ocup ? ' aria-busy="true"' : '') + '>' + tag + (fuente ? ' <span class="ddTag dif">' + fuente + '</span>' : '') +
+      '<h3>' + esc(d0.concepto || "Movimiento") + '</h3>' + (dato || monto ? '<div class="dcDato"><span>' + esc(dato) + '</span>' + monto + '</div>' : '') +
+      '<div class="dcDijo"><small>' + (d0.estado === "corregida" ? "Ahora queda así" : "Lo que decidió") + '</small>' + esc(dicho(d)) + '</div>' +
+      (conf ? '<div class="dcConf" style="--c:' + (conf >= 90 ? '#6fe0b5' : conf >= 75 ? '#ffb066' : '#ffd166') + '">Qué tan seguro<span><i style="width:' + conf + '%"></i></span>' + conf + '%</div>' : '') +
+      (d0.porque ? '<p class="dcPq">' + esc(String(d0.porque).slice(0, 200)) + '</p>' : '') +
+      acc + ops + '<p class="inErr" role="alert">' + esc(dcError[d0.id] || "") + '</p></article>';
+  };
+  const autonomiaHTML = () => {
+    if(!autonomia) return "";
+    const a = autonomia, dec = +a.decididas || 0, pre = +a.preguntadas || 0, tot = dec + pre, conf = +a.confirmadas || 0, cor = +a.corregidas || 0;
+    let tit, n = 0;
+    if(!tot) tit = "Armoni todavía está aprendiendo a decidir solo";
+    else {
+      n = Math.max(0, Math.min(10, Math.round((a.pct != null && isFinite(+a.pct) ? +a.pct : dec * 100 / tot) / 10)));
+      tit = n >= 10 ? "Armoni decidió solo casi todo" : n <= 0 ? "Por ahora Armoni te pregunta casi todo" : "Armoni decidió solo " + n + " de cada 10";
+    }
+    const linea = [dec ? (dec === 1 ? "1 cosa la decidió solo" : dec + " cosas las decidió solo") : "", pre ? (pre === 1 ? "1 te la preguntó" : pre + " te las preguntó") : ""].filter(Boolean).join(" y ");
+    const tuyo = [conf ? "confirmaste " + conf : "", cor ? "corregiste " + cor : ""].filter(Boolean).join(" y ");
+    return '<div class="dcAuto"><b>' + tit + '</b>' + (tot ? '<div class="dcPuntos" aria-hidden="true">' + Array.from({ length: 10 }, (_, k) => '<i' + (k < n ? ' class="on"' : '') + '></i>').join("") + '</div>' : '') +
+      (linea ? '<span class="t">En el último mes: ' + linea + '.' + (tuyo ? ' Tú ' + tuyo + '.' : '') + '</span>' : '<span class="t">Cuando revise tus movimientos, aquí ves cuánto resolvió sin molestarte.</span>') +
+      '<div class="dcNivel" role="radiogroup" aria-label="Qué tanto decide solo">' + Object.keys(NIVELES).map(k => '<button type="button" role="radio" data-niv="' + k + '" aria-checked="' + (nivel === k) + '"' + (nivelOcupado ? ' disabled' : '') + '>' + NIVELES[k].n + '</button>').join("") + '</div>' +
+      '<p class="dcAyuda">' + NIVELES[nivel].t + '</p><p class="inErr" role="alert">' + esc(nivelError) + '</p></div>';
+  };
+  const decidioHTML = () => {
+    const vacio = (t, p) => '<div class="ddRed vacio"><div class="ddRedCaja"><svg class="ddRedSvg" viewBox="0 0 360 200" role="img" aria-label="' + esc(t) + '"><defs>' + RED_DEFS + '</defs><circle class="orb" cx="180" cy="100" r="62"/><circle class="orb" cx="180" cy="100" r="88"/>' + coreSVG(180, 100, false) + '</svg><p><b style="display:block;color:var(--strong);margin-bottom:4px">' + t + '</b>' + p + '</p></div></div>';
+    if(decisiones === null) return '<p class="ddNota">Aquí verás lo que Armoni resuelve solo, sin preguntarte.</p>' +
+      vacio("Muy pronto Armoni va a decidir solo", "Lo que esté clarito lo resuelve sin molestarte, y aquí te cuenta qué hizo y por qué. Tú le dices si estuvo bien.");
+    const P = decisiones.filter(d => d.estado === "auto" || !d.estado), R = decisiones.filter(d => d.estado && d.estado !== "auto");
+    const quieto = dcQuieto ? ' quieto' : '';
+    return '<p class="ddNota">Esto lo resolvió sin preguntarte. Si algo no está bien, corrígelo: así aprende para la próxima.</p>' + autonomiaHTML() +
+      (!decisiones.length ? vacio("Todavía no ha decidido nada solo", "Cuando revise tus movimientos, aquí verás lo que resolvió sin molestarte.") :
+        (P.length ? '<div class="ddLista dcLista' + quieto + '">' + P.map(dcCard).join("") + '</div>' : '<div class="ddResumen ok"><span class="ddNum">✓</span><div><b>Ya revisaste todo</b><span class="t">Cuando decida algo nuevo, aparece aquí.</span></div></div>') +
+        (R.length ? '<details class="ddDesp dcRev"' + (dcRevAbierto || !P.length ? ' open' : '') + ' style="margin-top:14px"><summary><span>Ya revisadas</span><i>' + R.length + '</i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></summary><div class="ddDespIn"><div class="ddLista dcLista quieto">' + R.map(dcCard).join("") + '</div></div></details>' : ''));
+  };
+  /* franja «Armoni notó»: ideas que saca de tus cuentas (sin gastar IA); se pueden ocultar */
+  const IDEA_T = { alerta: ["Ojo", "#ffb066"], tendencia: ["Tendencia", "#7ee8ff"], logro: ["¡Bien!", "#6fe0b5"], consejo: ["Idea", "#c6a6ff"] };
+  const notoHTML = () => {
+    const v = ideas.filter(x => !ideasOcultas.includes(x.id)).slice(0, 6); if(!v.length) return "";
+    return '<div class="dcNoto"><p class="ddGrupo">Armoni notó</p><div class="dcIdeas' + (v.length === 1 ? ' uno' : '') + '">' + v.map(x => { const t = IDEA_T[x.tipo] || IDEA_T.consejo;
+      return '<article class="dcIdea" style="--c:' + t[1] + '"><span class="tp"><i></i>' + t[0] + '</span>' + (x.titulo ? '<b>' + esc(x.titulo) + '</b>' : '') + (x.texto ? '<p>' + esc(x.texto) + '</p>' : '') +
+        (x.id ? '<button type="button" class="x" data-idea-x="' + esc(x.id) + '" aria-label="Ocultar esta idea">✕</button>' : '') + '</article>'; }).join("") + '</div></div>';
+  };
+  /* ✓ o corrección: la tarjeta cambia al instante; si el flujo no responde, vuelve como estaba y avisa */
+  async function dcAccion(id, accion, clas, catNueva){
+    const d = (decisiones || []).find(x => x.id === id); if(!d || dcOcupadas.has(id)) return;
+    const antes = { d: Object.assign({}, d), corr: dcCorr[id], aut: autonomia ? Object.assign({}, autonomia) : null };
+    delete dcError[id]; dcAbierta = null; dcCats = null;
+    if(accion === "confirmar"){ d.estado = "confirmada"; if(autonomia) autonomia.confirmadas = (+autonomia.confirmadas || 0) + 1; }
+    else {
+      if(autonomia && antes.d.estado !== "corregida") autonomia.corregidas = (+autonomia.corregidas || 0) + 1;
+      if(autonomia && antes.d.estado === "confirmada") autonomia.confirmadas = Math.max(0, (+autonomia.confirmadas || 0) - 1);
+      d.estado = "corregida"; dcCorr[id] = clas === "categoria" ? { clas, catNueva } : { clas, catNueva: "" };
+    }
+    dcOcupadas.add(id); graba("armoni.dc.corr", dcCorr); graba("armoni.decisiones", decisiones); pinta();
+    try{
+      await pide(Object.assign({ accion, decision: id }, accion === "corregir" ? { clas } : {}, catNueva ? { catNueva } : {}));
+      dcOcupadas.delete(id); if(document.body.classList.contains("mode-dudas")) pinta();
+      if(accion === "corregir" && typeof avisoOk === "function") avisoOk("Listo, ya lo corregí", "La próxima vez lo tengo en cuenta");
+      if(typeof Balance !== "undefined" && document.body.classList.contains("mode-balance")) Balance.refresh();
+    }catch{
+      dcOcupadas.delete(id);
+      const cur = (decisiones || []).find(x => x.id === id);
+      if(cur){ Object.keys(cur).forEach(k => delete cur[k]); Object.assign(cur, antes.d); }
+      if(antes.corr) dcCorr[id] = antes.corr; else delete dcCorr[id];
+      autonomia = antes.aut;
+      dcError[id] = "No pude guardarlo. Revisa tu internet e inténtalo otra vez.";
+      graba("armoni.dc.corr", dcCorr); graba("armoni.decisiones", decisiones); if(autonomia) graba("armoni.autonomia", autonomia); pinta();
+      const el = document.querySelector('#ddCuerpo [data-dc="' + (window.CSS && CSS.escape ? CSS.escape(id) : id) + '"]');   // que se vea el aviso en su tarjeta
+      if(el) el.closest(".dcCard").scrollIntoView({ block: "center", behavior: REDUCED ? "auto" : "smooth" });
+    }
+  }
+  async function cambiaNivel(n){
+    if(!NIVELES[n] || n === nivel || nivelOcupado) return;
+    const antes = nivel; nivel = n; nivelOcupado = true; nivelError = ""; graba("armoni.nivel", nivel); pinta();
+    try{
+      await pide({ accion: "autonomia", nivel: n });
+      nivelOcupado = false; pinta();
+      if(typeof avisoOk === "function") avisoOk("Listo", "Armoni ahora va en modo " + NIVELES[n].n.toLowerCase());
+    }catch{ nivelOcupado = false; nivel = antes; graba("armoni.nivel", nivel); nivelError = "No pude cambiarlo. Revisa tu internet e inténtalo otra vez."; pinta(); }
+  }
   /* pantalla «Dudas»: todo lo que Armoni todavía no sabe, con buen aspecto y a un toque de responderlo */
   function pinta(refresca){
     const cuerpo = document.getElementById("ddCuerpo"); if(!cuerpo) return;
@@ -9374,17 +9563,20 @@ const Preguntas = (function(){
       '<div class="ddRed" id="ddRed"></div><div class="ddSaber" id="ddSaberL"></div>';
     const hec = H.map(q => '<div class="ddHecha"><b>' + esc(limpia(q)) + '</b><em>Tú: ' + esc(q.respuesta) + '</em><button type="button" class="ddCorr" data-c="' + esc(q.id) + '">Corregir</button></div>').join("");
     const desp = (t, n, cont, abierto) => '<details class="ddDesp"' + (abierto ? ' open' : '') + '><summary><span>' + t + '</span><i>' + n + '</i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></summary><div class="ddDespIn">' + cont + '</div></details>';
-    const tabs = '<div class="ddTabs" role="tablist"><button type="button" role="tab" data-t="dudas" aria-selected="' + (pestana === "dudas") + '">Dudas' + (A.length ? ' <b>' + A.length + '</b>' : '') + '</button><button type="button" role="tab" data-t="aprendizaje" aria-selected="' + (pestana === "aprendizaje") + '">Aprendizaje' + (saber.length ? ' <b>' + saber.length + '</b>' : '') + '</button></div>';
-    cuerpo.innerHTML = tabs + (pestana === "dudas" ?
-      '<div class="ddResumen' + (A.length ? '' : ' ok') + '"><span class="ddNum">' + (A.length || "✓") + '</span><div><b>' + (A.length ? (A.length === 1 ? "Tienes 1 duda por resolver" : "Tienes " + A.length + " dudas por resolver") : "Todo en orden") + '</b><span class="t">' + (A.length ? "Responderlas hace que tus cuentas queden más exactas." : "Armoni no tiene preguntas pendientes por ahora.") + '</span></div></div>' +
+    const porRevisar = (decisiones || []).filter(d => d.estado === "auto" || !d.estado).length;
+    const tabs = '<div class="ddTabs tres" role="tablist"><button type="button" role="tab" data-t="dudas" aria-selected="' + (pestana === "dudas") + '">Dudas' + (A.length ? ' <b>' + A.length + '</b>' : '') + '</button>' +
+      '<button type="button" role="tab" data-t="decidio" aria-selected="' + (pestana === "decidio") + '">Armoni decidió' + (porRevisar ? ' <b>' + porRevisar + '</b>' : '') + '</button><button type="button" role="tab" data-t="aprendizaje" aria-selected="' + (pestana === "aprendizaje") + '">Aprendizaje' + (saber.length ? ' <b>' + saber.length + '</b>' : '') + '</button></div>';
+    cuerpo.innerHTML = tabs + (pestana === "decidio" ? decidioHTML() : pestana === "dudas" ?
+      notoHTML() + '<div class="ddResumen' + (A.length ? '' : ' ok') + '"><span class="ddNum">' + (A.length || "✓") + '</span><div><b>' + (A.length ? (A.length === 1 ? "Tienes 1 duda por resolver" : "Tienes " + A.length + " dudas por resolver") : "Todo en orden") + '</b><span class="t">' + (A.length ? "Responderlas hace que tus cuentas queden más exactas." : "Armoni no tiene preguntas pendientes por ahora.") + '</span></div></div>' +
       (A.length ? '<div class="ddLista">' + A.map((q, i) => '<article class="ddCard" style="--i:' + Math.min(i, 8) + '">' + (q.tipo === "par" ? '<span class="ddTag">Dos registros parecidos</span>' : q.tipo === "lugar" ? '<span class="ddTag">Falta el lugar</span>' : q.tipo === "caso" ? '<span class="ddTag">Caso abierto</span>' : q.saltada ? '<span class="ddTag dif">La dejaste para después</span>' : '<span class="ddTag">Por resolver</span>') + ((q.hilo || []).length > 1 ? ' <span class="ddTag dif">En conversación</span>' : '') + '<h3>' + esc(limpia(q)) + '</h3>' + movs(q) + masInfo(q) + '<button type="button" class="ddBtn" data-id="' + esc(q.id) + '">' + (q.tipo === "lugar" || q.tipo === "par" ? "Completar" : q.tipo === "caso" || (q.hilo || []).length > 1 ? "Hablar con Armoni" : "Responder") + '</button></article>').join("") + '</div>' : '') +
       '<button type="button" class="ddBuscar" id="ddBuscar">Buscar dudas nuevas</button>' + revisionHTML()
       :
       '<p class="ddNota">' + (saber.length ? 'Cada punto es algo que aprendió de tus respuestas. Toca uno para entrar en él: ahí ves tu respuesta y puedes corregirla, modificarla o borrarla.' : 'Aquí verás lo que Armoni aprende de tus respuestas, conectado por temas.') + '</p>' +
       (saber.length ? sab : '<div class="ddRed vacio"><div class="ddRedCaja"><svg class="ddRedSvg" viewBox="0 0 360 230" role="img" aria-label="Armoni todavía no ha aprendido nada"><defs>' + RED_DEFS + '</defs><circle class="orb" cx="180" cy="110" r="70"/><circle class="orb" cx="180" cy="110" r="100"/>' + coreSVG(180, 110, false) + '</svg><p>Todavía no ha aprendido nada. Cada vez que respondas una duda, aquí aparece una conexión nueva.</p></div></div>'));
     cuerpo.querySelectorAll(".ddMas[data-k]").forEach(d => d.addEventListener("toggle", () => { if(d.open) abiertosMas.add(d.dataset.k); else abiertosMas.delete(d.dataset.k); }));
-    cuerpo.querySelectorAll("[data-t]").forEach(b => b.addEventListener("click", () => { pestana = b.dataset.t; redSel = null; if(redHub){ redHub = null; tema = "todo"; } pinta(); }));
-    const sub = document.querySelector("#dudasView .tmSub"); if(sub) sub.textContent = pestana === "dudas" ? "Lo que Armoni no entendió de tus cuentas y quiere preguntarte" : "Lo que Armoni va aprendiendo de tus respuestas";
+    if(pestana === "decidio") dcQuieto = true;   // al repintar (✓, corregir) las tarjetas no vuelven a «entrar»
+    cuerpo.querySelectorAll("[data-t]").forEach(b => b.addEventListener("click", () => { if(pestana !== b.dataset.t){ dcQuieto = false; dcAbierta = null; dcCats = null; } pestana = b.dataset.t; redSel = null; if(redHub){ redHub = null; tema = "todo"; } pinta(); }));
+    const sub = document.querySelector("#dudasView .tmSub"); if(sub) sub.textContent = pestana === "dudas" ? "Lo que Armoni no entendió de tus cuentas y quiere preguntarte" : pestana === "decidio" ? "Lo que Armoni resolvió solo, y por qué" : "Lo que Armoni va aprendiendo de tus respuestas";
     cuerpo.querySelectorAll(".ddCorr").forEach(b => b.addEventListener("click", () => abre(b.dataset.c)));
     cuerpo.querySelectorAll(".ddBtn").forEach(b => b.addEventListener("click", () => { const q = A.find(x => x.id === b.dataset.id); if(q && q.tipo === "lugar") abreLugar(q); else if(q && q.tipo === "par") abrePar(q); else abre(b.dataset.id); }));
     /* lista de lo que sabe: se filtra por tema y por lo que escribas, sin repintar todo (el cursor se queda en el buscador) */
@@ -9629,6 +9821,22 @@ const Preguntas = (function(){
       fila.classList.toggle("on");
     });
     cuerpo._ddOlvida = true;
+    const dRev = cuerpo.querySelector(".dcRev"); if(dRev) dRev.addEventListener("toggle", () => { dcRevAbierto = dRev.open; });
+    if(!cuerpo._ddDecide) cuerpo.addEventListener("click", e => {
+      const ix = e.target.closest("[data-idea-x]");
+      if(ix){ ideasOcultas = ideasOcultas.concat(ix.dataset.ideaX).slice(-40); graba("armoni.ideas.ocultas", ideasOcultas); pinta(); return; }
+      const nv = e.target.closest("[data-niv]"); if(nv){ cambiaNivel(nv.dataset.niv); return; }
+      const b = e.target.closest("[data-dc]"); if(!b || b.disabled) return;
+      const id = b.dataset.dc, acc = b.dataset.acc;
+      if(dcOcupadas.has(id)) return;
+      if(acc === "ok"){ dcAccion(id, "confirmar"); return; }
+      if(acc === "corregir"){ dcAbierta = dcAbierta === id ? null : id; dcCats = null; delete dcError[id]; pinta(); return; }
+      if(acc === "cancelar"){ dcAbierta = null; dcCats = null; pinta(); return; }
+      if(acc === "cats"){ dcCats = dcCats === id ? null : id; pinta(); return; }
+      if(acc === "op"){ dcAccion(id, "corregir", b.dataset.clas); return; }
+      if(acc === "cat"){ dcAccion(id, "corregir", "categoria", b.dataset.cat); return; }
+    });
+    cuerpo._ddDecide = true;
     const bu = cuerpo.querySelector("#ddBuscar");
     if(bu) bu.addEventListener("click", async () => {
       bu.disabled = true; bu.textContent = "Revisando tus movimientos…";
