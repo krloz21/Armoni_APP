@@ -4555,7 +4555,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-11-01.281";
+const APP_VERSION = "2026-11-01.282";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -15352,9 +15352,10 @@ const TuMes = (function(){
 
   /* ── aviso al entrar: «ya está tu resumen del mes». Sale una sola vez por mes; si se cierra, no vuelve ── */
   const K_AVISO = "armoni.tumes.mostrado";   // clave nueva: la anterior se marcaba aunque el resumen no alcanzara a verse
-  let avisandoMes = false;
+  let avisandoMes = false, masTarde = 0;
   async function avisar(){
-    if(avisandoMes) return; avisandoMes = true;   // al abrir y al volver a la vez: una sola
+    if(avisandoMes || Date.now() - masTarde < 20 * 60000) return;   // tocaron «Más tarde»: vuelve a salir la próxima vez que entren (no al instante)
+    avisandoMes = true;   // al abrir y al volver a la vez: una sola
     try{
       const hoy = new Date();
       const ant = new Date(hoy.getFullYear(), hoy.getMonth() - 1, 1);
@@ -15373,7 +15374,7 @@ const TuMes = (function(){
       for(let n = 0; n < 100 && tapado(); n++) await new Promise(r => setTimeout(r, 300));
       if(tapado()) return;
       await new Promise(r => setTimeout(r, 450));
-      try{ localStorage.setItem(K_AVISO, prev); }catch{}   // ya se mostró: pase lo que pase, no vuelve a salir
+      /* NO se marca al mostrarlo: sigue saliendo cada vez que entren hasta que toquen «Ver mi resumen» */
       const M = meses[k], P = meses[k + 1] || null, nom = mesNombre(prev);
       const [c1, c2] = tonoDe(M);
       const dias = new Date(+prev.slice(0, 4), +prev.slice(5, 7), 0).getDate();
@@ -15394,7 +15395,7 @@ const TuMes = (function(){
           '<div class="tmAvBig" style="--i:2" data-monto="' + Math.round(M.gastos) + '">' + peso(0) + '</div>' +
           '<p class="tmAvSub" style="--i:3">gastados' + cmp + '</p>' +
           '<div class="tmAvSpark" style="--i:4" aria-hidden="true">' + spark + '</div>' +
-          '<div class="tmAvAcc" style="--i:5"><button type="button" class="tmAvIr" id="tmAvIr">Ver mi resumen</button><button type="button" class="tmAvNo" id="tmAvNo">Ahora no</button></div>' +
+          '<div class="tmAvAcc" style="--i:5"><button type="button" class="tmAvIr" id="tmAvIr">Ver mi resumen</button><button type="button" class="tmAvNo" id="tmAvNo">Más tarde</button></div>' +
         '</div>';
       document.body.appendChild(scrim);
       requestAnimationFrame(() => requestAnimationFrame(() => scrim.classList.add("on")));
@@ -15403,8 +15404,9 @@ const TuMes = (function(){
       let cerrado = false;
       const cierra = () => { if(cerrado) return; cerrado = true; scrim.classList.remove("on"); scrim.classList.add("sale"); setTimeout(() => scrim.remove(), 420); };
       scrim.addEventListener("click", e => { if(e.target === scrim) cierra(); });
-      scrim.querySelector("#tmAvNo").addEventListener("click", cierra);
+      scrim.querySelector("#tmAvNo").addEventListener("click", () => { masTarde = Date.now(); cierra(); });
       scrim.querySelector("#tmAvIr").addEventListener("click", () => {
+        try{ localStorage.setItem(K_AVISO, prev); }catch{}   // ya lo vio: en este celular no vuelve a salir este mes
         cierra();
         Drawer.go("mes");
         setTimeout(() => abrir(M, P), REDUCED ? 0 : 380);
