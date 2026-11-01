@@ -4555,7 +4555,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-10-31.279";
+const APP_VERSION = "2026-11-01.280";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -15352,7 +15352,9 @@ const TuMes = (function(){
 
   /* ── aviso al entrar: «ya está tu resumen del mes». Sale una sola vez por mes; si se cierra, no vuelve ── */
   const K_AVISO = "armoni.tumes.avisado";
+  let avisandoMes = false;
   async function avisar(){
+    if(avisandoMes) return; avisandoMes = true;   // al abrir y al volver a la vez: una sola
     try{
       const hoy = new Date();
       const ant = new Date(hoy.getFullYear(), hoy.getMonth() - 1, 1);
@@ -15365,9 +15367,11 @@ const TuMes = (function(){
       try{ localStorage.setItem(KEY, JSON.stringify(d)); }catch{}
       const meses = d.meses || [], k = meses.findIndex(m => m.mes === prev);
       if(k < 0 || !(meses[k].gastos > 0)) return;
-      /* espera a que termine la pantalla de carga y a que no haya otra ventana abierta */
-      for(let n = 0; n < 60 && (document.getElementById("splash") || document.querySelector(".sheetScrim, .pgScrim, .ws")); n++) await new Promise(r => setTimeout(r, 300));
-      if(document.getElementById("splash")) return;
+      /* espera a que termine la pantalla de carga y a que no haya otra ventana abierta (arriendo, planes, temporada…);
+         si en 30 s sigue tapado, NO se marca como visto: sale la próxima vez que abran o vuelvan a la app */
+      const tapado = () => document.getElementById("splash") || document.querySelector(".sheetScrim, .pgScrim, .ws, .cfAn, .tpAn, .tmAvScrim") || document.hidden;
+      for(let n = 0; n < 100 && tapado(); n++) await new Promise(r => setTimeout(r, 300));
+      if(tapado()) return;
       await new Promise(r => setTimeout(r, 450));
       try{ localStorage.setItem(K_AVISO, prev); }catch{}   // ya se mostró: pase lo que pase, no vuelve a salir
       const M = meses[k], P = meses[k + 1] || null, nom = mesNombre(prev);
@@ -15406,6 +15410,7 @@ const TuMes = (function(){
         setTimeout(() => abrir(M, P), REDUCED ? 0 : 380);
       });
     }catch{ /* sin conexión: no molesta */ }
+    finally{ avisandoMes = false; }
   }
 
   return { refresh, avisar };
@@ -15536,6 +15541,8 @@ document.getElementById("cerrarBtn").addEventListener("click", () => { try{ Draw
 TrasIntro.hacer(() => setTimeout(() => { try{ SalidasEma.precarga(); }catch{} try{ CreditoCarro.precarga(); }catch{} }, 1200));   // el aviso de citas/salidas con Ema sale en la pantalla principal
 TrasIntro.hacer(() => Glim.check());
 TrasIntro.hacer(() => TuMes.avisar());
+/* el resumen del mes también sale al volver a la app (si todavía no se ha visto en este celular) */
+document.addEventListener("visibilitychange", () => { if(document.visibilityState === "visible") setTimeout(() => { try{ TuMes.avisar(); }catch{} }, 1500); });
 
 /* decoración de temporada: insignia en el menú y, en Navidad, una nevada muy suave. Se activa o se quita al cambiar de tema */
 const Decora = (function(){
