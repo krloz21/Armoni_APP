@@ -4555,7 +4555,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-11-01.282";
+const APP_VERSION = "2026-11-01.283";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -15352,9 +15352,12 @@ const TuMes = (function(){
 
   /* ── aviso al entrar: «ya está tu resumen del mes». Sale una sola vez por mes; si se cierra, no vuelve ── */
   const K_AVISO = "armoni.tumes.mostrado";   // clave nueva: la anterior se marcaba aunque el resumen no alcanzara a verse
-  let avisandoMes = false, masTarde = 0;
+  /* sale una vez; si tocan «Más tarde» vuelve a salir de vez en cuando (una vez al día) hasta que lo vean; ya visto, no sale más ese mes */
+  const K_LUEGO = "armoni.tumes.luego";
+  let avisandoMes = false;
   async function avisar(){
-    if(avisandoMes || Date.now() - masTarde < 20 * 60000) return;   // tocaron «Más tarde»: vuelve a salir la próxima vez que entren (no al instante)
+    let luego = 0; try{ luego = +localStorage.getItem(K_LUEGO) || 0; }catch{}
+    if(avisandoMes || Date.now() - luego < 24 * 3600000) return;
     avisandoMes = true;   // al abrir y al volver a la vez: una sola
     try{
       const hoy = new Date();
@@ -15403,8 +15406,8 @@ const TuMes = (function(){
       setTimeout(() => animaMonto(cifra, 0, +cifra.dataset.monto, REDUCED ? 1 : 1300), REDUCED ? 0 : 520);
       let cerrado = false;
       const cierra = () => { if(cerrado) return; cerrado = true; scrim.classList.remove("on"); scrim.classList.add("sale"); setTimeout(() => scrim.remove(), 420); };
-      scrim.addEventListener("click", e => { if(e.target === scrim) cierra(); });
-      scrim.querySelector("#tmAvNo").addEventListener("click", () => { masTarde = Date.now(); cierra(); });
+      scrim.addEventListener("click", e => { if(e.target === scrim){ try{ localStorage.setItem(K_LUEGO, String(Date.now())); }catch{} cierra(); } });
+      scrim.querySelector("#tmAvNo").addEventListener("click", () => { try{ localStorage.setItem(K_LUEGO, String(Date.now())); }catch{} cierra(); });
       scrim.querySelector("#tmAvIr").addEventListener("click", () => {
         try{ localStorage.setItem(K_AVISO, prev); }catch{}   // ya lo vio: en este celular no vuelve a salir este mes
         cierra();
