@@ -4555,7 +4555,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-11-01.280";
+const APP_VERSION = "2026-11-01.281";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -15351,7 +15351,7 @@ const TuMes = (function(){
   }
 
   /* ── aviso al entrar: «ya está tu resumen del mes». Sale una sola vez por mes; si se cierra, no vuelve ── */
-  const K_AVISO = "armoni.tumes.avisado";
+  const K_AVISO = "armoni.tumes.mostrado";   // clave nueva: la anterior se marcaba aunque el resumen no alcanzara a verse
   let avisandoMes = false;
   async function avisar(){
     if(avisandoMes) return; avisandoMes = true;   // al abrir y al volver a la vez: una sola
