@@ -956,7 +956,12 @@ body.mode-gmail footer, body.mode-glim footer{ display:none; }
 body[class*="mode-"] #credAviso{ display:none !important; }
 #credAviso{ width:min(100%, 42rem); margin:0 auto; }
 .credAvisoBtn{ display:flex; align-items:center; gap:12px; width:100%; margin:8px 0 6px; padding:12px 14px; border-radius:18px; border:1px solid rgba(255,190,90,.35); background:linear-gradient(130deg, rgba(255,190,90,.12), rgba(255,190,90,.04)); color:var(--white); font:inherit; text-align:left; cursor:pointer; }
-.credAvisoBtn .ic{ font-size:1.4rem; }
+.credAvisoBtn .ic{ flex:none; display:grid; place-items:center; width:44px; height:44px; border-radius:14px; font-size:1.3rem; line-height:1; background:rgba(var(--ink),.07); border:1px solid rgba(var(--ink),.08); }
+.credAvisoBtn.colaMal .ic{ background:rgba(255,120,100,.14); }
+.credAvisoBtn{ padding:12px 12px 12px 12px; }
+.credAvisoBtn b{ font-size:.92rem; letter-spacing:-.01em; }
+.credAvisoBtn small{ color:var(--dim); }
+.credAvisoBtn .ir{ display:grid; place-items:center; width:34px; height:34px; }
 .credAvisoBtn .tx{ flex:1; min-width:0; }
 .credAvisoBtn b{ display:block; font-size:.9rem; }
 .credAvisoBtn small{ display:block; margin-top:2px; font-size:.78rem; color:var(--ghost); line-height:1.35; }
@@ -4073,6 +4078,10 @@ body.mode-credito #credFoto{ display:grid; }
 #recDia .recChip, #rgDia .recChip, #recFecha{ min-height:44px; }
 /* «Reintentar» en los errores de carga */
 .restStatus:has(.uxReint){ flex-wrap:wrap; }
+/* estado vacío o de error: centrado, corto y con una sola acción (igual en todas las pantallas) */
+.uxEstado{ display:grid; justify-items:center; gap:12px; margin:18px auto 8px; max-width:30rem; padding:22px 18px; border-radius:22px; border:1px dashed rgba(var(--ink),.16); color:var(--ghost); text-align:center; font-size:.9rem; line-height:1.45; }
+.uxEstado .em{ font-size:1.7rem; line-height:1; }
+.uxEstado .uxReint{ margin-top:2px; }
 .uxReint{ min-height:44px; padding:0 18px; border-radius:999px; border:1px solid var(--line); background:var(--panel); color:var(--white); font:inherit; font-size:.85rem; font-weight:600; cursor:pointer; }
 .uxReint:active{ transform:scale(.96); }
 /* copiar del chat: el dibujo sigue de 26 px, el toque llega a 44 */
@@ -4573,7 +4582,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-11-04.284";
+const APP_VERSION = "2026-11-04.285";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -7313,7 +7322,7 @@ const SalidasEma = (function(){
       equilibrio();
       setTimeout(pidePuntaje, 400);
     }catch{
-      if(!datos) statusEl.innerHTML = 'No se pudo cargar. Revisa tu internet y que Tailscale esté encendido.<button type="button" class="uxReint" onclick="SalidasEma.refresh()">Reintentar</button>';
+      if(!datos) statusEl.innerHTML = '<div class="uxEstado"><span class="em" aria-hidden="true">📡</span><span>No se pudo cargar. Revisa tu internet y que Tailscale esté encendido.</span><button type="button" class="uxReint" onclick="SalidasEma.refresh()">Reintentar</button></div>';
     }
   }
   function refresh(){
@@ -8839,7 +8848,7 @@ const CreditoCarro = (function(){
     pidiendo = true;
     fetchLive(cache && JSON.stringify(cache.datos))
       .catch(() => {
-        if(!datos) statusEl.innerHTML = 'No se pudo cargar. Revisa tu internet y que Tailscale esté encendido.<button type="button" class="uxReint" onclick="CreditoCarro.refresh()">Reintentar</button>';
+        if(!datos) statusEl.innerHTML = '<div class="uxEstado"><span class="em" aria-hidden="true">📡</span><span>No se pudo cargar. Revisa tu internet y que Tailscale esté encendido.</span><button type="button" class="uxReint" onclick="CreditoCarro.refresh()">Reintentar</button></div>';
       })
       .finally(() => { pidiendo = false; });
   }
@@ -9547,6 +9556,7 @@ const FlujoViejo = (function(){
   /* j = la respuesta (ya leída) del flujo; devuelve true si está viejo */
   function revisa(id, j, minVersion){
     if(!j || typeof j !== "object") return false;
+    try{ document.dispatchEvent(new CustomEvent("flujo-respuesta", { detail: { id, j } })); }catch{}   // p. ej. el cierre de mes que ya revisó otro celular
     const v = Number(j.version != null ? j.version : j.v) || 0, m = lee(), antes = JSON.stringify(m[id] || null);   // servicios-estado dice «v»
     if(v < (minVersion || 1)) m[id] = { v, min: minVersion || 1 }; else delete m[id];
     if(JSON.stringify(m[id] || null) !== antes){ graba(m); pinta(); }
@@ -10944,7 +10954,8 @@ const DudasPro = (function(){
     if(!ah0 || !ah0.at || Date.now() - ah0.at > 3600000){ try{ await Promise.race([Ahorro.actualiza(), new Promise(ok => setTimeout(ok, 5000))]); }catch{} }
     const ctx = contexto();
     const ctl = new AbortController(), to = setTimeout(() => ctl.abort(), 240000);   // puede tardar: escribe en Notion antes de responder
-    const r = await fetch(PREGUNTAS_URL, { method: "POST", signal: ctl.signal, body: JSON.stringify(Object.assign({ token: MERCADO_TOKEN, accion: "consultar", historial: antes, contexto: ctx, ahorroAt: ctx.ahorroAt, respaldo: DudasRespaldo.lee() }, extra)) });
+    const cierreMes = (extra && extra.imagenes && extra.imagenes.length) ? cierrePendiente() : "";   // en días de cierre, una imagen cuenta como el extracto (también para los otros celulares)
+    const r = await fetch(PREGUNTAS_URL, { method: "POST", signal: ctl.signal, body: JSON.stringify(Object.assign({ token: MERCADO_TOKEN, accion: "consultar", historial: antes, contexto: ctx, ahorroAt: ctx.ahorroAt, respaldo: DudasRespaldo.lee(), cierreMes: cierreMes || undefined }, extra)) });
     clearTimeout(to);
     const j = await r.json().catch(() => ({}));
     if(r.ok){ DudasRespaldo.guarda(j); FlujoViejo.revisa("armoni-preguntas", j, 3); }
@@ -11050,7 +11061,7 @@ const DudasPro = (function(){
   let cierreActivo = "";
   /* «Recordar mañana» en la pantalla principal: el aviso de ahí descansa un día (en Control IA sigue a la vista) */
   const cierreDescansa = () => { try{ return Date.now() - (+localStorage.getItem(KCL) || 0) < 24 * 3600000; }catch{ return false; } };
-  const cierreHecho = k => { let h = []; try{ h = JSON.parse(localStorage.getItem(KC)) || []; }catch{} if(!h.includes(k)){ h.push(k); try{ localStorage.setItem(KC, JSON.stringify(h.slice(-24))); }catch{} } cierreActivo = ""; pintaCierre(); };
+  const cierreHecho = (k, avisar) => { let h = []; try{ h = JSON.parse(localStorage.getItem(KC)) || []; }catch{} if(!h.includes(k)){ h.push(k); try{ localStorage.setItem(KC, JSON.stringify(h.slice(-24))); }catch{} } cierreActivo = ""; pintaCierre(); if(avisar) avisaCierre(k); };
   function cierrePendiente(){
     const d = new Date(), dia = d.getDate();
     let k = "";
@@ -11070,14 +11081,14 @@ const DudasPro = (function(){
     const b = box && box.querySelector("[data-cierre]");
     if(b) b.onclick = pide;
     const ya = box && box.querySelector("[data-cierre-ya]");
-    if(ya) ya.onclick = () => cierreHecho(k);
+    if(ya) ya.onclick = () => cierreHecho(k, true);
     const card = main && main.firstChild;
     if(card){
       card.onclick = e => {
         if(e.target.closest(".avisoX")){
           /* ✕: ¿ya lo revisó o lo dejamos para mañana? */
           main.innerHTML = '<div class="credAvisoBtn cierreOpc" role="group"><span class="ic" aria-hidden="true">📄</span><span class="tx"><b>Cierre de ' + nombreMes(k) + '</b><small>¿Ya revisaste el extracto por fuera de Armoni?</small><span class="credVerifBtns"><button type="button" data-c="hecho">Ya lo revisé</button><button type="button" data-c="luego">Recordar mañana</button></span></span></div>';
-          main.querySelector('[data-c="hecho"]').onclick = () => cierreHecho(k);
+          main.querySelector('[data-c="hecho"]').onclick = () => cierreHecho(k, true);
           main.querySelector('[data-c="luego"]').onclick = () => { try{ localStorage.setItem(KCL, String(Date.now())); }catch{} pintaCierre(); };
           return;
         }
@@ -11089,6 +11100,13 @@ const DudasPro = (function(){
   /* en los días de cierre, cualquier imagen o PDF que se le mande a Control IA (y la IA responda) cuenta como el extracto revisado:
      antes solo contaba si venía del botón o decía «extracto», y el aviso se quedaba pegado */
   const marcaCierre = (q, img) => { const k = cierrePendiente(); if(!k || !(img || /extracto/i.test(q || ""))) return; cierreHecho(k); };
+  /* lo que el flujo sabe (lo revisó este celular u otro): se marca aquí también, así el aviso no sale en el celular de la esposa si ya se mandó */
+  document.addEventListener("flujo-respuesta", e => {
+    const d = e.detail || {}; if(d.id !== "armoni-preguntas" || !d.j || !Array.isArray(d.j.cierres)) return;
+    const k = cierrePendiente(); if(k && d.j.cierres.includes(k)) cierreHecho(k);
+  });
+  /* «Ya lo revisé» o un extracto mandado: también se le avisa al flujo para que los demás celulares lo sepan */
+  const avisaCierre = k => { try{ fetch(PREGUNTAS_URL, { method: "POST", body: JSON.stringify({ token: MERCADO_TOKEN, accion: "cierre", cierreMes: k }) }).catch(() => {}); }catch{} };
   document.addEventListener("dudas-enviada", e => marcaCierre(e.detail.q, e.detail.img));
   /* se elige la pestaña recién aquí: con «Control IA» guardada, seg() pinta el cierre y eso necesita KC/nombreMes ya definidos
      (antes, del 28 al 7, la app se rompía al abrir si la última pestaña había sido Control IA) */
@@ -12657,7 +12675,7 @@ const Glim = (function(){
     }
     if(datos) render(); else statusEl.innerHTML = '<span class="dot" aria-hidden="true"></span>Cargando Glim…';
     fetchLive().catch(() => {
-      if(!datos) statusEl.innerHTML = 'No se pudo cargar. Revisa tu internet y que Tailscale esté encendido.<button type="button" class="uxReint" onclick="Glim.refresh(true)">Reintentar</button>';
+      if(!datos) statusEl.innerHTML = '<div class="uxEstado"><span class="em" aria-hidden="true">📡</span><span>No se pudo cargar. Revisa tu internet y que Tailscale esté encendido.</span><button type="button" class="uxReint" onclick="Glim.refresh(true)">Reintentar</button></div>';
     });
   }
 
@@ -12788,7 +12806,7 @@ const Recuerda = (function(){
       clearTimeout(lento);
       if(n !== pedido) return;
       cardEl.classList.remove("cargando");
-      if(!cache[f]){ cardEl.innerHTML = ""; statusEl.innerHTML = 'No se pudo cargar. Revisa tu internet y que Tailscale esté encendido.<button type="button" class="uxReint" onclick="Recuerda.refresh(true)">Reintentar</button>'; }
+      if(!cache[f]){ cardEl.innerHTML = ""; statusEl.innerHTML = '<div class="uxEstado"><span class="em" aria-hidden="true">📡</span><span>No se pudo cargar. Revisa tu internet y que Tailscale esté encendido.</span><button type="button" class="uxReint" onclick="Recuerda.refresh(true)">Reintentar</button></div>'; }
     }
   }
 
@@ -14195,7 +14213,7 @@ const Mercar = (function(){
         else if(espera > 0) setTimeout(() => { if(estado === "inicio") inicio(true); }, espera); else inicio(true);
       }
     }catch{
-      if(!datos) statusEl.innerHTML = 'No se pudo cargar. Revisa tu internet y que Tailscale esté encendido.<button type="button" class="uxReint" onclick="Mercar.refresh(true)">Reintentar</button>';
+      if(!datos) statusEl.innerHTML = '<div class="uxEstado"><span class="em" aria-hidden="true">📡</span><span>No se pudo cargar. Revisa tu internet y que Tailscale esté encendido.</span><button type="button" class="uxReint" onclick="Mercar.refresh(true)">Reintentar</button></div>';
     } finally { enVuelo = false; }
   }
   function refresh(entrando){
@@ -15382,7 +15400,7 @@ const TuMes = (function(){
       try{ localStorage.setItem(KEY, JSON.stringify(d)); }catch{}
       if(cambio) pintaLista();
     }catch{
-      if(!datos) statusEl.innerHTML = "No se pudo cargar. Revisa tu internet y que Tailscale esté encendido.";
+      if(!datos) statusEl.innerHTML = '<div class="uxEstado"><span class="em" aria-hidden="true">📡</span><span>No se pudo cargar. Revisa tu internet y que Tailscale esté encendido.</span></div>';
     }
   }
   function refresh(){
