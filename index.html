@@ -1801,6 +1801,12 @@ body[class*="mode-"] #colaAviso, body[class*="mode-"] #arriendoAviso, body[class
 .glimTip b{ display:block; font-size:.88rem; }
 .glimTip span{ display:block; font-size:.8rem; color:var(--ghost); margin-top:2px; }
 .gHead{ margin:22px 4px 8px; }
+.gHeadMes{ display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; }
+.gMeses{ display:flex; gap:6px; flex-wrap:wrap; }
+.gMeses button{ min-height:30px; padding:0 12px; border-radius:999px; border:1px solid var(--line); background:rgba(var(--ink),.05); color:var(--ghost); font:inherit; font-size:.76rem; font-weight:650; letter-spacing:0; text-transform:none; cursor:pointer; transition:transform var(--t-tap) var(--ease-out), background var(--t-base) ease, color var(--t-base) ease; }
+.gMeses button[aria-selected="true"]{ background:linear-gradient(140deg, var(--cyan), var(--blue)); border-color:transparent; color:var(--on-accent); }
+.gMeses button:active{ transform:scale(.94); }
+.gResumenMes{ margin:0 4px 10px; font-size:.84rem; color:var(--ghost); }
 .gList{ background:var(--panel); border:1px solid var(--line); border-radius:18px; overflow:hidden; }
 .gRow{ display:flex; align-items:center; gap:12px; padding:12px 14px; }
 .gRow + .gRow{ border-top:1px solid var(--line); }
@@ -4582,7 +4588,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-11-04.285";
+const APP_VERSION = "2026-11-04.286";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -6586,8 +6592,9 @@ const Uso = (function(){
 })();
 window.ArmoniUso = Uso;
 /* el panel de Ajustes: barras con el tiempo de cada apartado */
-let usoVer = "casa";
+let usoVer = "casa";   // siempre toda la casa: la familia quiso ver lo de todos junto, no celular por celular
 function pintaUso(){
+  usoVer = "casa";
   const box = document.getElementById("usoCard"); if(!box) return;
   const eq = Uso.equipos(), otros = eq ? Object.keys(eq.equipos || {}).filter(k => k !== eq.yo) : [];
   if(usoVer !== "yo" && usoVer !== "casa" && !otros.includes(usoVer)) usoVer = "casa";
@@ -6598,9 +6605,8 @@ function pintaUso(){
   const dias = usoVer === "casa" ? Uso.todaLaCasa() : usoVer === "yo" ? null : eq.equipos[usoVer].dias;
   const todo = Uso.reporte(30, dias || undefined);
   const r = todo.filter(x => !x.apartado.startsWith("acción")), acc = todo.filter(x => x.apartado.startsWith("acción"));
-  const chips = otros.length ? '<div class="usoQuien" role="tablist"><button type="button" data-u="casa" aria-selected="' + (usoVer === "casa") + '">Toda la casa</button><button type="button" data-u="yo" aria-selected="' + (usoVer === "yo") + '">Este celular</button>' +
-    otros.map(k => '<button type="button" data-u="' + k.replace(/"/g, "") + '" aria-selected="' + (usoVer === k) + '">' + nombre(k).replace(/</g, "") + '</button>').join("") + '</div>' : '';
-  const visto = usoVer === "casa" ? '<p class="usoAcc">Suma de los ' + (otros.length + 1) + ' dispositivos: lo que más usa la familia sale arriba.</p>' : usoVer !== "yo" && eq.equipos[usoVer].visto ? '<p class="usoAcc">Actualizado ' + new Date(eq.equipos[usoVer].visto).toLocaleString("es-CO", { day: "numeric", month: "short", hour: "numeric", minute: "2-digit" }) + '</p>' : '';
+  const chips = '';
+  const visto = otros.length ? '<p class="usoAcc">Suma de los ' + (otros.length + 1) + ' celulares de la casa: lo que más usa la familia sale arriba.</p>' : '';
   if(!r.length){ box.innerHTML = chips + '<div class="setRow"><span class="setTxt"><span>Todavía no hay datos. Se van guardando mientras se usa la app.</span></span></div>'; }
   else {
     const mx = Math.max(...r.map(x => x.minutos), .1);
@@ -12623,13 +12629,27 @@ const Glim = (function(){
   const ICO_IN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 7 7 17M7 9v8h8"/></svg>';
   const ICO_OUT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg>';
   const fechaCorta = f => { if(!f) return ""; try{ return new Date(f + "T00:00:00").toLocaleDateString("es-CO", { day:"numeric", month:"short" }); }catch{ return f; } };
+  const MESES = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
+  const mesDe = f => String(f || "").slice(0, 7);
+  const mesActual = () => hoyISO().slice(0, 7);
+  let mesVista = "";   // "" = el mes en curso; un AAAA-MM = un mes anterior que se tocó para verlo
+  const esc = t => String(t ?? "").replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
 
   function render(){
     if(!datos) return;
     statusEl.innerHTML = "";
     const d = datos, r = ritmo(d);
     const pct = r.R ? Math.min(1, r.gastado / r.R) : 0;
-    const movs = (d.movimientos || []).filter(m => m && m.tipo && m.monto != null);
+    const todos = (d.movimientos || []).filter(m => m && m.tipo && m.monto != null);
+    /* por mes: el actual se ve solo (normalmente la recarga y lo que se lleve gastado); los anteriores se tocan para ver en qué se fue la plata */
+    const meses = [...new Set(todos.map(m => mesDe(m.fecha)).filter(Boolean))].sort().reverse();
+    const hoyM = mesActual();
+    if(mesVista && !meses.includes(mesVista)) mesVista = "";
+    const verM = mesVista || hoyM;
+    const movs = todos.filter(m => mesDe(m.fecha) === verM);
+    const nombreM = k => { const i = +k.slice(5) - 1; return (MESES[i] || k) + (k.slice(0, 4) !== hoyM.slice(0, 4) ? " " + k.slice(0, 4) : ""); };
+    const gastoM = movs.filter(m => m.tipo !== "Recarga").reduce((a, m) => a + (+m.monto || 0), 0);
+    const chipsM = [hoyM].concat(meses.filter(k => k !== hoyM)).slice(0, 6);
     let html =
       '<div class="glimHero">' +
         '<span class="gLbl">Saldo disponible</span>' +
@@ -12642,7 +12662,9 @@ const Glim = (function(){
       const lento = debeAvisar(d);
       html += '<div class="glimTip' + (lento ? ' lento' : '') + '"><b>' + (lento ? 'Vas más lento de lo normal' : 'Vas a buen ritmo') + '</b><span>' + consejo(r) + '</span></div>';
     }
-    html += '<div class="gHead">Movimientos</div>' + (movs.length
+    html += '<div class="gHead gHeadMes"><span>Movimientos</span>' + (chipsM.length > 1 ? '<div class="gMeses" role="tablist">' + chipsM.map(k => '<button type="button" role="tab" data-gm="' + k + '" aria-selected="' + (k === verM) + '">' + (k === hoyM ? "Este mes" : nombreM(k).charAt(0).toUpperCase() + nombreM(k).slice(1)) + '</button>').join("") + '</div>' : '') + '</div>' +
+      (verM !== hoyM && gastoM > 0 ? '<p class="gResumenMes">En ' + nombreM(verM) + ' gastaron ' + plata(gastoM) + ' de Glim' + (movs.some(m => m.tipo === "Recarga") ? '' : '') + '.</p>' : '') +
+      (movs.length
       ? '<div class="gList">' + movs.map(m => {
           const rec = m.tipo === "Recarga";
           return '<div class="gRow"><span class="gIco ' + (rec ? 'in' : 'out') + '" aria-hidden="true">' + (rec ? ICO_IN : ICO_OUT) + '</span>' +
@@ -12650,8 +12672,9 @@ const Glim = (function(){
             '<span class="gAmt ' + (rec ? 'in' : '') + '">' + (rec ? '+' : '−') + plata(m.monto) +
             (m.saldo != null ? '<small>Saldo ' + plata(m.saldo) + '</small>' : '') + '</span></div>';
         }).join('') + '</div>'
-      : '<p class="gEmpty">Todavía no hay movimientos. Aparecen solos cuando llega un correo de Glim.</p>');
+      : '<p class="gEmpty">' + (verM === hoyM ? 'Este mes todavía no hay movimientos. Aparecen solos cuando llega un correo de Glim.' : 'Ese mes no hubo movimientos.') + '</p>');
     cardEl.innerHTML = html;
+    cardEl.querySelectorAll("[data-gm]").forEach(b => b.onclick = () => { mesVista = b.dataset.gm === hoyM ? "" : b.dataset.gm; const sa = saldoAnterior; render(); saldoAnterior = sa; });
     animaMonto(document.getElementById("glimSaldoCifra"), saldoAnterior == null ? 0 : saldoAnterior, r.S, 900);
     saldoAnterior = r.S;
     const bar = cardEl.querySelector(".gBar i");
