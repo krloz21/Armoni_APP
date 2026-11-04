@@ -66,6 +66,24 @@ if (!sd.nu2) {
     const c = sd.cajas[k]; c.inicial = saldo; c.inicialFecha = base; c.tasa = tasa; c.tasaHasta = hasta; c.tasaDespues = despues;
   });
 }
+// 4 de noviembre de 2026 (10:28 a. m.): saldos reales de las cajitas de Nu, tal como salen en la app del banco.
+// Desde este instante Armoni vuelve a sumar lo que entra y a restar lo que sale; lo anotado ANTES de este momento ya está dentro de estos saldos.
+// «Gastos Familiares» es el bolsillo del día a día (antes se llamaba «Bolsillo para gastar»); «Mi baby» y «Ahorro extra» están en cero pero existen en Nu.
+if (!sd.nu3) {
+  sd.nu3 = true;
+  const base = '2026-11-04', at = new Date().toISOString();
+  [[/gastar|gastos/, 'Gastos Familiares', 322397.42, 9.85, null, null, true, 0],
+   [/casita|^ahorro$/, 'Ahorro casita', 5152734.05, 9.85, null, null, false, 1],
+   [/carro/, 'Pagos carro', 1559082.03, 10.20, '2027-01-08', 9.85, false, 2],
+   [/baby|bebe/, 'Mi baby', 0, 9.85, null, null, false, 3],
+   [/extra/, 'Ahorro extra', 0, 9.85, null, null, false, 4]].forEach(([re, nom, saldo, tasa, hasta, despues, gasto, orden]) => {
+    let k = Object.keys(sd.cajas).find(x => re.test(norm(sd.cajas[x].nombre)) || (sd.cajas[x].alias || []).some(a => re.test(norm(a))));
+    if (!k) { k = 'nu' + orden; sd.cajas[k] = { nombre: nom, meta: 0, alias: [], orden }; }
+    const c = sd.cajas[k];
+    if (norm(c.nombre) !== norm(nom)) { c.alias = (c.alias || []).concat(c.nombre).slice(-10); c.nombre = nom; }
+    c.inicial = saldo; c.inicialFecha = base; c.inicialAt = at; c.tasa = tasa; c.tasaHasta = hasta; c.tasaDespues = despues; if (gasto) c.gasto = true;
+  });
+}
 const ids = Object.keys(sd.cajas);
 // nombre de la cajita en el concepto («Ahorro · Casita», «Retiro · Pagos de carro»), comparado de forma flexible:
 // sin tildes ni mayúsculas, exacto o por alias; si no, uno contiene al otro; si no, por palabra clave («carro» → Pagos de carro, «casita» → Ahorro casita)
