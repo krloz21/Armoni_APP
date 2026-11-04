@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
 <title>Armoni</title>
 
 <!-- app en la pantalla de inicio del iPhone -->
@@ -89,7 +89,7 @@
 /* sin transiciones de vista (navegadores viejos): un fundido corto de colores */
 
 *,*::before,*::after{ box-sizing:border-box; }
-html{ height:100%; -webkit-text-size-adjust:100%; text-size-adjust:100%; touch-action:manipulation; }
+html{ height:100%; -webkit-text-size-adjust:100%; text-size-adjust:100%; touch-action:manipulation; overscroll-behavior-x:none; }
 body{
   height:100%; margin:0;
   background:var(--void); color:var(--white);
@@ -2111,6 +2111,11 @@ button{ transition:transform var(--t-tap) var(--ease-out); }
 /* ═════════ A mercar: más de juego (todo con transform/opacity: liviano) ═════════ */
 @keyframes mkSube{ from{ opacity:0; transform:translateY(14px) scale(.98); } to{ opacity:1; transform:none; } }
 @keyframes vEntra{ from{ opacity:0; transform:translateY(12px); } to{ opacity:1; transform:none; } }
+@keyframes vEntraAtras{ from{ opacity:0; transform:translateX(-16px); } to{ opacity:1; transform:none; } }
+/* al volver (gesto o botón atrás, ✕): todo entra desde la izquierda, sin escalonar, como un «pop» de iOS */
+body[data-nav="atras"] :is(#restView, #creditoView, #gmailView, #glimView, #recuerdaView, #ajustesView, #emaView, #mesView, #balanceView, #ahorroView, #dudasView, #tempView, #famView) > *{ animation-name:vEntraAtras; animation-duration:.4s; animation-delay:0s !important; }
+body[data-nav="atras"]:not([class*="mode-"]) #thread > .inner{ animation:vEntraAtras .4s var(--ease-out) both; }
+@media (prefers-reduced-motion: reduce){ body[data-nav="atras"] #thread > .inner{ animation:none; } }
 @keyframes mkEntraCarta{ from{ opacity:0; transform:translateY(14px) scale(.95); } to{ opacity:1; transform:none; } }
 @keyframes mkLlega{ from{ opacity:0; transform:scale(.88) translateY(26px); } to{ opacity:1; transform:scale(.94) translateY(14px); } }
 @keyframes mkChispa{ 0%{ opacity:1; transform:translate(0,0) scale(1); } 100%{ opacity:0; transform:translate(var(--x), var(--y)) scale(.2); } }
@@ -3846,6 +3851,17 @@ body.asleep #mkFx{ display:none; }
 #restView > :nth-child(n+5), #creditoView > :nth-child(n+5), #gmailView > :nth-child(n+5), #glimView > :nth-child(n+5), #recuerdaView > :nth-child(n+5), #ajustesView > :nth-child(n+5), #emaView > :nth-child(n+5), #mesView > :nth-child(n+5), #balanceView > :nth-child(n+5), #ahorroView > :nth-child(n+5), #dudasView > :nth-child(n+5), #tempView > :nth-child(n+5), #famView > :nth-child(n+5){ animation-delay:.2s; }
 @media (prefers-reduced-motion: reduce){ #restView > *, #creditoView > *, #gmailView > *, #glimView > *, #recuerdaView > *, #ajustesView > *, #emaView > *, #mesView > *, #balanceView > *, #ahorroView > *, #dudasView > *, #tempView > *, #famView > *{ animation:none; } }
 
+/* ═════════ acabado tipográfico: títulos más ajustados y textos sin líneas huérfanas ═════════ */
+h1, h2, h3, .restIntro h2, .wsT{ letter-spacing:-.02em; text-wrap:balance; }
+.msg .body p, .msg .body li, .uxEstado, .credVerif p, .dcCierre .tx, .credAvisoBtn small, .gEmpty, .usoAcc, .dcProCab small{ text-wrap:pretty; }
+/* etiquetas de sección: mismo tamaño y mismo aire en todas las pantallas */
+.gHead, .gLbl, .ajGrupo, .seListaCab{ font-size:.72rem; font-weight:700; letter-spacing:.08em; color:var(--dim); }
+/* avisos de inicio: una lista con el mismo espacio entre tarjetas */
+.credAvisoBtn{ margin:0 0 10px; }
+#credAviso:empty, #cierreAviso:empty, #colaAviso:empty, #arriendoAviso:empty, #pseAviso:empty, #flujoAviso:empty{ display:none; }
+/* nada que se toque mide menos de 32 px de alto */
+.gMeses button{ min-height:32px; }
+
 /* ═════════ acabado: respuesta al tacto (como iOS/Material), sin costo de batería ═════════
    Solo transform/opacity (la GPU lo compone sin volver a pintar). Nada corre en reposo. */
 .credAvisoBtn, .credVerifBtns button, .dcCierre button, .pgSi, .pgNo, .uxReint, .ddModo button, .ddTabs button, .dNav button, .restCard, .gmBtn, .segTheme button, .credAvisoBtn .avisoX{
@@ -4588,7 +4604,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-11-04.286";
+const APP_VERSION = "2026-11-04.287";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -4683,8 +4699,11 @@ let viewportMoved = () => {};   // se reemplaza más abajo: redibuja el vidrio m
   if(!vv) return;
   const root = document.documentElement.style;
   const fit = () => {
+    /* sin zoom, la página nunca debe quedar desplazada (al enfocar la caja de escribir Android a veces la corre y la barra de abajo
+       se veía movida de lugar): se devuelve a 0 y la app se acomoda sola al alto visible */
+    if(vv.scale < 1.02 && (window.scrollY || window.scrollX)) window.scrollTo(0, 0);
     root.setProperty("--app-h", vv.height + "px");
-    root.setProperty("--app-top", vv.offsetTop + "px");
+    root.setProperty("--app-top", (vv.scale < 1.02 ? 0 : vv.offsetTop) + "px");
     viewportMoved();
     keptScrolled();   // el teclado ya terminó de moverse: ahora sí la posición es la real
   };
@@ -11356,7 +11375,9 @@ const AtrasSistema = (function(){
     return mejor;
   }
   const hayAlgo = () => !!capaArriba() || document.body.classList.contains("drawer-open") || MODE !== "chat";
-  let reserva = false;
+  let reserva = false, tNav = 0;
+  /* marca «vamos hacia atrás» un instante: la pantalla que aparece entra desde la izquierda (y no desde abajo) */
+  function atras(){ document.body.dataset.nav = "atras"; clearTimeout(tNav); tNav = setTimeout(() => { delete document.body.dataset.nav; }, 650); }
   function arma(){
     if(reserva || !hayAlgo()) return;
     try{ history.pushState({ armoniAtras: 1 }, ""); reserva = true; }catch{}
@@ -11375,7 +11396,7 @@ const AtrasSistema = (function(){
     const c = capaArriba();
     if(c) cierraCapa(c);
     else if(document.body.classList.contains("drawer-open")) Drawer.close();
-    else if(MODE !== "chat"){ const v = [...document.querySelectorAll("#tpVolver, #ajVolver, .vVolver")].find(visible); if(v) v.click(); else Drawer.go("chat"); }
+    else if(MODE !== "chat"){ atras(); const v = [...document.querySelectorAll("#tpVolver, #ajVolver, .vVolver")].find(visible); if(v) v.click(); else Drawer.go("chat"); }
     else { history.back(); return; }      // nada que cerrar: atrás sale de la app (o vuelve a la página anterior)
     setTimeout(arma, 500);                 // si aún queda algo abierto (p. ej. un formulario de pasos), se vuelve a reservar
   });
@@ -11384,8 +11405,10 @@ const AtrasSistema = (function(){
   if(rr) new MutationObserver(revisa).observe(rr, { childList: true, subtree: true, attributes: true, attributeFilter: ["class"] });
   document.addEventListener("click", revisa, true);
   revisa();
-  return { revisa };
+  return { revisa, atras };
 })();
+/* la ✕ de arriba también es «volver» */
+(function(){ const x = document.getElementById("cerrarBtn"); if(x) x.addEventListener("click", () => { try{ AtrasSistema.atras(); }catch{} }, true); })();
 
 /* el aviso de un plan nuevo de Comfandi abre Armoni directo en Salidas Ema */
 try{
