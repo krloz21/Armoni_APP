@@ -247,7 +247,7 @@ body:not([class*="mode-"]) #thread.sinChat{ overflow-y:hidden; }
 .msg.bot .body > :not(.tools){ animation:materialize .6s cubic-bezier(.2,.75,.25,1) both; }
 @keyframes lift{ from{ opacity:0; transform:translateY(28px) scale(.97); } to{ opacity:1; transform:none; } }
 @keyframes materialize{
-  from{ opacity:0; filter:blur(4px); transform:translateY(7px); }
+  from{ opacity:0; transform:translateY(7px); }
   to{ opacity:1; filter:blur(0); transform:none; }
 }
 
@@ -647,7 +647,7 @@ footer{ padding:10px var(--sp) calc(var(--safe-bot) + 14px); }
 @keyframes tagin{ from{ opacity:0; transform:translateY(5px); } to{ opacity:1; transform:none; } }
 
 #splash.out .brand{
-  opacity:0; filter:blur(6px); transform:translateY(-8px);
+  opacity:0; transform:translateY(-8px);
   transition:opacity .35s ease, filter .35s ease, transform .35s ease;
 }
 
@@ -1332,6 +1332,9 @@ body[class*="mode-"] #credAviso{ display:none !important; }
 .dcCierre button{ flex:none; padding:9px 12px; border-radius:12px; border:0; background:linear-gradient(140deg, #8fc7ff, #5f8bff); color:#071226; font:inherit; font-size:.82rem; font-weight:700; cursor:pointer; }
 body[class*="mode-"] #cierreAviso{ display:none !important; }
 #cierreAviso{ width:min(100%, 42rem); margin:0 auto; }
+.dcCierreYa{ display:inline; margin-left:4px; padding:0; border:0; background:none; color:var(--ghost); font:inherit; font-size:.8rem; text-decoration:underline; text-underline-offset:3px; cursor:pointer; }
+.credAvisoBtn.cierreOpc .credVerifBtns{ display:flex; margin-top:10px; }
+.credAvisoBtn.cierreOpc .credVerifBtns button:first-child{ background:linear-gradient(140deg, #8fc7ff, #5f8bff); color:#071226; }
 /* avisos de la pantalla principal: la cola (decidir / no se pudo guardar), el valor del arriendo y los flujos viejos */
 body[class*="mode-"] #colaAviso, body[class*="mode-"] #arriendoAviso, body[class*="mode-"] #pseAviso, body[class*="mode-"] #flujoAviso{ display:none !important; }
 #colaAviso, #arriendoAviso, #pseAviso, #flujoAviso{ width:min(100%, 42rem); margin:0 auto; }
@@ -1456,8 +1459,8 @@ body[class*="mode-"] #colaAviso, body[class*="mode-"] #arriendoAviso, body[class
 .wsLey span{ display:inline-flex; align-items:center; gap:6px; }
 .wsLey i{ width:9px; height:9px; border-radius:50%; background:var(--c); }
 .wsDatos{ display:grid; gap:12px; margin-top:6px; }
-.wsDato{ display:flex; align-items:center; gap:14px; padding:14px 16px; border-radius:20px; background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.12);  opacity:0; transform:translateX(-24px); filter:blur(6px); animation:wsEntraDato .8s cubic-bezier(.16,1,.3,1) forwards; animation-delay:calc(.35s + var(--j) * .28s); }
-@keyframes wsEntraDato{ to{ opacity:1; transform:none; filter:blur(0); } }
+.wsDato{ display:flex; align-items:center; gap:14px; padding:14px 16px; border-radius:20px; background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.12);  opacity:0; transform:translateX(-24px); animation:wsEntraDato .8s cubic-bezier(.16,1,.3,1) forwards; animation-delay:calc(.35s + var(--j) * .28s); }
+@keyframes wsEntraDato{ to{ opacity:1; transform:none; } }
 .wsDato .e{ font-size:1.9rem; line-height:1; flex:none; }
 .wsDato small{ display:block; font-size:.66rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:rgba(255,255,255,.6); margin-bottom:2px; }
 .wsDato b{ font-size:1.12rem; font-weight:700; letter-spacing:-.02em; line-height:1.2; }
@@ -1483,14 +1486,14 @@ body[class*="mode-"] #colaAviso, body[class*="mode-"] #arriendoAviso, body[class
 .wsX{ width:36px; height:36px; border:1px solid rgba(255,255,255,.14); border-radius:50%; background:rgba(255,255,255,.1);  color:#fff; display:grid; place-items:center; cursor:pointer; }
 .wsX svg{ width:16px; height:16px; }
 .wsCuerpo{ position:relative; z-index:2; flex:1; display:flex; flex-direction:column; justify-content:center; padding:24px 26px calc(env(safe-area-inset-bottom, 0px) + 46px); }
-.wsCuerpo > *{ opacity:0; transform:translateY(26px) scale(.98); filter:blur(4px); animation:wsSube .85s cubic-bezier(.16,1,.3,1) forwards; animation-delay:calc(var(--d, 0) * 1s); }
-@keyframes wsSube{ to{ opacity:1; transform:none; filter:blur(0); } }
+.wsCuerpo > *{ opacity:0; transform:translateY(26px) scale(.98); animation:wsSube .85s cubic-bezier(.16,1,.3,1) forwards; animation-delay:calc(var(--d, 0) * 1s); }
+@keyframes wsSube{ to{ opacity:1; transform:none; } }
 .wsK{ align-self:flex-start; display:inline-flex; align-items:center; gap:8px; margin-bottom:16px; padding:7px 13px; border-radius:999px; font-size:.72rem; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:rgba(255,255,255,.88); background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.14);  }
 .wsK::before{ content:""; width:7px; height:7px; border-radius:50%; background:linear-gradient(140deg, var(--c2), var(--c1)); box-shadow:0 0 10px var(--c2); }
 .wsT{ font-size:2.1rem; font-weight:700; letter-spacing:-.035em; line-height:1.08; margin:0 0 16px; }
 .wsBig{ font-size:clamp(2.2rem, 12.2vw, 3.5rem); padding-bottom:.08em; font-weight:700; letter-spacing:-.045em; line-height:1; font-variant-numeric:tabular-nums; margin:4px 0 18px; background:linear-gradient(180deg, #fff 35%, var(--c2)); -webkit-background-clip:text; background-clip:text; color:transparent; }
 .wsCuerpo > .wsEmoji{ width:92px; height:92px; border-radius:28px; display:grid; place-items:center; font-size:3rem; line-height:1; margin-bottom:22px; background:linear-gradient(145deg, rgba(255,255,255,.16), rgba(255,255,255,.04)); border:1px solid rgba(255,255,255,.16); box-shadow:inset 0 1px 0 rgba(255,255,255,.2), 0 24px 50px -22px var(--c1); animation:wsPop .9s cubic-bezier(.34,1.56,.64,1) forwards, wsFlota 3.6s ease-in-out 1s infinite; }
-@keyframes wsPop{ from{ opacity:0; transform:scale(.5) rotate(-8deg); filter:blur(4px); } to{ opacity:1; transform:none; filter:blur(0); } }
+@keyframes wsPop{ from{ opacity:0; transform:scale(.5) rotate(-8deg); } to{ opacity:1; transform:none; } }
 @keyframes wsFlota{ 50%{ transform:translateY(-7px); } }
 /* ── al salir: el contenido se apaga primero (nada se ve cortado) ── */
 .ws.saliendo .wsCuerpo, .ws.saliendo .wsSegs, .ws.saliendo .wsTop, .ws.saliendoAbajo .wsCuerpo, .ws.saliendoAbajo .wsSegs, .ws.saliendoAbajo .wsTop{ opacity:0; transition:opacity .18s ease; }
@@ -1614,11 +1617,10 @@ body[class*="mode-"] #colaAviso, body[class*="mode-"] #arriendoAviso, body[class
 @keyframes wsAbre{ from{ clip-path:inset(var(--oy) var(--or) var(--ob) var(--ol) round 26px); } to{ clip-path:inset(0 0 0 0 round 0px); } }
 .ws.desdeTarjeta .wsCuerpo.primera > *{ animation-delay:calc(var(--d, 0) * 1s + .22s); }
 .ws.arrastrando{ transition:none; }
-.wsCuerpo > *{ filter:blur(4px); }
 .wsCuerpo.sale > *{ animation:wsSaleItem .26s cubic-bezier(.4,0,1,1) forwards !important; animation-delay:0s !important; }
-@keyframes wsSaleItem{ from{ opacity:1; transform:none; filter:blur(0); } to{ opacity:0; transform:translateY(calc(var(--dir, 1) * -18px)) scale(.985); filter:blur(3px); } }
+@keyframes wsSaleItem{ from{ opacity:1; transform:none; } to{ opacity:0; transform:translateY(calc(var(--dir, 1) * -18px)) scale(.985); } }
 .wsCuerpo[data-dir="-1"] > *{ animation-name:wsSubeAtras; }
-@keyframes wsSubeAtras{ from{ opacity:0; transform:translateY(-22px) scale(.985); filter:blur(4px); } to{ opacity:1; transform:none; filter:blur(0); } }
+@keyframes wsSubeAtras{ from{ opacity:0; transform:translateY(-22px) scale(.985); } to{ opacity:1; transform:none; } }
 @media (prefers-reduced-motion:reduce){ .ws.desdeTarjeta, .ws.desdeTarjeta.saliendo, .ws.volviendo{ animation:none; } .wsCuerpo.sale > *{ animation:none !important; opacity:0; } }
 
 /* aviso «ya está tu resumen» */
@@ -1709,7 +1711,7 @@ body[class*="mode-"] #colaAviso, body[class*="mode-"] #arriendoAviso, body[class
 .mkCuenta b.late{ animation:mkNum .6s cubic-bezier(.34,1.56,.64,1); }
 .mkCuenta.ya b{ font-size:3.4rem; background:linear-gradient(140deg, #4ade80, #fde047); -webkit-background-clip:text; background-clip:text; color:transparent; text-shadow:none; }
 .mkCuenta small{ position:relative; margin-top:40px; font-size:.82rem; color:var(--dim); max-width:240px; }
-@keyframes mkNum{ from{ transform:scale(2.4); opacity:0; filter:blur(6px); } to{ transform:none; opacity:1; filter:none; } }
+@keyframes mkNum{ from{ transform:scale(2.4); opacity:0; } to{ transform:none; opacity:1; } }
 @keyframes mkAnillo{ from{ transform:scale(.7); opacity:1; } to{ transform:scale(1.25); opacity:0; } }
 .mkDeck.reparte .mkCard:not(.atras){ animation:mkReparte .6s cubic-bezier(.2,1.2,.4,1); }
 @keyframes mkReparte{ from{ transform:translateY(-120px) rotate(-14deg) scale(.7); opacity:0; } }
@@ -1922,7 +1924,7 @@ button{ transition:transform var(--t-tap) var(--ease-out); }
 @keyframes sheetOutF{ to{ opacity:0; transform:scale(.98); } }
 @keyframes sheetInR{ from{ opacity:0; transform:translateX(26px); } to{ opacity:1; transform:none; } }
 @keyframes sheetInL{ from{ opacity:0; transform:translateX(-26px); } to{ opacity:1; transform:none; } }
-@keyframes sheetInF{ from{ opacity:0; filter:blur(3px); transform:translateY(6px); } to{ opacity:1; filter:blur(0); transform:none; } }
+@keyframes sheetInF{ from{ opacity:0; transform:translateY(6px) scale(.995); } to{ opacity:1; transform:none; } }
 
 /* cabecera de la ficha de categoría */
 .sheetHead{ display:flex; align-items:center; gap:14px; padding-right:38px; margin-bottom:16px; }
@@ -3826,12 +3828,28 @@ body.asleep #mkFx{ display:none; }
   .mkRacha.pop::after, .mkBar.fxPasa .fxBrillo::before, .mkBar.fxLleno, .mkPts.fxCome, .mkNivelFin::after, .mkXpFin.fxListo b, .mkStat{ animation:none; }
 }
 /* entrada común de las pantallas: mismo tiempo y mismo ritmo en todas; al ocultarse y volver a mostrarse la animación arranca de cero */
-#restView > *, #creditoView > *, #gmailView > *, #glimView > *, #recuerdaView > *, #ajustesView > *{ animation:vEntra .5s cubic-bezier(.32,.72,0,1) backwards; }
-#restView > :nth-child(2), #creditoView > :nth-child(2), #gmailView > :nth-child(2), #glimView > :nth-child(2), #recuerdaView > :nth-child(2), #ajustesView > :nth-child(2){ animation-delay:0.05s; }
-#restView > :nth-child(3), #creditoView > :nth-child(3), #gmailView > :nth-child(3), #glimView > :nth-child(3), #recuerdaView > :nth-child(3), #ajustesView > :nth-child(3){ animation-delay:0.10s; }
-#restView > :nth-child(4), #creditoView > :nth-child(4), #gmailView > :nth-child(4), #glimView > :nth-child(4), #recuerdaView > :nth-child(4), #ajustesView > :nth-child(4){ animation-delay:0.15s; }
-#restView > :nth-child(n+5), #creditoView > :nth-child(n+5), #gmailView > :nth-child(n+5), #glimView > :nth-child(n+5), #recuerdaView > :nth-child(n+5), #ajustesView > :nth-child(n+5){ animation-delay:.2s; }
-@media (prefers-reduced-motion: reduce){ #restView > *, #creditoView > *, #gmailView > *, #glimView > *, #recuerdaView > *, #ajustesView > *{ animation:none; } }
+#restView > *, #creditoView > *, #gmailView > *, #glimView > *, #recuerdaView > *, #ajustesView > *, #emaView > *, #mesView > *, #balanceView > *, #ahorroView > *, #dudasView > *, #tempView > *, #famView > *{ animation:vEntra .5s cubic-bezier(.32,.72,0,1) backwards; }
+#restView > :nth-child(2), #creditoView > :nth-child(2), #gmailView > :nth-child(2), #glimView > :nth-child(2), #recuerdaView > :nth-child(2), #ajustesView > :nth-child(2), #emaView > :nth-child(2), #mesView > :nth-child(2), #balanceView > :nth-child(2), #ahorroView > :nth-child(2), #dudasView > :nth-child(2), #tempView > :nth-child(2), #famView > :nth-child(2){ animation-delay:0.05s; }
+#restView > :nth-child(3), #creditoView > :nth-child(3), #gmailView > :nth-child(3), #glimView > :nth-child(3), #recuerdaView > :nth-child(3), #ajustesView > :nth-child(3), #emaView > :nth-child(3), #mesView > :nth-child(3), #balanceView > :nth-child(3), #ahorroView > :nth-child(3), #dudasView > :nth-child(3), #tempView > :nth-child(3), #famView > :nth-child(3){ animation-delay:0.10s; }
+#restView > :nth-child(4), #creditoView > :nth-child(4), #gmailView > :nth-child(4), #glimView > :nth-child(4), #recuerdaView > :nth-child(4), #ajustesView > :nth-child(4), #emaView > :nth-child(4), #mesView > :nth-child(4), #balanceView > :nth-child(4), #ahorroView > :nth-child(4), #dudasView > :nth-child(4), #tempView > :nth-child(4), #famView > :nth-child(4){ animation-delay:0.15s; }
+#restView > :nth-child(n+5), #creditoView > :nth-child(n+5), #gmailView > :nth-child(n+5), #glimView > :nth-child(n+5), #recuerdaView > :nth-child(n+5), #ajustesView > :nth-child(n+5), #emaView > :nth-child(n+5), #mesView > :nth-child(n+5), #balanceView > :nth-child(n+5), #ahorroView > :nth-child(n+5), #dudasView > :nth-child(n+5), #tempView > :nth-child(n+5), #famView > :nth-child(n+5){ animation-delay:.2s; }
+@media (prefers-reduced-motion: reduce){ #restView > *, #creditoView > *, #gmailView > *, #glimView > *, #recuerdaView > *, #ajustesView > *, #emaView > *, #mesView > *, #balanceView > *, #ahorroView > *, #dudasView > *, #tempView > *, #famView > *{ animation:none; } }
+
+/* ═════════ acabado: respuesta al tacto (como iOS/Material), sin costo de batería ═════════
+   Solo transform/opacity (la GPU lo compone sin volver a pintar). Nada corre en reposo. */
+.credAvisoBtn, .credVerifBtns button, .dcCierre button, .pgSi, .pgNo, .uxReint, .ddModo button, .ddTabs button, .dNav button, .restCard, .gmBtn, .segTheme button, .credAvisoBtn .avisoX{
+  transition:transform var(--t-tap) var(--ease-out), opacity var(--t-tap) ease, background var(--t-base) ease, border-color var(--t-base) ease, box-shadow var(--t-base) ease;
+}
+.credAvisoBtn:active, .credVerifBtns button:active, .dcCierre button:active, .pgSi:active, .pgNo:active, .uxReint:active, .gmBtn:active, .restCard:active{ transform:scale(.975); }
+.credAvisoBtn .avisoX:active, .segTheme button:active, .ddModo button:active, .ddTabs button:active{ transform:scale(.9); }
+.credAvisoBtn{ -webkit-tap-highlight-color:transparent; }
+/* foco con teclado visible en todo lo que se toca (donde no había uno propio) */
+:where(button, [role="button"], a, input, textarea, select, [tabindex]):focus-visible{ outline:2px solid var(--cyan); outline-offset:2px; border-radius:inherit; }
+/* en el celular los paneles que se desplazan no arrastran la página de atrás */
+#thread, .sheetBody, .pgScrim, .tmAvScrim, #drawer{ overscroll-behavior:contain; }
+/* reposo: cuando la app duerme no queda ninguna animación corriendo */
+body.asleep *, body.asleep *::before, body.asleep *::after{ animation-play-state:paused !important; }
+@media (prefers-reduced-motion: reduce){ .credAvisoBtn:active, .credVerifBtns button:active, .dcCierre button:active, .pgSi:active, .pgNo:active{ transform:none; } }
 
 /* ═════════ botón + (registrar un gasto) y su ventana ═════════ */
 #masIngreso{ flex:none; align-self:flex-end; width:38px; height:38px; border-radius:50%; border:1px solid rgba(var(--ink),.14); background:rgba(var(--ink),.07); color:var(--ghost); display:grid; place-items:center; cursor:pointer; margin-left:-8px; transition:transform .4s cubic-bezier(.34,1.56,.64,1), background .2s ease, color .2s ease; }
@@ -4555,7 +4573,7 @@ if(TEMPORADA) document.documentElement.dataset.season = TEMPORADA;
    la app se recarga sola (al abrirla y cada vez que vuelves a ella). */
 /* el service worker se registra siempre: Android lo necesita (junto al manifest) para ofrecer «Instalar app» */
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-const APP_VERSION = "2026-11-01.283";
+const APP_VERSION = "2026-11-04.284";
 /* lo pesado espera a que termine la presentación: así la intro corre fluida (sin cortes) al abrir */
 const TrasIntro = (function(){
   let listo = false; const cola = [];
@@ -8734,7 +8752,12 @@ const CreditoCarro = (function(){
   const platac = n => n == null ? "—" : "$" + (Math.abs(n) >= 1e6 ? (n/1e6).toFixed(1).replace(".0","") + "M" : Math.round(n).toLocaleString("es-CO"));
   const mesLargo = iso => { try{ return new Date(iso + "T00:00:00").toLocaleDateString("es-CO", { month:"long", year:"numeric" }); }catch{ return iso; } };
 
+  /* lo que llega del flujo debe traer el resumen y el crédito; si un día responde otra cosa (un error, vacío) no se guarda
+     ni se pinta: antes una respuesta rara quedaba en caché y «Crédito» no volvía a abrir */
+  const valido = d => !!(d && d.resumen && d.credito && typeof d.credito.montoInicial === "number" && d.credito.montoInicial > 0);
+  const KV = "armoni.credito.verifVista";   // el aviso de la pantalla principal se puede quitar por cuota (en «Crédito» la tarjeta sigue)
   function renderCard(d){
+    if(!valido(d)){ cardEl.innerHTML = ""; return; }
     const r = d.resumen, c = d.credito;
     const pct = Math.max(0, Math.min(1, (c.montoInicial - r.saldoActual) / c.montoInicial));
     const circ = Math.PI * 2 * 32;
@@ -8775,8 +8798,9 @@ const CreditoCarro = (function(){
       const ult = pv[pv.length - 1], MES = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
       const mes = ult.fecha ? MES[+String(ult.fecha).slice(5, 7) - 1] : "";
       cardEl.insertAdjacentHTML("afterbegin", '<div class="credVerif"><b>Llegó el pago' + (mes ? ' de ' + mes : '') + ' por PSE</b><p>Armoni registró la cuota ' + esc(ult.numero || "") + ' de ' + plata(ult.monto || 0) + ' y calculó el capital y el interés. Para que quede exacta, sube la foto del extracto del banco o escríbeme los valores.</p>' +
-        '<div class="credVerifBtns"><button type="button" data-cv="foto">Subir foto del extracto</button><button type="button" data-cv="texto">Escribir los valores</button></div></div>');
+        '<div class="credVerifBtns"><button type="button" data-cv="foto">Subir foto del extracto</button><button type="button" data-cv="texto">Escribir los valores</button><button type="button" data-cv="ok">Ya coinciden, déjala así</button></div></div>');
       cardEl.querySelector('[data-cv="foto"]').onclick = () => { if(fotoBtn) fotoBtn.click(); };
+      cardEl.querySelector('[data-cv="ok"]').onclick = () => preguntar("Ya comparé la cuota " + (ult.numero || "") + (mes ? " de " + mes : "") + " con el extracto del banco y los valores que registró Armoni coinciden. Márcala como verificada sin cambiar nada.");
       cardEl.querySelector('[data-cv="texto"]').onclick = () => { field.value = "Los valores exactos de la cuota " + (ult.numero || "") + (mes ? " de " + mes : "") + " son: capital $ , interés $ , seguros $ , saldo $ "; field.dispatchEvent(new Event("input")); field.focus(); };
     }
     try{ document.dispatchEvent(new Event("credito-datos")); }catch{}
@@ -8787,13 +8811,14 @@ const CreditoCarro = (function(){
     });
   }
 
-  const readCache = () => { try{ return JSON.parse(localStorage.getItem(KEY)); }catch{ return null; } };
+  const readCache = () => { try{ const c = JSON.parse(localStorage.getItem(KEY)); return c && valido(c.datos) ? c : null; }catch{ return null; } };
   const writeCache = raw => { try{ localStorage.setItem(KEY, JSON.stringify({ datos: raw, at: Date.now() })); }catch{} };
 
   async function fetchLive(anterior){
     const res = await fetch(CREDITO_CARRO_URL, { cache: "no-store" });
     if(!res.ok) throw new Error("HTTP " + res.status);
-    const fresh = await res.json();
+    const fresh = await res.json().catch(() => null);
+    if(!valido(fresh)) throw new Error("datos");
     writeCache(fresh);
     if(JSON.stringify(fresh) !== anterior){   // sin cambios: no repinta ni parpadea
       datos = fresh;
@@ -8882,14 +8907,16 @@ const CreditoCarro = (function(){
   function nueva(){ charla = null; askEl.innerHTML = ""; }
 
   /* al abrir la app: trae el estado del crédito en segundo plano (sin IA) para avisar en la pantalla principal si falta confirmar una cuota */
-  function precarga(){ const c = readCache(); if(c && c.datos) datos = datos || c.datos; if(c && Date.now() - (c.at || 0) < 10 * 60000) return aviso(); fetch(CREDITO_CARRO_URL, { cache: "no-store" }).then(r => r.ok ? r.json() : null).then(j => { if(j){ writeCache(j); datos = j; } aviso(); }).catch(() => aviso()); }
+  function precarga(){ const c = readCache(); if(c && c.datos) datos = datos || c.datos; if(c && Date.now() - (c.at || 0) < 10 * 60000) return aviso(); fetch(CREDITO_CARRO_URL, { cache: "no-store" }).then(r => r.ok ? r.json() : null).then(j => { if(valido(j)){ writeCache(j); datos = j; } aviso(); }).catch(() => aviso()); }
   function aviso(){
     const box = document.getElementById("credAviso"); if(!box) return;
     const c = readCache(), pv = (c && c.datos && c.datos.porVerificar) || [];
     if(!pv.length){ box.innerHTML = ""; return; }
     const ult = pv[pv.length - 1];
-    box.innerHTML = '<button type="button" class="credAvisoBtn"><span class="ic" aria-hidden="true">🚗</span><span class="tx"><b>Llegó el pago del carro</b><small>Falta confirmar los valores exactos de la cuota ' + esc(ult.numero || "") + ': sube la foto del extracto</small></span><span class="ir" aria-hidden="true">›</span></button>';
-    box.firstChild.onclick = () => { try{ Drawer.go("credito"); }catch{} };
+    let vista = ""; try{ vista = localStorage.getItem(KV) || ""; }catch{}
+    if(vista === String(ult.numero)){ box.innerHTML = ""; return; }
+    box.innerHTML = '<div class="credAvisoBtn" role="button" tabindex="0"><span class="ic" aria-hidden="true">🚗</span><span class="tx"><b>Llegó el pago del carro</b><small>Falta confirmar los valores exactos de la cuota ' + esc(ult.numero || "") + ': toca para subir la foto del extracto</small></span><button type="button" class="ir avisoX" aria-label="Ocultar este aviso">✕</button></div>';
+    box.firstChild.onclick = e => { if(e.target.closest(".avisoX")){ try{ localStorage.setItem(KV, String(ult.numero)); }catch{} aviso(); return; } try{ Drawer.go("credito"); }catch{} };
   }
   document.addEventListener("credito-datos", aviso);
   return { refresh, preguntar, nueva, precarga, tieneFoto: () => !!foto };
@@ -11019,8 +11046,11 @@ const DudasPro = (function(){
   }
   vista.querySelector(".ddModo").addEventListener("click", e => { const b = e.target.closest("[data-seg]"); if(b) seg(b.dataset.seg); });
   /* cierre de mes: desde el 28 (y hasta el 7 del mes siguiente) Armoni pide el extracto del banco para validar que todo quedó registrado */
-  const KC = "armoni.extracto.hecho", MES = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
+  const KC = "armoni.extracto.hecho", KCL = "armoni.extracto.luego", MES = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
   let cierreActivo = "";
+  /* «Recordar mañana» en la pantalla principal: el aviso de ahí descansa un día (en Control IA sigue a la vista) */
+  const cierreDescansa = () => { try{ return Date.now() - (+localStorage.getItem(KCL) || 0) < 24 * 3600000; }catch{ return false; } };
+  const cierreHecho = k => { let h = []; try{ h = JSON.parse(localStorage.getItem(KC)) || []; }catch{} if(!h.includes(k)){ h.push(k); try{ localStorage.setItem(KC, JSON.stringify(h.slice(-24))); }catch{} } cierreActivo = ""; pintaCierre(); };
   function cierrePendiente(){
     const d = new Date(), dia = d.getDate();
     let k = "";
@@ -11033,19 +11063,32 @@ const DudasPro = (function(){
   const nombreMes = k => MES[+k.slice(5) - 1];
   function pintaCierre(){
     const k = cierrePendiente(), box = document.getElementById("dcCierre"), main = document.getElementById("cierreAviso");
-    if(box) box.innerHTML = k ? '<div class="dcCierre"><span aria-hidden="true">📄</span><span class="tx"><b>Cierre de ' + nombreMes(k) + '</b>Sube el extracto de Nu (pantallazos o el PDF) y reviso que todo esté registrado y que las cajitas cuadren.</span><button type="button" data-cierre>Subir extracto</button></div>' : "";
-    if(main) main.innerHTML = k ? '<button type="button" class="credAvisoBtn"><span class="ic" aria-hidden="true">📄</span><span class="tx"><b>Cierre de ' + nombreMes(k) + '</b><small>Armoni necesita el extracto del banco para validar que todo quedó registrado</small></span><span class="ir" aria-hidden="true">›</span></button>' : "";
+    if(box) box.innerHTML = k ? '<div class="dcCierre"><span aria-hidden="true">📄</span><span class="tx"><b>Cierre de ' + nombreMes(k) + '</b>Sube el extracto de Nu (pantallazos o el PDF) y reviso que todo esté registrado y que las cajitas cuadren. <button type="button" class="dcCierreYa" data-cierre-ya>Ya lo revisé</button></span><button type="button" data-cierre>Subir extracto</button></div>' : "";
+    if(main) main.innerHTML = k && !cierreDescansa() ? '<div class="credAvisoBtn" role="button" tabindex="0"><span class="ic" aria-hidden="true">📄</span><span class="tx"><b>Cierre de ' + nombreMes(k) + '</b><small>Toca para subir el extracto de Nu (pantallazos o PDF): Armoni revisa que todo quedó registrado</small></span><button type="button" class="ir avisoX" aria-label="Más opciones">✕</button></div>' : "";
+    /* abrir el selector de archivos directo desde el aviso: va a Control IA y pide el extracto en el mismo toque */
+    const pide = () => { cierreActivo = k; if(!txt.value.trim()){ txt.value = "Este es el extracto de " + nombreMes(k) + ". Valida que todo esté registrado y que las cajitas cuadren."; txt.dispatchEvent(new Event("input")); } file.click(); };
     const b = box && box.querySelector("[data-cierre]");
-    if(b) b.onclick = () => { cierreActivo = k; if(!txt.value.trim()){ txt.value = "Este es el extracto de " + nombreMes(k) + ". Valida que todo esté registrado y que las cajitas cuadren."; txt.dispatchEvent(new Event("input")); } file.click(); };
-    if(main && main.firstChild) main.firstChild.onclick = () => { try{ Drawer.go("dudas"); }catch{} seg("ia"); setTimeout(() => { const c = document.querySelector("#dcCierre [data-cierre]"); if(c) c.focus(); }, 300); };
+    if(b) b.onclick = pide;
+    const ya = box && box.querySelector("[data-cierre-ya]");
+    if(ya) ya.onclick = () => cierreHecho(k);
+    const card = main && main.firstChild;
+    if(card){
+      card.onclick = e => {
+        if(e.target.closest(".avisoX")){
+          /* ✕: ¿ya lo revisó o lo dejamos para mañana? */
+          main.innerHTML = '<div class="credAvisoBtn cierreOpc" role="group"><span class="ic" aria-hidden="true">📄</span><span class="tx"><b>Cierre de ' + nombreMes(k) + '</b><small>¿Ya revisaste el extracto por fuera de Armoni?</small><span class="credVerifBtns"><button type="button" data-c="hecho">Ya lo revisé</button><button type="button" data-c="luego">Recordar mañana</button></span></span></div>';
+          main.querySelector('[data-c="hecho"]').onclick = () => cierreHecho(k);
+          main.querySelector('[data-c="luego"]').onclick = () => { try{ localStorage.setItem(KCL, String(Date.now())); }catch{} pintaCierre(); };
+          return;
+        }
+        try{ Drawer.go("dudas"); }catch{} seg("ia"); pide();
+      };
+      card.onkeydown = e => { if(e.key === "Enter" || e.key === " "){ e.preventDefault(); card.click(); } };
+    }
   }
-  /* si mandan una imagen con el cierre activo (o diciendo «extracto»), ese mes queda revisado */
-  const marcaCierre = (q, img) => {
-    const k = cierrePendiente(); if(!k || !img || !(cierreActivo === k || /extracto/i.test(q))) return;
-    let h = []; try{ h = JSON.parse(localStorage.getItem(KC)) || []; }catch{}
-    if(!h.includes(k)){ h.push(k); try{ localStorage.setItem(KC, JSON.stringify(h.slice(-24))); }catch{} }
-    cierreActivo = ""; pintaCierre();
-  };
+  /* en los días de cierre, cualquier imagen o PDF que se le mande a Control IA (y la IA responda) cuenta como el extracto revisado:
+     antes solo contaba si venía del botón o decía «extracto», y el aviso se quedaba pegado */
+  const marcaCierre = (q, img) => { const k = cierrePendiente(); if(!k || !(img || /extracto/i.test(q || ""))) return; cierreHecho(k); };
   document.addEventListener("dudas-enviada", e => marcaCierre(e.detail.q, e.detail.img));
   /* se elige la pestaña recién aquí: con «Control IA» guardada, seg() pinta el cierre y eso necesita KC/nombreMes ya definidos
      (antes, del 28 al 7, la app se rompía al abrir si la última pestaña había sido Control IA) */
